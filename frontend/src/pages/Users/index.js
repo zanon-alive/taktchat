@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
+
 import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -37,6 +38,10 @@ import ForbiddenPage from "../../components/ForbiddenPage";
 const backendUrl = getBackendUrl();
 
 const reducer = (state, action) => {
+  if (action.type === "SET_USERS") {
+    // Substitui completamente a lista (paginação por página)
+    return [...action.payload];
+  }
   if (action.type === "LOAD_USERS") {
     const users = action.payload;
     const newUsers = [];
@@ -84,18 +89,19 @@ const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(2),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    // Removido overflowY e scrollbar interna para usar scroll da janela
   },
   userAvatar: {
     width: theme.spacing(6),
     height: theme.spacing(6),
   },
+
   avatarDiv: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
+
   loadingContainer: {
     display: "flex",
     justifyContent: "center",
@@ -111,9 +117,8 @@ const Users = () => {
   const classes = useStyles();
 
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
   const [deletingUser, setDeletingUser] = useState(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
@@ -122,6 +127,7 @@ const Users = () => {
   const [users, dispatch] = useReducer(reducer, []);
   const { user: loggedInUser, socket } = useContext(AuthContext)
   const { profileImage } = loggedInUser;
+  const USERS_PER_PAGE = 20; // Mantém alinhado ao backend
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -135,13 +141,13 @@ const Users = () => {
         const { data } = await api.get("/users/", {
           params: { searchParam, pageNumber },
         });
-        dispatch({ type: "LOAD_USERS", payload: data.users });
-        setHasMore(data.hasMore);
+        // Substitui lista ao trocar de página/filtro
+        dispatch({ type: "SET_USERS", payload: data.users });
+        setTotalUsers(typeof data.count === "number" ? data.count : (data.total || data.users.length));
       } catch (err) {
         toastError(err);
       } finally {
         setLoading(false);
-        setLoadingMore(false);
       }
     };
     fetchUsers();
@@ -196,17 +202,38 @@ const Users = () => {
     setPageNumber(1);
   };
 
-  const loadMore = () => {
-    setLoadingMore(true);
-    setPageNumber((prevPage) => prevPage + 1);
-  };
-
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
+  // Paginação numerada
+  const totalPages = totalUsers === 0 ? 1 : Math.ceil(totalUsers / USERS_PER_PAGE);
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setPageNumber(page);
     }
+  };
+  const renderPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 3) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1, 2, 3, "...");
+    }
+    return pages.map((page, index) => (
+      <li key={index}>
+        {page === "..." ? (
+          <span className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+        ) : (
+          <button
+            onClick={() => handlePageChange(page)}
+            className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+              page === pageNumber
+                ? "text-blue-600 border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+                : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            }`}
+          >
+            {page}
+          </button>
+        )}
+      </li>
+    ));
   };
 
   const renderProfileImage = (user) => {
@@ -234,7 +261,7 @@ const Users = () => {
   };
 
   return (
-    <MainContainer>
+    <MainContainer useWindowScroll>
       <ConfirmationModal
         title={
           deletingUser &&
@@ -286,13 +313,13 @@ const Users = () => {
           <Paper
             className={classes.mainPaper}
             variant="outlined"
-            onScroll={handleScroll}
           >
             <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell align="center">{i18n.t("users.table.ID")}</TableCell>
                   <TableCell align="center">{i18n.t("users.table.status")}</TableCell>
+
                   <TableCell align="center">
                     Avatar
                   </TableCell>
@@ -340,23 +367,74 @@ const Users = () => {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {loadingMore && (
-                    <TableRow>
-                      <TableCell colSpan={9} align="center">
-                        <CircularProgress />
-                      </TableCell>
-                    </TableRow>
-                  )}
                 </>
               </TableBody>
             </Table>
-            {loading && !loadingMore && (
+            {loading && (
               <div className={classes.loadingContainer}>
                 <CircularProgress />
                 <span className={classes.loadingText}>{i18n.t("loading")}</span>
               </div>
             )}
           </Paper>
+          {/* Paginação numerada */}
+          <nav className="flex justify-center mt-4" aria-label="Page navigation">
+            <ul className="inline-flex -space-x-px text-sm">
+              <li>
+                <button
+                  onClick={() => handlePageChange(1)}
+                  disabled={pageNumber === 1}
+                  className={`flex items-center justify-center px-3 h-8 leading-tight border rounded-l-lg ${
+                    pageNumber === 1
+                      ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                      : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  }`}
+                >
+                  «
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handlePageChange(pageNumber - 1)}
+                  disabled={pageNumber === 1}
+                  className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+                    pageNumber === 1
+                      ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                      : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  }`}
+                >
+                  ‹
+                </button>
+              </li>
+              {renderPageNumbers()}
+              <li>
+                <button
+                  onClick={() => handlePageChange(pageNumber + 1)}
+                  disabled={pageNumber === totalPages}
+                  className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+                    pageNumber === totalPages
+                      ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                      : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  }`}
+                >
+                  ›
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={pageNumber === totalPages}
+                  className={`flex items-center justify-center px-3 h-8 leading-tight border rounded-r-lg ${
+                    pageNumber === totalPages
+                      ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                      : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  }`}
+                >
+                  »
+                </button>
+              </li>
+            </ul>
+          </nav>
         </>
       }
     </MainContainer>

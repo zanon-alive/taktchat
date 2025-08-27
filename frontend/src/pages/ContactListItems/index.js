@@ -168,9 +168,10 @@ const ContactListItems = () => {
           });
           dispatch({ type: "LOAD_CONTACTS", payload: data.contacts });
           setHasMore(data.hasMore);
-          setLoading(false);
         } catch (err) {
           toastError(err);
+        } finally {
+          setLoading(false);
         }
       };
       fetchContacts();
@@ -237,6 +238,7 @@ const ContactListItems = () => {
   const handleDeleteContact = async (contactId) => {
     try {
       await api.delete(`/contact-list-items/${contactId}`);
+      dispatch({ type: "DELETE_CONTACT", payload: contactId });
       toast.success(i18n.t("contacts.toasts.deleted"));
     } catch (err) {
       toastError(err);
@@ -255,6 +257,14 @@ const ContactListItems = () => {
         method: "POST",
         data: formData,
       });
+      toast.success("Importação iniciada. Processaremos o arquivo em segundo plano.");
+      // Recarregar lista
+      dispatch({ type: "RESET" });
+      setSearchParam("");
+      setPageNumber(1);
+      setRefreshKey((k) => k + 1);
+      if (fileUploadRef.current) fileUploadRef.current.value = null;
+      setDeletingContact(null);
     } catch (err) {
       toastError(err);
     }
@@ -272,14 +282,17 @@ const ContactListItems = () => {
     setPageNumber((prevState) => prevState + 1);
   };
 
-
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
-    }
-  };
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      if (loading || !hasMore) return;
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      if (scrollHeight - (scrollTop + clientHeight) < 100) {
+        loadMore();
+      }
+    };
+    window.addEventListener("scroll", handleWindowScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleWindowScroll);
+  }, [loading, hasMore]);
 
   const goToContactLists = () => {
     history.push("/contact-lists");
@@ -384,22 +397,27 @@ const ContactListItems = () => {
   };
 
   return (
-    <MainContainer>
-      <div className="w-full h-full p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 overflow-y-auto" onScroll={handleScroll}>
-      <ContactListItemModal
-        open={contactListItemModalOpen}
-        onClose={handleCloseContactListItemModal}
-        aria-labelledby="form-dialog-title"
-        contactId={selectedContactId}
-      />
-      <AddFilteredContactsModal
-        open={filterModalOpen}
-        onClose={handleCloseFilterModal}
-        contactListId={contactListId}
+    <MainContainer useWindowScroll>
+      <div className="w-full p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+        <ContactListItemModal
+          open={contactListItemModalOpen}
+          onClose={handleCloseContactListItemModal}
+          aria-labelledby="form-dialog-title"
+          contactId={selectedContactId}
+          onSave={(data) => {
+            dispatch({ type: "UPDATE_CONTACTS", payload: data });
+          }}
+        />
+        <AddFilteredContactsModal
+          open={filterModalOpen}
+          onClose={handleCloseFilterModal}
+          contactListId={contactListId}
         savedFilter={contactList && contactList.savedFilter}
         reload={() => {
+          dispatch({ type: "RESET" });
           setSearchParam("");
           setPageNumber(1);
+          setRefreshKey((k) => k + 1);
           refreshContactList();
         }}
       />
@@ -500,6 +518,7 @@ const ContactListItems = () => {
               type="file"
               accept=".xls,.xlsx"
               onChange={() => {
+                setDeletingContact(null);
                 setConfirmOpen(true);
               }}
               ref={fileUploadRef}
@@ -607,7 +626,13 @@ const ContactListItems = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <button onClick={() => hadleEditContact(contact.id)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"><Edit className="w-5 h-5" /></button>
-                    <button onClick={() => { setConfirmOpen(true); setDeletingContact(contact); }} className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"><Trash2 className="w-5 h-5" /></button>
+                    <Can
+                      role={user.profile}
+                      perform="contacts-page:deleteContact"
+                      yes={() => (
+                        <button onClick={() => { setConfirmOpen(true); setDeletingContact(contact); }} className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"><Trash2 className="w-5 h-5" /></button>
+                      )}
+                    />
                   </div>
                 </div>
               ))}

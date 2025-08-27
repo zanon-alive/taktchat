@@ -93,7 +93,6 @@ const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(2),
-    overflowY: "scroll",
     borderRadius: 16,
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
     ...theme.scrollbarStyles,

@@ -31,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
   },
   mainPaper: {
     ...theme.scrollbarStyles,
-    overflowY: "scroll",
     flex: 1,
   },
   tab: {
@@ -41,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     ...theme.scrollbarStyles,
-    overflowY: "scroll",
     padding: theme.spacing(2),
     display: "flex",
     alignItems: "center",
@@ -133,7 +131,7 @@ const SettingsCustom = () => {
   };
 
   return (
-    <MainContainer className={classes.root}>
+    <MainContainer useWindowScroll={true} className={classes.root}>
       {user.profile === "user" ?
         <ForbiddenPage />
         :

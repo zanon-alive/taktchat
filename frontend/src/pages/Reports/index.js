@@ -46,6 +46,7 @@ import { Field } from "formik";
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
     background: theme.palette.fancyBackground,
+    // Usar apenas o scroll da janela via MainContainer useWindowScroll
 
   },
   formControl: {
@@ -64,9 +65,7 @@ const useStyles = makeStyles((theme) => ({
   },
   mainPaperTable: {
     flex: 1,
-    overflow: 'auto',
-    height: '68vh',
-    ...theme.scrollbarStylesSoftBig,
+    // Removido overflow/height para usar scroll externo da janela
   },
   mainPaperFilter: {
     flex: 1,
@@ -356,7 +355,7 @@ const Reports = () => {
   }
 
   return (
-    <MainContainer className={classes.mainContainer}>
+    <MainContainer className={classes.mainContainer} useWindowScroll>
       {openTicketMessageDialog && (
         <ShowTicketLogModal
           isOpen={openTicketMessageDialog}

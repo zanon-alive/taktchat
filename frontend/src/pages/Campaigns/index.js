@@ -42,6 +42,10 @@ import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const reducer = (state, action) => {
+  if (action.type === "SET_CAMPAIGNS") {
+    // Substitui completamente a lista (paginação por página)
+    return [...action.payload];
+  }
   if (action.type === "LOAD_CAMPAIGNS") {
     const campaigns = action.payload;
     const newCampaigns = [];
@@ -92,8 +96,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     // padding: theme.spacing(1),
     padding: theme.padding,
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    // Removido overflow e barra de rolagem interna para usar scroll da janela
   },
 }));
 
@@ -103,7 +106,7 @@ const Campaigns = () => {
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
+  const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [deletingCampaign, setDeletingCampaign] = useState(null);
   const [campaignModalOpen, setCampaignModalOpen] = useState(false);
@@ -171,8 +174,9 @@ const Campaigns = () => {
       const { data } = await api.get("/campaigns/", {
         params: { searchParam, pageNumber },
       });
-      dispatch({ type: "LOAD_CAMPAIGNS", payload: data.records });
-      setHasMore(data.hasMore);
+      // Substitui a lista ao trocar de página/filtro
+      dispatch({ type: "SET_CAMPAIGNS", payload: data.records });
+      setTotalCampaigns(typeof data.count === "number" ? data.count : 0);
       setLoading(false);
     } catch (err) {
       toastError(err);
@@ -210,16 +214,39 @@ const Campaigns = () => {
     setPageNumber(1);
   };
 
-  const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
-  };
-
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
+  // Paginação numerada
+  const CAMPAIGNS_PER_PAGE = 20; // manter alinhado ao backend
+  const totalPages = totalCampaigns === 0 ? 1 : Math.ceil(totalCampaigns / CAMPAIGNS_PER_PAGE);
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setPageNumber(page);
     }
+  };
+  const renderPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 3) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1, 2, 3, "...");
+    }
+    return pages.map((page, index) => (
+      <li key={index}>
+        {page === "..." ? (
+          <span className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+        ) : (
+          <button
+            onClick={() => handlePageChange(page)}
+            className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+              page === pageNumber
+                ? "text-blue-600 border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+                : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            }`}
+          >
+            {page}
+          </button>
+        )}
+      </li>
+    ));
   };
 
   const formatStatus = (val) => {
@@ -262,7 +289,7 @@ const Campaigns = () => {
   };
 
   return (
-    <MainContainer>
+    <MainContainer useWindowScroll>
       <ConfirmationModal
         title={
           deletingCampaign &&
@@ -331,7 +358,6 @@ const Campaigns = () => {
             <Paper
               className={classes.mainPaper}
               variant="outlined"
-              onScroll={handleScroll}
             >
               <Table size="small">
                 <TableHead>
@@ -444,6 +470,64 @@ const Campaigns = () => {
                 </TableBody>
               </Table>
             </Paper>
+            {/* Paginação numerada */}
+            <nav className="flex justify-center mt-4" aria-label="Page navigation">
+              <ul className="inline-flex -space-x-px text-sm">
+                <li>
+                  <button
+                    onClick={() => handlePageChange(1)}
+                    disabled={pageNumber === 1}
+                    className={`flex items-center justify-center px-3 h-8 leading-tight border rounded-l-lg ${
+                      pageNumber === 1
+                        ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                        : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    }`}
+                  >
+                    «
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handlePageChange(pageNumber - 1)}
+                    disabled={pageNumber === 1}
+                    className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+                      pageNumber === 1
+                        ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                        : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    }`}
+                  >
+                    ‹
+                  </button>
+                </li>
+                {renderPageNumbers()}
+                <li>
+                  <button
+                    onClick={() => handlePageChange(pageNumber + 1)}
+                    disabled={pageNumber === totalPages}
+                    className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+                      pageNumber === totalPages
+                        ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                        : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    }`}
+                  >
+                    ›
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={pageNumber === totalPages}
+                    className={`flex items-center justify-center px-3 h-8 leading-tight border rounded-r-lg ${
+                      pageNumber === totalPages
+                        ? "text-gray-300 bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-700"
+                        : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    }`}
+                  >
+                    »
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </>}
     </MainContainer>
   );
