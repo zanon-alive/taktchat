@@ -1,6 +1,14 @@
 [
   {
-    "id": "5519983199588@s.whatsapp.net",
-    "name": "Marcieri Brucieri"
+    "id": "5519971502198@s.whatsapp.net",
+    "name": "William Nobre"
+  },
+  {
+    "id": "5519992891970@s.whatsapp.net",
+    "name": "Nathania P Gima Prima"
+  },
+  {
+    "id": "5519989061302@s.whatsapp.net",
+    "name": "Alisson Troya Marmoraria"
   }
 ]

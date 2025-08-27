@@ -39,17 +39,22 @@ const useAuth = () => {
     },
     async (error) => {
       const originalRequest = error.config;
-      if (error?.response?.status === 403 && !originalRequest._retry) {
+      const status = error?.response?.status;
+      const isAuthRefreshCall = originalRequest?.url?.includes("/auth/refresh_token");
+      if ((status === 401 || status === 403) && !originalRequest._retry && !isAuthRefreshCall) {
         originalRequest._retry = true;
-
-        const { data } = await api.post("/auth/refresh_token");
-        if (data) {
-          localStorage.setItem("token", JSON.stringify(data.token));
-          api.defaults.headers.Authorization = `Bearer ${data.token}`;
+        try {
+          const { data } = await api.post("/auth/refresh_token");
+          if (data?.token) {
+            localStorage.setItem("token", JSON.stringify(data.token));
+            api.defaults.headers.Authorization = `Bearer ${data.token}`;
+            return api(originalRequest);
+          }
+        } catch (e) {
+          // queda para logout abaixo
         }
-        return api(originalRequest);
       }
-      if (error?.response?.status === 401) {
+      if (status === 401) {
         localStorage.removeItem("token");
         api.defaults.headers.Authorization = undefined;
         setIsAuth(false);
@@ -59,19 +64,24 @@ const useAuth = () => {
   );
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     (async () => {
-      if (token) {
-        try {
-          const { data } = await api.post("/auth/refresh_token");
+      try {
+        const { data } = await api.post("/auth/refresh_token");
+        if (data?.token) {
+          localStorage.setItem("token", JSON.stringify(data.token));
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
           setIsAuth(true);
           setUser(data.user);
-        } catch (err) {
-          toastError(err);
         }
+      } catch (err) {
+        // falha de refresh inicial: garantir estado limpo
+        localStorage.removeItem("token");
+        api.defaults.headers.Authorization = undefined;
+        setIsAuth(false);
+        // não exibir toast aqui para não poluir ao simplesmente abrir o app sem sessão
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, []);
 
