@@ -31,7 +31,7 @@ interface ContactData {
   representativeCode?: string;
   city?: string;
   instagram?: string;
-  situation?: 'Ativo' | 'Inativo' | 'Suspenso' | 'Excluído';
+  situation?: 'Ativo' | 'Baixado' | 'Ex-Cliente' | 'Excluido' | 'Futuro' | 'Inativo';
   fantasyName?: string;
   foundationDate?: Date;
   creditLimit?: string;
@@ -196,7 +196,10 @@ const UpdateContactService = async ({
   const updateData: any = {
     name: resolvedName,
     number: number !== undefined ? number : contact.number,
-    email: email !== undefined ? emptyToNull(email) : contact.email,
+    // Email: nunca salvar como null (modelo não permite). Vazio => "".
+    email: email !== undefined
+      ? (email === null ? "" : (typeof email === "string" ? email.trim() : (contact.email ?? "")))
+      : (contact.email ?? ""),
     acceptAudioMessage: acceptAudioMessage !== undefined ? acceptAudioMessage : contact.acceptAudioMessage,
     active: active !== undefined ? active : contact.active,
     disableBot: disableBot !== undefined ? disableBot : contact.disableBot,

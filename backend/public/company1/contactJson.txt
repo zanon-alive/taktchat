@@ -1,14 +1,10 @@
 [
   {
-    "id": "5519971502198@s.whatsapp.net",
-    "name": "William Nobre"
+    "id": "554598127180@s.whatsapp.net",
+    "name": "Mara Corrêa Climatize"
   },
   {
-    "id": "5519992891970@s.whatsapp.net",
-    "name": "Nathania P Gima Prima"
-  },
-  {
-    "id": "5519989061302@s.whatsapp.net",
-    "name": "Alisson Troya Marmoraria"
+    "id": "5511986565757@s.whatsapp.net",
+    "name": "Daniel Programador Web"
   }
 ]

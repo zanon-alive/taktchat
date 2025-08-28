@@ -46,6 +46,8 @@ import Contact from "../models/Contact";
 import Tag from "../models/Tag";
 import ContactTag from "../models/ContactTag";
 import logger from "../utils/logger";
+import ValidateContactService from "../services/ContactServices/ValidateContactService";
+import { isValidCPF, isValidCNPJ } from "../utils/validators";
 
 type IndexQuery = {
   searchParam: string;
@@ -78,7 +80,7 @@ interface ContactData {
   representativeCode?: string;
   city?: string;
   instagram?: string;
-  situation?: 'Ativo' | 'Inativo' | 'Suspenso' | 'Excluído';
+  situation?: 'Ativo' | 'Baixado' | 'Ex-Cliente' | 'Excluido' | 'Futuro' | 'Inativo';
   fantasyName?: string;
   foundationDate?: Date;
   creditLimit?: string;
@@ -183,6 +185,27 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     order
   });
 
+  // Dispara validações em background sem bloquear a resposta
+  try {
+    // Forçar revalidação imediata durante os testes: TTL = 0h (voltar para 24 quando terminar)
+    const ttlHours = 0;
+    const now = Date.now();
+    const ttlMs = ttlHours * 60 * 60 * 1000;
+    contacts.forEach(c => {
+      const isWhats = c.channel === "whatsapp";
+      const notGroup = !c.isGroup;
+      const last = c.validatedAt ? new Date(c.validatedAt as any).getTime() : 0;
+      const stale = !last || now - last > ttlMs || c.isWhatsappValid === null || typeof c.isWhatsappValid === "undefined";
+      if (isWhats && notGroup && stale) {
+        // fire-and-forget
+        ValidateContactService({ contactId: c.id, companyId, ttlHours })
+          .catch(err => logger.warn({ contactId: c.id, companyId, error: err?.message }, "[Contacts.index] validação assíncrona falhou"));
+      }
+    });
+  } catch (e: any) {
+    logger.warn({ companyId, error: e?.message }, "[Contacts.index] falha ao agendar validações");
+  }
+
   return res.json({ contacts, count, hasMore });
 };
 
@@ -233,15 +256,21 @@ export const getContact = async (
   const schema = Yup.object().shape({
     name: Yup.string().required(),
     number: Yup.string()
+      .transform((value, originalValue) =>
+        typeof originalValue === "string" ? originalValue.replace(/\D/g, "") : originalValue
+      )
       .required()
       .matches(/^\d+$/, "Invalid number format. Only numbers is allowed."),
 
     cpfCnpj: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === "string" ? originalValue.replace(/\D/g, "").trim() : originalValue;
+        return v === "" || v === undefined ? null : v;
+      })
       .nullable()
       .test('cpf-cnpj', 'CPF/CNPJ inválido', (value) => {
-        if (!value || value === '') return true;
-        const cleanDoc = value.replace(/\D/g, '');
-        return [11, 14].includes(cleanDoc.length);
+        if (!value) return true;
+        return isValidCPF(value) || isValidCNPJ(value);
       }),
     creditLimit: Yup.string()
       .transform((value, originalValue) => {
@@ -252,7 +281,7 @@ export const getContact = async (
     representativeCode: Yup.string().nullable(),
     city: Yup.string().nullable(),
     instagram: Yup.string().nullable(),
-    situation: Yup.string().oneOf(['Ativo', 'Inativo', 'Suspenso', 'Excluido']).nullable(),
+    situation: Yup.string().oneOf(['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo']).nullable(),
     fantasyName: Yup.string().nullable(),
     foundationDate: Yup.date().nullable(),
     email: Yup.string()
@@ -283,6 +312,16 @@ export const getContact = async (
   if (newContact.hasOwnProperty("creditLimit")) {
     if (typeof newContact.creditLimit === "string" && newContact.creditLimit.trim() === "") {
       newContact.creditLimit = null as any;
+    }
+  }
+
+  // Normaliza cpfCnpj: mantém apenas dígitos ou null
+  if (newContact.hasOwnProperty("cpfCnpj")) {
+    if (newContact.cpfCnpj === null || newContact.cpfCnpj === undefined || newContact.cpfCnpj === "") {
+      newContact.cpfCnpj = null as any;
+    } else if (typeof newContact.cpfCnpj === "string") {
+      const digits = newContact.cpfCnpj.replace(/\D/g, "");
+      newContact.cpfCnpj = (digits && digits.length > 0) ? digits : (null as any);
     }
   }
 
@@ -339,6 +378,9 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const schema = Yup.object().shape({
     name: Yup.string().nullable(),
     number: Yup.string()
+      .transform((value, originalValue) =>
+        typeof originalValue === "string" ? originalValue.replace(/\D/g, "") : originalValue
+      )
       .nullable()
       .matches(/^\d+$/, "Invalid number format. Only numbers is allowed."),
     email: Yup.string()
@@ -349,11 +391,14 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
       .email()
       .nullable(),
     cpfCnpj: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === "string" ? originalValue.replace(/\D/g, "").trim() : originalValue;
+        return v === "" || v === undefined ? null : v;
+      })
       .nullable()
       .test('cpf-cnpj', 'CPF/CNPJ inválido', (value) => {
-        if (!value || value === '') return true;
-        const cleanDoc = value.replace(/\D/g, '');
-        return [11, 14].includes(cleanDoc.length);
+        if (!value) return true;
+        return isValidCPF(value) || isValidCNPJ(value);
       }),
     creditLimit: Yup.string()
       .transform((value, originalValue) => {
@@ -364,7 +409,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     representativeCode: Yup.string().nullable(),
     city: Yup.string().nullable(),
     instagram: Yup.string().nullable(),
-    situation: Yup.string().oneOf(['Ativo', 'Inativo', 'Suspenso', 'Excluido']).nullable(),
+    situation: Yup.string().oneOf(['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo']).nullable(),
     fantasyName: Yup.string().nullable(),
     foundationDate: Yup.date().nullable()
   });
@@ -388,6 +433,16 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   if (contactData.hasOwnProperty("creditLimit")) {
     if (typeof contactData.creditLimit === "string" && contactData.creditLimit.trim() === "") {
       contactData.creditLimit = null as any;
+    }
+  }
+
+  // Normaliza cpfCnpj: mantém apenas dígitos ou null
+  if (contactData.hasOwnProperty("cpfCnpj")) {
+    if (contactData.cpfCnpj === null || contactData.cpfCnpj === undefined || (typeof contactData.cpfCnpj === "string" && contactData.cpfCnpj.trim() === "")) {
+      contactData.cpfCnpj = null as any;
+    } else if (typeof contactData.cpfCnpj === "string") {
+      const digits = contactData.cpfCnpj.replace(/\D/g, "");
+      contactData.cpfCnpj = (digits && digits.length > 0) ? digits : (null as any);
     }
   }
 
@@ -597,6 +652,29 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
       number,
       companyId
     });
+
+    return res.status(200).json(contact);
+  };
+
+  // Força validação imediata de um contato (ignora TTL)
+  export const forceValidate = async (req: Request, res: Response): Promise<Response> => {
+    const { contactId } = req.params;
+    const { companyId } = req.user;
+    const { ttlHours } = req.body as { ttlHours?: number };
+
+    const contact = await ValidateContactService({
+      contactId: Number(contactId),
+      companyId,
+      force: true,
+      ttlHours
+    });
+
+    const io = getIO();
+    io.of(String(companyId))
+      .emit(`company-${companyId}-contact`, {
+        action: "update",
+        contact
+      });
 
     return res.status(200).json(contact);
   };

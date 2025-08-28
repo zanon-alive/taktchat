@@ -230,33 +230,26 @@ export function ContactForm ({ initialContact, onSave, onCancel }) {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <FormControl
-                                variant="outlined"
-                                margin="dense"
-                                fullWidth
-                            >
-                                <InputLabel id="situation-select-label">Situação</InputLabel>
-                                <Field
-                                    as={Select}
-                                    labelId="situation-select-label"
-                                    id="situation-select"
-                                    name="situation"
-                                    label="Situação"
-                                >
-                                    <MenuItem value="Ativo">Ativo</MenuItem>
-                                    <MenuItem value="Inativo">Inativo</MenuItem>
-                                    <MenuItem value="Suspenso">Suspenso</MenuItem>
-                                </Field>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Field
-                                as={TextField}
-                                label="Nome Fantasia"
-                                name="fantasyName"
-                                variant="outlined"
-                                margin="dense"
-                                fullWidth
-                            />
+    variant="outlined"
+    margin="dense"
+    fullWidth
+>
+    <InputLabel id="situation-select-label">Situação</InputLabel>
+    <Field
+        as={Select}
+        labelId="situation-select-label"
+        id="situation-select"
+        name="situation"
+        label="Situação"
+    >
+        <MenuItem value="Ativo">Ativo</MenuItem>
+        <MenuItem value="Baixado">Baixado</MenuItem>
+        <MenuItem value="Ex-Cliente">Ex-Cliente</MenuItem>
+        <MenuItem value="Excluido">Excluído</MenuItem>
+        <MenuItem value="Futuro">Futuro</MenuItem>
+        <MenuItem value="Inativo">Inativo</MenuItem>
+    </Field>
+</FormControl>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Field

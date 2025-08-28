@@ -891,10 +891,14 @@ const Contacts = () => {
                                         <td className="pl-3 pr-3 py-3 whitespace-nowrap w-[120px]">
                                             <div className="flex items-center gap-2 text-[16px] leading-tight">
                                                 <span className="flex-1  min-w-4 truncate text-[16px] leading-tight text-gray-800 dark:text-gray-100">{formatPhoneNumber(contact.number)}</span>
-                                                {contact.isWhatsappValid === true ? (
-                                                    <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0" />
+                                                {!!contact.isWhatsappValid ? (
+                                                    <Tooltip {...CustomTooltipProps} title={`WhatsApp válido${contact.validatedAt ? ` • ${new Date(contact.validatedAt).toLocaleString('pt-BR')}` : ""}`}>
+                                                        <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0" />
+                                                    </Tooltip>
                                                 ) : (
-                                                    <Ban className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                                    <Tooltip {...CustomTooltipProps} title={`WhatsApp inválido${contact.validatedAt ? ` • ${new Date(contact.validatedAt).toLocaleString('pt-BR')}` : ""}`}>
+                                                        <Ban className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                                    </Tooltip>
                                                 )}
                                             </div>
                                         </td>
@@ -1058,10 +1062,14 @@ const Contacts = () => {
                                 </span>
                                 <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 ">
                                     <span className="truncate">{formatPhoneNumber(contact.number)}</span>
-                                    {contact.isWhatsappValid === true ? (
-                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                    {!!contact.isWhatsappValid ? (
+                                        <Tooltip {...CustomTooltipProps} title={`WhatsApp válido${contact.validatedAt ? ` • ${new Date(contact.validatedAt).toLocaleString('pt-BR')}` : ""}`}>
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                        </Tooltip>
                                     ) : (
-                                        <Ban className="w-5 h-5 text-gray-400" />
+                                        <Tooltip {...CustomTooltipProps} title={`WhatsApp inválido${contact.validatedAt ? ` • ${new Date(contact.validatedAt).toLocaleString('pt-BR')}` : ""}`}>
+                                            <Ban className="w-5 h-5 text-gray-400" />
+                                        </Tooltip>
                                     )}
                                 </div>
                             </div>

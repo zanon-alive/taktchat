@@ -30,6 +30,10 @@ contactRoutes.put("/contacts/toggleAcceptAudio/:contactId", isAuth, ContactContr
 contactRoutes.get("/contacts/vcard", isAuth, ContactController.getContactVcard);
 
 
+// Validação forçada de contato (ignora TTL)
+contactRoutes.post("/contacts/:contactId(\\d+)/validate", isAuth, ContactController.forceValidate);
+
+
 contactRoutes.put("/contacts/block/:contactId", isAuth, ContactController.blockUnblock);
 contactRoutes.post("/contacts/upload", isAuth, upload.array("file"), ContactController.upload);
 contactRoutes.get("/contactTags/:contactId", isAuth, ContactController.getContactTags);

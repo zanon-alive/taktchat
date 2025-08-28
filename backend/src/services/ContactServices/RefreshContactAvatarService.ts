@@ -276,6 +276,22 @@ const RefreshContactAvatarService = async ({ contactId, companyId, whatsappId }:
       }
     }
 
+    // Se já existe um arquivo local (com nome desejado ou antigo), mas o campo urlPicture está vazio,
+    // adote o arquivo existente para evitar ficar com finalUrlPicture null.
+    if (!contact.getDataValue("urlPicture") && (desiredExists || fileExists)) {
+      const adoptFilename = desiredExists ? desiredFilename : (rawFilename as string);
+      logger.info({
+        contactId: contact.id,
+        adoptFilename
+      }, "[RefreshAvatar] adotando arquivo existente para urlPicture");
+      try {
+        await contact.update({ urlPicture: adoptFilename, pictureUpdated: true });
+        await contact.reload();
+      } catch (e) {
+        logger.warn({ contactId: contact.id, error: (e as any).message }, "[RefreshAvatar] falha ao adotar arquivo existente");
+      }
+    }
+
     logger.info({
       contactId: contact.id,
       finalUrlPicture: contact.getDataValue("urlPicture"),

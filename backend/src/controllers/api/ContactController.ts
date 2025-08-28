@@ -22,7 +22,7 @@ interface ContactData {
   representativeCode?: string;
   city?: string;
   instagram?: string;
-  situation?: 'Ativo' | 'Inativo' | 'Suspenso' | 'Excluído';
+  situation?: 'Ativo' | 'Baixado' | 'Ex-Cliente' | 'Excluido' | 'Futuro' | 'Inativo';
   fantasyName?: string;
   foundationDate?: Date;
   creditLimit?: string;
@@ -63,7 +63,7 @@ export const count = async (req: Request, res:Response): Promise<Response> => {
     representativeCode: Yup.string().nullable(),
     city: Yup.string().nullable(),
     instagram: Yup.string().nullable(),
-    situation: Yup.string().oneOf(['Ativo', 'Inativo', 'Suspenso', 'Excluido']).nullable(),
+    situation: Yup.string().oneOf(['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo']).nullable(),
     fantasyName: Yup.string().nullable(),
     foundationDate: Yup.date().nullable(),
     creditLimit: Yup.string()

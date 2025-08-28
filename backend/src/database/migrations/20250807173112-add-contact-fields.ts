@@ -28,7 +28,7 @@ module.exports = {
       }, { transaction });
 
       await queryInterface.addColumn("Contacts", "situation", {
-        type: DataTypes.ENUM('Ativo', 'Inativo', 'Suspenso'),
+        type: DataTypes.ENUM('Ativo', 'Inativo', ''),
         allowNull: true,
         defaultValue: 'Ativo'
       }, { transaction });

@@ -72,7 +72,7 @@ const reducer = (state, action) => {
     const contactIndex = state.findIndex((c) => c.id === contact.id);
 
     if (contactIndex !== -1) {
-      state[contactIndex] = contact;
+      state[contactIndex] = { ...state[contactIndex], ...contact };
       return [...state];
     } else {
       return [contact, ...state];

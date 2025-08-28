@@ -53,38 +53,35 @@ const useStyles = makeStyles(theme => ({
 		position: "absolute",
 		top: "50%",
 		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
+	}
 }));
 
 const ContactSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2, "Parâmetros incompletos!")
-		.max(250, "Parâmetros acima do esperado!")
-		.required("Obrigatório"),
-	number: Yup.string().min(8, "Parâmetros incompletos!").max(50, "Parâmetros acima do esperado!"),
-	email: Yup.string().email("E-mail inválido"),
-    cpfCnpj: Yup.string()
-        .nullable()
-        .test('cpfCnpj-validation', 'CPF/CNPJ inválido', (value) => {
-            if (!value) return true; // Permite campo vazio
-            const cleanValue = value.replace(/\D/g, '');
-            if (cleanValue.length === 11) {
-                return isValidCPF(cleanValue);
-            }
-            if (cleanValue.length === 14) {
-                return isValidCNPJ(cleanValue);
-            }
-            return false;
-        }),
-    representativeCode: Yup.string().nullable(),
-    city: Yup.string().nullable(),
-    instagram: Yup.string().nullable(),
-    situation: Yup.string().nullable(),
-    fantasyName: Yup.string().nullable(),
-    foundationDate: Yup.date().nullable(),
-    creditLimit: Yup.string().nullable(),
+  name: Yup.string()
+    .min(2, "Parâmetros incompletos!")
+    .max(250, "Parâmetros acima do esperado!")
+    .required("Obrigatório"),
+  number: Yup.string()
+    .min(8, "Parâmetros incompletos!")
+    .max(50, "Parâmetros acima do esperado!")
+    .required("Obrigatório"),
+  email: Yup.string().email("E-mail inválido"),
+  cpfCnpj: Yup.string()
+    .nullable()
+    .test('cpfCnpj-validation', 'CPF/CNPJ inválido', (value) => {
+      if (!value) return true;
+      const cleanValue = value.replace(/\D/g, '');
+      if (cleanValue.length === 11) return isValidCPF(cleanValue);
+      if (cleanValue.length === 14) return isValidCNPJ(cleanValue);
+      return false;
+    }),
+  representativeCode: Yup.string().nullable(),
+  city: Yup.string().nullable(),
+  instagram: Yup.string().nullable(),
+  situation: Yup.string().nullable(),
+  fantasyName: Yup.string().nullable(),
+  foundationDate: Yup.date().nullable(),
+  creditLimit: Yup.string().nullable(),
 });
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
@@ -327,9 +324,11 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												label="Situação"
 											>
 												<MenuItem value="Ativo">Ativo</MenuItem>
-												<MenuItem value="Inativo">Inativo</MenuItem>
+												<MenuItem value="Baixado">Baixado</MenuItem>
+												<MenuItem value="Ex-Cliente">Ex-Cliente</MenuItem>
 												<MenuItem value="Excluido">Excluído</MenuItem>
-												<MenuItem value="Suspenso">Suspenso</MenuItem>
+												<MenuItem value="Futuro">Futuro</MenuItem>
+												<MenuItem value="Inativo">Inativo</MenuItem>
 											</Field>
 										</FormControl>
 									</Grid>

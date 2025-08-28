@@ -120,10 +120,17 @@ if (!isGroup) {
     const sanitizedCreditLimit = (creditLimit === null || creditLimit === undefined || creditLimit === '') ? null : String(creditLimit);
     const sanitizedCpfCnpj = cpfCnpj ? cpfCnpj.replace(/[^0-9]/g, "") : null;
 
+    // Normalização de email: nunca null
+    const normalizedEmail = ((): string | undefined => {
+      if (email === null) return "";
+      if (typeof email === "string") return email.trim();
+      return undefined;
+    })();
+
     const contactData = {
       name,
       number,
-      email: email || undefined,
+      email: normalizedEmail,
       isGroup,
       companyId,
       profilePicUrl: profilePicUrl || undefined,
@@ -213,6 +220,10 @@ if (!isGroup) {
         contactData.name = incomingName && !incomingIsNumber ? incomingName : String(number);
       }
 
+      // Garantir que email não fique null ao salvar
+      if ((contactData as any).email === undefined) {
+        (contactData as any).email = contact.email ?? "";
+      }
       await contact.update(contactData);
       await contact.reload();
 
@@ -300,6 +311,15 @@ if (!isGroup) {
         await contact.reload();
       }
     }
+
+    // Recarrega contato completo antes de emitir e retornar
+    const Tag = require("../../models/Tag").default;
+    contact = await Contact.findOne({
+      where: { id: contact.id, companyId },
+      include: [
+        { model: Tag, as: "tags", attributes: ["id", "name", "color", "updatedAt"] }
+      ]
+    });
 
     if (createContact) {
       io.of(String(companyId))

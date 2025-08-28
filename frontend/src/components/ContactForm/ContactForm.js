@@ -126,7 +126,8 @@ const ContactSchema = Yup.object().shape({
     .required("Obrigatório"),
   number: Yup.string()
     .min(8, "Número muito curto!")
-    .max(50, "Número muito longo!"),
+    .max(50, "Número muito longo!")
+    .required("Obrigatório"),
   email: Yup.string().email("E-mail inválido"),
   cpfCnpj: Yup.string()
     .test('cpfCnpj', 'CPF/CNPJ inválido', function(value) {

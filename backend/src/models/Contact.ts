@@ -108,7 +108,7 @@ class Contact extends Model<Contact> {
 
   @Column({
     type: 'ENUM',
-    values: ['Ativo', 'Inativo', 'Suspenso'],
+    values: ['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo'],
     allowNull: true,
     defaultValue: 'Ativo'
   })
@@ -180,6 +180,12 @@ class Contact extends Model<Contact> {
 
   @Column
   pictureUpdated: boolean;
+
+  @Column
+  isWhatsappValid: boolean;
+
+  @Column
+  validatedAt: Date;
 
   @Column
   get urlPicture(): string | null {
