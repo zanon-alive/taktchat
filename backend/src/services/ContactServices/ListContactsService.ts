@@ -167,7 +167,17 @@ const ListContactsService = async ({
       "situation",
       "fantasyName",
       "foundationDate",
-      "creditLimit"
+      "creditLimit",
+      // Campo derivado: validação do WhatsApp com base em ContactListItems (booleano ou null se não houver registros)
+      [
+        Sequelize.literal(`(
+            SELECT bool_or(cli."isWhatsappValid")
+            FROM "ContactListItems" cli
+            WHERE cli."number" = "Contact"."number"
+              AND cli."companyId" = "Contact"."companyId"
+          )`),
+        "isWhatsappValid"
+      ]
     ],
     include: [
       {

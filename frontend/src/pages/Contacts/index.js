@@ -26,6 +26,8 @@ import {
     Filter,
     X,
     Phone,
+    CheckCircle,
+    Ban,
 } from "lucide-react";
 import { Facebook, Instagram, WhatsApp, ImportExport, Backup, ContactPhone } from "@material-ui/icons";
 import { Tooltip, Menu, MenuItem } from "@material-ui/core";
@@ -451,7 +453,7 @@ const Contacts = () => {
     };
 
     // Trunca texto para um tamanho máximo e adiciona reticências
-    const truncateText = (text, max = 50) => {
+    const truncateText = (text, max = 150) => {
         if (!text) return "";
         const str = String(text);
         return str.length > max ? str.slice(0, max) + "..." : str;
@@ -823,25 +825,25 @@ const Contacts = () => {
                                             onChange={handleSelectAllContacts}
                                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </th>
-                                    <th scope="col" className="pl-0 pr-3 py-3 w-[240px] lg:w-[300px]">
+                                    <th scope="col" className="pl-0 pr-3 py-3 w-[300px]">
                                         <button onClick={() => handleSort('name')} className="flex items-center gap-1 select-none">
                                             Nome
                                             <span className="text-[15px] opacity-70">{sortField === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                                         </button>
                                     </th>
-                                    <th scope="col" className="pl-3 pr-3 py-3 w-[140px]">
+                                    <th scope="col" className="pl-3 pr-3 py-3 w-[173px]">
                                         <button onClick={() => handleSort('number')} className="flex items-center gap-1 select-none">
                                             WhatsApp
                                             <span className="text-[15px] opacity-70">{sortField === 'number' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                                         </button>
                                     </th>
-                                    <th scope="col" className="hidden lg:table-cell pl-1 pr-1 py-3 w-[120px]">
+                                    <th scope="col" className="hidden lg:table-cell pl-1 pr-1 py-3 w-[140px]">
                                         <button onClick={() => handleSort('email')} className="flex items-center gap-1 select-none">
                                             Email
                                             <span className="text-[15px] opacity-70">{sortField === 'email' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                                         </button>
                                     </th>
-                                    <th scope="col" className="pl-3 pr-3 py-3 w-[120px]">
+                                    <th scope="col" className="pl-3 pr-3 py-3 w-[100px]">
                                         <button onClick={() => handleSort('city')} className="flex items-center gap-1 select-none">
                                             Cidade/UF
                                             <span className="text-[15px] opacity-70">{sortField === 'city' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
@@ -853,7 +855,7 @@ const Contacts = () => {
                                             <span className="text-[15px] opacity-70">{sortField === 'tags' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                                         </button>
                                     </th>
-                                    <th scope="col" className="pl-3 pr-3 py-3 text-center w-[110px]">
+                                    <th scope="col" className="pl-3 pr-3 py-3 text-center w-[70px]">
                                         <button onClick={() => handleSort('status')} className="flex items-center justify-center gap-1 w-full select-none">
                                             Status
                                             <span className="text-[15px] opacity-70">{sortField === 'status' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
@@ -871,7 +873,7 @@ const Contacts = () => {
                                                 onChange={handleToggleSelectContact(contact.id)}
                                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                         </td>
-                                        <td className="pl-0 pr-3 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center gap-3 w-[240px] lg:w-[300px] max-w-[240px] lg:max-w-[300px] overflow-hidden text-ellipsis">
+                                        <td className="pl-0 pr-3 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center gap-3 w-[360px] lg:w-[360px] max-w-[360px] lg:max-w-[360px] overflow-hidden text-ellipsis">
                                             <Tooltip {...CustomTooltipProps} title={contact.name}>
                                                 <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 flex-shrink-0 overflow-hidden">
                                                     <ContactAvatar 
@@ -881,13 +883,20 @@ const Contacts = () => {
                                                 </div>
                                             </Tooltip>
                                             <Tooltip {...CustomTooltipProps} title={contact.name}>
-                                                <span className="truncate flex-1 min-w-0">
+                                                <span className="truncate">
                                                     {contact.name}
                                                 </span>
                                             </Tooltip>
                                         </td>
-                                        <td className="pl-3 pr-3 py-3 whitespace-nowrap w-[140px]">
-                                            {formatPhoneNumber(contact.number)}
+                                        <td className="pl-3 pr-3 py-3 whitespace-nowrap w-[120px]">
+                                            <div className="flex items-center gap-2 text-[16px] leading-tight">
+                                                <span className="flex-1  min-w-4 truncate text-[16px] leading-tight text-gray-800 dark:text-gray-100">{formatPhoneNumber(contact.number)}</span>
+                                                {contact.isWhatsappValid === true ? (
+                                                    <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0" />
+                                                ) : (
+                                                    <Ban className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="hidden lg:table-cell pl-1 pr-1 py-3 w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
                                             <Tooltip {...CustomTooltipProps} title={contact.email}>
@@ -1042,14 +1051,19 @@ const Contacts = () => {
                             </div>
                             <div className="flex flex-col flex-1 min-w-0">
                                 <span className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate" title={contact.name}>
-                                    {truncateText(contact.name, 20)}
+                                    {contact.name}
                                 </span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400 truncate" title={contact.email}>
                                     {contact.email}
                                 </span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                    {formatPhoneNumber(contact.number)}
-                                </span>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 ">
+                                    <span className="truncate">{formatPhoneNumber(contact.number)}</span>
+                                    {contact.isWhatsappValid === true ? (
+                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                    ) : (
+                                        <Ban className="w-5 h-5 text-gray-400" />
+                                    )}
+                                </div>
                             </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0">
                                 <button onClick={() => { setContactTicket(contact); setNewTicketModalOpen(true); }} className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"><WhatsApp className="w-5 h-5" /></button>
