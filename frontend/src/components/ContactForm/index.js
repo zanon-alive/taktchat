@@ -79,6 +79,7 @@ const ContactSchema = Yup.object().shape({
     fantasyName: Yup.string().nullable(),
     foundationDate: Yup.date().nullable(),
     creditLimit: Yup.string().nullable(),
+    segment: Yup.string().nullable(),
 });
 
 export function ContactForm ({ initialContact, onSave, onCancel }) {

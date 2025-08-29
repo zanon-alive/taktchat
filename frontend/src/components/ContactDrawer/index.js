@@ -7,7 +7,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import Drawer from "@material-ui/core/Drawer";
 import Link from "@material-ui/core/Link";
 import InputLabel from "@material-ui/core/InputLabel";
-// import Avatar from "@material-ui/core/Avatar";
 import Paper from "@material-ui/core/Paper";
 import CreateIcon from '@material-ui/icons/Create';
 import BlockIcon from "@material-ui/icons/Block";
@@ -131,7 +130,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
     const { get } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
     const { user } = useContext(AuthContext);
-    const [acceptAudioMessage, setAcceptAudio] = useState(contact.acceptAudioMessage);
+    const [acceptAudioMessage, setAcceptAudio] = useState(contact?.acceptAudioMessage ?? true);
     const [avatarModalOpen, setAvatarModalOpen] = useState(false);
     const [avatarLargeUrl, setAvatarLargeUrl] = useState(null);
     const [notesOpen, setNotesOpen] = useState(true);
@@ -158,6 +157,12 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
     useEffect(() => {
         setOpenForm(false);
     }, [open, contact]);
+
+    // Sincroniza o estado local do ícone de áudio quando o contato recebido por props mudar
+    useEffect(() => {
+        setAcceptAudio(contact?.acceptAudioMessage ?? true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [contact?.id, contact?.acceptAudioMessage]);
 
     // Carrega a imagem grande ao abrir o modal
     useEffect(() => {
@@ -289,6 +294,9 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                                         </Typography>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.situation && `Situação: ${contact.situation}`}
+                                        </Typography>
+                                        <Typography style={{ color: "primary", fontSize: 12 }}>
+                                           {contact.segment && `Segmento: ${contact.segment}`}
                                         </Typography>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.foundationDate && `Data de Fundação: ${new Date(contact.foundationDate).toLocaleDateString()}`}

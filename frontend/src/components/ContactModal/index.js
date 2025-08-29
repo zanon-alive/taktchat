@@ -270,10 +270,14 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 																label="CPF/CNPJ"
 																variant="outlined"
 																margin="dense"
-															
+																															
 																fullWidth
+																InputLabelProps={{
+																	shrink: true,
+																}}
 																error={touched.cpfCnpj && Boolean(errors.cpfCnpj)}
 																helperText={touched.cpfCnpj && errors.cpfCnpj}
+																
 															/>
 														)}
 													</InputMask>
@@ -292,6 +296,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												shrink: true,
 											}}
 											fullWidth
+											disabled
 										/>
 									</Grid>
 									<Grid item xs={12} md={6}>
@@ -305,6 +310,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												shrink: true,
 											}}
 											fullWidth
+											disabled
 										/>
 									</Grid>
 									<Grid item xs={12} md={6}>
@@ -350,6 +356,9 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											name="fantasyName"
 											variant="outlined"
 											margin="dense"
+											InputLabelProps={{
+												shrink: true,
+											}}
 											fullWidth
 										/>
 									</Grid>
@@ -364,6 +373,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											}}
 											variant="outlined"
 											margin="dense"
+											disabled
 											fullWidth
 										/>
 									</Grid>
@@ -377,6 +387,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											}}
 											variant="outlined"
 											margin="dense"
+											disabled
+											placeholder="Insira numeros"
 											fullWidth
 										/>
 									</Grid>
@@ -390,6 +402,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											}}
 											variant="outlined"
 											margin="dense"
+											disabled
 											fullWidth
 										/>
 									</Grid>
@@ -402,9 +415,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												variant="outlined"
 												margin="dense"
 												fullWidth
-												disabled
 												InputLabelProps={{ shrink: true }}
-												placeholder="Salve o contato para gerenciar tags"
+												placeholder="Salve para gravar tags"
 											/>
 										)}
 									</Grid>
