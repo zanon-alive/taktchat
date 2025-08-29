@@ -77,6 +77,11 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
   const [representativeCodes, setRepresentativeCodes] = useState([]);
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [loadingChannels, setLoadingChannels] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingSegments, setLoadingSegments] = useState(false);
+  const [loadingSituations, setLoadingSituations] = useState(false);
+  const [loadingRepresentatives, setLoadingRepresentatives] = useState(false);
   const [saveFilterFlag, setSaveFilterFlag] = useState(false);
   const [cronTime, setCronTime] = useState("02:00"); // HH:mm
   const [cronTz, setCronTz] = useState("America/Sao_Paulo");
@@ -99,6 +104,21 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     "Jul", "Ago", "Set", "Out", "Nov", "Dez"
   ];
 
+  // Cache simples em sessionStorage para evitar recarregar os mesmos dados
+  const getCache = (key) => {
+    try {
+      const raw = sessionStorage.getItem(`afc_${key}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
+  };
+  const setCache = (key, value) => {
+    try {
+      sessionStorage.setItem(`afc_${key}`, JSON.stringify(value));
+    } catch (_) {}
+  };
+
   // Situações padrão que devem sempre aparecer no filtro,
   // mesmo que ainda não existam contatos com esses valores no banco
   const defaultSituations = [
@@ -112,11 +132,15 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
   useEffect(() => {
     if (open) {
-      loadChannels();
-      loadCities();
-      loadSegments();
-      loadSituations();
-      loadRepresentativeCodes();
+      // Inicializa rapidamente as situações e itens leves; os pesados serão lazy (onOpen)
+      const cachedSituations = getCache("situations");
+      if (Array.isArray(cachedSituations) && cachedSituations.length) {
+        setSituations(cachedSituations);
+      } else {
+        const base = [...defaultSituations].sort((a, b) => a.localeCompare(b, "pt-BR"));
+        setSituations(base);
+        setCache("situations", base);
+      }
       loadTags();
       loadCronConfig();
     }
@@ -149,7 +173,27 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     }
   }, [open, savedFilter]);
 
+  // Garante que outros campos do savedFilter apareçam mesmo antes do carregamento lazy
+  useEffect(() => {
+    if (!open || !savedFilter) return;
+    if (Array.isArray(savedFilter.channel) && savedFilter.channel.length) {
+      setChannels(prev => Array.from(new Set([...(prev||[]), ...savedFilter.channel.map(v => String(v).trim()).filter(Boolean)])).sort((a,b)=>a.localeCompare(b,"pt-BR")));
+    }
+    if (Array.isArray(savedFilter.city) && savedFilter.city.length) {
+      setCities(prev => Array.from(new Set([...(prev||[]), ...savedFilter.city.map(v => String(v).trim()).filter(Boolean)])).sort((a,b)=>a.localeCompare(b,"pt-BR")));
+    }
+    if (Array.isArray(savedFilter.representativeCode) && savedFilter.representativeCode.length) {
+      setRepresentativeCodes(prev => Array.from(new Set([...(prev||[]), ...savedFilter.representativeCode.map(v => String(v).trim()).filter(Boolean)])).sort((a,b)=>a.localeCompare(b,"pt-BR")));
+    }
+    if (Array.isArray(savedFilter.situation) && savedFilter.situation.length) {
+      setSituations(prev => Array.from(new Set([...(prev||[]), ...savedFilter.situation.map(v => String(v).trim()).filter(Boolean)])).sort((a,b)=>a.localeCompare(b,"pt-BR")));
+    }
+  }, [open, savedFilter]);
+
   const loadChannels = async () => {
+    const cached = getCache("channels");
+    if (Array.isArray(cached) && cached.length) { setChannels(cached); return; }
+    setLoadingChannels(true);
     try {
       // Pagina por todos os contatos para coletar todos os canais
       let page = 1;
@@ -183,12 +227,17 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
       const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
       setChannels(all);
+      setCache("channels", all);
     } catch (err) {
       toastError(err);
     }
+    setLoadingChannels(false);
   };
 
   const loadSegments = async () => {
+    const cached = getCache("segments");
+    if (Array.isArray(cached) && cached.length) { setSegments(cached); return; }
+    setLoadingSegments(true);
     try {
       let companyId = user?.companyId;
       if (!companyId) {
@@ -204,12 +253,17 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b, "pt-BR"));
       setSegments(normalized);
+      setCache("segments", normalized);
     } catch (err) {
       toastError(err);
     }
+    setLoadingSegments(false);
   };
 
   const loadCities = async () => {
+    const cached = getCache("cities");
+    if (Array.isArray(cached) && cached.length) { setCities(cached); return; }
+    setLoadingCities(true);
     try {
       // Pagina por todos os contatos para coletar todas as cidades
       let page = 1;
@@ -245,57 +299,32 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
       const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
       setCities(all);
+      setCache("cities", all);
     } catch (err) {
       toastError(err);
     }
+    setLoadingCities(false);
   };
 
   const loadSituations = async () => {
+    const cached = getCache("situations");
+    if (Array.isArray(cached) && cached.length) { setSituations(cached); return; }
+    setLoadingSituations(true);
     try {
-      // Inicia o mapa com as situações padrão para garantir presença e capitalização correta
-      const map = new Map();
-      for (const s of defaultSituations) {
-        map.set(String(s).toLowerCase(), s);
-      }
-
-      // Opcionalmente varre contatos para incluir situações existentes não previstas (por segurança)
-      let page = 1;
-      let hasMore = true;
-      while (hasMore) {
-        const { data } = await api.get("/contacts", {
-          params: {
-            pageNumber: page,
-            limit: 500,
-            orderBy: "situation",
-            order: "ASC",
-          },
-        });
-
-        const list = Array.isArray(data?.contacts) ? data.contacts : [];
-        for (const contact of list) {
-          const raw = contact?.situation;
-          if (!raw) continue;
-          const value = String(raw).trim();
-          if (!value) continue;
-          const key = value.toLowerCase();
-          if (!map.has(key)) map.set(key, value);
-        }
-
-        hasMore = Boolean(data?.hasMore);
-        page += 1;
-        if (list.length === 0) break;
-      }
-
-      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
-      setSituations(all);
+      const base = [...defaultSituations].sort((a, b) => a.localeCompare(b, "pt-BR"));
+      setSituations(base);
+      setCache("situations", base);
     } catch (err) {
-      // Fallback: garante opções padrão
       setSituations([...defaultSituations].sort((a, b) => a.localeCompare(b, "pt-BR")));
       toastError(err);
     }
+    setLoadingSituations(false);
   };
 
   const loadRepresentativeCodes = async () => {
+    const cached = getCache("representativeCodes");
+    if (Array.isArray(cached) && cached.length) { setRepresentativeCodes(cached); return; }
+    setLoadingRepresentatives(true);
     try {
       // Pagina por todos os contatos para coletar todos os códigos de representante
       let page = 1;
@@ -329,9 +358,11 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
       const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
       setRepresentativeCodes(all);
+      setCache("representativeCodes", all);
     } catch (err) {
       toastError(err);
     }
+    setLoadingRepresentatives(false);
   };
 
   const loadTags = async () => {
@@ -529,6 +560,10 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={channels}
+                        onOpen={() => { if (!channels.length) loadChannels(); }}
+                        loading={loadingChannels}
+                        loadingText="Carregando..."
+                        noOptionsText="Sem opções"
                         getOptionLabel={(option) => option}
                         value={field.value || []}
                         onChange={(event, value) => form.setFieldValue(field.name, value)}
@@ -540,6 +575,15 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                             placeholder={i18n.t("contactListItems.filterDialog.channel")}
                             fullWidth
                             margin="dense"
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {loadingChannels ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              )
+                            }}
                           />
                         )}
                       />
@@ -553,6 +597,10 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={representativeCodes}
+                        onOpen={() => { if (!representativeCodes.length) loadRepresentativeCodes(); }}
+                        loading={loadingRepresentatives}
+                        loadingText="Carregando..."
+                        noOptionsText="Sem opções"
                         getOptionLabel={(option) => option}
                         value={field.value || []}
                         onChange={(event, value) => form.setFieldValue(field.name, value)}
@@ -564,6 +612,15 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                             placeholder={i18n.t("contactListItems.filterDialog.representativeCode")}
                             fullWidth
                             margin="dense"
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {loadingRepresentatives ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              )
+                            }}
                           />
                         )}
                       />
@@ -577,6 +634,10 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={cities}
+                        onOpen={() => { if (!cities.length) loadCities(); }}
+                        loading={loadingCities}
+                        loadingText="Carregando..."
+                        noOptionsText="Sem opções"
                         getOptionLabel={(option) => option}
                         value={field.value || []}
                         onChange={(event, value) => form.setFieldValue(field.name, value)}
@@ -588,6 +649,15 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                             placeholder={i18n.t("contactListItems.filterDialog.city")}
                             fullWidth
                             margin="dense"
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {loadingCities ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              )
+                            }}
                           />
                         )}
                       />
@@ -601,6 +671,10 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={segments}
+                        onOpen={() => { if (!segments.length) loadSegments(); }}
+                        loading={loadingSegments}
+                        loadingText="Carregando..."
+                        noOptionsText="Sem opções"
                         getOptionLabel={(option) => option}
                         value={field.value || []}
                         onChange={(event, value) => form.setFieldValue(field.name, value)}
@@ -612,6 +686,15 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                             placeholder="Segmento de Mercado"
                             fullWidth
                             margin="dense"
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {loadingSegments ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              )
+                            }}
                           />
                         )}
                       />
@@ -625,6 +708,10 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={situations}
+                        onOpen={() => { if (!situations.length) loadSituations(); }}
+                        loading={loadingSituations}
+                        loadingText="Carregando..."
+                        noOptionsText="Sem opções"
                         getOptionLabel={(option) => option}
                         value={field.value || []}
                         onChange={(event, value) => form.setFieldValue(field.name, value)}
@@ -636,6 +723,15 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                             placeholder={i18n.t("contactListItems.filterDialog.situation")}
                             fullWidth
                             margin="dense"
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <>
+                                  {loadingSituations ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              )
+                            }}
                           />
                         )}
                       />
