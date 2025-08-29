@@ -269,8 +269,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 																{...inputProps}
 																label="CPF/CNPJ"
 																variant="outlined"
-																margin="dense"
-																															
+																margin="dense"															
 																fullWidth
 																InputLabelProps={{
 																	shrink: true,
