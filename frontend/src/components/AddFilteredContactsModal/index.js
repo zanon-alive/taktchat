@@ -195,37 +195,48 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     if (Array.isArray(cached) && cached.length) { setChannels(cached); return; }
     setLoadingChannels(true);
     try {
-      // Pagina por todos os contatos para coletar todos os canais
+      // Prévia rápida com primeira página
       let page = 1;
       let hasMore = true;
-      const map = new Map(); // chave normalizada -> valor exibido
+      const map = new Map();
 
+      const firstResp = await api.get("/contacts", {
+        params: { pageNumber: page, limit: 500, orderBy: "channel", order: "ASC" },
+      });
+      const firstList = Array.isArray(firstResp?.data?.contacts) ? firstResp.data.contacts : [];
+      for (const c of firstList) {
+        const raw = c?.channel; if (!raw) continue;
+        const value = String(raw).trim(); if (!value) continue;
+        const key = value.toLowerCase(); if (!map.has(key)) map.set(key, value);
+      }
+      hasMore = Boolean(firstResp?.data?.hasMore);
+      page += 1;
+
+      // monta preview + garante valores do savedFilter
+      const basePreview = Array.from(map.values()).sort((a,b)=>a.localeCompare(b,"pt-BR")).slice(0,5);
+      const setPreview = new Set(basePreview);
+      if (savedFilter && Array.isArray(savedFilter.channel)) {
+        savedFilter.channel.forEach(v => { const s = String(v||"").trim(); if (s) setPreview.add(s); });
+      }
+      setChannels(Array.from(setPreview).sort((a,b)=>a.localeCompare(b,"pt-BR")));
+
+      // Continuação em background
       while (hasMore) {
         const { data } = await api.get("/contacts", {
-          params: {
-            pageNumber: page,
-            limit: 500,
-            orderBy: "channel",
-            order: "ASC",
-          },
+          params: { pageNumber: page, limit: 500, orderBy: "channel", order: "ASC" },
         });
-
         const list = Array.isArray(data?.contacts) ? data.contacts : [];
-        for (const contact of list) {
-          const raw = contact?.channel;
-          if (!raw) continue;
-          const value = String(raw).trim();
-          if (!value) continue;
-          const key = value.toLowerCase();
-          if (!map.has(key)) map.set(key, value);
+        for (const c of list) {
+          const raw = c?.channel; if (!raw) continue;
+          const value = String(raw).trim(); if (!value) continue;
+          const key = value.toLowerCase(); if (!map.has(key)) map.set(key, value);
         }
-
         hasMore = Boolean(data?.hasMore);
         page += 1;
         if (list.length === 0) break;
       }
 
-      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const all = Array.from(map.values()).sort((a,b)=>a.localeCompare(b,"pt-BR"));
       setChannels(all);
       setCache("channels", all);
     } catch (err) {
@@ -265,39 +276,47 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     if (Array.isArray(cached) && cached.length) { setCities(cached); return; }
     setLoadingCities(true);
     try {
-      // Pagina por todos os contatos para coletar todas as cidades
+      // Prévia rápida com primeira página
       let page = 1;
       let hasMore = true;
-      const map = new Map(); // chave: cidade normalizada (lowercase), valor: cidade exibida
+      const map = new Map(); // key lower -> exibido
 
+      const firstResp = await api.get("/contacts", {
+        params: { pageNumber: page, limit: 500, orderBy: "city", order: "ASC" },
+      });
+      const firstList = Array.isArray(firstResp?.data?.contacts) ? firstResp.data.contacts : [];
+      for (const c of firstList) {
+        const raw = c?.city; if (!raw) continue;
+        const value = String(raw).trim(); if (!value) continue;
+        const key = value.toLowerCase(); if (!map.has(key)) map.set(key, value);
+      }
+      hasMore = Boolean(firstResp?.data?.hasMore);
+      page += 1;
+
+      const basePreview = Array.from(map.values()).sort((a,b)=>a.localeCompare(b,"pt-BR")).slice(0,5);
+      const setPreview = new Set(basePreview);
+      if (savedFilter && Array.isArray(savedFilter.city)) {
+        savedFilter.city.forEach(v => { const s = String(v||"").trim(); if (s) setPreview.add(s); });
+      }
+      setCities(Array.from(setPreview).sort((a,b)=>a.localeCompare(b,"pt-BR")));
+
+      // Continuação em background
       while (hasMore) {
         const { data } = await api.get("/contacts", {
-          params: {
-            pageNumber: page,
-            limit: 500,
-            orderBy: "city",
-            order: "ASC",
-          },
+          params: { pageNumber: page, limit: 500, orderBy: "city", order: "ASC" },
         });
-
         const list = Array.isArray(data?.contacts) ? data.contacts : [];
-        for (const contact of list) {
-          const raw = contact?.city;
-          if (!raw) continue;
-          const value = String(raw).trim();
-          if (!value) continue;
-          const key = value.toLowerCase();
-          if (!map.has(key)) map.set(key, value);
+        for (const c of list) {
+          const raw = c?.city; if (!raw) continue;
+          const value = String(raw).trim(); if (!value) continue;
+          const key = value.toLowerCase(); if (!map.has(key)) map.set(key, value);
         }
-
         hasMore = Boolean(data?.hasMore);
         page += 1;
-
-        // Segurança: se a API não informar hasMore corretamente e retornar vazio, interrompe
         if (list.length === 0) break;
       }
 
-      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const all = Array.from(map.values()).sort((a,b)=>a.localeCompare(b,"pt-BR"));
       setCities(all);
       setCache("cities", all);
     } catch (err) {
@@ -326,11 +345,41 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     if (Array.isArray(cached) && cached.length) { setRepresentativeCodes(cached); return; }
     setLoadingRepresentatives(true);
     try {
-      // Pagina por todos os contatos para coletar todos os códigos de representante
+      // Paginação com pré-visualização rápida (primeira página)
       let page = 1;
       let hasMore = true;
       const map = new Map(); // chave normalizada -> valor exibido
 
+      // Busca primeira página rapidamente e mostra os 5 primeiros
+      const firstResp = await api.get("/contacts", {
+        params: {
+          pageNumber: page,
+          limit: 500,
+          orderBy: "representativeCode",
+          order: "ASC",
+        },
+      });
+      const firstList = Array.isArray(firstResp?.data?.contacts) ? firstResp.data.contacts : [];
+      for (const contact of firstList) {
+        const raw = contact?.representativeCode;
+        if (!raw) continue;
+        const value = String(raw).trim();
+        if (!value) continue;
+        const key = value.toLowerCase();
+        if (!map.has(key)) map.set(key, value);
+      }
+      hasMore = Boolean(firstResp?.data?.hasMore);
+      page += 1;
+
+      const basePreview = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR")).slice(0, 5);
+      const setPreview = new Set(basePreview);
+      if (savedFilter && Array.isArray(savedFilter.representativeCode)) {
+        savedFilter.representativeCode.forEach(v => { const s = String(v||"").trim(); if (s) setPreview.add(s); });
+      }
+      const preview = Array.from(setPreview).sort((a,b)=>a.localeCompare(b,"pt-BR"));
+      if (preview.length) setRepresentativeCodes(preview);
+
+      // Continua carregando o restante em background
       while (hasMore) {
         const { data } = await api.get("/contacts", {
           params: {
@@ -560,7 +609,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={channels}
-                        onOpen={() => { if (!channels.length) loadChannels(); }}
+                        onOpen={() => { loadChannels(); }}
                         loading={loadingChannels}
                         loadingText="Carregando..."
                         noOptionsText="Sem opções"
@@ -597,7 +646,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={representativeCodes}
-                        onOpen={() => { if (!representativeCodes.length) loadRepresentativeCodes(); }}
+                        onOpen={() => { loadRepresentativeCodes(); }}
                         loading={loadingRepresentatives}
                         loadingText="Carregando..."
                         noOptionsText="Sem opções"
@@ -634,7 +683,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={cities}
-                        onOpen={() => { if (!cities.length) loadCities(); }}
+                        onOpen={() => { loadCities(); }}
                         loading={loadingCities}
                         loadingText="Carregando..."
                         noOptionsText="Sem opções"
@@ -671,7 +720,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                       <Autocomplete
                         multiple
                         options={segments}
-                        onOpen={() => { if (!segments.length) loadSegments(); }}
+                        onOpen={() => { loadSegments(); }}
                         loading={loadingSegments}
                         loadingText="Carregando..."
                         noOptionsText="Sem opções"
