@@ -392,6 +392,16 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										/>
 									</Grid>
 								</Grid>
+								{contact?.id ? (
+									<>
+										<Typography variant="subtitle1" gutterBottom style={{ marginTop: 12 }}>
+											Tags
+										</Typography>
+										<div style={{ marginBottom: 8 }}>
+											<TagsContainer contact={contact} />
+										</div>
+									</>
+								) : null}
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"
