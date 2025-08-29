@@ -889,7 +889,8 @@ export const forwardMessage = async (req: Request, res: Response): Promise<Respo
       body = "";
     }
 
-    const publicFolder = path.join(__dirname, "..", "..", "..", "backend", "public");
+    // Usar o diretório público correto em runtime (aponta para /app/public após build)
+    const publicFolder = path.resolve(__dirname, "..", "..", "public");
     const filePath = path.join(publicFolder, `company${createTicket.companyId}`, fileName);
 
     const mediaSrc = {
