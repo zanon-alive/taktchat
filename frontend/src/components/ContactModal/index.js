@@ -82,6 +82,7 @@ const ContactSchema = Yup.object().shape({
   fantasyName: Yup.string().nullable(),
   foundationDate: Yup.date().nullable(),
   creditLimit: Yup.string().nullable(),
+  segment: Yup.string().nullable(),
 });
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
@@ -101,7 +102,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 		situation: "Ativo",
 		fantasyName: "",
 		foundationDate: "",
-		creditLimit: ""
+		creditLimit: "",
+		segment: ""
 	};
 
 	const [contact, setContact] = useState(initialState);
@@ -366,10 +368,17 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											fullWidth
 										/>
 									</Grid>
+									<Grid item xs={12} md={6}>
+										<Field
+											as={TextField}
+											label="Segmento"
+											name="segment"
+											variant="outlined"
+											margin="dense"
+											fullWidth
+										/>
+									</Grid>
 								</Grid>
-								<div>
-									<TagsContainer contact={contact} className={classes.textField} />
-								</div>
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"

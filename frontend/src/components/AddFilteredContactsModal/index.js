@@ -31,6 +31,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
+import useAuth from "../../hooks/useAuth.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,6 +72,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
   const [loading, setLoading] = useState(false);
   const [channels, setChannels] = useState([]);
   const [cities, setCities] = useState([]);
+  const [segments, setSegments] = useState([]);
   const [situations, setSituations] = useState([]);
   const [representativeCodes, setRepresentativeCodes] = useState([]);
   const [tags, setTags] = useState([]);
@@ -78,6 +80,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
   const [saveFilterFlag, setSaveFilterFlag] = useState(false);
   const [cronTime, setCronTime] = useState("02:00"); // HH:mm
   const [cronTz, setCronTz] = useState("America/Sao_Paulo");
+  const { user, getCurrentUserInfo } = useAuth();
   const timezones = [
     "America/Sao_Paulo",
     "America/Bahia",
@@ -96,10 +99,22 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     "Jul", "Ago", "Set", "Out", "Nov", "Dez"
   ];
 
+  // Situações padrão que devem sempre aparecer no filtro,
+  // mesmo que ainda não existam contatos com esses valores no banco
+  const defaultSituations = [
+    "Ativo",
+    "Baixado",
+    "Ex-Cliente",
+    "Excluido",
+    "Futuro",
+    "Inativo"
+  ];
+
   useEffect(() => {
     if (open) {
       loadChannels();
       loadCities();
+      loadSegments();
       loadSituations();
       loadRepresentativeCodes();
       loadTags();
@@ -122,11 +137,61 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
   const loadChannels = async () => {
     try {
-      const { data } = await api.get("/contacts", {
-        params: { pageNumber: 1 },
+      // Pagina por todos os contatos para coletar todos os canais
+      let page = 1;
+      let hasMore = true;
+      const map = new Map(); // chave normalizada -> valor exibido
+
+      while (hasMore) {
+        const { data } = await api.get("/contacts", {
+          params: {
+            pageNumber: page,
+            limit: 500,
+            orderBy: "channel",
+            order: "ASC",
+          },
+        });
+
+        const list = Array.isArray(data?.contacts) ? data.contacts : [];
+        for (const contact of list) {
+          const raw = contact?.channel;
+          if (!raw) continue;
+          const value = String(raw).trim();
+          if (!value) continue;
+          const key = value.toLowerCase();
+          if (!map.has(key)) map.set(key, value);
+        }
+
+        hasMore = Boolean(data?.hasMore);
+        page += 1;
+        if (list.length === 0) break;
+      }
+
+      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      setChannels(all);
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
+  const loadSegments = async () => {
+    try {
+      let companyId = user?.companyId;
+      if (!companyId) {
+        const info = await getCurrentUserInfo?.();
+        companyId = info?.user?.companyId || info?.companyId;
+      }
+      if (!companyId) return;
+
+      const { data } = await api.get("/contacts/segments", {
+        params: { companyId }
       });
-      const uniqueChannels = [...new Set(data.contacts.map(contact => contact.channel).filter(Boolean))];
-      setChannels(uniqueChannels);
+      const list = Array.isArray(data) ? data : (Array.isArray(data?.segments) ? data.segments : []);
+      const normalized = list
+        .map(s => (s == null ? "" : String(s).trim()))
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, "pt-BR"));
+      setSegments(normalized);
     } catch (err) {
       toastError(err);
     }
@@ -134,11 +199,40 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
   const loadCities = async () => {
     try {
-      const { data } = await api.get("/contacts", {
-        params: { pageNumber: 1 },
-      });
-      const uniqueCities = [...new Set(data.contacts.map(contact => contact.city).filter(Boolean))];
-      setCities(uniqueCities);
+      // Pagina por todos os contatos para coletar todas as cidades
+      let page = 1;
+      let hasMore = true;
+      const map = new Map(); // chave: cidade normalizada (lowercase), valor: cidade exibida
+
+      while (hasMore) {
+        const { data } = await api.get("/contacts", {
+          params: {
+            pageNumber: page,
+            limit: 500,
+            orderBy: "city",
+            order: "ASC",
+          },
+        });
+
+        const list = Array.isArray(data?.contacts) ? data.contacts : [];
+        for (const contact of list) {
+          const raw = contact?.city;
+          if (!raw) continue;
+          const value = String(raw).trim();
+          if (!value) continue;
+          const key = value.toLowerCase();
+          if (!map.has(key)) map.set(key, value);
+        }
+
+        hasMore = Boolean(data?.hasMore);
+        page += 1;
+
+        // Segurança: se a API não informar hasMore corretamente e retornar vazio, interrompe
+        if (list.length === 0) break;
+      }
+
+      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      setCities(all);
     } catch (err) {
       toastError(err);
     }
@@ -146,23 +240,83 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
 
   const loadSituations = async () => {
     try {
-      const { data } = await api.get("/contacts", {
-        params: { pageNumber: 1 },
-      });
-      const uniqueSituations = [...new Set(data.contacts.map(contact => contact.situation).filter(Boolean))];
-      setSituations(uniqueSituations);
+      // Inicia o mapa com as situações padrão para garantir presença e capitalização correta
+      const map = new Map();
+      for (const s of defaultSituations) {
+        map.set(String(s).toLowerCase(), s);
+      }
+
+      // Opcionalmente varre contatos para incluir situações existentes não previstas (por segurança)
+      let page = 1;
+      let hasMore = true;
+      while (hasMore) {
+        const { data } = await api.get("/contacts", {
+          params: {
+            pageNumber: page,
+            limit: 500,
+            orderBy: "situation",
+            order: "ASC",
+          },
+        });
+
+        const list = Array.isArray(data?.contacts) ? data.contacts : [];
+        for (const contact of list) {
+          const raw = contact?.situation;
+          if (!raw) continue;
+          const value = String(raw).trim();
+          if (!value) continue;
+          const key = value.toLowerCase();
+          if (!map.has(key)) map.set(key, value);
+        }
+
+        hasMore = Boolean(data?.hasMore);
+        page += 1;
+        if (list.length === 0) break;
+      }
+
+      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      setSituations(all);
     } catch (err) {
+      // Fallback: garante opções padrão
+      setSituations([...defaultSituations].sort((a, b) => a.localeCompare(b, "pt-BR")));
       toastError(err);
     }
   };
 
   const loadRepresentativeCodes = async () => {
     try {
-      const { data } = await api.get("/contacts", {
-        params: { pageNumber: 1 },
-      });
-      const uniqueCodes = [...new Set(data.contacts.map(contact => contact.representativeCode).filter(Boolean))];
-      setRepresentativeCodes(uniqueCodes);
+      // Pagina por todos os contatos para coletar todos os códigos de representante
+      let page = 1;
+      let hasMore = true;
+      const map = new Map(); // chave normalizada -> valor exibido
+
+      while (hasMore) {
+        const { data } = await api.get("/contacts", {
+          params: {
+            pageNumber: page,
+            limit: 500,
+            orderBy: "representativeCode",
+            order: "ASC",
+          },
+        });
+
+        const list = Array.isArray(data?.contacts) ? data.contacts : [];
+        for (const contact of list) {
+          const raw = contact?.representativeCode;
+          if (!raw) continue;
+          const value = String(raw).trim();
+          if (!value) continue;
+          const key = value.toLowerCase();
+          if (!map.has(key)) map.set(key, value);
+        }
+
+        hasMore = Boolean(data?.hasMore);
+        page += 1;
+        if (list.length === 0) break;
+      }
+
+      const all = Array.from(map.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      setRepresentativeCodes(all);
     } catch (err) {
       toastError(err);
     }
@@ -172,7 +326,12 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     try {
       const { data } = await api.get("/tags");
       const list = Array.isArray(data) ? data : (data && Array.isArray(data.tags) ? data.tags : []);
-      setTags(list);
+      const sorted = [...list].sort((a, b) => {
+        const an = (a?.name || "").toString();
+        const bn = (b?.name || "").toString();
+        return an.localeCompare(bn, "pt-BR");
+      });
+      setTags(sorted);
     } catch (err) {
       toastError(err);
     }
@@ -232,6 +391,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
         channel: values.channel ? values.channel : null,
         representativeCode: values.representativeCode ? values.representativeCode : null,
         city: values.city ? values.city : null,
+        segment: values.segment ? values.segment : null,
         situation: values.situation ? values.situation : null,
         tags: selectedTags.map(tag => tag.id)
       };
@@ -332,6 +492,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
           channel: (savedFilter && savedFilter.channel) ? savedFilter.channel : [],
           representativeCode: (savedFilter && savedFilter.representativeCode) ? savedFilter.representativeCode : [],
           city: (savedFilter && savedFilter.city) ? savedFilter.city : [],
+          segment: (savedFilter && savedFilter.segment) ? savedFilter.segment : [],
           situation: (savedFilter && savedFilter.situation) ? savedFilter.situation : [],
           foundationMonths: (savedFilter && Array.isArray(savedFilter.foundationMonths))
             ? savedFilter.foundationMonths.map(n => monthsPT[n - 1]).filter(Boolean)
@@ -347,8 +508,9 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
       >
         {({ values, errors, touched, isSubmitting }) => (
           <Form>
-            <DialogContent dividers >
+            <DialogContent dividers>
               <Grid container spacing={2}>
+
                 <Grid item xs={12} md={6}>
                   <Field name="channel">
                     {({ field, form }) => (
@@ -397,7 +559,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                   </Field>
                 </Grid>
 
-                <Grid item xs={12} md={12}>
+                <Grid item xs={12} md={6}>
                   <Field name="city">
                     {({ field, form }) => (
                       <Autocomplete
@@ -412,6 +574,30 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                             variant="outlined"
                             label={i18n.t("contactListItems.filterDialog.city")}
                             placeholder={i18n.t("contactListItems.filterDialog.city")}
+                            fullWidth
+                            margin="dense"
+                          />
+                        )}
+                      />
+                    )}
+                  </Field>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Field name="segment">
+                    {({ field, form }) => (
+                      <Autocomplete
+                        multiple
+                        options={segments}
+                        getOptionLabel={(option) => option}
+                        value={field.value || []}
+                        onChange={(event, value) => form.setFieldValue(field.name, value)}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Segmento"
+                            placeholder="Segmento"
                             fullWidth
                             margin="dense"
                           />
@@ -582,7 +768,6 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                   </>
                 )}
 
-                
               </Grid>
             </DialogContent>
             <DialogActions>

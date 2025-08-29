@@ -38,6 +38,7 @@ interface Request {
   fantasyName?: string;
   foundationDate?: Date;
   creditLimit?: string;
+  segment?: string;
 }
 
 const downloadProfileImage = async ({
@@ -93,7 +94,8 @@ const CreateOrUpdateContactService = async ({
   situation,
   fantasyName,
   foundationDate,
-  creditLimit
+  creditLimit,
+  segment
 }: Request): Promise<Contact> => {
   try {
     let createContact = false;
@@ -127,6 +129,16 @@ if (!isGroup) {
       return undefined;
     })();
 
+    const normalizedSegment = ((): string | null | undefined => {
+      if (typeof segment === 'undefined') return undefined;
+      if (segment === null) return null;
+      if (typeof segment === 'string') {
+        const s = segment.trim();
+        return s === '' ? null : s;
+      }
+      return undefined;
+    })();
+
     const contactData = {
       name,
       number,
@@ -141,7 +153,8 @@ if (!isGroup) {
       situation: situation || "Ativo",
       fantasyName: fantasyName || undefined,
       foundationDate: foundationDate || undefined,
-      creditLimit: sanitizedCreditLimit
+      creditLimit: sanitizedCreditLimit,
+      segment: normalizedSegment
     };
 
     const io = getIO();
@@ -168,6 +181,7 @@ if (!isGroup) {
       contact.fantasyName = fantasyName || contact.fantasyName;
       contact.foundationDate = foundationDate || contact.foundationDate;
       contact.creditLimit = creditLimit !== undefined ? (creditLimit || null) : contact.creditLimit;
+      contact.segment = normalizedSegment !== undefined ? (normalizedSegment as any) : (contact as any).segment;
 
       if (isNil(contact.whatsappId)) {
         const whatsapp = await Whatsapp.findOne({

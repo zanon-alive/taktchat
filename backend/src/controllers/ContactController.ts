@@ -57,6 +57,7 @@ type IndexQuery = {
   limit?: string;
   orderBy?: string;
   order?: string;
+  segment?: string;
 };
 
 type IndexGetContactQuery = {
@@ -84,11 +85,12 @@ interface ContactData {
   fantasyName?: string;
   foundationDate?: Date;
   creditLimit?: string;
+  segment?: string;
 }
 
 export const importXls = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
-  const { number, name, email, validateContact, tags, cpfCnpj, representativeCode, city, instagram, situation, fantasyName, foundationDate, creditLimit } = req.body;
+  const { number, name, email, validateContact, tags, cpfCnpj, representativeCode, city, instagram, situation, fantasyName, foundationDate, creditLimit, segment } = req.body;
   const simpleNumber = String(number).replace(/[^\d.-]+/g, '');
   let validNumber = simpleNumber;
 
@@ -117,7 +119,8 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
     situation,
     fantasyName,
     foundationDate,
-    creditLimit: creditLimit ? String(creditLimit) : null
+    creditLimit: creditLimit ? String(creditLimit) : null,
+    segment
     // whatsappId: defaultWhatsapp.id
   };
 
@@ -182,7 +185,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     profile, // <<-- ALTERAÇÃO 2: 'profile' é enviado para o serviço
     limit,
     orderBy,
-    order
+    order,
+    segment: (req.query as IndexQuery).segment
   });
 
   // Dispara validações em background sem bloquear a resposta
@@ -290,6 +294,12 @@ export const getContact = async (
         return v === "" || v === undefined ? null : v;
       })
       .email()
+      .nullable(),
+    segment: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === "string" ? originalValue.trim() : originalValue;
+        return v === "" || v === undefined ? null : v;
+      })
       .nullable()
   });
 
@@ -322,6 +332,16 @@ export const getContact = async (
     } else if (typeof newContact.cpfCnpj === "string") {
       const digits = newContact.cpfCnpj.replace(/\D/g, "");
       newContact.cpfCnpj = (digits && digits.length > 0) ? digits : (null as any);
+    }
+  }
+
+  // Normaliza segment: string vazia -> null; mantém undefined quando não presente
+  if (Object.prototype.hasOwnProperty.call(newContact, 'segment')) {
+    if (newContact.segment === null || newContact.segment === undefined) {
+      // mantém como está (null/undefined)
+    } else if (typeof newContact.segment === 'string') {
+      const s = newContact.segment.trim();
+      newContact.segment = (s === '') ? (null as any) : s;
     }
   }
 
@@ -411,7 +431,13 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     instagram: Yup.string().nullable(),
     situation: Yup.string().oneOf(['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo']).nullable(),
     fantasyName: Yup.string().nullable(),
-    foundationDate: Yup.date().nullable()
+    foundationDate: Yup.date().nullable(),
+    segment: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === "string" ? originalValue.trim() : originalValue;
+        return v === "" || v === undefined ? null : v;
+      })
+      .nullable()
   });
 
   try {
@@ -443,6 +469,16 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     } else if (typeof contactData.cpfCnpj === "string") {
       const digits = contactData.cpfCnpj.replace(/\D/g, "");
       contactData.cpfCnpj = (digits && digits.length > 0) ? digits : (null as any);
+    }
+  }
+
+  // Normaliza segment: string vazia -> null; mantém undefined quando não presente
+  if (Object.prototype.hasOwnProperty.call(contactData, 'segment')) {
+    if (contactData.segment === null || contactData.segment === undefined) {
+      // mantém como está
+    } else if (typeof contactData.segment === 'string') {
+      const s = contactData.segment.trim();
+      contactData.segment = (s === '') ? (null as any) : s;
     }
   }
 

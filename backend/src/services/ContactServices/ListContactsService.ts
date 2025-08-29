@@ -21,6 +21,7 @@ interface Request {
   limit?: string;
   orderBy?: string;
   order?: string;
+  segment?: string;
 }
 
 interface Response {
@@ -39,7 +40,8 @@ const ListContactsService = async ({
                                      profile,
                                      limit,
                                      orderBy,
-                                     order
+                                     order,
+                                     segment
                                    }: Request): Promise<Response> => {
   let whereCondition: Filterable["where"] = {};
 
@@ -107,6 +109,18 @@ const ListContactsService = async ({
     companyId
   };
 
+  if (typeof segment !== "undefined") {
+    const seg = typeof segment === 'string' ? segment.trim() : segment;
+    if (seg && seg !== "") {
+      whereCondition = {
+        ...whereCondition,
+        segment: seg
+      };
+    } else {
+      // quando vier vazio, não filtra por segmento
+    }
+  }
+
   if (Array.isArray(tagsIds) && tagsIds.length > 0) {
     const contactTagFilter: any[] | null = [];
     const contactTags = await ContactTag.findAll({
@@ -168,6 +182,7 @@ const ListContactsService = async ({
       "fantasyName",
       "foundationDate",
       "creditLimit",
+      "segment",
       // Campos persistidos
       "isWhatsappValid",
       "validatedAt"

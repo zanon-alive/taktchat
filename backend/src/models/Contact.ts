@@ -107,6 +107,11 @@ class Contact extends Model<Contact> {
   instagram: string;
 
   @Column({
+    allowNull: true
+  })
+  segment: string;
+
+  @Column({
     type: 'ENUM',
     values: ['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo'],
     allowNull: true,

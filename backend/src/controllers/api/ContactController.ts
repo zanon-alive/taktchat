@@ -6,13 +6,42 @@ import { getIO } from "../../libs/socket";
 import logger from "../../utils/logger";
 import AppError from "../../errors/AppError";
 import * as Yup from "yup";
+import Contact from "../../models/Contact";
+import { Op } from "sequelize";
+import Tag from "../../models/Tag";
+import ContactTag from "../../models/ContactTag";
 
 type IndexQuery = {
     companyId: number;
 };
 
-import Tag from "../../models/Tag";
-import ContactTag from "../../models/ContactTag";
+export const segments = async (req: Request, res: Response): Promise<Response> => {
+  const bodyCompanyId = (req.body as any)?.companyId;
+  const queryCompanyId = (req.query as any)?.companyId;
+  const companyId = Number(bodyCompanyId ?? queryCompanyId);
+
+  if (!companyId || Number.isNaN(companyId)) {
+    throw new AppError("companyId é obrigatório", 400);
+  }
+
+  const rows = await Contact.findAll({
+    where: {
+      companyId,
+      segment: { [Op.ne]: null }
+    },
+    attributes: ["segment"],
+    raw: true
+  });
+
+  const set = new Set<string>();
+  for (const r of rows as any[]) {
+    const s = (r.segment || "").trim();
+    if (s) set.add(s);
+  }
+
+  const segments = Array.from(set).sort((a, b) => a.localeCompare(b));
+  return res.json({ count: segments.length, segments });
+}
 
 interface ContactData {
   name: string;
@@ -27,6 +56,7 @@ interface ContactData {
   foundationDate?: Date;
   creditLimit?: string;
   tags?: string;
+  segment?: string;
 }
 
 export const show = async (req: Request, res:Response): Promise<Response> => {
@@ -72,6 +102,12 @@ export const count = async (req: Request, res:Response): Promise<Response> => {
         return v === '' || v === undefined ? null : v;
       })
       .nullable(),
+    segment: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === 'string' ? originalValue.trim() : originalValue;
+        return v === '' || v === undefined ? null : v;
+      })
+      .nullable(),
   });
 
   try {
@@ -92,6 +128,15 @@ export const count = async (req: Request, res:Response): Promise<Response> => {
   if (Object.prototype.hasOwnProperty.call(contactData, 'creditLimit')) {
     if (typeof contactData.creditLimit === 'string' && contactData.creditLimit.trim() === '') {
       contactData.creditLimit = null as any;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(contactData, 'segment')) {
+    if (contactData.segment === null || contactData.segment === undefined) {
+      // mantém null/undefined
+    } else if (typeof contactData.segment === 'string') {
+      const s = contactData.segment.trim();
+      contactData.segment = (s === '') ? (null as any) : s;
     }
   }
 

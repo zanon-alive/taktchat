@@ -35,6 +35,7 @@ interface ContactData {
   fantasyName?: string;
   foundationDate?: Date;
   creditLimit?: string;
+  segment?: string;
 }
 
 interface Request {
@@ -68,7 +69,8 @@ const UpdateContactService = async ({
     situation,
     fantasyName,
     foundationDate,
-    creditLimit
+    creditLimit,
+    segment
   } = contactData;
 
   const sanitizedCreditLimit = creditLimit !== undefined ? creditLimit : null;
@@ -105,7 +107,7 @@ const UpdateContactService = async ({
       "urlPicture",
       // Adicionar novos campos aos atributos
       "cpfCnpj", "representativeCode", "city", "instagram",
-      "situation", "fantasyName", "foundationDate", "creditLimit"
+      "situation", "fantasyName", "foundationDate", "creditLimit", "segment"
     ],
     include: ["extraInfo", "tags",
       {
@@ -214,6 +216,7 @@ const UpdateContactService = async ({
     fantasyName: fantasyName !== undefined ? emptyToNull(fantasyName) : contact.fantasyName,
     foundationDate: foundationDateValue,
     creditLimit: creditLimit !== undefined ? emptyToNull(creditLimit) : contact.creditLimit,
+    segment: segment !== undefined ? emptyToNull(segment) : (contact as any).segment,
   };
 
   // Apenas atualiza o userId se ele for fornecido
@@ -238,7 +241,7 @@ const UpdateContactService = async ({
       "urlPicture",
       // Adicionar novos campos aos atributos
       "cpfCnpj", "representativeCode", "city", "instagram",
-      "situation", "fantasyName", "foundationDate", "creditLimit"
+      "situation", "fantasyName", "foundationDate", "creditLimit", "segment"
     ],
     include: ["extraInfo", "tags",
       {

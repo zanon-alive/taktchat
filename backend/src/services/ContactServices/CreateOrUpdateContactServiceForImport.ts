@@ -23,6 +23,7 @@ interface Request {
   situation?: 'Ativo' | 'Baixado' | 'Ex-Cliente' | 'Excluido' | 'Futuro' | 'Inativo';
   fantasyName?: string;
   foundationDate?: Date;
+  segment?: string;
 }
 
 const CreateOrUpdateContactServiceForImport = async ({
@@ -41,7 +42,8 @@ const CreateOrUpdateContactServiceForImport = async ({
   instagram,
   situation,
   fantasyName,
-  foundationDate
+  foundationDate,
+  segment
 }: Request): Promise<Contact> => {
   const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
 
@@ -60,6 +62,17 @@ const CreateOrUpdateContactServiceForImport = async ({
     return String(v);
   };
 
+  // helper: normalize segment to null when empty/whitespace; undefined when not provided
+  const normalizeSegment = (v: any): string | null | undefined => {
+    if (typeof v === 'undefined') return undefined;
+    if (v === null) return null;
+    if (typeof v === 'string') {
+      const s = v.trim();
+      return s === '' ? null : s;
+    }
+    return undefined;
+  };
+
   const contactData = {
     name,
     number,
@@ -76,7 +89,8 @@ const CreateOrUpdateContactServiceForImport = async ({
     instagram,
     situation: situation || 'Ativo',
     fantasyName,
-    foundationDate: finalFoundationDate
+    foundationDate: finalFoundationDate,
+    segment: normalizeSegment(segment)
   };
 
   const io = getIO();
@@ -98,6 +112,11 @@ const CreateOrUpdateContactServiceForImport = async ({
       situation: situation || contact.situation,
       creditLimit: normalizeCreditLimit(creditLimit) ?? contact.creditLimit
     };
+
+    // Não sobrescrever 'segment' se não enviado
+    if (typeof contactData.segment === 'undefined') {
+      delete updatePayload.segment;
+    }
 
     if (hasValidExistingName) {
       // Não atualizar o campo name
