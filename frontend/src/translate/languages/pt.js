@@ -112,12 +112,12 @@ const messages = {
           ratedCalls: "Atendimentos avaliados",
           evaluationIndex: "Índice de avaliação",
           score: "Pontuação",
-          prosecutors: "Promotores",
-          neutral: "Neutros",
+          promoters: "Promotores",
+          neutrals: "Neutros",
           detractors: "Detratores",
         },
       },
-      reports: {
+      researchReports: {
         title: "Relatório de Pesquisas Realizadas",
         operator: "Operador",
         period: "Período",
@@ -1094,7 +1094,7 @@ const messages = {
           tagsError: "Erro ao processar filtro de tags. Verifique se as tags selecionadas existem.",
         },
       },
-      kanban: {
+      kanbanMenu: {
         title: "Kanban",
         searchPlaceholder: "Pesquisa",
         subMenus: {
@@ -1511,6 +1511,59 @@ const messages = {
         toasts: {
           deleted: "Lane excluída com sucesso.",
         },
+      },
+      kanban: {
+        unread: "não lidas",
+        options: "Opções",
+        hideColumn: "Ocultar coluna",
+        manageColumns: "Gerenciar colunas",
+        copyLink: "Copiar link",
+        copyTicketLink: "Copiar link do ticket",
+        moveToTag: "Mover para tag…",
+        togglePriority: "Marcar prioridade (alternar)",
+        noTagsAvailable: "Sem tags disponíveis",
+        progress: "Progresso",
+        noAssignee: "Aberto",
+        orderBy: "Ordenar por:",
+        searchContact: "Buscar contato...",
+        addColumns: "+ Adicionar colunas",
+        resetColumns: "Redefinir colunas",
+        dateStart: "Data de início",
+        dateEnd: "Data de fim",
+        search: "Buscar",
+        sort: {
+          recent: "Recentes",
+          oldest: "Antigos",
+          unread: "Não lidos",
+          priority: "Prioridade"
+        },
+        counters: {
+          comments: "Comentários / mensagens",
+          attachments: "Anexos",
+          subtasks: "Subtarefas"
+        },
+        filters: {
+          queue: "Fila",
+          user: "Usuário",
+          tags: "Tags"
+        },
+        title: "Kanban de Tickets",
+        tabs: {
+          overview: "Visão geral",
+          list: "Lista",
+          board: "Quadro",
+          calendar: "Calendário",
+          documents: "Documentos",
+          messages: "Mensagens"
+        },
+        empty: {
+          noTickets: "Nenhum ticket para exibir. Ajuste os filtros ou tente novamente mais tarde."
+        },
+        toasts: {
+          moveSuccess: "Ticket movido com sucesso",
+          moveError: "Falha ao mover o ticket",
+          priorityUpdated: "Prioridade atualizada"
+        }
       },
       files: {
         title: "Lista de arquivos",

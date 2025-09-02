@@ -141,14 +141,19 @@ const ListTicketsServiceKanban = async ({
 
   if (dateStart && dateEnd) {
     whereCondition = {
-      createdAt: {
-        [Op.between]: [+startOfDay(parseISO(dateStart)), +endOfDay(parseISO(dateEnd))]
+      ...whereCondition,
+      updatedAt: {
+        [Op.between]: [
+          +startOfDay(parseISO(dateStart)),
+          +endOfDay(parseISO(dateEnd))
+        ]
       }
     };
   }
 
   if (updatedAt) {
     whereCondition = {
+      ...whereCondition,
       updatedAt: {
         [Op.between]: [
           +startOfDay(parseISO(updatedAt)),

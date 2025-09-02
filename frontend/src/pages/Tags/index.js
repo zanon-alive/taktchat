@@ -262,7 +262,7 @@ const Tags = () => {
                       variant="outlined"
                       style={{
                         backgroundColor: tag.color,
-                        textShadow: "1px 1px #000",
+                        textShadow: "0px 0.3px #000",
                         color: "white",
                       }}
                       label={tag.name}
