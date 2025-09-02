@@ -1,0 +1,10 @@
+import express from "express";
+import isAuth from "../middleware/isAuth";
+import * as AiController from "../controllers/AiController";
+
+const routes = express.Router();
+
+routes.post("/ai/generate-campaign-messages", isAuth, AiController.generateCampaignMessages);
+routes.get("/ai/encryption-status", isAuth, AiController.encryptionStatus);
+
+export default routes;

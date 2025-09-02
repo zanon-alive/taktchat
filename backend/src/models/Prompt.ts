@@ -9,6 +9,7 @@ import {
   PrimaryKey,
   Table,
   UpdatedAt,
+  DataType,
 } from "sequelize-typescript";
 import Queue from "./Queue";
 import Company from "./Company";
@@ -65,6 +66,10 @@ class Prompt extends Model<Prompt> {
   @AllowNull(false)
   @Column
   model: string; // Added model as a STRING column
+
+  @AllowNull(true)
+  @Column({ type: DataType.TEXT })
+  attachments: string; // JSON string com anexos selecionados na biblioteca
 
   @AllowNull
   @ForeignKey(() => Queue)

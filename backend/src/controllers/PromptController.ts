@@ -54,6 +54,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     voiceKey,
     voiceRegion,
     model,
+    attachments,
   } = req.body;
 
   const promptTable = await CreatePromptService({
@@ -72,6 +73,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     voiceKey,
     voiceRegion,
     model,
+    attachments,
   });
 
   const io = getIO();

@@ -42,6 +42,8 @@ type StoreData = {
   queueId: number | string;
   statusTicket: string;
   openTicket: string;
+  dispatchStrategy?: string; // 'single' | 'round_robin'
+  allowedWhatsappIds?: number[] | string | null;
 };
 
 type FindParams = {

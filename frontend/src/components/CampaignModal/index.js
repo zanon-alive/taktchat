@@ -95,6 +95,7 @@ const CampaignModal = ({
 
   const initialState = {
     name: "",
+
     message1: "",
     message2: "",
     message3: "",
@@ -113,15 +114,19 @@ const CampaignModal = ({
     tagListId: "Nenhuma",
     companyId,
     statusTicket: "closed",
-    openTicket: "disabled"
+    openTicket: "disabled",
+    dispatchStrategy: "single",
+    allowedWhatsappIds: []
   };
 
   const [campaign, setCampaign] = useState(initialState);
   const [whatsapps, setWhatsapps] = useState([]);
   const [selectedWhatsapps, setSelectedWhatsapps] = useState([]);
+  const [dispatchStrategy, setDispatchStrategy] = useState("single");
+  const [allowedWhatsappIds, setAllowedWhatsappIds] = useState([]);
   const [whatsappId, setWhatsappId] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
     if (!campaignId && defaultWhatsappId) {
       setWhatsappId(defaultWhatsappId);
     }
@@ -135,7 +140,6 @@ useEffect(() => {
   const [campaignEditable, setCampaignEditable] = useState(true);
   const attachmentFile = useRef(null);
 
-
   const [options, setOptions] = useState([]);
   const [queues, setQueues] = useState([]);
   const [allQueues, setAllQueues] = useState([]);
@@ -144,6 +148,30 @@ useEffect(() => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedQueue, setSelectedQueue] = useState(null);
   const { findAll: findAllQueues } = useQueues();
+
+  // --- IA: geração de variações ---
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiTone, setAiTone] = useState("amigável");
+  const [aiNumVariations, setAiNumVariations] = useState(2);
+  const [aiBusinessContext, setAiBusinessContext] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiGenerated, setAiGenerated] = useState([]);
+  const [aiTargetField, setAiTargetField] = useState("message1");
+
+  const getMessageFieldByTab = (tabIdx) => {
+    switch (tabIdx) {
+      case 0: return "message1";
+      case 1: return "message2";
+      case 2: return "message3";
+      case 3: return "message4";
+      case 4: return "message5";
+      default: return "message1";
+    }
+  };
+  const extractPlaceholders = (text = "") => {
+    const matches = text.match(/\{[^}]+\}/g) || [];
+    return Array.from(new Set(matches));
+  };
 
   useEffect(() => {
     return () => {
@@ -163,7 +191,6 @@ useEffect(() => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
 
   useEffect(() => {
     if (searchParam.length < 3) {
@@ -244,6 +271,15 @@ useEffect(() => {
           // const selectedWhatsapps = data.whatsappId.split(",");
           setWhatsappId(data.whatsappId);
         }
+        if (data?.dispatchStrategy) {
+          setDispatchStrategy(data.dispatchStrategy);
+        }
+        if (data?.allowedWhatsappIds) {
+          try {
+            const parsed = typeof data.allowedWhatsappIds === 'string' ? JSON.parse(data.allowedWhatsappIds) : data.allowedWhatsappIds;
+            if (Array.isArray(parsed)) setAllowedWhatsappIds(parsed);
+          } catch (e) {}
+        }
         setCampaign((prev) => {
           let prevCampaignData = Object.assign({}, prev);
 
@@ -260,8 +296,6 @@ useEffect(() => {
       });
     }
   }, [campaignId, open, initialValues, companyId]);
-
-
 
   useEffect(() => {
     const now = moment();
@@ -293,11 +327,10 @@ useEffect(() => {
         ...values,  // Merge the existing values object
         whatsappId: whatsappId,
         userId: selectedUser?.id || null,
-        queueId: selectedQueue || null
+        queueId: selectedQueue || null,
+        dispatchStrategy,
+        allowedWhatsappIds
       };
-
-      //console.log(values);
-      //console.log(selectedWhatsapps);
 
       Object.entries(values).forEach(([key, value]) => {
         if (key === "scheduledAt" && value !== "" && value !== null) {
@@ -456,10 +489,25 @@ useEffect(() => {
             }, 400);
           }}
         >
-          {({ values, errors, touched, isSubmitting }) => (
+          {({ values, errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <DialogContent dividers>
                 <Grid spacing={2} container>
+                  {/* Botão IA - aplica na mensagem da aba atual */}
+                  <Grid xs={12} item>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => {
+                        setAiTargetField(getMessageFieldByTab(messageTab));
+                        setAiGenerated([]);
+                        setAiDialogOpen(true);
+                      }}
+                      disabled={!campaignEditable}
+                    >
+                      Gerar variações com IA (aba atual)
+                    </Button>
+                  </Grid>
                   <Grid xs={12} md={4} item>
                     <Field
                       as={TextField}
@@ -614,6 +662,65 @@ useEffect(() => {
                       </Field>
                     </FormControl>
                   </Grid>
+
+                  <Grid xs={12} md={4} item>
+                    <FormControl
+                      variant="outlined"
+                      margin="dense"
+                      fullWidth
+                      className={classes.formControl}
+                    >
+                      <InputLabel id="dispatchStrategy-selection-label">
+                        Estratégia de envio
+                      </InputLabel>
+                      <Select
+                        labelId="dispatchStrategy-selection-label"
+                        id="dispatchStrategy"
+                        label="Estratégia de envio"
+                        value={dispatchStrategy}
+                        onChange={(e) => setDispatchStrategy(e.target.value)}
+                        disabled={!campaignEditable}
+                      >
+                        <MenuItem value="single">Única conexão</MenuItem>
+                        <MenuItem value="round_robin">Rodízio entre conexões</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {dispatchStrategy === 'round_robin' && (
+                    <Grid xs={12} md={8} item>
+                      <Autocomplete
+                        multiple
+                        options={whatsapps}
+                        getOptionLabel={(option) => option.name}
+                        value={
+                          Array.isArray(allowedWhatsappIds)
+                            ? whatsapps.filter(w => allowedWhatsappIds.includes(w.id))
+                            : []
+                        }
+                        onChange={(event, newValue) => {
+                          const ids = newValue.map(w => w.id);
+                          setAllowedWhatsappIds(ids);
+                        }}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => (
+                            <Chip variant="default" label={option.name} {...getTagProps({ index })} />
+                          ))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            margin="dense"
+                            label="Conexões (quando rodízio)"
+                            placeholder="Selecione as conexões para o rodízio"
+                          />
+                        )}
+                        disableCloseOnSelect
+                        disabled={!campaignEditable}
+                      />
+                    </Grid>
+                  )}
 
                   <Grid xs={12} md={4} item>
                     <Field
@@ -895,6 +1002,116 @@ useEffect(() => {
                       )}
                     </Box>
                   </Grid>
+                  {/* Dialog de IA */}
+                  <Dialog open={aiDialogOpen} onClose={() => setAiDialogOpen(false)} maxWidth="sm" fullWidth>
+                    <DialogTitle>Gerar variações com IA</DialogTitle>
+                    <DialogContent dividers>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                          <TextField
+                            select
+                            SelectProps={{ native: true }}
+                            label="Tom da mensagem"
+                            fullWidth
+                            margin="dense"
+                            variant="outlined"
+                            value={aiTone}
+                            onChange={(e) => setAiTone(e.target.value)}
+                          >
+                            <option value="amigável">Amigável</option>
+                            <option value="profissional">Profissional</option>
+                            <option value="promocional">Promocional</option>
+                          </TextField>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            type="number"
+                            label="Nº de variações"
+                            fullWidth
+                            margin="dense"
+                            variant="outlined"
+                            inputProps={{ min: 1, max: 5 }}
+                            value={aiNumVariations}
+                            onChange={(e) => setAiNumVariations(Math.max(1, Math.min(5, Number(e.target.value) || 1)))}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Contexto do negócio (opcional)"
+                            fullWidth
+                            margin="dense"
+                            variant="outlined"
+                            multiline
+                            rows={3}
+                            value={aiBusinessContext}
+                            onChange={(e) => setAiBusinessContext(e.target.value)}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={async () => {
+                              try {
+                                setAiLoading(true);
+                                setAiGenerated([]);
+                                const baseText = values[aiTargetField] || "";
+                                const variables = extractPlaceholders(baseText);
+                                const { data } = await api.post('/ai/generate-campaign-messages', {
+                                  baseText,
+                                  variables,
+                                  tone: aiTone,
+                                  numVariations: aiNumVariations,
+                                  language: 'pt-BR',
+                                  businessContext: aiBusinessContext
+                                });
+                                setAiGenerated(Array.isArray(data?.variations) ? data.variations : []);
+                              } catch (err) {
+                                toastError(err);
+                              } finally {
+                                setAiLoading(false);
+                              }
+                            }}
+                            disabled={aiLoading}
+                          >
+                            {aiLoading ? 'Gerando...' : 'Gerar'}
+                          </Button>
+                        </Grid>
+                        {aiGenerated.length > 0 && (
+                          <Grid item xs={12}>
+                            <div style={{ marginTop: 8 }}>
+                              {aiGenerated.map((text, idx) => (
+                                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                                  <TextField
+                                    value={text}
+                                    fullWidth
+                                    variant="outlined"
+                                    multiline
+                                    rows={2}
+                                  />
+                                  <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={() => {
+                                      // aplica no campo atual usando Formik
+                                      setFieldValue(aiTargetField, text);
+                                      toast.success('Variação aplicada ao campo da aba atual.');
+                                    }}
+                                  >
+                                    Aplicar
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </Grid>
+                        )}
+                      </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => setAiDialogOpen(false)} color="primary" variant="outlined">Fechar</Button>
+                    </DialogActions>
+                  </Dialog>
+                  
                   {(campaign.mediaPath || attachment) && (
                     <Grid xs={12} item>
                       <Button startIcon={<AttachFileIcon />}>

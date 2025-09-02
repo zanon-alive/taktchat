@@ -950,6 +950,40 @@ function calculateDelay(
   return diffMs + baseInterval + jitterMs;
 }
 
+const rrIndexByCampaign: Map<number, number> = new Map();
+
+async function pickNextWhatsapp(campaign: any): Promise<number> {
+  try {
+    let allowed: number[] | null = null;
+    if (campaign?.allowedWhatsappIds) {
+      if (typeof campaign.allowedWhatsappIds === "string") {
+        try {
+          const parsed = JSON.parse(campaign.allowedWhatsappIds);
+          if (Array.isArray(parsed)) allowed = parsed.map((v) => Number(v)).filter((v) => !Number.isNaN(v));
+        } catch {}
+      } else if (Array.isArray(campaign.allowedWhatsappIds)) {
+        allowed = campaign.allowedWhatsappIds.map((v: any) => Number(v)).filter((v: number) => !Number.isNaN(v));
+      }
+    }
+    let candidates: any[] = [];
+    if (allowed && allowed.length > 0) {
+      candidates = await Whatsapp.findAll({ where: { id: allowed, companyId: campaign.companyId, status: "CONNECTED" } });
+    } else {
+      candidates = await Whatsapp.findAll({ where: { companyId: campaign.companyId, status: "CONNECTED" } });
+    }
+    if (!candidates || candidates.length === 0) {
+      return campaign.whatsappId; // fallback
+    }
+    const key = Number(campaign.id);
+    const idx = rrIndexByCampaign.get(key) || 0;
+    const chosen = candidates[idx % candidates.length];
+    rrIndexByCampaign.set(key, (idx + 1) % candidates.length);
+    return chosen.id;
+  } catch {
+    return campaign.whatsappId;
+  }
+}
+
 async function handlePrepareContact(job) {
   try {
     const { contactId, campaignId, delay, variables }: PrepareContactData =
@@ -1017,12 +1051,18 @@ async function handlePrepareContact(job) {
       record.deliveredAt === null &&
       record.confirmationRequestedAt === null
     ) {
+      // Seleciona a conexão por contato se a estratégia da campanha for round_robin
+      let selectedWhatsappId = campaign.whatsappId;
+      if (campaign?.dispatchStrategy === "round_robin") {
+        selectedWhatsappId = await pickNextWhatsapp(campaign);
+      }
       const nextJob = await campaignQueue.add(
         "DispatchCampaign",
         {
           campaignId: campaign.id,
           campaignShippingId: record.id,
-          contactListItemId: contactId
+          contactListItemId: contactId,
+          selectedWhatsappId
         },
         {
           delay
@@ -1042,16 +1082,18 @@ async function handlePrepareContact(job) {
 async function handleDispatchCampaign(job) {
   try {
     const { data } = job;
-    const { campaignShippingId, campaignId }: DispatchCampaignData = data;
+    const { campaignShippingId, campaignId } = data as any;
     const campaign = await getCampaign(campaignId);
-    const wbot = await GetWhatsappWbot(campaign.whatsapp);
+    const selectedWhatsappId: number = (data as any)?.selectedWhatsappId || campaign.whatsappId;
+    const whatsapp = await Whatsapp.findByPk(selectedWhatsappId);
+    const wbot = await GetWhatsappWbot(whatsapp);
 
     if (!wbot) {
       logger.error(`campaignQueue -> DispatchCampaign -> error: wbot not found`);
       return;
     }
 
-    if (!campaign.whatsapp) {
+    if (!whatsapp) {
       logger.error(`campaignQueue -> DispatchCampaign -> error: whatsapp not found`);
       return;
     }
@@ -1088,19 +1130,22 @@ async function handleDispatchCampaign(job) {
 
     // Cap e Backoff por conexão (whatsappId)
     const caps = await getCapBackoffSettings(campaign.companyId);
-    const capDelayMs = await getCapDeferDelayMs(campaign.whatsappId, caps);
-    const backoffDelayMs = getBackoffDeferDelayMs(campaign.whatsappId);
+    const capDelayMs = await getCapDeferDelayMs(selectedWhatsappId, caps);
+    const backoffDelayMs = getBackoffDeferDelayMs(selectedWhatsappId);
     const deferMs = Math.max(capDelayMs, backoffDelayMs);
     if (deferMs > 0) {
       const nextJob = await campaignQueue.add(
         "DispatchCampaign",
-        { campaignId, campaignShippingId, contactListItemId: data.contactListItemId },
+        { campaignId, campaignShippingId, contactListItemId: data.contactListItemId, selectedWhatsappId },
         { delay: deferMs, removeOnComplete: true }
       );
       await campaignShipping.update({ jobId: String(nextJob.id) });
       logger.warn(`Cap/Backoff ativo. Reagendando envio: Campanha=${campaignId}; Registro=${campaignShippingId}; delay=${deferMs}ms`);
       return;
     }
+    logger.info(
+      `Sem deferimento: prosseguindo com envio imediato. Campanha=${campaignId}; Registro=${campaignShippingId}; capDelayMs=${capDelayMs}; backoffDelayMs=${backoffDelayMs}`
+    );
 
     const isGroup = Boolean(campaignShipping.contact && campaignShipping.contact.isGroup);
     const chatId = isGroup
@@ -1118,11 +1163,11 @@ async function handleDispatchCampaign(job) {
           name: campaignShipping.contact.name,
           number: campaignShipping.number,
           email: campaignShipping.contact.email,
-          whatsappId: campaign.whatsappId,
+          whatsappId: selectedWhatsappId,
           profilePicUrl: ""
         }
       })
-      const whatsapp = await Whatsapp.findByPk(campaign.whatsappId);
+      // já temos whatsapp selecionado
 
       let ticket = await Ticket.findOne({
         where: {
@@ -1200,7 +1245,7 @@ async function handleDispatchCampaign(job) {
         }
         await campaignShipping.update({ deliveredAt: moment() });
         // sucesso: zera backoff para a conexão
-        resetBackoffOnSuccess(campaign.whatsappId);
+        resetBackoffOnSuccess(selectedWhatsappId);
       }
     }
     else {
@@ -1261,12 +1306,13 @@ async function handleDispatchCampaign(job) {
       const campaign = campaignId ? await getCampaign(campaignId) : null;
       if (campaign) {
         const caps = await getCapBackoffSettings(campaign.companyId);
-        updateBackoffOnError(campaign.whatsappId, caps, err?.message || "");
-        const delayMs = getBackoffDeferDelayMs(campaign.whatsappId) || (caps.backoffPauseMinutes * 60 * 1000);
+        const selectedWhatsappId: number = (job?.data as any)?.selectedWhatsappId || campaign.whatsappId;
+        updateBackoffOnError(selectedWhatsappId, caps, err?.message || "");
+        const delayMs = getBackoffDeferDelayMs(selectedWhatsappId) || (caps.backoffPauseMinutes * 60 * 1000);
         const { campaignShippingId, contactListItemId } = job.data as DispatchCampaignData;
         const nextJob = await campaignQueue.add(
           "DispatchCampaign",
-          { campaignId: campaign.id, campaignShippingId, contactListItemId },
+          { campaignId: campaign.id, campaignShippingId, contactListItemId, selectedWhatsappId },
           { delay: delayMs, removeOnComplete: true }
         );
         const record = await CampaignShipping.findByPk(campaignShippingId);

@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import ShowIntegrationService from "./ShowQueueIntegrationService";
+import { encryptString } from "../../utils/crypto";
 
 interface IntegrationData {
   type?: string;
@@ -60,11 +61,36 @@ const UpdateQueueIntegrationService = async ({
 
   const integration = await ShowIntegrationService(integrationId, companyId);
 
+  // Prepare jsonContent for persistence
+  let jsonToPersist: string | undefined = jsonContent;
+  if ((type || integration.type) === "openai") {
+    try {
+      const incoming = jsonContent ? JSON.parse(jsonContent) : {};
+      const current = integration.jsonContent ? JSON.parse(integration.jsonContent) : {};
+
+      // Preserve existing apiKey if incoming is missing or masked
+      const incomingKey = incoming?.apiKey;
+      if (typeof incomingKey === "string" && incomingKey.length > 0 && incomingKey !== "********") {
+        if (!incomingKey.startsWith("ENC::")) {
+          incoming.apiKey = encryptString(incomingKey);
+        }
+      } else {
+        incoming.apiKey = current?.apiKey; // keep existing (already encrypted)
+      }
+
+      // Merge model and any other fields
+      const merged = { ...current, ...incoming };
+      jsonToPersist = JSON.stringify(merged);
+    } catch (_) {
+      // if parse fails, fallback to incoming string as-is
+    }
+  }
+
   await integration.update({
     type,
     name,
     projectName,
-    jsonContent,
+    jsonContent: jsonToPersist,
     language,
     urlN8N,
     companyId,

@@ -2,6 +2,7 @@ import * as Yup from "yup";
 
 import AppError from "../../errors/AppError";
 import QueueIntegrations from "../../models/QueueIntegrations";
+import { encryptString } from "../../utils/crypto";
 
 
 interface Request {
@@ -61,12 +62,26 @@ const CreateQueueIntegrationService = async ({
   }
 
 
+  // Encrypt OpenAI apiKey if present
+  let jsonToPersist: string = jsonContent;
+  if (type === "openai" && jsonContent) {
+    try {
+      const parsed = JSON.parse(jsonContent);
+      if (parsed?.apiKey && typeof parsed.apiKey === "string" && !String(parsed.apiKey).startsWith("ENC::")) {
+        parsed.apiKey = encryptString(parsed.apiKey);
+      }
+      jsonToPersist = JSON.stringify(parsed);
+    } catch (_) {
+      // if JSON invalid, keep as is
+    }
+  }
+
   const queueIntegration = await QueueIntegrations.create(
     {
       type,
       name,
       projectName,
-      jsonContent,
+      jsonContent: jsonToPersist,
       language,
       urlN8N,
       companyId,

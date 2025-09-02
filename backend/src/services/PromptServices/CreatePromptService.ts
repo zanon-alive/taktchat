@@ -19,6 +19,7 @@ interface PromptData {
   voiceKey?: string;
   voiceRegion?: string;
   model: string; // Model is now required
+  attachments?: string; // JSON string
 }
 
 const CreatePromptService = async (promptData: PromptData): Promise<Prompt> => {
@@ -38,6 +39,7 @@ const CreatePromptService = async (promptData: PromptData): Promise<Prompt> => {
     voice,
     voiceKey,
     voiceRegion,
+    attachments,
   } = promptData;
 
   const promptSchema = Yup.object().shape({
@@ -112,6 +114,7 @@ const CreatePromptService = async (promptData: PromptData): Promise<Prompt> => {
     voice,
     voiceKey,
     voiceRegion,
+    attachments,
   });
 
   promptTable = await ShowPromptService({ promptId: promptTable.id, companyId });

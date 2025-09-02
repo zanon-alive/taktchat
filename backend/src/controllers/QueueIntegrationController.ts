@@ -22,7 +22,26 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     companyId
   });
 
-  return res.status(200).json({ queueIntegrations, count, hasMore });
+  // Mascarar apiKey de integrações OpenAI
+  const sanitized = queueIntegrations.map(qi => {
+    try {
+      let obj: any = (qi as any).toJSON ? (qi as any).toJSON() : (qi as any);
+      if (obj?.type === "openai" && obj?.jsonContent) {
+        try {
+          const parsed = JSON.parse(obj.jsonContent);
+          if (parsed && parsed.apiKey) {
+            parsed.apiKey = "********";
+            obj.jsonContent = JSON.stringify(parsed);
+          }
+        } catch (_) {}
+      }
+      return obj;
+    } catch (_) {
+      return qi;
+    }
+  });
+
+  return res.status(200).json({ queueIntegrations: sanitized, count, hasMore });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
@@ -53,7 +72,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     queueIntegration
   });
 
-  return res.status(200).json(queueIntegration);
+  // Mascarar apiKey se for OpenAI
+  let obj: any = queueIntegration?.toJSON ? queueIntegration.toJSON() : queueIntegration;
+  try {
+    if (obj?.type === "openai" && obj?.jsonContent) {
+      const parsed = JSON.parse(obj.jsonContent);
+      if (parsed?.apiKey) parsed.apiKey = "********";
+      obj.jsonContent = JSON.stringify(parsed);
+    }
+  } catch (_) {}
+
+  return res.status(200).json(obj);
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
@@ -62,7 +91,17 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   const queueIntegration = await ShowQueueIntegrationService(integrationId, companyId);
 
-  return res.status(200).json(queueIntegration);
+  // Mascarar apiKey se for OpenAI
+  let obj: any = queueIntegration?.toJSON ? queueIntegration.toJSON() : queueIntegration;
+  try {
+    if (obj?.type === "openai" && obj?.jsonContent) {
+      const parsed = JSON.parse(obj.jsonContent);
+      if (parsed?.apiKey) parsed.apiKey = "********";
+      obj.jsonContent = JSON.stringify(parsed);
+    }
+  } catch (_) {}
+
+  return res.status(200).json(obj);
 };
 
 export const update = async (
@@ -82,7 +121,17 @@ export const update = async (
     queueIntegration
   });
 
-  return res.status(201).json(queueIntegration);
+  // Mascarar apiKey se for OpenAI
+  let obj: any = queueIntegration?.toJSON ? queueIntegration.toJSON() : queueIntegration;
+  try {
+    if (obj?.type === "openai" && obj?.jsonContent) {
+      const parsed = JSON.parse(obj.jsonContent);
+      if (parsed?.apiKey) parsed.apiKey = "********";
+      obj.jsonContent = JSON.stringify(parsed);
+    }
+  } catch (_) {}
+
+  return res.status(201).json(obj);
 };
 
 export const remove = async (

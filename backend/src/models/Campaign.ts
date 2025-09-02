@@ -8,7 +8,8 @@ import {
   AutoIncrement,
   ForeignKey,
   BelongsTo,
-  HasMany
+  HasMany,
+  DataType
 } from "sequelize-typescript";
 import CampaignShipping from "./CampaignShipping";
 import Company from "./Company";
@@ -124,6 +125,12 @@ class Campaign extends Model<Campaign> {
 
   @Column({ defaultValue: "disabled" })
   openTicket: string;
+
+  @Column({ defaultValue: "single" })
+  dispatchStrategy: string; // single | round_robin
+
+  @Column({ type: DataType.TEXT, allowNull: true })
+  allowedWhatsappIds: string; // JSON array de IDs permitidos para rodízio por campanha
 }
 
 export default Campaign;

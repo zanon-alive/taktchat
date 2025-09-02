@@ -1,10 +1,10 @@
 [
   {
-    "id": "554598127180@s.whatsapp.net",
-    "name": "Mara Corrêa Climatize"
+    "id": "5511916130562@s.whatsapp.net",
+    "name": "Whaticket Agência Clicks Certos"
   },
   {
-    "id": "5511986565757@s.whatsapp.net",
-    "name": "Daniel Programador Web"
+    "id": "5511992457060@s.whatsapp.net",
+    "name": "Lucas Vindi Financiamento"
   }
 ]

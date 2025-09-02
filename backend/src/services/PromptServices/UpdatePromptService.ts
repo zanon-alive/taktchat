@@ -20,6 +20,7 @@ interface PromptData {
   voiceKey?: string;
   voiceRegion?: string;
   model?: string;
+  attachments?: string; // JSON string
 }
 
 interface Request {

@@ -25,6 +25,24 @@ export const msgsd = (): string => {
   return ms;
 };
 
+export const formatDate = (d?: Date | string): string => {
+  if (!d) return "";
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return "";
+  const dd = ("0" + date.getDate()).slice(-2);
+  const mm = ("0" + (date.getMonth() + 1)).slice(-2);
+  const yy = date.getFullYear();
+  return `${dd}-${mm}-${yy}`;
+};
+
+export const periodoDia = (): string => {
+  const hh = new Date().getHours();
+  if (hh >= 6 && hh <= 11) return "manhã";
+  if (hh >= 12 && hh <= 17) return "tarde";
+  if (hh >= 18 && hh <= 23) return "noite";
+  return "madrugada";
+};
+
 export const control = (): string => {
   const Hr = new Date();
 
@@ -73,9 +91,20 @@ export default (body: string, ticket?: Ticket): string => {
   const view = {
     firstName: firstName(ticket),
     name: ticket ? ticket?.contact?.name : "",
+    email: ticket ? ticket?.contact?.email : "",
+    cpfCnpj: ticket ? ticket?.contact?.cpfCnpj : "",
+    representativeCode: ticket ? ticket?.contact?.representativeCode : "",
+    city: ticket ? ticket?.contact?.city : "",
+    situation: ticket ? ticket?.contact?.situation : "",
+    fantasyName: ticket ? ticket?.contact?.fantasyName : "",
+    foundationDate: ticket ? formatDate(ticket?.contact?.foundationDate as any) : "",
+    creditLimit: ticket ? (ticket?.contact?.creditLimit || "") : "",
+    segment: ticket ? ticket?.contact?.segment : "",
     ticket_id: ticket ? ticket.id : "",
     userName: ticket ? ticket?.user?.name : "",
     ms: msgsd(),
+    saudacao: msgsd(),
+    periodo_dia: periodoDia(),
     hour: hour(),
     date: date(),
     queue: ticket ? ticket?.queue?.name : "",

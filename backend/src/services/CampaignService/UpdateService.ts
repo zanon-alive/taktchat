@@ -13,6 +13,7 @@ interface Data {
   scheduledAt: string;
   companyId: number;
   contactListId: number;
+  whatsappId?: number;
   message1?: string;
   message2?: string;
   message3?: string;
@@ -27,6 +28,8 @@ interface Data {
   queueId: number | string;
   statusTicket: string;
   openTicket: string;
+  dispatchStrategy?: string; // 'single' | 'round_robin'
+  allowedWhatsappIds?: number[] | string | null;
 }
 
 const UpdateService = async (data: Data): Promise<Campaign> => {
@@ -53,7 +56,20 @@ const UpdateService = async (data: Data): Promise<Campaign> => {
     data.status = "PROGRAMADA";
   }
 
-  await record.update(data);
+  // Serializa allowedWhatsappIds se vier como array/objeto
+  const payload: any = { ...data };
+  if (
+    payload.allowedWhatsappIds != null &&
+    typeof payload.allowedWhatsappIds !== "string"
+  ) {
+    try {
+      payload.allowedWhatsappIds = JSON.stringify(payload.allowedWhatsappIds);
+    } catch (e) {
+      payload.allowedWhatsappIds = String(payload.allowedWhatsappIds);
+    }
+  }
+
+  await record.update(payload);
 
   await record.reload({
     include: [

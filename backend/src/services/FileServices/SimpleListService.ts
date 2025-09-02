@@ -1,12 +1,12 @@
 import { Op } from "sequelize";
-import Rating from "../../models/Files";
+import Files from "../../models/Files";
 
 interface Request {
   companyId: number
   searchParam?: string;
 }
 
-const ListService = async ({ searchParam, companyId }: Request): Promise<Rating[]> => {
+const ListService = async ({ searchParam, companyId }: Request): Promise<Files[]> => {
   let whereCondition = {};
 
   if (searchParam) {
@@ -15,16 +15,15 @@ const ListService = async ({ searchParam, companyId }: Request): Promise<Rating[
     };
   }
 
-  const ratings = await Rating.findAll({
+  const files = await Files.findAll({
     where: {companyId, ...whereCondition},
     order: [["name", "ASC"]],
     attributes: {
       exclude: ["createdAt", "updatedAt"]
     },
-    group: ["Rating.id"]
   });
 
-  return ratings;
+  return files;
 };
 
 export default ListService;
