@@ -10,6 +10,8 @@
     "dev": "node ./scripts/check_and_kill_port.js && nodemon --exec ts-node src/server.ts",
     "dev:server": "ts-node-dev --respawn --transpile-only --ignore node_modules src/server.ts",
     "db:migrate": "npx sequelize db:migrate",
+    "db:migrate:prod": "sequelize db:migrate",
+    "db:status:prod": "sequelize db:migrate:status",
     "db:seed": "sequelize db:seed:all",
     "pretest": "NODE_ENV=test sequelize db:migrate && NODE_ENV=test sequelize db:seed:all",
     "test": "NODE_ENV=test jest",

@@ -1,6 +1,11 @@
 require("../bootstrap");
 // são paulo timezone
-module.exports = {
+
+// SSL condicional via variáveis de ambiente
+const sslEnabled = String(process.env.DB_SSL || "").toLowerCase() === "true" || process.env.DB_SSL === "1";
+const rejectUnauthorized = !(String(process.env.DB_SSL_REJECT_UNAUTHORIZED || "false").toLowerCase() === "false");
+
+const config: any = {
   define: {
     charset: "utf8mb4",
     collate: "utf8mb4_bin"
@@ -16,7 +21,8 @@ module.exports = {
       /SequelizeInvalidConnectionError/,
       /SequelizeConnectionTimedOutError/
     ],
-    max: 100
+    // reduzir para evitar longos travamentos em produção
+    max: parseInt(process.env.DB_RETRY_MAX || "10")
   },
   pool: {
     max: parseInt(process.env.DB_POOL_MAX) || 100,
@@ -33,3 +39,14 @@ module.exports = {
   password: process.env.DB_PASS,
   logging: false
 };
+
+if (sslEnabled && (config.dialect === "postgres" || config.dialect === "postgresql")) {
+  config.dialectOptions = {
+    ssl: {
+      require: true,
+      rejectUnauthorized
+    }
+  };
+}
+
+module.exports = config;
