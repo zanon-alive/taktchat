@@ -1,10 +1,6 @@
 [
   {
-    "id": "5511916130562@s.whatsapp.net",
-    "name": "Whaticket Agência Clicks Certos"
-  },
-  {
-    "id": "5511992457060@s.whatsapp.net",
-    "name": "Lucas Vindi Financiamento"
+    "id": "5511999163418@s.whatsapp.net",
+    "name": "Vinicius Folha De Pagamento Inter"
   }
 ]

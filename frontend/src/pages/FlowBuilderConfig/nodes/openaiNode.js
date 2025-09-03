@@ -13,7 +13,16 @@ import { SiOpenai } from "react-icons/si";
 
 export default memo(({ data, isConnectable, id }) => {
   const storageItems = useNodeStorage();
-  console.log(12, "ticketNode", data);
+  console.log(12, "openaiNode", data);
+
+  const tbi = data?.typebotIntegration || {};
+  let attachmentsCount = 0;
+  try {
+    const atts = typeof tbi.attachments === 'string' ? JSON.parse(tbi.attachments) : tbi.attachments;
+    attachmentsCount = Array.isArray(atts) ? atts.length : 0;
+  } catch (_) {
+    attachmentsCount = 0;
+  }
   return (
     <div
       style={{
@@ -95,16 +104,18 @@ export default memo(({ data, isConnectable, id }) => {
         <div style={{ color: "#232323", fontSize: "16px" }}>OpenAI/Gemini</div>
       </div>
       <div style={{ color: "#232323", fontSize: "12px", width: 180 }}>
-        <div
-          style={{
-            backgroundColor: "#F6EEEE",
-            marginBottom: "3px",
-            borderRadius: "5px",
-          }}
-        >
-          <div style={{ gap: "5px", padding: "6px" }}>
-            <div style={{ textAlign: "center" }}>OpenAI/Gemini</div>
-          </div>
+        <div style={{ backgroundColor: "#F6EEEE", marginBottom: "6px", borderRadius: "5px", padding: "6px" }}>
+          <div style={{ textAlign: "center", fontWeight: 600 }}>OpenAI/Gemini</div>
+        </div>
+
+        <div style={{ lineHeight: 1.3 }}>
+          <div><strong>Ação:</strong> {tbi.name || "—"}</div>
+          <div><strong>Integração:</strong> {tbi.integrationId ? `#${tbi.integrationId}` : "—"}</div>
+          <div><strong>Fila:</strong> {tbi.queueId ? `#${tbi.queueId}` : "—"}</div>
+          <div><strong>Modelo:</strong> {tbi.model || "—"}</div>
+          <div><strong>Temp.:</strong> {tbi.temperature ?? "—"}</div>
+          <div><strong>Máx. Msgs:</strong> {tbi.maxMessages ?? "—"}</div>
+          <div><strong>Anexos:</strong> {attachmentsCount}</div>
         </div>
       </div>
       <Handle

@@ -5,11 +5,11 @@ import multer from "multer";
 
 import * as SettingController from "../controllers/SettingController";
 import isSuper from "../middleware/isSuper";
-import uploadConfig from "../config/upload";
-import uploadPrivateConfig from "../config/privateFiles";
+import { createUpload } from "../config/uploadFactory";
+import validateUploadedFiles from "../middleware/validateUploadedFiles";
 
-const upload = multer(uploadConfig);
-const uploadPrivate = multer(uploadPrivateConfig);
+const upload = createUpload({ privacy: "public" });
+const uploadPrivate = createUpload({ privacy: "private" });
 
 const settingRoutes = Router();
 
@@ -29,12 +29,19 @@ settingRoutes.put("/setting/:settingKey", isAuth, SettingController.updateOne);
 
 settingRoutes.get("/public-settings/:settingKey", envTokenAuth, SettingController.publicShow);
 
-settingRoutes.post("/settings-whitelabel/logo", isAuth, upload.single("file"), SettingController.storeLogo);
+settingRoutes.post(
+  "/settings-whitelabel/logo",
+  isAuth,
+  upload.single("file"),
+  validateUploadedFiles(),
+  SettingController.storeLogo
+);
 
 settingRoutes.post(
   "/settings/privateFile",
   isAuth,
   uploadPrivate.single("file"),
+  validateUploadedFiles(),
   SettingController.storePrivateFile
 )
 

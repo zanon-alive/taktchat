@@ -34,8 +34,15 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { name, message, options } = req.body;
+  const { name, message } = req.body;
   const { companyId } = req.user;
+  const files = req.files as Express.Multer.File[];
+
+  const options = files?.map((file, index) => ({
+    name: req.body[`option_${index}_name`],
+    path: file.filename,
+    mediaType: file.mimetype,
+  })) || [];
 
   const fileList = await CreateService({
     name,
@@ -63,36 +70,6 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(file);
 };
 
-export const uploadMedias = async (req: Request, res: Response): Promise<Response> => {
-  const { fileId, id, mediaType } = req.body;
-  const files = req.files as Express.Multer.File[];
-  const file = head(files);
-
-  try {
-
-    let fileOpt
-    if (files.length > 0) {
-
-      for (const [index, file] of files.entries()) {
-        fileOpt = await FilesOptions.findOne({
-          where: {
-            fileId,
-            id: Array.isArray(id) ? id[index] : id
-          }
-        });
-
-        await fileOpt.update({
-          path: file.filename.replace('/', '-'),
-          mediaType: Array.isArray(mediaType) ? mediaType[index] : mediaType
-        });
-      }
-    }
-
-    return res.send({ mensagem: "Arquivos atualizados" });
-  } catch (err: any) {
-    throw new AppError(err.message);
-  }
-};
 
 export const update = async (
   req: Request,
@@ -103,8 +80,57 @@ export const update = async (
   }
 
   const { fileId } = req.params;
-  const fileData = req.body;
   const { companyId } = req.user;
+  const files = req.files as Express.Multer.File[];
+  const fileData = req.body;
+
+  // Reconstrói options preservando ordem e associação correta
+  const optionsMap = new Map();
+  let fileIndex = 0;
+  
+  // Primeiro, coleta todas as options do FormData
+  for (const key in req.body) {
+    if (key.startsWith('option_')) {
+      const parts = key.split('_');
+      const index = parseInt(parts[1], 10);
+      const property = parts[2];
+
+      if (!optionsMap.has(index)) {
+        optionsMap.set(index, {});
+      }
+
+      const option = optionsMap.get(index);
+      if (property === 'id') {
+        option.id = parseInt(req.body[key], 10);
+      } else if (property === 'name') {
+        option.name = req.body[key];
+      } else if (property === 'file_index') {
+        option.fileIndex = parseInt(req.body[key], 10);
+      }
+    }
+  }
+
+  // Associa arquivos novos usando file_index se disponível
+  files?.forEach((file, idx) => {
+    // Procura por option que referencia este arquivo
+    for (const [optionIndex, option] of optionsMap.entries()) {
+      if (option.fileIndex === idx || (!option.id && !option.path && fileIndex === idx)) {
+        option.path = file.filename;
+        option.mediaType = file.mimetype;
+        delete option.fileIndex; // Remove campo auxiliar
+        break;
+      }
+    }
+    fileIndex++;
+  });
+
+  // Converte Map para array ordenado
+  const options = Array.from(optionsMap.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([, option]) => option)
+    .filter(opt => opt.name || opt.id); // Remove entradas vazias
+
+  fileData.options = options;
 
   const fileList = await UpdateService({ fileData, id: fileId, companyId });
 

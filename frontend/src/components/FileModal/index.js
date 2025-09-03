@@ -24,6 +24,8 @@ import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
+import MediaPreview from "../MediaPreview";
+import MediaViewerModal from "../MediaViewerModal";
 
 import { green } from "@material-ui/core/colors";
 
@@ -83,21 +85,20 @@ const FileListSchema = Yup.object().shape({
         .min(3, "nome muito curto")
         .required("Obrigatório"),
     message: Yup.string()
-        .required("Obrigatório")
 });
 
 const FilesModal = ({ open, onClose, fileListId, reload }) => {
     const classes = useStyles();
     const { user } = useContext(AuthContext);
 
-    const [files, setFiles] = useState([]);
     const [selectedFileNames, setSelectedFileNames] = useState([]);
-
+    const [mediaViewerModalOpen, setMediaViewerModalOpen] = useState(false);
+    const [viewingMedia, setViewingMedia] = useState(null);
 
     const initialState = {
         name: "",
         message: "",
-        options: [{ name: "", path: "", mediaType: "" }],
+        options: [],
     };
 
     const [fileList, setFileList] = useState(initialState);
@@ -117,56 +118,54 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
 
     const handleClose = () => {
         setFileList(initialState);
-        setFiles([]);
         onClose();
     };
 
     const handleSaveFileList = async (values) => {
+        const formData = new FormData();
 
-        const uploadFiles = async (options, filesOptions, id) => {
-            const formData = new FormData();
-            formData.append("fileId", id);
-            formData.append("typeArch", "fileList")
-            filesOptions.forEach((fileOption, index) => {
-                if (fileOption.file) {
-                    formData.append("files", fileOption.file);
-                    formData.append("mediaType", fileOption.file.type)
-                    formData.append("name", options[index].name);
-                    formData.append("id", options[index].id);
-                }
-            });
+        // Adiciona os campos de texto
+        formData.append('name', values.name);
+        formData.append('message', values.message || "");
+        formData.append('userId', user.id);
 
-            try {
-                const { data } = await api.post(`/files/uploadList/${id}`, formData);
-                setFiles([]);
-                return data;
-            } catch (err) {
-                toastError(err);
+        // Adiciona os arquivos e seus nomes correspondentes
+        let fileIndex = 0;
+        values.options.forEach((option, index) => {
+            if (option.file) {
+                formData.append('files', option.file);
+                formData.append(`option_${index}_name`, option.name || "");
+                formData.append(`option_${index}_file_index`, fileIndex);
+                fileIndex++;
+            } else if (option.id) {
+                // Para arquivos existentes, envia o ID e o nome
+                formData.append(`option_${index}_id`, option.id);
+                formData.append(`option_${index}_name`, option.name || "");
             }
-            return null;
-        }
-
-        const fileData = { ...values, userId: user.id };
+        });
 
         try {
             if (fileListId) {
-                const { data } = await api.put(`/files/${fileListId}`, fileData)
-                if (data.options.length > 0)
-                    // console.log(values.options)
-                    uploadFiles(data.options, values.options, fileListId)
+                await api.put(`/files/${fileListId}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
             } else {
-                const { data } = await api.post("/files", fileData);
-                if (data.options.length > 0)
-                    uploadFiles(data.options, values.options, data.id)
+                await api.post('/files', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
             }
             toast.success(i18n.t("fileModal.success"));
-            if (typeof reload == 'function') {
+            if (typeof reload === 'function') {
                 reload();
             }
+            handleClose();
         } catch (err) {
             toastError(err);
         }
-        handleClose();
     };
 
     return (
@@ -191,7 +190,7 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                         }, 400);
                     }}
                 >
-                    {({ touched, errors, isSubmitting, values }) => (
+                    {({ touched, errors, isSubmitting, values, setFieldValue }) => (
                         <Form>
                             <DialogContent dividers>
                                 <div className={classes.multFieldLine}>
@@ -211,9 +210,10 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                                     <Field
                                         as={TextField}
                                         label={i18n.t("fileModal.form.message")}
+                                        placeholder="Descrição opcional da lista de arquivos..."
                                         type="message"
                                         multiline
-                                        minRows={5}
+                                        minRows={3}
                                         fullWidth
                                         name="message"
                                         error={
@@ -232,6 +232,13 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                                 >
                                     {i18n.t("fileModal.form.fileOptions")}
                                 </Typography>
+                                <Typography
+                                    style={{ marginBottom: 16, fontSize: '0.875rem', color: '#666' }}
+                                    variant="body2"
+                                >
+                                    📎 Formatos suportados: Imagens (JPG, PNG, GIF, WebP), Áudio (MP3, WAV, OGG, AAC), Vídeo (MP4, WebM), Documentos (PDF, TXT)
+                                    <br />💡 Clique no ícone 📎 para selecionar um arquivo e digite um nome descritivo para cada item.
+                                </Typography>
 
                                 <FieldArray name="options">
                                     {({ push, remove }) => (
@@ -239,59 +246,123 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                                             {values.options &&
                                                 values.options.length > 0 &&
                                                 values.options.map((info, index) => (
-                                                    <div
-                                                        className={classes.extraAttr}
-                                                        key={`${index}-info`}
-                                                    >
-                                                        <Grid container spacing={0}>
-                                                            <Grid xs={6} md={10} item>
-                                                                <Field
-                                                                    as={TextField}
-                                                                    label={i18n.t("fileModal.form.extraName")}
-                                                                    name={`options[${index}].name`}
-                                                                    variant="outlined"
-                                                                    margin="dense"
-                                                                    multiline
-                                                                    fullWidth
-                                                                    minRows={2}
-                                                                    className={classes.textField}
-                                                                />
-                                                            </Grid>
-                                                            <Grid xs={2} md={2} item style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                                <input
-                                                                    type="file"
-                                                                    onChange={(e) => {
-                                                                        const selectedFile = e.target.files[0];
-                                                                        const updatedOptions = [...values.options];
-                                                                        updatedOptions[index].file = selectedFile;
-                                                                        setFiles('options', updatedOptions);
-
-                                                                        // Atualize a lista selectedFileNames para o campo específico
-                                                                        const updatedFileNames = [...selectedFileNames];
-                                                                        updatedFileNames[index] = selectedFile ? selectedFile.name : '';
-                                                                        setSelectedFileNames(updatedFileNames);
-                                                                    }}
-                                                                    style={{ display: 'none' }}
-                                                                    name={`options[${index}].file`}
-                                                                    id={`file-upload-${index}`}
-                                                                />
-                                                                <label htmlFor={`file-upload-${index}`}>
-                                                                    <IconButton component="span">
-                                                                        <AttachFileIcon />
-                                                                    </IconButton>
-                                                                </label>
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => remove(index)}
-                                                                >
-                                                                    <DeleteOutlineIcon />
-                                                                </IconButton>
-                                                            </Grid>
-                                                            <Grid xs={12} md={12} item>
-                                                                {info.path ? info.path : selectedFileNames[index]}
-                                                            </Grid>
+                                                    <Grid container spacing={2} key={`${index}-info`} alignItems="center" style={{ marginBottom: '10px' }}>
+                                                        <Grid item xs={12} sm={3} md={2}>
+                                                            <MediaPreview
+                                                                url={info.url || info.previewUrl}
+                                                                mediaType={info.mediaType || info.file?.type}
+                                                                name={info.name || info.path || selectedFileNames[index]}
+                                                                fileSize={info.file?.size}
+                                                                createdAt={info.createdAt}
+                                                                onClick={() => {
+                                                                    const media = {
+                                                                        url: info.url || info.previewUrl,
+                                                                        mediaType: info.mediaType || info.file?.type,
+                                                                        name: info.name || info.path || selectedFileNames[index]
+                                                                    };
+                                                                    const isViewable = ['image/', 'audio/', 'video/', 'application/pdf', 'text/plain'].some(prefix => media.mediaType?.startsWith(prefix));
+                                                                    
+                                                                    if (isViewable && media.url) {
+                                                                        setViewingMedia(media);
+                                                                        setMediaViewerModalOpen(true);
+                                                                    } else if (media.url) {
+                                                                        window.open(media.url, '_blank');
+                                                                    }
+                                                                }}
+                                                            />
                                                         </Grid>
-                                                    </div>
+                                                        <Grid item xs={12} sm={7} md={9}>
+                                                            <Field
+                                                                as={TextField}
+                                                                label={i18n.t("fileModal.form.extraName")}
+                                                                placeholder="Ex: Documento de identidade, Foto do produto, Manual de instruções..."
+                                                                name={`options[${index}].name`}
+                                                                variant="outlined"
+                                                                margin="dense"
+                                                                multiline
+                                                                fullWidth
+                                                                minRows={2}
+                                                                className={classes.textField}
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={12} sm={2} md={1} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '4px' }}>
+                                                            <input
+                                                                type="file"
+                                                                onChange={(e) => {
+                                                                    const selectedFile = e.target.files[0];
+                                                                    
+                                                                    if (selectedFile) {
+                                                                        // Validação de tipo de arquivo
+                                                                        const allowedTypes = [
+                                                                            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+                                                                            'application/pdf', 'text/plain',
+                                                                            'audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/aac', 'audio/mp4',
+                                                                            'video/mp4', 'video/webm', 'video/quicktime'
+                                                                        ];
+                                                                        
+                                                                        if (!allowedTypes.includes(selectedFile.type)) {
+                                                                            toast.error(`Tipo de arquivo não suportado: ${selectedFile.type}`);
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        // Validação de tamanho (50MB)
+                                                                        if (selectedFile.size > 50 * 1024 * 1024) {
+                                                                            toast.error('Arquivo muito grande. Limite: 50MB');
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        // Salva o arquivo no Formik
+                                                                        setFieldValue(`options[${index}].file`, selectedFile);
+                                                                        setFieldValue(`options[${index}].previewUrl`, URL.createObjectURL(selectedFile));
+                                                                        setFieldValue(`options[${index}].mediaType`, selectedFile.type);
+                                                                        
+                                                                        // Atualiza nome exibido
+                                                                        const updatedFileNames = [...selectedFileNames];
+                                                                        updatedFileNames[index] = selectedFile.name;
+                                                                        setSelectedFileNames(updatedFileNames);
+                                                                        
+                                                                        // Auto-preenche nome se estiver vazio
+                                                                        if (!values.options[index]?.name) {
+                                                                            setFieldValue(`options[${index}].name`, selectedFile.name);
+                                                                        }
+                                                                        
+                                                                        toast.success(`Arquivo "${selectedFile.name}" adicionado com sucesso!`);
+                                                                    }
+                                                                }}
+                                                                style={{ display: 'none' }}
+                                                                name={`options[${index}].file`}
+                                                                id={`file-upload-${index}`}
+                                                                accept="image/*,audio/*,video/*,application/pdf,text/plain"
+                                                            />
+                                                            <label htmlFor={`file-upload-${index}`}>
+                                                                <IconButton 
+                                                                    component="span" 
+                                                                    color={info.file || info.url ? 'primary' : 'default'}
+                                                                    title="Selecionar arquivo"
+                                                                >
+                                                                    <AttachFileIcon />
+                                                                </IconButton>
+                                                            </label>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => {
+                                                                    // Limpa preview URL se existir
+                                                                    if (info.previewUrl) {
+                                                                        URL.revokeObjectURL(info.previewUrl);
+                                                                    }
+                                                                    remove(index);
+                                                                    // Remove do array de nomes também
+                                                                    const updatedFileNames = [...selectedFileNames];
+                                                                    updatedFileNames.splice(index, 1);
+                                                                    setSelectedFileNames(updatedFileNames);
+                                                                }}
+                                                                title="Remover item"
+                                                                color="secondary"
+                                                            >
+                                                                <DeleteOutlineIcon />
+                                                            </IconButton>
+                                                        </Grid>
+                                                    </Grid>
 
                                                 ))}
                                             <div className={classes.extraAttr}>
@@ -300,17 +371,38 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                                                     variant="outlined"
                                                     color="primary"
                                                     onClick={() => {
-                                                        push({ name: "", path: "" });
+                                                        push({ name: "", path: "", mediaType: "" });
                                                         setSelectedFileNames([...selectedFileNames, ""]);
                                                     }}
                                                 >
                                                     {`+ ${i18n.t("fileModal.buttons.fileOptions")}`}
                                                 </Button>
                                             </div>
+                                            
+                                            {values.options.length === 0 && (
+                                                <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                                                    <AttachFileIcon style={{ fontSize: '3rem', marginBottom: '16px' }} />
+                                                    <Typography variant="body1">
+                                                        Nenhum arquivo adicionado ainda
+                                                    </Typography>
+                                                    <Typography variant="body2" style={{ marginTop: '8px' }}>
+                                                        Clique em "+ ADICIONAR ARQUIVO" para começar
+                                                    </Typography>
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </FieldArray>
                             </DialogContent>
+                            {viewingMedia && (
+                                <MediaViewerModal
+                                    open={mediaViewerModalOpen}
+                                    onClose={() => setMediaViewerModalOpen(false)}
+                                    url={viewingMedia.url}
+                                    mediaType={viewingMedia.mediaType}
+                                    name={viewingMedia.name}
+                                />
+                            )}
                             <DialogActions>
                                 <Button
                                     onClick={handleClose}

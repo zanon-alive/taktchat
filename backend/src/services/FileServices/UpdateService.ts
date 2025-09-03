@@ -5,17 +5,19 @@ import Files from "../../models/Files";
 import FilesOptions from "../../models/FilesOptions";
 import ShowService from "./ShowService";
 
-interface Options {
+interface FileOption {
   id?: number;
-  name: string;
-  path: string;
+  name?: string;
+  path?: string;
+  mediaType?: string;
+  [key: string]: any; // Permite campos adicionais
 }
 
 interface FileData {
   id?: number;
   name: string;
   message: string;
-  options?: Options[];
+  options?: FileOption[];
 }
 
 interface Request {
@@ -45,18 +47,52 @@ const UpdateService = async ({
   }
 
   if (options) {
-    await Promise.all(
-      options.map(async info => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        await FilesOptions.upsert({ ...info, fileId: file.id });
-      })
-    );
+    // Monta um array final mesclando dados existentes quando path/mediaType não forem enviados
+    const mergedOptions: FileOption[] = [];
 
+    for (const info of options) {
+      // Se possuir ID, tenta preservar path/mediaType
+      if (info.id) {
+        const existing = await FilesOptions.findOne({ where: { id: info.id, fileId: file.id } });
+        if (existing) {
+          mergedOptions.push({
+            id: existing.id,
+            name: info.name ?? existing.name,
+            path: info.path ?? (existing as any).path,
+            mediaType: info.mediaType ?? (existing as any).mediaType
+          });
+          continue;
+        }
+      }
+
+      // Para novos itens: somente considere se possuir path/mediaType válidos
+      if (info.path && info.mediaType) {
+        const hasSubdirs = info.path.includes("/");
+        const relPath = hasSubdirs
+          ? info.path
+          : `company${companyId}/files/${file.id}/${info.path}`;
+        mergedOptions.push({
+          name: info.name ?? "",
+          path: relPath,
+          mediaType: info.mediaType
+        });
+      }
+    }
+
+    if (mergedOptions.length > 0) {
+      await Promise.all(
+        mergedOptions.map(async m => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          await FilesOptions.upsert({ ...m, fileId: file.id });
+        })
+      );
+    }
+
+    // Exclui options que foram removidas
     await Promise.all(
       file.options.map(async oldInfo => {
-        const stillExists = options.findIndex(info => info.id === oldInfo.id);
-
+        const stillExists = (options || []).findIndex(info => info.id === oldInfo.id);
         if (stillExists === -1) {
           await FilesOptions.destroy({ where: { id: oldInfo.id } });
         }
@@ -69,7 +105,7 @@ const UpdateService = async ({
   
   await file.update({
     name,
-    message
+    message: message ?? ""
   });
 
   await file.reload({

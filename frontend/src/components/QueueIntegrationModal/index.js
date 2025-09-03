@@ -95,7 +95,12 @@ const QueueIntegration = ({ open, onClose, integrationId }) => {
     typebotRestartMessage: "",
     typebotSlug: "",
     typebotUnknownMessage: "",
-
+    // OpenAI fields
+    apiKey: "",
+    model: "gpt-3.5-turbo-1106",
+    temperature: 1,
+    maxTokens: 100,
+    maxMessages: 10,
   };
 
   const [integration, setIntegration] = useState(initialState);
@@ -151,7 +156,7 @@ const QueueIntegration = ({ open, onClose, integrationId }) => {
   const handleSaveDialogflow = async (values) => {
 
     try {
-      if (values.type === 'n8n' || values.type === 'webhook' || values.type === 'typebot' || values.type === "flowbuilder") values.projectName = values.name
+      if (values.type === 'n8n' || values.type === 'webhook' || values.type === 'typebot' || values.type === "flowbuilder" || values.type === "openai" || values.type === "gemini") values.projectName = values.name
       if (integrationId) {
         await api.put(`/queueIntegration/${integrationId}`, values);
         toast.success(i18n.t("queueIntegrationModal.messages.editSuccess"));
@@ -212,11 +217,13 @@ const QueueIntegration = ({ open, onClose, integrationId }) => {
                           id="type"
                           required
                         >
+                          <MenuItem value="openai">OpenAI</MenuItem>
                           <MenuItem value="dialogflow">DialogFlow</MenuItem>
                           <MenuItem value="n8n">N8N</MenuItem>
                           <MenuItem value="webhook">WebHooks</MenuItem>
                           <MenuItem value="typebot">Typebot</MenuItem>
                           <MenuItem value="flowbuilder">Flowbuilder</MenuItem>
+                          <MenuItem value="gemini">Google Gemini</MenuItem>
                         </Field>
                       </FormControl>
                     </Grid>
@@ -345,6 +352,188 @@ const QueueIntegration = ({ open, onClose, integrationId }) => {
                           className={classes.textField}
                         />
                       </Grid>
+                    )}
+                    {(values.type === "openai") && (
+                      <>
+                        <Grid item xs={12}>
+                          <Typography variant="body2" color="textSecondary" style={{ marginBottom: 16, padding: 16, backgroundColor: "#f5f5f5", borderRadius: 4 }}>
+                            📝 <strong>Dica:</strong> Configure sua API Key da OpenAI aqui. Esta configuração será usada automaticamente em todos os prompts e flows que utilizarem OpenAI.
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} xl={6} >
+                          <Field
+                            as={TextField}
+                            label="Nome da Integração"
+                            autoFocus
+                            name="name"
+                            placeholder="Ex: OpenAI Empresa"
+                            error={touched.name && Boolean(errors.name)}
+                            helperText={(touched.name && errors.name) || "Um rótulo para identificar esta integração"}
+                            variant="outlined"
+                            margin="dense"
+                            required
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6} xl={6} >
+                          <Field
+                            as={TextField}
+                            label="API Key OpenAI"
+                            name="apiKey"
+                            type="password"
+                            placeholder="sk-..."
+                            error={touched.apiKey && Boolean(errors.apiKey)}
+                            helperText={(touched.apiKey && errors.apiKey) || "Sua chave da API OpenAI (começa com sk-)"}
+                            variant="outlined"
+                            margin="dense"
+                            required
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={4} xl={4} >
+                          <FormControl
+                            fullWidth
+                            margin="dense"
+                            variant="outlined"
+                            error={touched.model && Boolean(errors.model)}
+                          >
+                            <InputLabel>Modelo Padrão</InputLabel>
+                            <Field
+                              as={Select}
+                              label="Modelo Padrão"
+                              name="model"
+                            >
+                              <MenuItem value="gpt-3.5-turbo-1106">GPT 3.5 Turbo</MenuItem>
+                              <MenuItem value="gpt-4o">GPT 4o</MenuItem>
+                            </Field>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={4} xl={4} >
+                          <Field
+                            as={TextField}
+                            label="Temperatura (0-1)"
+                            name="temperature"
+                            type="number"
+                            placeholder="1"
+                            inputProps={{ step: "0.1", min: "0", max: "1" }}
+                            error={touched.temperature && Boolean(errors.temperature)}
+                            helperText={(touched.temperature && errors.temperature) || "Criatividade: 0=preciso, 1=criativo"}
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={4} xl={4} >
+                          <Field
+                            as={TextField}
+                            label="Máx. Tokens"
+                            name="maxTokens"
+                            type="number"
+                            placeholder="100"
+                            error={touched.maxTokens && Boolean(errors.maxTokens)}
+                            helperText={(touched.maxTokens && errors.maxTokens) || "Tamanho máximo da resposta"}
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                      </>
+                    )}
+                    {(values.type === "gemini") && (
+                      <>
+                        <Grid item xs={12}>
+                          <Typography variant="body2" color="textSecondary" style={{ marginBottom: 16, padding: 16, backgroundColor: "#f0f8ff", borderRadius: 4 }}>
+                            🤖 <strong>Dica:</strong> Configure sua API Key do Google Gemini aqui. Esta configuração será usada automaticamente em todos os prompts e flows que utilizarem Gemini.
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} xl={6} >
+                          <Field
+                            as={TextField}
+                            label="Nome da Integração"
+                            autoFocus
+                            name="name"
+                            placeholder="Ex: Gemini Empresa"
+                            error={touched.name && Boolean(errors.name)}
+                            helperText={(touched.name && errors.name) || "Um rótulo para identificar esta integração"}
+                            variant="outlined"
+                            margin="dense"
+                            required
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6} xl={6} >
+                          <Field
+                            as={TextField}
+                            label="API Key Google Gemini"
+                            name="apiKey"
+                            type="password"
+                            placeholder="AIza..."
+                            error={touched.apiKey && Boolean(errors.apiKey)}
+                            helperText={touched.apiKey && errors.apiKey || "Sua chave da API Google Gemini (começa com AIza)"}
+                            variant="outlined"
+                            margin="dense"
+                            required
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={4} xl={4} >
+                          <FormControl
+                            fullWidth
+                            margin="dense"
+                            variant="outlined"
+                            error={touched.model && Boolean(errors.model)}
+                          >
+                            <InputLabel>Modelo Padrão</InputLabel>
+                            <Field
+                              as={Select}
+                              label="Modelo Padrão"
+                              name="model"
+                            >
+                              <MenuItem value="gemini-1.5-flash">Gemini 1.5 Flash</MenuItem>
+                              <MenuItem value="gemini-1.5-pro">Gemini 1.5 Pro</MenuItem>
+                              <MenuItem value="gemini-2.0-flash">Gemini 2.0 Flash</MenuItem>
+                              <MenuItem value="gemini-2.0-pro">Gemini 2.0 Pro</MenuItem>
+                            </Field>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={4} xl={4} >
+                          <Field
+                            as={TextField}
+                            label="Temperatura (0-1)"
+                            name="temperature"
+                            type="number"
+                            placeholder="1"
+                            inputProps={{ step: "0.1", min: "0", max: "1" }}
+                            error={touched.temperature && Boolean(errors.temperature)}
+                            helperText={(touched.temperature && errors.temperature) || "Criatividade: 0=preciso, 1=criativo"}
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={4} xl={4} >
+                          <Field
+                            as={TextField}
+                            label="Máx. Tokens"
+                            name="maxTokens"
+                            type="number"
+                            placeholder="100"
+                            error={touched.maxTokens && Boolean(errors.maxTokens)}
+                            helperText={(touched.maxTokens && errors.maxTokens) || "Tamanho máximo da resposta"}
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                            className={classes.textField}
+                          />
+                        </Grid>
+                      </>
                     )}
                     {(values.type === "typebot") && (
                       <>

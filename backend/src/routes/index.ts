@@ -46,6 +46,7 @@ import webHook from "./webHookRoutes";
 import flowBuilder from "./flowBuilderRoutes";
 import flowCampaignRoutes from "./flowCampaignRoutes";
 import aiRoutes from "./aiRoutes";
+import maintenanceRoutes from "./maintenanceRoutes";
 
 
 const routes = Router();
@@ -99,5 +100,6 @@ routes.use(statisticsRoutes);
 routes.use(companySettingsRoutes);
 routes.use(scheduleMessageRoutes);
 routes.use(aiRoutes);
+routes.use(maintenanceRoutes);
 
 export default routes;

@@ -7,7 +7,8 @@ import {
   AutoIncrement,
   CreatedAt,
   UpdatedAt,
-  BelongsTo
+  BelongsTo,
+  DataType
 } from "sequelize-typescript";
 import Files from "./Files";
 
@@ -32,6 +33,18 @@ class FilesOptions extends Model<FilesOptions> {
 
   @Column
   mediaType: string;
+
+  @Column(DataType.VIRTUAL)
+  get url(): string {
+    if (!this.path) {
+      return null;
+    }
+    // Garante caminho relativo a partir de /public
+    const baseRel = this.path.startsWith("company")
+      ? this.path
+      : `company${this.file?.companyId}/files/${this.fileId}/${this.path}`;
+    return `${process.env.BACKEND_URL}/public/${baseRel}`;
+  }
 
   @CreatedAt
   createdAt: Date;

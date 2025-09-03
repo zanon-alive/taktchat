@@ -1,26 +1,18 @@
-import util from "util";
-import Redis from "ioredis";
 import hmacSHA512 from "crypto-js/hmac-sha512";
 import Base64 from "crypto-js/enc-base64";
 import { REDIS_URI_CONNECTION } from "../config/redis";
 
 class CacheSingleton {
-  private redis: Redis;
-
-  private keys: (pattern: string) => Promise<string[]>;
+  // Usa any para permitir fallback em memória quando não houver Redis
+  private redis: any;
 
   private static instance: CacheSingleton;
 
-  private constructor(redisInstance: Redis) {
+  private constructor(redisInstance: any) {
     this.redis = redisInstance;
-
-    this.set = util.promisify(this.redis.set).bind(this.redis);
-    this.get = util.promisify(this.redis.get).bind(this.redis);
-    this.keys = util.promisify(this.redis.keys).bind(this.redis);
-    this.del = util.promisify(this.redis.del).bind(this.redis);
   }
 
-  public static getInstance(redisInstance: Redis): CacheSingleton {
+  public static getInstance(redisInstance: any): CacheSingleton {
     if (!CacheSingleton.instance) {
       CacheSingleton.instance = new CacheSingleton(redisInstance);
     }
@@ -29,7 +21,7 @@ class CacheSingleton {
 
   private static encryptParams(params: any) {
     const str = JSON.stringify(params);
-    const key = Base64.stringify(hmacSHA512(params, str));
+    const key = Base64.stringify(hmacSHA512(str, str));
     return key;
   }
 
@@ -39,27 +31,22 @@ class CacheSingleton {
     option?: string,
     optionValue?: string | number
   ): Promise<string> {
-    const setPromisefy = util.promisify(this.redis.set).bind(this.redis);
     if (option !== undefined && optionValue !== undefined) {
-      return setPromisefy(key, value, option, optionValue);
+      return this.redis.set(key, value, option, optionValue);
     }
-
-    return setPromisefy(key, value);
+    return this.redis.set(key, value);
   }
 
   public async get(key: string): Promise<string | null> {
-    const getPromisefy = util.promisify(this.redis.get).bind(this.redis);
-    return getPromisefy(key);
+    return this.redis.get(key);
   }
 
   public async getKeys(pattern: string): Promise<string[]> {
-    const getKeysPromisefy = util.promisify(this.redis.keys).bind(this.redis);
-    return getKeysPromisefy(pattern);
+    return this.redis.keys(pattern);
   }
 
   public async del(key: string): Promise<number> {
-    const delPromisefy = util.promisify(this.redis.del).bind(this.redis);
-    return delPromisefy(key);
+    return this.redis.del(key);
   }
 
   public async delFromPattern(pattern: string): Promise<void> {
@@ -91,11 +78,46 @@ class CacheSingleton {
     return this.del(finalKey);
   }
 
-  public getRedisInstance(): Redis {
+  public getRedisInstance(): any {
     return this.redis;
   }
 }
 
-const redisInstance = new Redis(REDIS_URI_CONNECTION);
+// Fallback simples em memória quando REDIS_URI não estiver configurado
+function createInMemoryRedis() {
+  const store = new Map<string, string>();
+  return {
+    async set(key: string, value: string) {
+      store.set(key, value);
+      return "OK";
+    },
+    async get(key: string) {
+      return store.has(key) ? (store.get(key) as string) : null;
+    },
+    async keys(pattern: string) {
+      // suporte básico a '*' no final/meio
+      const regex = new RegExp(
+        "^" + pattern.replace(/[.+^${}()|\\[\\]\\\\]/g, "\\$&").replace(/\\\*/g, ".*") + "$"
+      );
+      return Array.from(store.keys()).filter(k => regex.test(k));
+    },
+    async del(key: string) {
+      return store.delete(key) ? 1 : 0;
+    }
+  };
+}
+
+let redisInstance: any = null;
+try {
+  const Redis = require("ioredis");
+  if (REDIS_URI_CONNECTION) {
+    redisInstance = new Redis(REDIS_URI_CONNECTION);
+  } else {
+    redisInstance = createInMemoryRedis();
+  }
+} catch (e) {
+  // ioredis não instalado: usa fallback em memória
+  redisInstance = createInMemoryRedis();
+}
 
 export default CacheSingleton.getInstance(redisInstance);

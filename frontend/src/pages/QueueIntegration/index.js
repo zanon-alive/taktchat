@@ -5,7 +5,8 @@ import n8n from "../../assets/n8n.png";
 import dialogflow from "../../assets/dialogflow.png";
 import webhooks from "../../assets/webhook.png";
 import typebot from "../../assets/typebot.jpg";
-import flowbuilder from "../../assets/flowbuilders.png"
+import flowbuilder from "../../assets/flowbuilders.png";
+import openai from "../../assets/openai.png";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -21,7 +22,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip
 } from "@material-ui/core";
 
 import {
@@ -181,7 +181,7 @@ const QueueIntegration = () => {
     return () => {
       socket.off(`company-${companyId}-queueIntegration`, onQueueEvent);
     };
-  }, []);
+  }, [companyId, socket, dispatch]);
 
   const handleOpenUserModal = () => {
     setSelectedIntegration(null);
@@ -301,8 +301,12 @@ const QueueIntegration = () => {
                           src={webhooks} className={classes.avatar} />)}
                         {integration.type === "typebot" && (<Avatar
                           src={typebot} className={classes.avatar} />)}
-                          {integration.type === "flowbuilder" && (<Avatar
+                        {integration.type === "flowbuilder" && (<Avatar
                           src={flowbuilder} className={classes.avatar} />)}
+                        {integration.type === "openai" && (<Avatar
+                          src={openai} className={classes.avatar} />)}
+                        {integration.type === "gemini" && (<Avatar
+                          src={openai} className={classes.avatar} />)}
                       </TableCell>
 
                       <TableCell align="center">{integration.id}</TableCell>

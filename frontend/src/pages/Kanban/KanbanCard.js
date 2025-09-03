@@ -6,6 +6,7 @@ import ContactAvatar from "../../components/ContactAvatar";
 import { ChatBubbleOutline, AttachFile, EventAvailable } from "@material-ui/icons";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { i18n } from "../../translate/i18n";
+import { format, parseISO } from "date-fns";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -185,6 +186,16 @@ export default function KanbanCard({ ticket, onClick, allTags = [], onMoveReques
 
   const progress = getProgress(ticket?.unreadMessages);
 
+  const lastInteractionText = useMemo(() => {
+    try {
+      const raw = ticket?.lastInteractionAt || ticket?.updatedAt || ticket?.lastMessageDate || ticket?.createdAt;
+      if (!raw) return null;
+      const date = typeof raw === 'string' ? parseISO(raw) : new Date(raw);
+      if (!date || isNaN(date)) return null;
+      return format(date, "dd/MM/yyyy HH:mm");
+    } catch (_) { return null; }
+  }, [ticket?.lastInteractionAt, ticket?.updatedAt, ticket?.lastMessageDate, ticket?.createdAt]);
+
   const channelIcon = useMemo(() => {
     const style = { fontSize: 12 };
     switch (ticket?.channel) {
@@ -279,7 +290,14 @@ export default function KanbanCard({ ticket, onClick, allTags = [], onMoveReques
       )}
 
       <div className={classes.progressWrap}>
-        <Typography variant="caption" color="textSecondary">{i18n.t('kanban.progress')}</Typography>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="caption" color="textSecondary">{i18n.t('kanban.progress')}</Typography>
+          {lastInteractionText && (
+            <Tooltip title={'Última interação'}>
+              <Typography variant="caption" color="textSecondary">{lastInteractionText}</Typography>
+            </Tooltip>
+          )}
+        </div>
         <div className={classes.progressTrack}>
           <div className={classes.progressBar} style={{ width: `${progress}%`, background: priority.color }} />
         </div>

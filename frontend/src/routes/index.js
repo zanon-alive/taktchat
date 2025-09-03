@@ -17,6 +17,7 @@ import Queues from "../pages/Queues";
 import Tags from "../pages/Tags";
 import MessagesAPI from "../pages/MessagesAPI";
 import Helps from "../pages/Helps";
+import AITutorial from "../pages/Helps/AITutorial";
 import ContactLists from "../pages/ContactLists";
 import ContactListItems from "../pages/ContactListItems";
 import Companies from "../pages/Companies";
@@ -84,6 +85,7 @@ const Routes = () => {
                 <Route exact path="/contacts" component={Contacts} isPrivate />
                 <Route exact path="/contacts/import" component={ContactImportPage} isPrivate />
                 <Route exact path="/helps" component={Helps} isPrivate />
+                <Route exact path="/helps/ai-tutorial" component={AITutorial} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
                 <Route exact path="/messages-api" component={MessagesAPI} isPrivate />
                 <Route exact path="/settings" component={SettingsCustom} isPrivate />

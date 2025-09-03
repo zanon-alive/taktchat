@@ -5,22 +5,39 @@ import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import { i18n } from "../../translate/i18n";
-import { MenuItem, FormControl, InputLabel, Select, Tooltip, Typography, Paper, Popover, ClickAwayListener, Link, Chip, Checkbox, FormControlLabel, List, ListItem, ListItemText, Collapse } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
-import { Visibility, VisibilityOff } from "@material-ui/icons";
-import { InputAdornment, IconButton } from "@material-ui/core";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Typography,
+  Paper,
+  Tooltip,
+  Link,
+  ClickAwayListener,
+  Popover,
+  Chip,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemText,
+  Collapse,
+  Checkbox,
+  FormControlLabel
+} from "@material-ui/core";
 import QueueSelectSingle from "../QueueSelectSingle";
+import AIIntegrationSelector from "../AIIntegrationSelector";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -72,18 +89,7 @@ const PromptSchema = Yup.object().shape({
   prompt: Yup.string()
     .min(50, "Muito curto!")
     .required("Descreva o treinamento para Inteligência Artificial"),
-  model: Yup.string()
-    .oneOf(allowedModels, "Modelo inválido")
-    .required("Informe o modelo"),
-  maxTokens: Yup.number()
-    .min(10, "Mínimo 10 tokens")
-    .max(4096, "Máximo 4096 tokens")
-    .required("Informe o número máximo de tokens"),
-  temperature: Yup.number()
-    .min(0, "Mínimo 0")
-    .max(1, "Máximo 1")
-    .required("Informe a temperatura"),
-  apiKey: Yup.string().required("Informe a API Key"),
+  integrationId: Yup.number().required("Selecione uma integração IA"),
   queueId: Yup.number().required("Informe a fila"),
   maxMessages: Yup.number()
     .min(1, "Mínimo 1 mensagem")
@@ -100,25 +106,18 @@ const PromptSchema = Yup.object().shape({
 
 const PromptModal = ({ open, onClose, promptId }) => {
   const classes = useStyles();
-  const [showApiKey, setShowApiKey] = useState(false);
+  const [selectedIntegration, setSelectedIntegration] = useState(null);
   const [encryptionEnabled, setEncryptionEnabled] = useState(true);
-
-  const handleToggleApiKey = () => {
-    setShowApiKey(!showApiKey);
-  };
 
   const initialState = {
     name: "",
     prompt: "",
-    model: "gpt-3.5-turbo-1106",
+    integrationId: null,
+    queueId: null,
+    maxMessages: 10,
     voice: "texto",
     voiceKey: "",
     voiceRegion: "",
-    maxTokens: 100,
-    temperature: 1,
-    apiKey: "",
-    queueId: null,
-    maxMessages: 10,
   };
 
   const [prompt, setPrompt] = useState(initialState);
@@ -224,8 +223,8 @@ const PromptModal = ({ open, onClose, promptId }) => {
         setPrompt({
           ...initialState,
           ...data,
-          queueId: data.queueId || null, // Garantir que queueId seja definido
-          model: allowedModels.includes(data.model) ? data.model : "gpt-3.5-turbo-1106", // Validação de modelo
+          queueId: data.queueId || null,
+          integrationId: data.integrationId || null,
         });
         // Restaurar anexos selecionados, se houver
         try {
@@ -278,7 +277,7 @@ const PromptModal = ({ open, onClose, promptId }) => {
     try {
       const promptData = {
         ...values,
-        voice: values.model === "gpt-3.5-turbo-1106" ? values.voice : "texto",
+        voice: (selectedIntegration?.model === "gpt-3.5-turbo-1106") ? values.voice : "texto",
         attachments: JSON.stringify(selectedOptions || []),
       };
       if (promptId) {
@@ -368,26 +367,14 @@ const PromptModal = ({ open, onClose, promptId }) => {
                   required
                 />
                 <FormControl fullWidth margin="dense" variant="outlined">
-                  <Field
-                    as={TextField}
-                    label={i18n.t("promptModal.form.apikey")}
-                    name="apiKey"
-                    type={showApiKey ? "text" : "password"}
-                    error={touched.apiKey && Boolean(errors.apiKey)}
-                    helperText={touched.apiKey ? errors.apiKey : "Cole sua chave (ex.: sk-...). Ela é usada apenas no servidor e fica oculta após salvar."}
-                    variant="outlined"
-                    margin="dense"
-                    fullWidth
-                    required
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={handleToggleApiKey}>
-                            {showApiKey ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
+                  <AIIntegrationSelector
+                    value={values.integrationId}
+                    onChange={(integrationId, integration) => {
+                      setFieldValue('integrationId', integrationId);
+                      setSelectedIntegration(integration);
                     }}
+                    error={touched.integrationId && Boolean(errors.integrationId)}
+                    helperText={touched.integrationId ? errors.integrationId : "Selecione uma integração OpenAI/Gemini configurada"}
                   />
                 </FormControl>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -538,43 +525,20 @@ const PromptModal = ({ open, onClose, promptId }) => {
                     />
                   )}
                 />
-                <div className={classes.multFieldLine}>
-                  <FormControl fullWidth margin="dense" variant="outlined" error={touched.model && Boolean(errors.model)}>
-                    <InputLabel>{i18n.t("promptModal.form.model")}</InputLabel>
-                    <Field
-                      as={Select}
-                      label={i18n.t("promptModal.form.model")}
-                      name="model"
-                      onChange={e => {
-                        setFieldValue("model", e.target.value);
-                        if (e.target.value !== "gpt-3.5-turbo-1106") {
-                          setFieldValue("voice", "texto");
-                        }
-                      }}
-                    >
-                      {allowedModels.map(model => (
-                        <MenuItem key={model} value={model}>
-                          {model === "gpt-3.5-turbo-1106" && "GPT 3.5 Turbo"}
-                          {model === "gpt-4o" && "GPT 4o"}
-                          {model === "gemini-1.5-flash" && "Gemini 1.5 Flash"}
-                          {model === "gemini-1.5-pro" && "Gemini 1.5 Pro"}
-                          {model === "gemini-2.0-flash" && "Gemini 2.0 Flash"}
-                          {model === "gemini-2.0-pro" && "Gemini 2.0 Pro"}
-                        </MenuItem>
-                      ))}
-                    </Field>
-                    {touched.model && errors.model && (
-                      <div style={{ color: "red", fontSize: "12px" }}>{errors.model}</div>
-                    )}
-                    <Typography variant="caption" style={{ marginTop: 4, opacity: 0.8 }}>
-                      Sugestão: GPT 4o para melhor qualidade; 3.5 Turbo para menor custo; Gemini 1.5 para contextos longos.
+                {selectedIntegration && (
+                  <Paper variant="outlined" style={{ padding: 12, marginBottom: 12, backgroundColor: '#f5f5f5' }}>
+                    <Typography variant="subtitle2" style={{ marginBottom: 8 }}>Integração Selecionada</Typography>
+                    <Typography variant="body2">
+                      <strong>{selectedIntegration.name}</strong> • {selectedIntegration.model} • Temp: {selectedIntegration.temperature} • Tokens: {selectedIntegration.maxTokens}
                     </Typography>
-                  </FormControl>
+                  </Paper>
+                )}
+                <div className={classes.multFieldLine}>
                   <FormControl
                     fullWidth
                     margin="dense"
                     variant="outlined"
-                    disabled={values.model !== "gpt-3.5-turbo-1106"}
+                    disabled={selectedIntegration?.model !== "gpt-3.5-turbo-1106"}
                     error={touched.voice && Boolean(errors.voice)}
                   >
                     <InputLabel>{i18n.t("promptModal.form.voice")}</InputLabel>
@@ -668,7 +632,7 @@ const PromptModal = ({ open, onClose, promptId }) => {
                     variant="outlined"
                     margin="dense"
                     fullWidth
-                    disabled={values.model !== "gpt-3.5-turbo-1106"}
+                    disabled={selectedIntegration?.model !== "gpt-3.5-turbo-1106"}
                   />
                   <Field
                     as={TextField}
@@ -679,7 +643,7 @@ const PromptModal = ({ open, onClose, promptId }) => {
                     variant="outlined"
                     margin="dense"
                     fullWidth
-                    disabled={values.model !== "gpt-3.5-turbo-1106"}
+                    disabled={selectedIntegration?.model !== "gpt-3.5-turbo-1106"}
                   />
                 </div>
                 <div className={classes.multFieldLine}>
@@ -698,28 +662,6 @@ const PromptModal = ({ open, onClose, promptId }) => {
                       min: "0",
                       max: "1",
                     }}
-                  />
-                  <Field
-                    as={TextField}
-                    label={i18n.t("promptModal.form.max_tokens")}
-                    name="maxTokens"
-                    error={touched.maxTokens && Boolean(errors.maxTokens)}
-                    helperText={touched.maxTokens && errors.maxTokens}
-                    variant="outlined"
-                    margin="dense"
-                    fullWidth
-                    type="number"
-                  />
-                  <Field
-                    as={TextField}
-                    label={i18n.t("promptModal.form.max_messages")}
-                    name="maxMessages"
-                    error={touched.maxMessages && Boolean(errors.maxMessages)}
-                    helperText={touched.maxMessages && errors.maxMessages}
-                    variant="outlined"
-                    margin="dense"
-                    fullWidth
-                    type="number"
                   />
                 </div>
               </DialogContent>

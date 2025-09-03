@@ -19,7 +19,8 @@ import { initSavedFilterCron } from "./jobs/SavedFilterCronManager";
 import { startQueueProcess } from "./queues";
 // import { ScheduledMessagesJob, ScheduleMessagesGenerateJob, ScheduleMessagesEnvioJob, ScheduleMessagesEnvioForaHorarioJob } from "./wbotScheduledMessages";
 
-const server = app.listen(process.env.PORT, async () => {
+const port = Number(process.env.PORT) || 8080;
+const server = app.listen(port, async () => {
   const companies = await Company.findAll({
     where: { status: true },
     attributes: ["id"]
@@ -39,7 +40,7 @@ const server = app.listen(process.env.PORT, async () => {
     BullQueue.process();
   }
 
-  logger.info(`Server started on port: ${process.env.PORT}`);
+  logger.info(`Server started on port: ${port}`);
 });
 
 process.on("uncaughtException", err => {

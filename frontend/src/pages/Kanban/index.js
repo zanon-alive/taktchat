@@ -96,8 +96,8 @@ const Kanban = () => {
   const [tickets, setTickets] = useState([]);
   const [ticketNot, setTicketNot] = useState(0);
   const [file, setFile] = useState({ lanes: [] });
-  const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), "yyyy-MM-dd"));
+  const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), "yyyy-MM-dd"));
   const [searchText, setSearchText] = useState("");
   const [sortBy, setSortBy] = useState("recent"); // recent | oldest | unread | priority
   const [filterQueues, setFilterQueues] = useState([]); // ids
@@ -105,7 +105,7 @@ const Kanban = () => {
   const [filterTags, setFilterTags] = useState([]); // ids
   const [rangeOpen, setRangeOpen] = useState(false);
   const [rangeAnchor, setRangeAnchor] = useState(null);
-  const [range, setRange] = useState({ startDate: parseISO(format(new Date(), "yyyy-MM-dd")), endDate: parseISO(format(new Date(), "yyyy-MM-dd")) });
+  const [range, setRange] = useState({ startDate: parseISO(format(startOfMonth(new Date()), "yyyy-MM-dd")), endDate: parseISO(format(endOfMonth(new Date()), "yyyy-MM-dd")) });
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
 
   const jsonString = user.queues.map(queue => queue.UserQueue.queueId);

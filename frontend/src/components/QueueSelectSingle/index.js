@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const QueueSelectSingle = () => {
+const QueueSelectSingle = ({ selectedQueueId, onChange, label }) => {
     const classes = useStyles();
     const [queues, setQueues] = useState([]);
 
@@ -31,32 +31,51 @@ const QueueSelectSingle = () => {
         })();
     }, []);
 
+    const labelText = label || i18n.t("queueSelect.inputLabel");
+
     return (
         <div style={{ marginTop: 6 }}>
             <FormControl
                 variant="outlined"
-                className={classes.FormControl}
+                className={classes.formControl}
                 margin="dense"
                 fullWidth
             >
                 <div>
                     <Typography>
-                        {i18n.t("queueSelect.inputLabel")}
+                        {labelText}
                     </Typography>
-                    <Field
-                        as={Select}
-                        label={i18n.t("queueSelect.inputLabel")}
-                        name="queueId"
-                        labelId="queue-selection-label"
-                        id="queue-selection"
-                        fullWidth
-                    >
-                        {queues.map(queue => (
-                            <MenuItem key={queue.id} value={queue.id}>
-                                {queue.name}
-                            </MenuItem>
-                        ))}
-                    </Field>
+                    {typeof onChange === "function" ? (
+                        <Select
+                            label={labelText}
+                            labelId="queue-selection-label"
+                            id="queue-selection"
+                            fullWidth
+                            value={selectedQueueId || ""}
+                            onChange={e => onChange(e.target.value)}
+                        >
+                            {queues.map(queue => (
+                                <MenuItem key={queue.id} value={queue.id}>
+                                    {queue.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    ) : (
+                        <Field
+                            as={Select}
+                            label={labelText}
+                            name="queueId"
+                            labelId="queue-selection-label"
+                            id="queue-selection"
+                            fullWidth
+                        >
+                            {queues.map(queue => (
+                                <MenuItem key={queue.id} value={queue.id}>
+                                    {queue.name}
+                                </MenuItem>
+                            ))}
+                        </Field>
+                    )}
                 </div>
             </FormControl>
         </div>

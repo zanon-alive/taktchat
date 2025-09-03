@@ -1,20 +1,25 @@
 import express from "express";
 import isAuth from "../middleware/isAuth";
-import uploadConfig from "../config/upload";
-import multer from "multer";
+import { createUpload } from "../config/uploadFactory";
+import validateUploadedFiles from "../middleware/validateUploadedFiles";
 
 import * as FilesController from "../controllers/FilesController";
 
-const upload = multer(uploadConfig);
+const upload = createUpload({
+  privacy: "public",
+  subfolder: "files",
+  dynamic: true,
+  paramId: "fileId"
+});
 
 const filesRoutes = express.Router();
 
 filesRoutes.get("/files/list", isAuth, FilesController.list);
 filesRoutes.get("/files", isAuth, FilesController.index);
-filesRoutes.post("/files", isAuth, FilesController.store);
-filesRoutes.put("/files/:fileId", isAuth,  FilesController.update);
+filesRoutes.post("/files", isAuth, upload.array("files"), FilesController.store);
+filesRoutes.put("/files/:fileId", isAuth, upload.array("files"), FilesController.update);
 filesRoutes.get("/files/:fileId", isAuth, FilesController.show);
 filesRoutes.delete("/files/:fileId", isAuth, FilesController.remove);
 filesRoutes.delete("/files", isAuth, FilesController.removeAll);
-filesRoutes.post("/files/uploadList/:fileListId", isAuth, upload.array("files"), FilesController.uploadMedias);
+
 export default filesRoutes;

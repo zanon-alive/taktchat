@@ -2,7 +2,8 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import multer from "multer";
-import uploadConfig from "../config/uploadExt";
+import { createUpload } from "../config/uploadFactory";
+import validateUploadedFiles from "../middleware/validateUploadedFiles";
 
 import * as FlowBuilderController from "../controllers/FlowBuilderController";
 
@@ -13,7 +14,7 @@ import FlowExportController from "../controllers/FlowExportController";
 import FlowImportController from "../controllers/FlowImportController";
 // --------------------------------------
 
-const upload = multer(uploadConfig);
+const upload = createUpload({ privacy: "public", subfolder: "flowbuilder" });
 const uploadMemory = multer();        // usado para import (buffer em memória)
 
 const flowBuilder = express.Router();
@@ -68,6 +69,7 @@ flowBuilder.post(
   "/flowbuilder/img",
   isAuth,
   upload.array("medias"),
+  validateUploadedFiles(),
   FlowBuilderController.FlowUploadImg
 );
 
@@ -75,6 +77,7 @@ flowBuilder.post(
   "/flowbuilder/audio",
   isAuth,
   upload.array("medias"),
+  validateUploadedFiles(),
   FlowBuilderController.FlowUploadAudio
 );
 
@@ -82,6 +85,7 @@ flowBuilder.post(
   "/flowbuilder/content",
   isAuth,
   upload.array("medias"),
+  validateUploadedFiles(),
   FlowBuilderController.FlowUploadAll
 );
 
