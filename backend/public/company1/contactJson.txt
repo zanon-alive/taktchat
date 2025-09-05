@@ -404,6 +404,10 @@
     "name": "Edna Brucieri Tia"
   },
   {
+    "id": "5519992391041@s.whatsapp.net",
+    "name": "Ecocenter Solar"
+  },
+  {
     "id": "5519999013211@s.whatsapp.net",
     "name": "Sergio Begnami"
   },
@@ -1074,10 +1078,6 @@
   {
     "id": "5511999910621@s.whatsapp.net",
     "name": "Minha Claro"
-  },
-  {
-    "id": "5519992391041@s.whatsapp.net",
-    "name": "Ecocenter Solar"
   },
   {
     "id": "5519994908542@s.whatsapp.net",
