@@ -21,7 +21,6 @@ RUN set -eux; \
   node -v; npm -v; \
   npm config set fund false; \
   npm config set audit false; \
-  npm config set jobs 1; \
   npm config set fetch-retries 5; \
   npm config set fetch-timeout 120000; \
   npm ci --legacy-peer-deps --no-audit --no-fund --loglevel=verbose \
