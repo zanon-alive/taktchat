@@ -35,6 +35,8 @@ RUN set -eux; \
 
 # Copia o restante do código
 COPY . .
+# Garante diretório público mesmo que não exista no repo (evita falha no COPY do runtime)
+RUN mkdir -p public
 
 # Build Typescript -> dist
 RUN npm run build
