@@ -3,6 +3,7 @@ name: Build and Push Backend Docker image
 on:
   push:
     branches: [ main ]  # ou o branch que quiser monitorar
+  workflow_dispatch:
 
 jobs:
   build:
