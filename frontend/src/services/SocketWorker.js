@@ -16,11 +16,18 @@ class SocketWorker {
   }
 
   configureSocket() {
-    const token = localStorage.getItem("public-token");
+    // Token correto vem em localStorage na chave "token" como JSON string
+    let token = null;
+    try {
+      const raw = localStorage.getItem("token");
+      token = raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      token = null;
+    }
     const nsUrl = `${process.env.REACT_APP_BACKEND_URL}/workspace-${this?.companyId}`;
     // Importante: o backend valida namespaces como /workspace-<id> e exige query.token (JWT)
     this.socket = io(nsUrl, {
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,
