@@ -66,7 +66,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company-${companyId}-queueIntegration`, {
     action: "create",
     queueIntegration
@@ -115,7 +115,7 @@ export const update = async (
   const queueIntegration = await UpdateQueueIntegrationService({ integrationData, integrationId, companyId });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company-${companyId}-queueIntegration`, {
     action: "update",
     queueIntegration
@@ -144,7 +144,7 @@ export const remove = async (
   await DeleteQueueIntegrationService(integrationId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company-${companyId}-queueIntegration`, {
     action: "delete",
     integrationId: +integrationId
@@ -160,7 +160,7 @@ export const testSession = async (req: Request, res: Response): Promise<Response
   const response = await TestSessionIntegrationService({ projectName, jsonContent, language });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company-${companyId}-queueIntegration`, {
     action: "testSession",
     response

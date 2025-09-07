@@ -798,26 +798,7 @@ ${optionsMenu}`;
       }
 
       console.log(678, "ActionsWebhookService");
-
-      console.log("UPDATE10...");
-      ticket = await Ticket.findOne({
-        where: { id: idTicket, whatsappId, companyId: companyId }
-      });
-
-      if (ticket.status === "closed") {
-        io.of(String(companyId))
-          // .to(oldStatus)
-          // .to(ticketId.toString())
-          .emit(`company-${ticket.companyId}-ticket`, {
-            action: "delete",
-            ticketId: ticket.id
-          });
-      }
-
-      console.log("UPDATE12...");
       await ticket.update({
-        whatsappId: whatsappId,
-        queueId: ticket?.queueId,
         userId: null,
         companyId: companyId,
         flowWebhook: true,

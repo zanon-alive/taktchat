@@ -18,7 +18,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const chatbot = await CreateChatBotServices({ name, color, greetingMessage, queueType, optIntegrationId, optQueueId, optUserId, optFileId, closeTicket });
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-chatbot`, {
       action: "update",
       chatbot
@@ -44,7 +44,7 @@ export const update = async (
   const chatbot = await UpdateChatBotServices(chatbotId, req.body);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-chatbot`, {
       action: "update",
       chatbot
@@ -63,7 +63,7 @@ export const remove = async (
   await DeleteChatBotServices(chatbotId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-chatbot`, {
       action: "delete",
       chatbotId: +chatbotId

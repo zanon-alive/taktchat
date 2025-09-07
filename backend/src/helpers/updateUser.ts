@@ -18,7 +18,7 @@ export const updateUser = async (userId, companyId) => {
     await user.reload();
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${user.companyId}-user`, {
         action: "update",
         user

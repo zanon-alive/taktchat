@@ -70,7 +70,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-ContactList`, {
       action: "create",
       record
@@ -113,7 +113,7 @@ export const update = async (
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-ContactList`, {
       action: "update",
       record
@@ -132,7 +132,7 @@ export const remove = async (
   await DeleteService(id);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-ContactList`, {
       action: "delete",
       id
@@ -176,7 +176,7 @@ export const upload = async (req: Request, res: Response) => {
 
   const io = getIO();
 
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-ContactListItem-${+id}`, {
       action: "reload",
       records: response
@@ -197,12 +197,12 @@ export const clearItems = async (
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-ContactListItem`, {
       action: "reload"
     });
   // Emitir também no canal específico da lista para compatibilidade com outras operações
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-ContactListItem-${Number(id)}`, {
       action: "reload"
     });

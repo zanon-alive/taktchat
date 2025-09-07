@@ -55,7 +55,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company${companyId}-tag`, {
       action: "create",
       tag
@@ -90,7 +90,7 @@ export const update = async (
   const tag = await UpdateService({ tagData, id: tagId });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company${companyId}-tag`, {
       action: "update",
       tag
@@ -109,7 +109,7 @@ export const remove = async (
   await DeleteService(tagId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company${companyId}-tag`, {
       action: "delete",
       tagId
@@ -166,7 +166,7 @@ export const removeContactTag = async (
   const tag = await ShowService(tagId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company${companyId}-tag`, {
       action: "update",
       tag

@@ -77,7 +77,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId)).emit(`company-${companyId}-prompt`, {
+  io.of(`/workspace-${companyId}`).emit(`company-${companyId}-prompt`, {
     action: "update",
     prompt: promptTable,
   });
@@ -108,7 +108,7 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
   const prompt = await UpdatePromptService({ promptData, promptId, companyId });
 
   const io = getIO();
-  io.of(String(companyId)).emit(`company-${companyId}-prompt`, {
+  io.of(`/workspace-${companyId}`).emit(`company-${companyId}-prompt`, {
     action: "update",
     prompt,
   });
@@ -133,7 +133,7 @@ export const remove = async (
     await DeletePromptService(promptId, companyId);
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
   .emit(`company-${companyId}-prompt`, {
       action: "delete",
       intelligenceId: +promptId

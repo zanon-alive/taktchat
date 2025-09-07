@@ -40,8 +40,11 @@ const server = app.listen(port, async () => {
     await startQueueProcess();
   });
 
-  if (process.env.REDIS_URI_ACK && process.env.REDIS_URI_ACK !== '') {
+  const hasRedisQueues = Boolean((process.env.REDIS_URI_ACK && process.env.REDIS_URI_ACK !== '') || (process.env.REDIS_URI && process.env.REDIS_URI !== ''));
+  if (hasRedisQueues) {
     BullQueue.process();
+  } else {
+    logger.warn("BullQueue desabilitado: defina REDIS_URI ou REDIS_URI_ACK para habilitar processamento de filas.");
   }
 
   logger.info(`Server started on port: ${port}`);

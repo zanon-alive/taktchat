@@ -837,7 +837,7 @@ export const verifyMediaMessage = async (
         ]
       });
 
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         // .to("closed")
         .emit(`company-${companyId}-ticket`, {
           action: "delete",
@@ -845,7 +845,7 @@ export const verifyMediaMessage = async (
           ticketId: ticket.id
         });
       // console.log("emitiu socket 902", ticket.id)
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         // .to(ticket.status)
         //   .to(ticket.id.toString())
         .emit(`company-${companyId}-ticket`, {
@@ -924,7 +924,7 @@ export const verifyMessage = async (
     // });
 
     if (!ticket.imported) {
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         // .to(ticket.status)
         // .to(ticket.id.toString())
         .emit(`company-${companyId}-ticket`, {
@@ -1946,7 +1946,7 @@ export const handleRating = async (
     type: "closed"
   });
 
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     // .to("open")
     .emit(`company-${companyId}-ticket`, {
       action: "delete",
@@ -1954,7 +1954,7 @@ export const handleRating = async (
       ticketId: ticket.id,
     });
 
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     // .to(ticket.status)
     // .to(ticket.id.toString())
     .emit(`company-${companyId}-ticket`, {
@@ -2311,7 +2311,7 @@ const flowbuilderIntegration = async (
       companyId
     });
 
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-ticket`, {
         action: "delete",
         ticket,
@@ -3012,14 +3012,14 @@ const handleMessage = async (
 
         console.log("log... 3094")
 
-        io.of(String(companyId))
+        io.of(`/workspace-${companyId}`)
           // .to(String(ticket.id))
           .emit(`company-${companyId}-appMessage`, {
             action: "update",
             message: messageToUpdate
           });
 
-        io.of(String(companyId))
+        io.of(`/workspace-${companyId}`)
           // .to(ticket.status)
           // .to("notification")
           // .to(String(ticket.id))
@@ -3440,7 +3440,7 @@ const verifyCampaignMessageAndCloseTicket = async (message: proto.IWebMessageInf
       await ticket.update({ status: "closed", amountUsedBotQueues: 0 });
       await messageRecord.update({ isPrivate: true });
 
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         // .to("open")
         .emit(`company-${companyId}-ticket`, {
           action: "delete",
@@ -3448,7 +3448,7 @@ const verifyCampaignMessageAndCloseTicket = async (message: proto.IWebMessageInf
           ticketId: ticket.id
         });
 
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         // .to(ticket.status)
         // .to(ticket.id.toString())
         .emit(`company-${companyId}-ticket`, {

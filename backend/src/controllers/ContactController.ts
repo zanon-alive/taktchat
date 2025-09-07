@@ -156,7 +156,7 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
 
 
 
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "create",
       contact
@@ -431,7 +431,7 @@ export const store = async (req: AuthenticatedRequest, res: Response): Promise<R
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "create",
       contact
@@ -565,7 +565,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "update",
       contact
@@ -586,7 +586,7 @@ export const remove = async (
   await DeleteContactService(contactId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "delete",
       contactId
@@ -612,7 +612,7 @@ export const bulkUpdate = async (req: Request, res: Response): Promise<Response>
 
   const io = getIO();
   updated.forEach(contact => {
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-contact`, {
         action: "update",
         contact
@@ -638,7 +638,7 @@ export const bulkRemove = async (req: Request, res: Response): Promise<Response>
     const io = getIO();
     // Emitir evento para cada ID deletado para atualizar o frontend em tempo real
     contactIds.forEach(id => {
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-contact`, {
           action: "delete",
           contactId: id
@@ -661,7 +661,7 @@ export const toggleAcceptAudio = async (req: Request, res: Response): Promise<Re
   const contact = await ToggleAcceptAudioContactService({ contactId });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "update",
       contact
@@ -681,7 +681,7 @@ export const blockUnblock = async (
   const contact = await BlockUnblockContactService({ contactId, companyId, active });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "update",
       contact
@@ -699,7 +699,7 @@ export const upload = async (req: Request, res: Response) => {
 
   const io = getIO();
 
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-contact`, {
       action: "reload",
       records: response
@@ -785,7 +785,7 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
     });
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-contact`, {
         action: "update",
         contact
@@ -818,7 +818,7 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
     const contact = await ToggleDisableBotContactService({ contactId });
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-contact`, {
         action: "update",
         contact

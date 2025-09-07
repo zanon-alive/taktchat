@@ -80,7 +80,7 @@ const CreateTicketService = async ({
     throw new AppError("ERR_CREATING_TICKET");
   }
 
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     // .to(ticket.status)
     // .to("notification")
     // .to(ticket.id.toString())

@@ -13,7 +13,7 @@ export const StartWhatsAppSession = async (
   await whatsapp.update({ status: "OPENING" });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-whatsappSession`, {
       action: "update",
       session: whatsapp

@@ -196,7 +196,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     });
 
     const io = getIO();
-    io.of(userCompanyId.toString())
+    io.of(`/workspace-${userCompanyId}`)
       .emit(`company-${userCompanyId}-user`, {
         action: "create",
         user
@@ -250,7 +250,7 @@ export const update = async (
 
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-user`, {
       action: "update",
       user
@@ -284,7 +284,7 @@ export const remove = async (
     await DeleteUserService(userId, companyId);
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-user`, {
         action: "delete",
         userId
@@ -353,7 +353,7 @@ export const mediaUpload = async (
     user = await ShowUserService(userId, companyId);
     
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-user`, {
         action: "update",
         user
@@ -373,7 +373,7 @@ export const toggleChangeWidht = async (req: Request, res: Response): Promise<Re
   const user = await ToggleChangeWidthService({ userId, defaultTicketsManagerWidth });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-user`, {
       action: "update",
       user

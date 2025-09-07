@@ -16,7 +16,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     const ticket = await ShowTicketService(ticketId, companyId);
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       // .to(ticket.status)
       .emit(`company-${companyId}-ticket`, {
         action: "update",
@@ -73,7 +73,7 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
     const ticket = await ShowTicketService(ticketId, companyId);
 
     const io = getIO();
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       // .to(ticket.status)
       .emit(`company-${companyId}-ticket`, {
         action: "update",

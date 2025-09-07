@@ -55,10 +55,10 @@ const MarkDeleteWhatsAppMessage = async (from: any, timestamp?: any, msgId?: str
 
                 }
 
-                await UpdateTicketService({ ticketData: { lastMessage: "🚫 _Mensagem Apagada_" }, ticketId: ticket.id, companyId })
+                await UpdateTicketService({ ticketData: { lastMessage: " _Mensagem Apagada_" }, ticketId: ticket.id, companyId })
 
                 const io = getIO();
-                io.of(String(companyId))
+                io.of(`/workspace-${companyId}`)
                     // .to(messageToUpdate.ticketId.toString())
                     .emit(`appMessage-${messageToUpdate}`, {
                         action: "update",

@@ -332,13 +332,13 @@ if (!isGroup) {
     });
 
     if (createContact) {
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-contact`, {
           action: "create",
           contact
         });
     } else {
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-contact`, {
           action: "update",
           contact

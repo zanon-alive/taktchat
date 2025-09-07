@@ -75,7 +75,7 @@ const ValidateContactService = async ({
     // Emite atualização em tempo real para frontend (lista de Contacts)
     try {
       const io = getIO();
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-contact`, {
           action: "update",
           contact

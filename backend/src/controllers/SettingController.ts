@@ -86,7 +86,7 @@ export const update = async (
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company-${companyId}-settings`, {
     action: "update",
     setting

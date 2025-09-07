@@ -52,7 +52,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company${companyId}-file`, {
       action: "create",
       fileList
@@ -135,7 +135,7 @@ export const update = async (
   const fileList = await UpdateService({ fileData, id: fileId, companyId });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company${companyId}-file`, {
     action: "update",
     fileList
@@ -155,7 +155,7 @@ export const remove = async (
   await DeleteService(fileId, companyId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company${companyId}-file`, {
     action: "delete",
     fileId

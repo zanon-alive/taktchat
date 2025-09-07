@@ -178,14 +178,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   StartWhatsAppSession(whatsapp, companyId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-whatsapp`, {
       action: "update",
       whatsapp
     });
 
   if (oldDefaultWhatsapp) {
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-whatsapp`, {
         action: "update",
         whatsapp: oldDefaultWhatsapp
@@ -313,7 +313,7 @@ export const storeFacebook = async (
       if (!exist) {
         const { whatsapp } = await CreateWhatsAppService(pageConection);
 
-        io.of(String(companyId))
+        io.of(`/workspace-${companyId}`)
           .emit(`company-${companyId}-whatsapp`, {
             action: "update",
             whatsapp
@@ -357,14 +357,14 @@ export const update = async (
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`company-${companyId}-whatsapp`, {
       action: "update",
       whatsapp
     });
 
   if (oldDefaultWhatsapp) {
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-whatsapp`, {
         action: "update",
         whatsapp: oldDefaultWhatsapp
@@ -405,7 +405,7 @@ export const remove = async (
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
 
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-whatsapp`, {
         action: "delete",
         whatsappId: +whatsappId
@@ -429,7 +429,7 @@ export const remove = async (
     });
 
     for await (const whatsapp of getAllSameToken) {
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-whatsapp`, {
           action: "delete",
           whatsappId: whatsapp.id
@@ -481,14 +481,14 @@ export const updateAdmin = async (
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
     .emit(`admin-whatsapp`, {
       action: "update",
       whatsapp
     });
 
   if (oldDefaultWhatsapp) {
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`admin-whatsapp`, {
         action: "update",
         whatsapp: oldDefaultWhatsapp
@@ -515,7 +515,7 @@ export const removeAdmin = async (
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
 
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`admin-whatsapp`, {
         action: "delete",
         whatsappId: +whatsappId
@@ -540,7 +540,7 @@ export const removeAdmin = async (
     });
 
     for await (const whatsapp of getAllSameToken) {
-      io.of(String(companyId))
+      io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-whatsapp`, {
           action: "delete",
           whatsappId: whatsapp.id

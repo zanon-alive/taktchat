@@ -128,7 +128,7 @@ const CreateOrUpdateContactServiceForImport = async ({
 
     await contact.update(updatePayload);
 
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-contact`, {
         action: "update",
         contact
@@ -136,7 +136,7 @@ const CreateOrUpdateContactServiceForImport = async ({
   } else {
     contact = await Contact.create(contactData);
 
-    io.of(String(companyId))
+    io.of(`/workspace-${companyId}`)
       .emit(`company-${companyId}-contact`, {
         action: "create",
         contact

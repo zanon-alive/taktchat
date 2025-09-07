@@ -93,7 +93,6 @@ const generateRandomCode = (length: number = 11): string => {
 
 // Adicionar reação
 export const addReaction = async (req: Request, res: Response): Promise<Response> => {
-  console.log("[DEBUG] Entrou em MessageController.addReaction", { body: req.body, user: req.user, params: req.params });
   try {
     const { messageId } = req.params;
     const { type } = req.body;
@@ -692,7 +691,6 @@ function obterNomeEExtensaoDoArquivo(url: string): string {
 
 // Armazenar mensagem
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  console.log("[DEBUG] Entrou em MessageController.store", { body: req.body, user: req.user });
   const { ticketId } = req.params;
   const { body, quotedMsg, vCard, isPrivate = "false" }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
@@ -711,11 +709,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     if (medias) {
-      console.log("[DEBUG] store: enviando mídia(s)", { medias });
       await Promise.all(
         medias.map(async (media: Express.Multer.File, index) => {
           if (ticket.channel === "whatsapp") {
-            console.log("[DEBUG] store: antes de SendWhatsAppMedia (whatsapp)");
             await SendWhatsAppMedia({
               media,
               ticket,
@@ -723,18 +719,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
               isPrivate: isPrivate === "true",
               isForwarded: false
             });
-            console.log("[DEBUG] store: depois de SendWhatsAppMedia (whatsapp)");
           }
 
           if (["facebook", "instagram"].includes(ticket.channel)) {
             try {
-              console.log("[DEBUG] store: antes de sendFacebookMessageMedia");
               const sentMedia = await sendFacebookMessageMedia({
                 media,
                 ticket,
                 body: Array.isArray(body) ? body[index] : body,
               });
-              console.log("[DEBUG] store: depois de sendFacebookMessageMedia");
 
               if (ticket.channel === "facebook") {
                 await verifyMessageMedia(sentMedia, ticket, ticket.contact, true);
@@ -753,9 +746,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       );
     } else {
       if (ticket.channel === "whatsapp" && isPrivate === "false") {
-        console.log("[DEBUG] store: antes de SendWhatsAppMessage");
         await SendWhatsAppMessage({ body, ticket, quotedMsg, vCard });
-        console.log("[DEBUG] store: depois de SendWhatsAppMessage");
       } else if (ticket.channel === "whatsapp" && isPrivate === "true") {
         const messageData = {
           wid: `PVT${ticket.updatedAt.toString().replace(" ", "")}`,
@@ -776,13 +767,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        console.log("[DEBUG] store: antes de CreateMessageService (privado)");
         await CreateMessageService({ messageData, companyId: ticket.companyId });
-        console.log("[DEBUG] store: depois de CreateMessageService (privado)");
       } else if (["facebook", "instagram"].includes(ticket.channel)) {
-        console.log("[DEBUG] store: antes de sendFaceMessage");
         const sendText = await sendFaceMessage({ body, ticket, quotedMsg });
-        console.log("[DEBUG] store: depois de sendFaceMessage");
 
         if (ticket.channel === "facebook") {
           await verifyMessageFace(sendText, body, ticket, ticket.contact, true);
@@ -898,7 +885,6 @@ export const forwardMessage = async (req: Request, res: Response): Promise<Respo
 
 // Remover mensagem
 export const remove = async (req: Request, res: Response): Promise<Response> => {
-  console.log("[DEBUG] Entrou em MessageController.remove", { body: req.body, user: req.user, params: req.params });
   const { messageId } = req.params;
   const { companyId } = req.user;
 
@@ -1019,7 +1005,6 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
 // Editar mensagem
 export const edit = async (req: Request, res: Response): Promise<Response> => {
-  console.log("[DEBUG] Entrou em MessageController.edit", { body: req.body, user: req.user, params: req.params });
   const { messageId } = req.params;
   const { companyId } = req.user;
   const { body }: MessageData = req.body;
@@ -1028,13 +1013,6 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
     const { ticket, message } = await EditWhatsAppMessage({ messageId, body });
 
     const io = getIO();
-    console.log(`[SOCKET] Emitindo appMessage`, {
-      namespace: `/workspace-${companyId}`,
-      sala: ticket.uuid,
-      evento: `company-${companyId}-appMessage`,
-      action: "update",
-      messageId: message.id
-    });
     io.of(`/workspace-${companyId}`).to(ticket.uuid).emit(`company-${companyId}-appMessage`, {
       action: "update",
       message,

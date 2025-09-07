@@ -76,7 +76,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company${companyId}-schedule`, {
     action: "create",
     schedule
@@ -109,7 +109,7 @@ export const update = async (
   const schedule = await UpdateService({ scheduleData, id: scheduleId, companyId });
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company${companyId}-schedule`, {
     action: "update",
     schedule
@@ -128,7 +128,7 @@ export const remove = async (
   await DeleteService(scheduleId, companyId);
 
   const io = getIO();
-  io.of(String(companyId))
+  io.of(`/workspace-${companyId}`)
   .emit(`company${companyId}-schedule`, {
     action: "delete",
     scheduleId

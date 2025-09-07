@@ -170,7 +170,7 @@ export const count = async (req: Request, res:Response): Promise<Response> => {
     }
 
     const io = getIO();
-    io.of(String(companyId)).emit(`company-${companyId}-contact`, {
+    io.of(`/workspace-${companyId}`).emit(`company-${companyId}-contact`, {
       action: "create",
       contact
     });

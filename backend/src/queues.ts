@@ -874,7 +874,7 @@ async function verifyAndFinalizeCampaign(campaign) {
   }
 
   const io = getIO();
-  io.of(companyId)
+  io.of(`/workspace-${campaign.companyId}`)
     .emit(`company-${campaign.companyId}-campaign`, {
       action: "update",
       record: campaign
@@ -1351,7 +1351,7 @@ async function handleDispatchCampaign(job) {
     await verifyAndFinalizeCampaign(campaign);
 
     const io = getIO();
-    io.of(String(campaign.companyId))
+    io.of(`/workspace-${campaign.companyId}`)
       .emit(`company-${campaign.companyId}-campaign`, {
         action: "update",
         record: campaign
@@ -1482,7 +1482,7 @@ async function handleResumeTicketsOutOfHour(job) {
                   await ticket.reload();
 
                   const io = getIO();
-                  io.of(String(companyId))
+                  io.of(`/workspace-${companyId}`)
                     // .to("notification")
                     // .to(ticket.id.toString())
                     .emit(`company-${companyId}-ticket`, {
@@ -1597,7 +1597,7 @@ async function handleVerifyQueue(job) {
                   await ticket.reload();
 
                   const io = getIO();
-                  io.of(String(companyId))
+                  io.of(`/workspace-${companyId}`)
                     // .to("notification")
                     // .to(ticket.id.toString())
                     .emit(`company-${companyId}-ticket`, {
