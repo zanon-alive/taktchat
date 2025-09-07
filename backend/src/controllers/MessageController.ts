@@ -93,6 +93,7 @@ const generateRandomCode = (length: number = 11): string => {
 
 // Adicionar reação
 export const addReaction = async (req: Request, res: Response): Promise<Response> => {
+  console.log("[DEBUG] Entrou em MessageController.addReaction", { body: req.body, user: req.user, params: req.params });
   try {
     const { messageId } = req.params;
     const { type } = req.body;
@@ -691,6 +692,7 @@ function obterNomeEExtensaoDoArquivo(url: string): string {
 
 // Armazenar mensagem
 export const store = async (req: Request, res: Response): Promise<Response> => {
+  console.log("[DEBUG] Entrou em MessageController.store", { body: req.body, user: req.user });
   const { ticketId } = req.params;
   const { body, quotedMsg, vCard, isPrivate = "false" }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
@@ -886,6 +888,7 @@ export const forwardMessage = async (req: Request, res: Response): Promise<Respo
 
 // Remover mensagem
 export const remove = async (req: Request, res: Response): Promise<Response> => {
+  console.log("[DEBUG] Entrou em MessageController.remove", { body: req.body, user: req.user, params: req.params });
   const { messageId } = req.params;
   const { companyId } = req.user;
 
@@ -1006,6 +1009,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
 // Editar mensagem
 export const edit = async (req: Request, res: Response): Promise<Response> => {
+  console.log("[DEBUG] Entrou em MessageController.edit", { body: req.body, user: req.user, params: req.params });
   const { messageId } = req.params;
   const { companyId } = req.user;
   const { body }: MessageData = req.body;
