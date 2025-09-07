@@ -50,6 +50,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
+# Build info injection
+ARG BUILD_DATE
+ARG GIT_COMMIT
+ENV BUILD_DATE=$BUILD_DATE
+ENV GIT_COMMIT=$GIT_COMMIT
+
 # Copia manifestos, dependências já instaladas e artefatos compilados
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules

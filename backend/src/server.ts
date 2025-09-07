@@ -3,7 +3,7 @@ import 'dotenv/config';
 import gracefulShutdown from "http-graceful-shutdown";
 import http from "http";
 
-console.log("BACKEND BUILD: 2025-09-07T02:05:00Z | Versão de debug com logs SOCKET emit | hash: versao-debug-realtime");
+console.log(`BACKEND BUILD: ${process.env.BUILD_DATE} | Commit: ${process.env.GIT_COMMIT} | Versão de debug com logs SOCKET emit`);
 
 import app from "./app";
 
