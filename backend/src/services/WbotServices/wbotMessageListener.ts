@@ -5006,6 +5006,7 @@ const handleMsgAck = async (
           as: "quotedMsg",
           include: ["contact"]
         }
+      ]
     });
 
     if (!messageToUpdate || messageToUpdate.ack > chat) return;
