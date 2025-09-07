@@ -1,6 +1,10 @@
 /// <reference path="./@types/express.d.ts" />
 import 'dotenv/config';
 import gracefulShutdown from "http-graceful-shutdown";
+import http from "http";
+
+console.log("BACKEND BUILD: 2025-09-07T02:05:00Z | Versão de debug com logs SOCKET emit | hash: versao-debug-realtime");
+
 import app from "./app";
 
 // --- Endpoint de Healthcheck ---
