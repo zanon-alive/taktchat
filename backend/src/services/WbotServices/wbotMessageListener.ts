@@ -1166,9 +1166,8 @@ export const verifyMessage = async (
     // });
 
     if (!ticket.imported) {
-      io.of(String(companyId))
-        // .to(ticket.status)
-        // .to(ticket.id.toString())
+      io.of(`/workspace-${companyId}`)
+        .to(ticket.uuid)
         .emit(`company-${companyId}-ticket`, {
           action: "update",
           ticket,
@@ -4266,8 +4265,8 @@ const handleMessage = async (
 
         console.log("log... 3094");
 
-        io.of(String(companyId))
-          // .to(String(ticket.id))
+        io.of(`/workspace-${companyId}`)
+          .to(ticket.uuid)
           .emit(`company-${companyId}-appMessage`, {
             action: "update",
             message: messageToUpdate
@@ -5007,13 +5006,13 @@ const handleMsgAck = async (
           as: "quotedMsg",
           include: ["contact"]
         }
-      ]
     });
+
     if (!messageToUpdate || messageToUpdate.ack > chat) return;
 
     await messageToUpdate.update({ ack: chat });
-    io.of(messageToUpdate.companyId.toString())
-      // .to(messageToUpdate.ticketId.toString())
+    io.of(`/workspace-${messageToUpdate.companyId}`)
+      .to(messageToUpdate.ticket.uuid)
       .emit(`company-${messageToUpdate.companyId}-appMessage`, {
         action: "update",
         message: messageToUpdate
