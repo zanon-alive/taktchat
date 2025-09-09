@@ -87,7 +87,6 @@ export const count = async (req: Request, res:Response): Promise<Response> => {
         const v = typeof originalValue === 'string' ? originalValue.trim() : originalValue;
         return v === '' || v === undefined ? null : v;
       })
-      .email()
       .nullable(),
     cpfCnpj: Yup.string().nullable(),
     representativeCode: Yup.string().nullable(),
