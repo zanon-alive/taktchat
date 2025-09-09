@@ -102,16 +102,66 @@ export async function ImportContactsService(
 
   const contactList: Contact[] = [];
 
-  for (const contact of contacts) {
-    const [newContact, created] = await Contact.findOrCreate({
-      where: {
-        number: `${contact.number}`,
-        companyId: contact.companyId
-      },
-      defaults: contact
-    });
-    if (created) {
-      contactList.push(newContact);
+  for (const incoming of contacts) {
+    const number = `${incoming.number}`;
+    const companyIdRow = incoming.companyId;
+
+    const existing = await Contact.findOne({ where: { number, companyId: companyIdRow } });
+    if (!existing) {
+      // Criar novo contato com dados da planilha
+      // Observação: o modelo não aceita null em email, então normalizamos
+      const payload: any = {
+        ...incoming,
+        email: typeof incoming.email === 'string' ? incoming.email : ''
+      };
+      const created = await Contact.create(payload);
+      contactList.push(created);
+      continue;
+    }
+
+    // Update não destrutivo: só atualiza campos vazios/placeholder
+    const updatePayload: any = {};
+
+    // Nome: atualiza se vazio ou igual ao número; se já curado, apenas registra em contactName
+    const currentName = (existing.name || '').trim();
+    const isNumberName = currentName.replace(/\D/g, '') === number;
+    const incomingName = (incoming.name || '').trim();
+    if ((!currentName || isNumberName) && incomingName) {
+      updatePayload.name = incomingName;
+    } else if (incomingName) {
+      // preserva nome curado e salva referência
+      updatePayload.contactName = incomingName;
+    }
+
+    // Email: salva se atual vazio (""), e veio na planilha
+    const currentEmail = (existing.email || '').trim();
+    if (!currentEmail && incoming.email) {
+      updatePayload.email = String(incoming.email).trim();
+    }
+
+    // Campos adicionais: apenas se atuais forem nulos/vazios e houver valor na planilha
+    const emptyToNull = (v: any) => v === undefined || v === null || (typeof v === 'string' && v.trim() === '') ? null : v;
+    const keepIfEmpty = (key: keyof typeof incoming) => {
+      const val = (incoming as any)[key];
+      if (val === undefined || val === null || (typeof val === 'string' && val.toString().trim() === '')) return;
+      const current = (existing as any)[key];
+      if (current === null || current === undefined || (typeof current === 'string' && String(current).trim() === '')) {
+        (updatePayload as any)[key] = typeof val === 'string' ? val.toString().trim() : val;
+      }
+    };
+
+    keepIfEmpty('cpfCnpj');
+    keepIfEmpty('representativeCode');
+    keepIfEmpty('city');
+    keepIfEmpty('instagram');
+    keepIfEmpty('situation');
+    keepIfEmpty('fantasyName');
+    keepIfEmpty('foundationDate');
+    keepIfEmpty('creditLimit');
+    keepIfEmpty('segment');
+
+    if (Object.keys(updatePayload).length > 0) {
+      await existing.update(updatePayload);
     }
   }
 

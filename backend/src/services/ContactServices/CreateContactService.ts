@@ -39,6 +39,8 @@ interface Request {
   foundationDate?: Date;
   creditLimit?: string;
   segment?: string;
+  contactName?: string;
+  florder?: boolean;
 }
 
 const CreateContactService = async ({
@@ -62,7 +64,9 @@ const CreateContactService = async ({
                                       fantasyName,
                                       foundationDate,
                                       creditLimit,
-                                      segment
+                                      segment,
+                                      contactName,
+                                      florder
                                     }: Request): Promise<Contact> => {
   const numberExists = await Contact.findOne({
     where: { number, companyId }
@@ -130,10 +134,12 @@ const CreateContactService = async ({
     creditLimit: string | null;
     userId?: number | string;
     segment: string | null;
+    contactName?: string | null;
+    florder?: boolean;
   } = {
     name: name || '',
     number: number || '',
-    email: ((): string => {
+    email: (() => {
       if (email === undefined || email === null) return '';
       const e = typeof email === 'string' ? email.trim() : String(email);
       return e === '' ? '' : e;
@@ -154,6 +160,8 @@ const CreateContactService = async ({
     foundationDate: foundationDateValue,
     creditLimit: emptyToNull(creditLimit),
     segment: emptyToNull(segment),
+    contactName: typeof contactName === 'string' ? (contactName.trim() || null) : null,
+    florder: !!florder,
   };
 
   // Apenas adiciona o userId se ele for fornecido

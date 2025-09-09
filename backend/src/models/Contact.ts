@@ -117,6 +117,15 @@ class Contact extends Model<Contact> {
   @Column({
     allowNull: true
   })
+  contactName: string;
+
+  @Default(false)
+  @Column
+  florder: boolean;
+
+  @Column({
+    allowNull: true
+  })
   segment: string;
 
   @Column({

@@ -49,34 +49,49 @@ const ImportContactsService = async (companyId: number): Promise<void> => {
     : phoneContacts;
 
   if (isArray(phoneContactsList)) {
-    phoneContactsList.forEach(async ({ id, name, notify }) => {
-      if (id === "status@broadcast" || id.includes("g.us")) return;
-      const number = id.replace(/\D/g, "");
+    for (const item of phoneContactsList) {
+      const { id, name, notify } = item as any;
+      if (!id || id === "status@broadcast" || String(id).includes("g.us")) continue;
+      const number = String(id).replace(/\D/g, "");
 
-      const existingContact = await Contact.findOne({
-        where: { number, companyId }
-      });
+      try {
+        const existingContact = await Contact.findOne({ where: { number, companyId } });
+        const phoneName = (name || notify || "").trim();
 
-      if (existingContact) {
-        // Atualiza o nome do contato existente
-        existingContact.name = name || notify;
-        await existingContact.save();
-      } else {
-        // Criar um novo contato
-        try {
+        if (existingContact) {
+          const currentName = (existingContact.name || "").trim();
+          const isNumberName = currentName.replace(/\D/g, "") === number;
+
+          if (!currentName || isNumberName) {
+            // Atualiza nome principal quando vazio/igual ao número e armazena também em contactName
+            await existingContact.update({
+              name: phoneName || number,
+              contactName: phoneName || null
+            });
+          } else {
+            // Nome já curado pelo usuário: não sobrescrever; apenas guarda referência em contactName
+            if (phoneName) {
+              await existingContact.update({ contactName: phoneName });
+            }
+          }
+        } else {
+          // Criar um novo contato com name e contactName a partir do nome do aparelho
           await CreateContactService({
             number,
-            name: name || notify,
-            companyId
-          });
-        } catch (error) {
-          Sentry.captureException(error);
-          logger.warn(
-            `Could not get whatsapp contacts from phone. Err: ${error}`
-          );
+            name: phoneName || number,
+            companyId,
+            // novos campos
+            // contactName espelha o nome de origem do aparelho na criação
+            // florder permanece default false
+            // @ts-ignore: parâmetro extra suportado pelo serviço
+            contactName: phoneName || null
+          } as any);
         }
+      } catch (error) {
+        Sentry.captureException(error);
+        logger.warn(`Could not import phone contact ${number}. Err: ${error}`);
       }
-    });
+    }
   }
 };
 
