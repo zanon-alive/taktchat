@@ -148,7 +148,12 @@ const MessagesAPI = () => {
   };
 
   const handleSyncContact = async (values, actions) => {
-    const { token, ...contactData } = values;
+    const { token, tagIds, ...contactData } = values;
+    // Converte tagIds (string com vírgulas) para array numérico, se informado
+    if (typeof tagIds === 'string' && tagIds.trim() !== '') {
+      const arr = tagIds.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (arr.length > 0) contactData.tagIds = arr;
+    }
     try {
       await axios.post(getEndpoint('/api/contacts/sync'), contactData, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -276,6 +281,7 @@ Content-Type: application/json
   "name": "Nome do Contato",
   "number": "5511999999999",
   "email": "email@exemplo.com",
+  "contactName": "Nome do Responsável",
   "cpfCnpj": "123.456.789-00",
   "representativeCode": "COD-007",
   "city": "Cidade Exemplo",
@@ -284,6 +290,13 @@ Content-Type: application/json
   "fantasyName": "Nome Fantasia Exemplo",
   "foundationDate": "2023-01-01",
   "creditLimit": "5000.00",
+  "segment": "Varejo",
+  "florder": true,
+  "dtUltCompra": "2025-09-09",
+  "disableBot": false,
+  // Informe UMA das opções abaixo para tags:
+  "tagIds": [1, 2, 3],
+  // ou
   "tags": "VIP, Cliente Antigo"
 }`}
               </code>
@@ -293,9 +306,9 @@ Content-Type: application/json
             <Typography variant="h6">Teste de Sincronização</Typography>
             <Formik 
               initialValues={{ 
-                token: '', name: '', number: '', email: '', cpfCnpj: '', 
+                token: '', name: '', number: '', email: '', contactName: '', cpfCnpj: '', 
                 representativeCode: '', city: '', instagram: '', situation: '', 
-                fantasyName: '', foundationDate: '', creditLimit: '', tags: '' 
+                fantasyName: '', foundationDate: '', creditLimit: '', segment: '', florder: false, dtUltCompra: '', disableBot: false, tagIds: '', tags: '' 
               }} 
               onSubmit={handleSyncContact}
             >
@@ -305,6 +318,7 @@ Content-Type: application/json
                   <Field as={TextField} name="name" label="Nome" variant="outlined" required className={classes.formField} />
                   <Field as={TextField} name="number" label="Número" variant="outlined" required className={classes.formField} />
                   <Field as={TextField} name="email" label="Email" variant="outlined" className={classes.formField} />
+                  <Field as={TextField} name="contactName" label="Nome do Contato (Responsável)" variant="outlined" className={classes.formField} />
                   <Field as={TextField} name="cpfCnpj" label="CPF/CNPJ" variant="outlined" className={classes.formField} />
                   <Field as={TextField} name="representativeCode" label="Código do Representante" variant="outlined" className={classes.formField} />
                   <Field as={TextField} name="city" label="Cidade" variant="outlined" className={classes.formField} />
@@ -313,7 +327,32 @@ Content-Type: application/json
                   <Field as={TextField} name="fantasyName" label="Nome Fantasia" variant="outlined" className={classes.formField} />
                   <Field as={TextField} name="foundationDate" label="Data de Fundação" variant="outlined" className={classes.formField} type="date" InputLabelProps={{ shrink: true }} />
                   <Field as={TextField} name="creditLimit" label="Limite de Crédito" variant="outlined" className={classes.formField} />
-                  <Field as={TextField} name="tags" label="Tags (separadas por vírgula)" variant="outlined" className={classes.formField} />
+                  <Field as={TextField} name="segment" label="Segmento" variant="outlined" className={classes.formField} />
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Encomenda (florder)"
+                        variant="outlined"
+                        className={classes.formField}
+                        value={"Use true/false no JSON"}
+                        InputProps={{ readOnly: true }}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Field as={TextField} name="dtUltCompra" label="Última Compra" variant="outlined" className={classes.formField} type="date" InputLabelProps={{ shrink: true }} />
+                    </Grid>
+                  </Grid>
+                  <TextField
+                    label="Desabilitar chatbot (disableBot)"
+                    variant="outlined"
+                    className={classes.formField}
+                    value={"Use true/false no JSON"}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
+                  <Field as={TextField} name="tagIds" label="IDs das Tags (opcional, separados por vírgula)" variant="outlined" className={classes.formField} helperText="Se informar tagIds, o sistema vai ignorar o campo Tags por nome." />
+                  <Field as={TextField} name="tags" label="Tags por Nome (opcional, separadas por vírgula)" variant="outlined" className={classes.formField} />
                   <Button type="submit" color="primary" variant="contained" size="large" disabled={isSubmitting} className={classes.submitButton} endIcon={<SendIcon />}>
                     {isSubmitting ? <CircularProgress size={24} /> : 'Sincronizar'}
                   </Button>

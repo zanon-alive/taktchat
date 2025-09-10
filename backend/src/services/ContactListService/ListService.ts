@@ -61,6 +61,7 @@ const ListService = async ({
     attributes: [
       "id",
       "name",
+      "savedFilter",
       [fn("count", col("contacts.id")), "contactsCount"]
     ],
     group: ["ContactList.id"]

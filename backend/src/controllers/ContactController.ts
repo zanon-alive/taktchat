@@ -63,6 +63,8 @@ type IndexQuery = {
   orderBy?: string;
   order?: string;
   segment?: string | string[];
+  dtUltCompraStart?: string;
+  dtUltCompraEnd?: string;
 };
 
 type IndexGetContactQuery = {
@@ -91,6 +93,10 @@ interface ContactData {
   foundationDate?: Date;
   creditLimit?: string;
   segment?: string;
+  contactName?: string;
+  florder?: boolean;
+  dtUltCompra?: Date | string | null;
+  vlUltCompra?: number | string | null;
 }
 
 export const importXls = async (req: Request, res: Response): Promise<Response> => {
@@ -103,6 +109,7 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
   if (validateContact === "true") {
     validNumber = await CheckContactNumber(simpleNumber, companyId);
   }
+
   /**
    * Código desabilitado por demora no retorno
    */
@@ -131,28 +138,26 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
 
   const contact = await CreateOrUpdateContactServiceForImport(contactData);
 
-  if (tags) {
-    const tagList = tags.split(',').map(tag => tag.trim());
-
-    for (const tagName of tagList) {
-      try {
-        let [tag, created] = await Tag.findOrCreate({
-          where: { name: tagName, companyId, color: "#A4CCCC", kanban: 0 }
-
+  // Associações de tags (por nome ou por IDs), evitando duplicar por cor
+  try {
+    const tagIds = (req.body as any).tagIds as number[] | undefined;
+    if (Array.isArray(tagIds) && tagIds.length > 0) {
+      const rows = await Tag.findAll({ where: { id: tagIds, companyId } });
+      for (const tag of rows) {
+        await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: tag.id } });
+      }
+    } else if (tags) {
+      const tagList = String(tags).split(',').map((t: string) => t.trim()).filter(Boolean);
+      for (const tagName of tagList) {
+        const [tag] = await Tag.findOrCreate({
+          where: { name: tagName, companyId },
+          defaults: { color: "#A4CCCC", kanban: 0 }
         });
-
-
-        // Associate the tag with the contact
-        await ContactTag.findOrCreate({
-          where: {
-            contactId: contact.id,
-            tagId: tag.id
-          }
-        });
-      } catch (error) {
-        logger.info("Erro ao criar Tags", error)
+        await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: tag.id } });
       }
     }
+  } catch (error) {
+    logger.info("Erro ao associar Tags (importXls)", error);
   }
   await emitToCompanyNamespace(
     companyId,
@@ -167,7 +172,7 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber, contactTag: tagIdsStringified, isGroup, limit, orderBy, order } = req.query as IndexQuery;
+  const { searchParam, pageNumber, contactTag: tagIdsStringified, isGroup, limit, orderBy, order, dtUltCompraStart, dtUltCompraEnd } = req.query as IndexQuery;
   // <<-- ALTERAÇÃO 1: Adicionado 'profile' para obter o perfil do usuário
   const { id: userId, companyId, profile } = req.user;
 
@@ -221,7 +226,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     limit,
     orderBy,
     order,
-    segment
+    segment,
+    dtUltCompraStart,
+    dtUltCompraEnd
   });
 
   // Dispara validações em background sem bloquear a resposta
@@ -354,6 +361,8 @@ export const store = async (req: AuthenticatedRequest, res: Response): Promise<R
     situation: Yup.string().oneOf(['Ativo', 'Baixado', 'Ex-Cliente', 'Excluido', 'Futuro', 'Inativo']).nullable(),
     fantasyName: Yup.string().nullable(),
     foundationDate: Yup.date().nullable(),
+    dtUltCompra: Yup.date().nullable(),
+    vlUltCompra: Yup.mixed().nullable(),
     email: Yup.string()
       .transform((value, originalValue) => {
         const v = typeof originalValue === "string" ? originalValue.trim() : originalValue;
@@ -361,6 +370,13 @@ export const store = async (req: AuthenticatedRequest, res: Response): Promise<R
       })
       .email()
       .nullable(),
+    contactName: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === "string" ? originalValue.trim() : originalValue;
+        return v === "" || v === undefined ? null : v;
+      })
+      .nullable(),
+    florder: Yup.boolean().nullable(),
     segment: Yup.string()
       .transform((value, originalValue) => {
         const v = typeof originalValue === "string" ? originalValue.trim() : originalValue;
@@ -382,6 +398,40 @@ export const store = async (req: AuthenticatedRequest, res: Response): Promise<R
     } else if (typeof newContact.email === "string") {
       newContact.email = newContact.email.trim();
     }
+  }
+
+  // Normaliza contactName: string vazia -> null
+  if (Object.prototype.hasOwnProperty.call(newContact, 'contactName')) {
+    if (newContact.contactName === null || newContact.contactName === undefined) {
+      // mantém null/undefined
+    } else if (typeof (newContact as any).contactName === 'string') {
+      const s = (newContact as any).contactName.trim();
+      (newContact as any).contactName = s === '' ? null : s;
+    }
+  }
+
+  // Normaliza dtUltCompra: string vazia -> null
+  if (Object.prototype.hasOwnProperty.call(newContact, 'dtUltCompra')) {
+    if (typeof (newContact as any).dtUltCompra === 'string' && (newContact as any).dtUltCompra.trim() === '') {
+      (newContact as any).dtUltCompra = null as any;
+    }
+  }
+
+  // Normaliza vlUltCompra (string BRL -> número)
+  if (Object.prototype.hasOwnProperty.call(newContact, 'vlUltCompra')) {
+    const parseMoney = (val: any): number | null => {
+      if (val === undefined || val === null || val === '') return null;
+      if (typeof val === 'number') return val;
+      const cleaned = String(val).replace(/\s+/g, '').replace(/R\$?/gi, '').replace(/\./g, '').replace(',', '.');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? null : num;
+    };
+    (newContact as any).vlUltCompra = parseMoney((newContact as any).vlUltCompra);
+  }
+
+  // Normaliza florder: coerção booleana quando enviado
+  if (Object.prototype.hasOwnProperty.call(newContact, 'florder')) {
+    (newContact as any).florder = !!(newContact as any).florder;
   }
 
   // Normaliza creditLimit: converte vazio/whitespace para null
@@ -428,6 +478,28 @@ export const store = async (req: AuthenticatedRequest, res: Response): Promise<R
     companyId,
     userId: req.user.id // Adicionando o userId ao criar o contato
   });
+
+  // Suporte a tagIds e tags por nome no store
+  try {
+    const { tagIds, tags } = req.body as any;
+    if (Array.isArray(tagIds) && tagIds.length > 0) {
+      const rows = await Tag.findAll({ where: { id: tagIds, companyId } });
+      for (const tag of rows) {
+        await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: tag.id } });
+      }
+    } else if (typeof tags === 'string' && tags.trim() !== '') {
+      const tagList = tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+      for (const tagName of tagList) {
+        const [tag] = await Tag.findOrCreate({
+          where: { name: tagName, companyId },
+          defaults: { color: "#A4CCCC", kanban: 0 }
+        });
+        await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: tag.id } });
+      }
+    }
+  } catch (error) {
+    logger.info("Erro ao associar Tags (store)", error);
+  }
 
   await emitToCompanyNamespace(
     companyId,
@@ -478,6 +550,13 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
       })
       .email()
       .nullable(),
+    contactName: Yup.string()
+      .transform((value, originalValue) => {
+        const v = typeof originalValue === "string" ? originalValue.trim() : originalValue;
+        return v === "" || v === undefined ? null : v;
+      })
+      .nullable(),
+    florder: Yup.boolean().nullable(),
     cpfCnpj: Yup.string()
       .transform((value, originalValue) => {
         const v = typeof originalValue === "string" ? originalValue.replace(/\D/g, "").trim() : originalValue;
@@ -521,6 +600,33 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     } else if (typeof contactData.email === "string") {
       contactData.email = contactData.email.trim();
     }
+  }
+
+  // Normaliza contactName: string vazia -> null
+  if (Object.prototype.hasOwnProperty.call(contactData, 'contactName')) {
+    if ((contactData as any).contactName === null || (contactData as any).contactName === undefined) {
+      // mantém null/undefined
+    } else if (typeof (contactData as any).contactName === 'string') {
+      const s = (contactData as any).contactName.trim();
+      (contactData as any).contactName = s === '' ? null : s;
+    }
+  }
+
+  // Normaliza florder: coerção booleana quando enviado
+  if (Object.prototype.hasOwnProperty.call(contactData, 'florder')) {
+    (contactData as any).florder = !!(contactData as any).florder;
+  }
+
+  // Normaliza vlUltCompra (string BRL -> número)
+  if (Object.prototype.hasOwnProperty.call(contactData, 'vlUltCompra')) {
+    const parseMoney = (val: any): number | null => {
+      if (val === undefined || val === null || val === '') return null;
+      if (typeof val === 'number') return val;
+      const cleaned = String(val).replace(/\s+/g, '').replace(/R\$?/gi, '').replace(/\./g, '').replace(',', '.');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? null : num;
+    };
+    (contactData as any).vlUltCompra = parseMoney((contactData as any).vlUltCompra);
   }
 
   // Normaliza creditLimit: converte vazio/whitespace para null

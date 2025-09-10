@@ -551,12 +551,16 @@ const Contacts = () => {
             switch (sortField) {
                 case "name":
                     return c.name || "";
+                case "contactName":
+                    return c.contactName || "";
                 case "number":
                     return c.number || "";
                 case "email":
                     return c.email || "";
                 case "city":
                     return c.city || "";
+                case "florder":
+                    return c.florder ? 1 : 0;
                 case "tags":
                     return Array.isArray(c.tags) ? c.tags.length : 0;
                 case "status":
@@ -905,6 +909,7 @@ const Contacts = () => {
                                             <span className="text-[15px] opacity-70">{sortField === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                                         </button>
                                     </th>
+                                    {/* Colunas 'Nome do Contato' e 'Encomenda' removidas conforme solicitação */}
                                     <th scope="col" className="pl-3 pr-3 py-3 w-[167px]">
                                         <button onClick={() => handleSort('number')} className="flex items-center gap-1 select-none">
                                             WhatsApp
@@ -976,6 +981,7 @@ const Contacts = () => {
                                                 )}
                                             </div>
                                         </td>
+                                        {/* Células 'Nome do Contato' e 'Encomenda' removidas */}
                                         <td className="hidden lg:table-cell pl-1 pr-1 py-3 w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
                                             <Tooltip {...CustomTooltipProps} title={contact.email}>
                                                 <span className="truncate block max-w-full text-xs">{contact.email}</span>
@@ -1044,7 +1050,7 @@ const Contacts = () => {
                                         </td>
                                     </tr>
                                 ))}
-                                {loading && <TableRowSkeleton avatar columns={7} />}
+                                {loading && <TableRowSkeleton avatar columns={9} />}
                             </tbody>
                         </table>
                     </div>
@@ -1131,6 +1137,7 @@ const Contacts = () => {
                                 <span className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate" title={contact.name}>
                                     {contact.name}
                                 </span>
+                                {/* 'Nome do Contato' removido na visualização compacta */}
                                 <span className="text-xs text-gray-500 dark:text-gray-400 truncate" title={contact.email}>
                                     {contact.email}
                                 </span>
@@ -1145,6 +1152,7 @@ const Contacts = () => {
                                             <Ban className="w-5 h-5 text-gray-400" />
                                         </Tooltip>
                                     )}
+                                    {/* Badge de 'Encomenda' removido na visualização compacta */}
                                 </div>
                             </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0">

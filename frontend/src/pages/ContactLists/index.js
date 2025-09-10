@@ -31,8 +31,8 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import ContactListDialog from "../../components/ContactListDialog";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { Grid } from "@material-ui/core";
-import { Plus as PlusIcon } from "lucide-react";
+import { Grid, Popover, Button, Typography, Chip } from "@material-ui/core";
+import { Plus as PlusIcon, Filter as FilterIcon } from "lucide-react";
 
 import planilhaExemplo from "../../assets/planilha.xlsx";
 // import { SocketContext } from "../../context/Socket/SocketContext";
@@ -109,6 +109,33 @@ const ContactLists = () => {
   const [contactLists, dispatch] = useReducer(reducer, []);
   //   const socketManager = useContext(SocketContext);
   const { user, socket } = useContext(AuthContext);
+
+  // Popover de detalhes do filtro salvo
+  const [detailsAnchorEl, setDetailsAnchorEl] = useState(null);
+  const [detailsFilter, setDetailsFilter] = useState(null);
+  const openDetails = (event, sf) => {
+    setDetailsAnchorEl(event.currentTarget);
+    setDetailsFilter(sf || null);
+  };
+  const closeDetails = () => {
+    setDetailsAnchorEl(null);
+    setDetailsFilter(null);
+  };
+
+  // limpeza de filtro salvo acontece somente na página de contatos da lista
+
+  // Helpers de formatação
+  const fmtCurrency = (val) => {
+    if (val == null || val === '') return '—';
+    const num = Number(String(val).replace(/\s+/g,'').replace(/R\$?/i,'').replace(/\./g,'').replace(/,/g,'.'));
+    if (isNaN(num)) return String(val);
+    return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+  };
+  const fmtDate = (s) => {
+    if (!s) return '—';
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? String(s) : d.toLocaleDateString('pt-BR');
+  };
 
 
   useEffect(() => {
@@ -293,18 +320,35 @@ const ContactLists = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">{i18n.t("contactLists.table.name")}</TableCell>
-              <TableCell align="center">{i18n.t("contactLists.table.contacts")}</TableCell>
-              <TableCell align="center">{i18n.t("contactLists.table.actions")}</TableCell>
+              <TableCell align="left">{i18n.t("contactLists.table.name")}</TableCell>
+              <TableCell align="left">{i18n.t("contactLists.table.contacts")}</TableCell>
+              <TableCell align="left">Filtro salvo</TableCell>
+              <TableCell align="right">{i18n.t("contactLists.table.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <>
               {contactLists.map((contactList) => (
                 <TableRow key={contactList.id}>
-                  <TableCell align="center">{contactList.name}</TableCell>
-                  <TableCell align="center">{contactList.contactsCount || 0}</TableCell>
-                  <TableCell align="center">
+                  <TableCell align="left">{contactList.name}</TableCell>
+                  <TableCell align="left">{contactList.contactsCount || 0}</TableCell>
+                  <TableCell align="left" style={{ maxWidth: 560 }}>
+                    {(() => {
+                      const sf = contactList && contactList.savedFilter ? contactList.savedFilter : null;
+                      if (!sf) return <span style={{ color: '#999' }}>—</span>;
+                      return (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onMouseEnter={(e) => openDetails(e, sf)}
+                          startIcon={<FilterIcon size={16} color="#059669" />}
+                        >
+                          Filtro salvo
+                        </Button>
+                      );
+                    })()}
+                  </TableCell>
+                  <TableCell align="right">
                     <a href={planilhaExemplo} download="planilha.xlsx">
                       <IconButton size="small" title="Baixar Planilha Exemplo">
                         <DownloadIcon />
@@ -337,11 +381,69 @@ const ContactLists = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {loading && <TableRowSkeleton columns={3} />}
+              {loading && <TableRowSkeleton columns={4} />}
             </>
           </TableBody>
         </Table>
       </Paper>
+      {/* Popover de detalhes do filtro salvo */}
+      <Popover
+        open={Boolean(detailsAnchorEl)}
+        anchorEl={detailsAnchorEl}
+        onClose={closeDetails}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        PaperProps={{ onMouseLeave: closeDetails }}
+        disableAutoFocus
+        disableEnforceFocus
+        disableRestoreFocus
+      >
+        <div style={{ padding: 16, maxWidth: 440 }}>
+          <Typography variant="subtitle2" gutterBottom>Detalhes do filtro salvo</Typography>
+          {detailsFilter ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {Array.isArray(detailsFilter.channel) && detailsFilter.channel.length && (
+                <div><strong>Canal:</strong> {detailsFilter.channel.join(', ')}</div>
+              )}
+              {Array.isArray(detailsFilter.representativeCode) && detailsFilter.representativeCode.length && (
+                <div><strong>Representante:</strong> {detailsFilter.representativeCode.join(', ')}</div>
+              )}
+              {Array.isArray(detailsFilter.city) && detailsFilter.city.length && (
+                <div><strong>Cidade:</strong> {detailsFilter.city.join(', ')}</div>
+              )}
+              {Array.isArray(detailsFilter.segment) && detailsFilter.segment.length && (
+                <div><strong>Segmento:</strong> {detailsFilter.segment.join(', ')}</div>
+              )}
+              {Array.isArray(detailsFilter.situation) && detailsFilter.situation.length && (
+                <div><strong>Situação:</strong> {detailsFilter.situation.join(', ')}</div>
+              )}
+              {Array.isArray(detailsFilter.foundationMonths) && detailsFilter.foundationMonths.length && (
+                <div><strong>Fundação (mês):</strong> {detailsFilter.foundationMonths.join(', ')}</div>
+              )}
+              {(detailsFilter.minCreditLimit || detailsFilter.maxCreditLimit) && (
+                <div><strong>Crédito:</strong> {fmtCurrency(detailsFilter.minCreditLimit)} – {detailsFilter.maxCreditLimit ? fmtCurrency(detailsFilter.maxCreditLimit) : '∞'}</div>
+              )}
+              {typeof detailsFilter.florder !== 'undefined' && (
+                <div><strong>Encomenda:</strong> {detailsFilter.florder ? 'Sim' : 'Não'}</div>
+              )}
+              {(detailsFilter.dtUltCompraStart || detailsFilter.dtUltCompraEnd) && (
+                <div><strong>Última compra (período):</strong> {fmtDate(detailsFilter.dtUltCompraStart)} – {fmtDate(detailsFilter.dtUltCompraEnd)}</div>
+              )}
+              {(detailsFilter.minVlUltCompra != null || detailsFilter.maxVlUltCompra != null) && (
+                <div><strong>Valor da última compra:</strong> {fmtCurrency(detailsFilter.minVlUltCompra)} – {fmtCurrency(detailsFilter.maxVlUltCompra)}</div>
+              )}
+              {Array.isArray(detailsFilter.tags) && detailsFilter.tags.length && (
+                <div><strong>Tags:</strong> {detailsFilter.tags.length}</div>
+              )}
+              {!Object.keys(detailsFilter || {}).length && (
+                <Typography variant="body2" color="textSecondary">Nenhum campo definido.</Typography>
+              )}
+            </div>
+          ) : (
+            <Typography variant="body2" color="textSecondary">Nenhum filtro.</Typography>
+          )}
+        </div>
+      </Popover>
       {/* Paginação numerada */}
       <nav className="flex justify-center mt-4" aria-label="Page navigation">
         <ul className="inline-flex -space-x-px text-sm">

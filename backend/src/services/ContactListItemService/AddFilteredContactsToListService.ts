@@ -15,6 +15,11 @@ interface FilterParams {
   minCreditLimit?: string;
   maxCreditLimit?: string;
   tags?: number[];
+  florder?: boolean | string; // encomenda Sim/Não
+  dtUltCompraStart?: string; // yyyy-mm-dd
+  dtUltCompraEnd?: string;   // yyyy-mm-dd
+  minVlUltCompra?: number | string; // valor mínimo da última compra
+  maxVlUltCompra?: number | string; // valor máximo da última compra
 }
 
 interface Request {
@@ -240,6 +245,67 @@ const AddFilteredContactsToListService = async ({
           tags: filters.tags
         });
         throw new Error(`Erro ao processar filtro de tags: ${error.message}`);
+      }
+    }
+
+    // Filtro de "Encomenda" (florder)
+    if (typeof (filters as any).florder !== 'undefined') {
+      try {
+        const raw = (filters as any).florder;
+        const normalizeBool = (v: any): boolean | null => {
+          if (typeof v === 'boolean') return v;
+          if (v == null) return null;
+          const s = String(v).trim().toLowerCase();
+          if (["true", "1", "sim", "yes"].includes(s)) return true;
+          if (["false", "0", "nao", "não", "no"].includes(s)) return false;
+          return null;
+        };
+        const b = normalizeBool(raw);
+        if (b !== null) {
+          whereConditions.push({ florder: b });
+        }
+      } catch (e) {
+        logger.warn('Falha ao interpretar filtro florder', { value: (filters as any).florder, error: (e as any)?.message });
+      }
+    }
+
+    // Filtro por intervalo de Última Compra (dtUltCompra)
+    if ((filters as any).dtUltCompraStart || (filters as any).dtUltCompraEnd) {
+      const range: any = {};
+      if ((filters as any).dtUltCompraStart) {
+        range[Op.gte] = (filters as any).dtUltCompraStart;
+      }
+      if ((filters as any).dtUltCompraEnd) {
+        range[Op.lte] = (filters as any).dtUltCompraEnd;
+      }
+      whereConditions.push({ dtUltCompra: range });
+    }
+
+    // Filtro por faixa de valor da última compra (vlUltCompra NUMERIC) — mesma lógica do crédito
+    if ((filters as any).minVlUltCompra != null || (filters as any).maxVlUltCompra != null) {
+      const parseNum = (v: any): number | null => {
+        if (v === undefined || v === null || v === '') return null;
+        if (typeof v === 'number') return v;
+        const n = parseFloat(String(v).replace(/\s+/g, '').replace(/R\$?/gi, '').replace(/\./g, '').replace(',', '.'));
+        return isNaN(n) ? null : n;
+      };
+      const hasMin = typeof (filters as any).minVlUltCompra !== 'undefined' && (filters as any).minVlUltCompra !== '';
+      const hasMax = typeof (filters as any).maxVlUltCompra !== 'undefined' && (filters as any).maxVlUltCompra !== '';
+      const minV = hasMin ? parseNum((filters as any).minVlUltCompra) : undefined;
+      const maxV = hasMax ? parseNum((filters as any).maxVlUltCompra) : undefined;
+
+      // Garante que não pegue NULL
+      whereConditions.push(literal('"vlUltCompra" IS NOT NULL'));
+
+      if (hasMin && hasMax && minV != null && maxV != null) {
+        whereConditions.push(Sequelize.where(literal('"vlUltCompra"'), { [Op.between]: [minV, maxV] }));
+        logger.info(`Filtro vlUltCompra entre: ${minV} e ${maxV}`);
+      } else if (hasMin && minV != null) {
+        whereConditions.push(Sequelize.where(literal('"vlUltCompra"'), { [Op.gte]: minV }));
+        logger.info(`Filtro vlUltCompra mínimo: ${minV}`);
+      } else if (hasMax && maxV != null) {
+        whereConditions.push(Sequelize.where(literal('"vlUltCompra"'), { [Op.lte]: maxV }));
+        logger.info(`Filtro vlUltCompra máximo: ${maxV}`);
       }
     }
 

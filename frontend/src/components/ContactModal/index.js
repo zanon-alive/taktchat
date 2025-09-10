@@ -17,7 +17,9 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Switch from "@material-ui/core/Switch";
+import withStyles from "@material-ui/core/styles/withStyles";
 import { Grid, FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import ContactAvatar from "../ContactAvatar";
 
 import { i18n } from "../../translate/i18n";
 
@@ -66,6 +68,8 @@ const ContactSchema = Yup.object().shape({
     .max(50, "Parâmetros acima do esperado!")
     .required("Obrigatório"),
   email: Yup.string().email("E-mail inválido"),
+  contactName: Yup.string().nullable(),
+  florder: Yup.boolean().nullable(),
   cpfCnpj: Yup.string()
     .nullable()
     .test('cpfCnpj-validation', 'CPF/CNPJ inválido', (value) => {
@@ -83,11 +87,31 @@ const ContactSchema = Yup.object().shape({
   foundationDate: Yup.date().nullable(),
   creditLimit: Yup.string().nullable(),
   segment: Yup.string().nullable(),
+  dtUltCompra: Yup.date().nullable(),
+  vlUltCompra: Yup.mixed().nullable(),
 });
+
+// Switch personalizado: verde quando ativo (checked), vermelho quando inativo
+const GreenRedSwitch = withStyles({
+  switchBase: {
+    color: '#ef4444', // vermelho quando inativo
+    '&$checked': {
+      color: '#16a34a', // verde quando ativo
+    },
+    '&$checked + $track': {
+      backgroundColor: '#16a34a',
+    },
+  },
+  checked: {},
+  track: {
+    backgroundColor: '#fca5a5', // trilho vermelho claro quando inativo
+  },
+})(Switch);
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
 	const isMounted = useRef(true);
+    const [avatarOpen, setAvatarOpen] = useState(false);
 
 	const initialState = {
 		name: "",
@@ -103,7 +127,11 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 		fantasyName: "",
 		foundationDate: "",
 		creditLimit: "",
-		segment: ""
+		segment: "",
+		contactName: "",
+		florder: false,
+		dtUltCompra: "",
+		vlUltCompra: "",
 	};
 
 	const [contact, setContact] = useState(initialState);
@@ -146,10 +174,10 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const handleSaveContact = async values => {
 		try {
 			if (contactId) {
-				await api.put(`/contacts/${contactId}`, { ...values, disableBot: disableBot });
+				await api.put(`/contacts/${contactId}`, { ...values, disableBot: values.disableBot });
 				handleClose();
 			} else {
-				const { data } = await api.post("/contacts", { ...values, disableBot: disableBot });
+				const { data } = await api.post("/contacts", { ...values, disableBot: values.disableBot });
 				if (onSave) {
 					onSave(data);
 				}
@@ -165,10 +193,20 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 		<div className={classes.root}>
 			<Dialog open={open} onClose={handleClose} maxWidth="sm" scroll="paper">
 				<DialogTitle id="form-dialog-title">
-				{i18n.t("contactModal.form.mainInfo")} > &nbsp; 
-									{contactId
-										? `${i18n.t("contactModal.title.edit")}`
-										: `${i18n.t("contactModal.title.add")}`}
+					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+						<span>{i18n.t("contactModal.form.mainInfo")} • {contactId ? i18n.t("contactModal.title.edit") : i18n.t("contactModal.title.add")}</span>
+						{(() => {
+							const avatarImageUrl = contact?.profilePicUrl || contact?.urlPicture;
+							return (
+								<div
+									onClick={() => { if (avatarImageUrl) setAvatarOpen(true); }}
+									style={{ cursor: avatarImageUrl ? 'pointer' : 'default' }}
+								>
+									<ContactAvatar contact={contact} style={{ width: 44, height: 44, borderRadius: '50%' }} />
+								</div>
+							);
+						})()}
+					</div>
 				</DialogTitle>
 				<Formik
 					initialValues={contact}
@@ -180,7 +218,6 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 							actions.setSubmitting(false);
 						}, 400);
 					}}
-					
 				>
 					{({ values, errors, touched, isSubmitting, setFieldValue }) => (
 						<Form>
@@ -214,8 +251,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 														onChange={(e) => {
 															const value = e.target.value;
 															// Remove all non-digit characters
-															const cleanValue = value.replace(/\D/g, '');
-															form.setFieldValue('number', cleanValue);
+															const cleanValue2 = value.replace(/\D/g, '');
+															form.setFieldValue('number', cleanValue2);
 														}}
 													>
 														{(inputProps) => (
@@ -238,51 +275,15 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									<Grid item xs={12} md={6}>
 										<Field
 											as={TextField}
-											label={i18n.t("contactModal.form.email")}
-											name="email"
-											error={touched.email && Boolean(errors.email)}
-											helperText={touched.email && errors.email}
-											placeholder="Email address"
-											fullWidth
-											margin="dense"
+											label="Nome do Contato"
+											name="contactName"
 											variant="outlined"
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<Field name="cpfCnpj">
-											{({ field, form }) => {
-												const cleanValue = field.value?.replace(/\D/g, '') || '';
-												const mask = cleanValue.length > 11 ? "99.999.999/9999-99" : "999.999.999-999";
-												return (
-													<InputMask
-														{...field}
-														mask={mask}
-														maskChar={null}
-														onChange={(e) => {
-															const value = e.target.value;
-															const cleanValue = value.replace(/\D/g, '');
-															form.setFieldValue('cpfCnpj', cleanValue);
-														}}
-													>
-														{(inputProps) => (
-															<TextField
-																{...inputProps}
-																label="CPF/CNPJ"
-																variant="outlined"
-																margin="dense"															
-																fullWidth
-																InputLabelProps={{
-																	shrink: true,
-																}}
-																error={touched.cpfCnpj && Boolean(errors.cpfCnpj)}
-																helperText={touched.cpfCnpj && errors.cpfCnpj}
-																
-															/>
-														)}
-													</InputMask>
-												)
+											margin="dense"
+											InputLabelProps={{
+												shrink: true,
 											}}
-										</Field>
+											fullWidth
+										/>
 									</Grid>
 									<Grid item xs={12} md={6}>
 										<Field
@@ -301,58 +302,21 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									<Grid item xs={12} md={6}>
 										<Field
 											as={TextField}
-											label="Cidade"
-											name="city"
-											variant="outlined"
-											margin="dense"
-											InputLabelProps={{
-												shrink: true,
-											}}
-											fullWidth
-											disabled
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<Field
-											as={TextField}
-											label="Instagram"
-											name="instagram"
-											variant="outlined"
-											margin="dense"
-											InputLabelProps={{
-												shrink: true,
-											}}
-											fullWidth
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<FormControl
-											variant="outlined"
-											margin="dense"
-											fullWidth
-										>
-											<InputLabel id="situation-select-label">Situação</InputLabel>
-											<Field
-												as={Select}
-												labelId="situation-select-label"
-												id="situation-select"
-												name="situation"
-												label="Situação"
-											>
-												<MenuItem value="Ativo">Ativo</MenuItem>
-												<MenuItem value="Baixado">Baixado</MenuItem>
-												<MenuItem value="Ex-Cliente">Ex-Cliente</MenuItem>
-												<MenuItem value="Excluido">Excluído</MenuItem>
-												<MenuItem value="Futuro">Futuro</MenuItem>
-												<MenuItem value="Inativo">Inativo</MenuItem>
-											</Field>
-										</FormControl>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<Field
-											as={TextField}
 											label="Nome Fantasia"
 											name="fantasyName"
+											variant="outlined"
+											margin="dense"
+											InputLabelProps={{
+												shrink: true,
+											}}
+											fullWidth
+										/>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<Field
+											as={TextField}
+											label="Cidade"
+											name="city"
 											variant="outlined"
 											margin="dense"
 											InputLabelProps={{
@@ -406,6 +370,71 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										/>
 									</Grid>
 									<Grid item xs={12} md={6}>
+										<Field
+											as={TextField}
+											label="Última Compra"
+											name="dtUltCompra"
+											type="date"
+											InputLabelProps={{
+												shrink: true,
+											}}
+											variant="outlined"
+											margin="dense"
+											disabled
+											fullWidth
+										/>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<Field
+											as={TextField}
+											label="Valor da Última Compra (R$)"
+											name="vlUltCompra"
+											variant="outlined"
+											margin="dense"
+											InputLabelProps={{
+												shrink: true,
+											}}
+											placeholder="Ex.: 1.234,56"
+											fullWidth
+										/>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<FormControl
+											variant="outlined"
+											margin="dense"
+											fullWidth
+										>
+											<InputLabel id="situation-select-label">Situação</InputLabel>
+											<Field
+												as={Select}
+												labelId="situation-select-label"
+												id="situation-select"
+												name="situation"
+												label="Situação"
+											>
+												<MenuItem value="Ativo">Ativo</MenuItem>
+												<MenuItem value="Baixado">Baixado</MenuItem>
+												<MenuItem value="Ex-Cliente">Ex-Cliente</MenuItem>
+												<MenuItem value="Excluido">Excluído</MenuItem>
+												<MenuItem value="Futuro">Futuro</MenuItem>
+												<MenuItem value="Inativo">Inativo</MenuItem>
+											</Field>
+										</FormControl>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<Field
+											as={TextField}
+											label="Instagram"
+											name="instagram"
+											variant="outlined"
+											margin="dense"
+											InputLabelProps={{
+												shrink: true,
+											}}
+											fullWidth
+										/>
+									</Grid>
+									<Grid item xs={12} md={6}>
 										{contact?.id ? (
 											<TagsContainer contact={contact} />
 										) : (
@@ -415,49 +444,47 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												margin="dense"
 												fullWidth
 												InputLabelProps={{ shrink: true }}
-												placeholder="Salve para gravar tags"
 											/>
 										)}
 									</Grid>
+									<Grid item xs={12} md={6}>
+										<div style={{ display: 'flex', gap: 24, alignItems: 'center', paddingTop: 8 }}>
+											<div>
+												<Typography variant="subtitle2" gutterBottom>Encomenda</Typography>
+												<GreenRedSwitch
+													size="small"
+													checked={Boolean(values.florder)}
+													onChange={() => setFieldValue('florder', !values.florder)}
+													name="florder"
+												/>
+												<Typography variant="body2" component="span" style={{ marginLeft: 8, fontWeight: 600, color: values.florder ? '#16a34a' : '#ef4444' }}>
+													{values.florder ? 'Sim' : 'Não'}
+												</Typography>
+											</div>
+											<div>
+												<Typography variant="subtitle2" gutterBottom>Desabilitar chatbot</Typography>
+												<GreenRedSwitch
+													size="small"
+													checked={values.disableBot}
+													onChange={() => setFieldValue('disableBot', !values.disableBot)}
+													name="disableBot"
+												/>
+												<Typography variant="body2" component="span" style={{ marginLeft: 8, fontWeight: 600, color: values.disableBot ? '#16a34a' : '#ef4444' }}>
+													{values.disableBot ? 'Sim' : 'Não'}
+												</Typography>
+											</div>
+										</div>
+									</Grid>
 								</Grid>
-								<Typography
-									style={{ marginBottom: 8, marginTop: 12 }}
-									variant="subtitle1"
-								>
-									<Switch
-										size="small"
-										checked={disableBot}
-										onChange={() =>
-											setDisableBot(!disableBot)
-										}
-										name="disableBot"
-									/>
-									{i18n.t("contactModal.form.chatBotContact")}
-								</Typography>
-								<Typography
-									style={{ marginBottom: 8, marginTop: 12 }}
-									variant="subtitle1"
-								>
-									{i18n.t("contactModal.form.whatsapp")} {contact?.whatsapp ? contact?.whatsapp.name : ""}
-								</Typography>
-								<Typography
-									style={{ marginBottom: 8, marginTop: 12 }}
-									variant="subtitle1"
-								>
-									{i18n.t("contactModal.form.termsLGDP")} {contact?.lgpdAcceptedAt ? format(new Date(contact?.lgpdAcceptedAt), "dd/MM/yyyy 'às' HH:mm") : ""}
-								</Typography>
-
-								{/* <Typography variant="subtitle1" gutterBottom>{i18n.t("contactModal.form.customer_portfolio")}</Typography> */}
-								{/* <div style={{ marginTop: 10 }}>
-									<AsyncSelect url="/users" dictKey={"users"}
-										initialValue={values.user} width="100%" label={i18n.t("contactModal.form.attendant")}
-										onChange={(event, value) => setFieldValue("userId", value ? value.id : null)} />
-								</div>
-								<div style={{ marginTop: 10 }}>
-									<AsyncSelect url="/queue" dictKey={null}
-										initialValue={values.queue} width="100%" label={i18n.t("contactModal.form.queue")}
-										onChange={(event, value) => setFieldValue("queueId", value ? value.id : null)} />
-								</div> */}
+                                {/* Linha única: Conexão (esquerda) | Termos LGPD (direita) */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginTop: 8 }}>
+                                    <Typography variant="subtitle1">
+                                        {i18n.t("contactModal.form.whatsapp")} {contact?.whatsapp ? contact?.whatsapp.name : ""}
+                                    </Typography>
+                                    <Typography variant="subtitle1">
+                                        {i18n.t("contactModal.form.termsLGDP")} {contact?.lgpdAcceptedAt ? format(new Date(contact?.lgpdAcceptedAt), "dd/MM/yyyy 'às' HH:mm") : ""}
+                                    </Typography>
+                                </div>
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"
@@ -543,6 +570,19 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 						</Form>
 					)}
 				</Formik>
+			</Dialog>
+			{/* Modal do Avatar */}
+			<Dialog open={avatarOpen} onClose={() => setAvatarOpen(false)} maxWidth="md">
+				<DialogContent style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+					{(() => {
+						const avatarImageUrl = contact?.profilePicUrl || contact?.urlPicture;
+						return avatarImageUrl ? (
+							<img src={avatarImageUrl} alt="Avatar" style={{ maxWidth: '90vw', maxHeight: '80vh', borderRadius: 8 }} />
+						) : (
+							<ContactAvatar contact={contact} style={{ width: 270, height: 270, borderRadius: 10 }} />
+						);
+					})()}
+				</DialogContent>
 			</Dialog>
 		</div>
 	);

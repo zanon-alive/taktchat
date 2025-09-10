@@ -36,6 +36,9 @@ interface ContactData {
   foundationDate?: Date;
   creditLimit?: string;
   segment?: string;
+  florder?: boolean;
+  vlUltCompra?: number | string | null;
+  dtUltCompra?: Date | string | null;
 }
 
 interface Request {
@@ -70,7 +73,10 @@ const UpdateContactService = async ({
     fantasyName,
     foundationDate,
     creditLimit,
-    segment
+    segment,
+    florder,
+    vlUltCompra,
+    dtUltCompra
   } = contactData;
 
   const sanitizedCreditLimit = creditLimit !== undefined ? creditLimit : null;
@@ -99,15 +105,43 @@ const UpdateContactService = async ({
     foundationDateValue = null;
   }
 
+  // Normalização da data de última compra
+  let lastPurchaseValue: Date | null = null;
+  if (dtUltCompra && typeof dtUltCompra === 'string' && dtUltCompra !== '') {
+    const d = new Date(dtUltCompra);
+    if (isNaN(d.getTime())) {
+      throw new AppError("INVALID_LAST_PURCHASE_DATE");
+    } else {
+      lastPurchaseValue = d;
+    }
+  }
+  if (typeof dtUltCompra === 'string' && dtUltCompra === '') {
+    lastPurchaseValue = null;
+  }
+
+  // Normalização do valor da última compra (aceita string BRL)
+  const parseMoney = (val: any): number | null => {
+    if (val === undefined || val === null || val === '') return null;
+    if (typeof val === 'number') return val;
+    const cleaned = String(val)
+      .replace(/\s+/g, '')
+      .replace(/R\$?/gi, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? null : num;
+  };
+  const vlUltCompraValue = parseMoney(vlUltCompra as any);
+
   const contact = await Contact.findOne({
     where: { id: contactId },
     attributes: [
       "id", "name", "number", "channel", "email", "companyId",
-      "acceptAudioMessage", "active", "profilePicUrl", "remoteJid",
-      "urlPicture",
+      "acceptAudioMessage", "active", "disableBot", "profilePicUrl", "remoteJid",
+      "urlPicture", "florder",
       // Adicionar novos campos aos atributos
       "cpfCnpj", "representativeCode", "city", "instagram",
-      "situation", "fantasyName", "foundationDate", "creditLimit", "segment"
+      "situation", "fantasyName", "foundationDate", "creditLimit", "segment", "dtUltCompra", "vlUltCompra"
     ],
     include: ["extraInfo", "tags",
       {
@@ -217,6 +251,9 @@ const UpdateContactService = async ({
     foundationDate: foundationDateValue,
     creditLimit: creditLimit !== undefined ? emptyToNull(creditLimit) : contact.creditLimit,
     segment: segment !== undefined ? emptyToNull(segment) : (contact as any).segment,
+    vlUltCompra: vlUltCompra !== undefined ? vlUltCompraValue : (contact as any).vlUltCompra,
+    dtUltCompra: dtUltCompra !== undefined ? lastPurchaseValue : (contact as any).dtUltCompra,
+    florder: florder !== undefined ? !!florder : (contact as any).florder,
   };
 
   // Apenas atualiza o userId se ele for fornecido
@@ -237,11 +274,11 @@ const UpdateContactService = async ({
   await contact.reload({
     attributes: [
       "id", "name", "number", "channel", "email", "companyId",
-      "acceptAudioMessage", "active", "profilePicUrl", "remoteJid",
-      "urlPicture",
+      "acceptAudioMessage", "active", "disableBot", "profilePicUrl", "remoteJid",
+      "urlPicture", "florder", "vlUltCompra",
       // Adicionar novos campos aos atributos
       "cpfCnpj", "representativeCode", "city", "instagram",
-      "situation", "fantasyName", "foundationDate", "creditLimit", "segment"
+      "situation", "fantasyName", "foundationDate", "creditLimit", "segment", "dtUltCompra"
     ],
     include: ["extraInfo", "tags",
       {

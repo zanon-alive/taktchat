@@ -23,15 +23,23 @@ import {
   Typography,
   InputAdornment,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  Popover,
+  Slider,
+  Box,
+  IconButton,
+  InputBase
 } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import useAuth from "../../hooks/useAuth.js";
+import { DateRangePicker } from 'materialui-daterange-picker';
+import { format, parseISO, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -99,10 +107,27 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
     "UTC",
     "Europe/London"
   ];
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const [rangeAnchor, setRangeAnchor] = useState(null);
   const monthsPT = [
     "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
     "Jul", "Ago", "Set", "Out", "Nov", "Dez"
   ];
+
+  // Helpers de formato/parsing BRL e edição inline
+  const formatBRL0 = (n) => `R$ ${Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const parseCurrency = (s, max) => {
+    if (s == null) return 0;
+    const num = parseFloat(String(s).replace(/R\$?\s*/gi, '').replace(/\./g, '').replace(/,/g, '.'));
+    if (isNaN(num)) return 0;
+    if (typeof max === 'number') return Math.max(0, Math.min(num, max));
+    return Math.max(0, num);
+  };
+
+  const [editMinCredit, setEditMinCredit] = useState(false);
+  const [editMaxCredit, setEditMaxCredit] = useState(false);
+  const [editMinVl, setEditMinVl] = useState(false);
+  const [editMaxVl, setEditMaxVl] = useState(false);
 
   // Cache simples em sessionStorage para evitar recarregar os mesmos dados
   const getCache = (key) => {
@@ -497,13 +522,33 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
       // Remover monthYear antigo, se existir
       delete filters.monthYear;
 
-      // Tratar minCreditLimit e maxCreditLimit para garantir que sejam números ou strings numéricas
+      // Mapear Encomenda (florder) para booleano
+      if (typeof values.florder !== 'undefined') {
+        if (values.florder === 'Sim') filters.florder = true;
+        else if (values.florder === 'Não') filters.florder = false;
+        else delete filters.florder; // vazio
+      }
+
+      // Ajustar envio de range de última compra
+      if (values.dtUltCompraStart) filters.dtUltCompraStart = values.dtUltCompraStart;
+      if (values.dtUltCompraEnd) filters.dtUltCompraEnd = values.dtUltCompraEnd;
+
+      // Se marcado "Sem máximo", remove maxCreditLimit
+      if (values.creditLimitNoMax) {
+        delete filters.maxCreditLimit;
+      }
+
+      // Tratar min/max para garantir formatos corretos
       if (filters.minCreditLimit) {
         filters.minCreditLimit = String(filters.minCreditLimit).replace(/R\$?\s?/gi, '').replace(/\./g, '').replace(/,/g, '.');
       }
       if (filters.maxCreditLimit) {
         filters.maxCreditLimit = String(filters.maxCreditLimit).replace(/R\$?\s?/gi, '').replace(/\./g, '').replace(/,/g, '.');
       }
+
+      // Incluir range de valor da última compra
+      if (typeof values.minVlUltCompra !== 'undefined') filters.minVlUltCompra = Number(values.minVlUltCompra);
+      if (typeof values.maxVlUltCompra !== 'undefined') filters.maxVlUltCompra = Number(values.maxVlUltCompra);
 
       // Remover filtros vazios
       Object.keys(filters).forEach(key => {
@@ -591,6 +636,16 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
             : [],
           minCreditLimit: (savedFilter && savedFilter.minCreditLimit) ? savedFilter.minCreditLimit : "",
           maxCreditLimit: (savedFilter && savedFilter.maxCreditLimit) ? savedFilter.maxCreditLimit : "",
+          minVlUltCompra: (savedFilter && savedFilter.minVlUltCompra) ? Number(savedFilter.minVlUltCompra) : 0,
+          maxVlUltCompra: (savedFilter && savedFilter.maxVlUltCompra) ? Number(savedFilter.maxVlUltCompra) : 30000,
+          vlUltCompraNoMax: false,
+          creditLimitNoMax: false,
+          // Novos filtros
+          florder: (savedFilter && (typeof savedFilter.florder !== 'undefined'))
+            ? (savedFilter.florder === true ? 'Sim' : savedFilter.florder === false ? 'Não' : '')
+            : '',
+          dtUltCompraStart: (savedFilter && savedFilter.dtUltCompraStart) ? savedFilter.dtUltCompraStart : "",
+          dtUltCompraEnd: (savedFilter && savedFilter.dtUltCompraEnd) ? savedFilter.dtUltCompraEnd : "",
         }}
         enableReinitialize={true}
         onSubmit={(values, actions) => {
@@ -812,35 +867,234 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
                   </Field>
                 </Grid>
 
+                {/* Linha 1: Limite de Crédito (faixa) + Valor da Última Compra (faixa) */}
                 <Grid item xs={12} md={6}>
-                  <Field
-                    as={TextField}
-                    label={i18n.t("contactListItems.filterDialog.minCreditLimit")}
-                    name="minCreditLimit"
-                    fullWidth
-                    variant="outlined"
-                    margin="dense"
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-                    }}
-                  />
+                  <Typography variant="subtitle2">Limite de Crédito (faixa)</Typography>
+                  <Box px={1} display="flex" flexDirection="column">
+                    <Field name="minCreditLimit">
+                      {({ form }) => (
+                        <Slider
+                          value={[Number(values.minCreditLimit || 0), values.creditLimitNoMax ? 100000 : Number(values.maxCreditLimit || 100000)]}
+                          onChange={(_, newValue) => {
+                            const [min, max] = newValue;
+                            form.setFieldValue('minCreditLimit', min);
+                            form.setFieldValue('maxCreditLimit', max);
+                          }}
+                          valueLabelDisplay="auto"
+                          min={0}
+                          max={100000}
+                          step={100}
+                          // Removemos labels dos marks para evitar sobreposição; usamos legenda personalizada abaixo
+                          marks={false}
+                          getAriaValueText={(v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
+                          valueLabelFormat={(v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
+                        />
+                      )}
+                    </Field>
+                    <Field name="minCreditLimit">
+                      {({ form }) => (
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={-1}>
+                          <Typography variant="caption" color="textSecondary">
+                            {editMinCredit ? (
+                              <InputBase
+                                autoFocus
+                                defaultValue={Number(values.minCreditLimit || 0)}
+                                onBlur={(e) => {
+                                  const maxAllowed = form.values.creditLimitNoMax ? 100000 : Number(form.values.maxCreditLimit || 100000);
+                                  let v = parseCurrency(e.target.value, maxAllowed);
+                                  if (v > maxAllowed) v = maxAllowed;
+                                  form.setFieldValue('minCreditLimit', v);
+                                  setEditMinCredit(false);
+                                }}
+                                onKeyDown={(e)=>{ if(e.key==='Enter'){ e.currentTarget.blur(); } if(e.key==='Escape'){ setEditMinCredit(false);} }}
+                                style={{ width: 90 }}
+                              />
+                            ) : (
+                              <span style={{ cursor: 'pointer' }} onClick={() => setEditMinCredit(true)}>{formatBRL0(values.minCreditLimit || 0)}</span>
+                            )}
+                            {' — '}
+                            {values.creditLimitNoMax ? (
+                              '∞'
+                            ) : editMaxCredit ? (
+                              <InputBase
+                                autoFocus
+                                defaultValue={Number(values.maxCreditLimit || 100000)}
+                                onBlur={(e) => {
+                                  let v = parseCurrency(e.target.value, 100000);
+                                  if (v < Number(form.values.minCreditLimit || 0)) v = Number(form.values.minCreditLimit || 0);
+                                  form.setFieldValue('maxCreditLimit', v);
+                                  setEditMaxCredit(false);
+                                }}
+                                onKeyDown={(e)=>{ if(e.key==='Enter'){ e.currentTarget.blur(); } if(e.key==='Escape'){ setEditMaxCredit(false);} }}
+                                style={{ width: 90 }}
+                              />
+                            ) : (
+                              <span style={{ cursor: 'pointer' }} onClick={() => setEditMaxCredit(true)}>{formatBRL0(values.maxCreditLimit || 100000)}</span>
+                            )}
+                          </Typography>
+                          <Field name="creditLimitNoMax">
+                            {({ form: f2 }) => {
+                              const active = !!f2.values.creditLimitNoMax;
+                              return (
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    const nv = !active;
+                                    f2.setFieldValue('creditLimitNoMax', nv);
+                                    if (nv) {
+                                      f2.setFieldValue('maxCreditLimit', 100000);
+                                    }
+                                  }}
+                                  aria-label={active ? 'Máximo infinito ativo' : 'Ativar máximo infinito'}
+                                >
+                                  <AllInclusiveIcon style={{ color: active ? '#16a34a' : '#c4c4c4' }} />
+                                </IconButton>
+                              );
+                            }}
+                          </Field>
+                        </Box>
+                      )}
+                    </Field>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2">Valor da Última Compra (faixa)</Typography>
+                  <Box px={1} display="flex" flexDirection="column">
+                    <Field name="minVlUltCompra">
+                      {({ form }) => (
+                        <Slider
+                          value={[Number(values.minVlUltCompra || 0), values.vlUltCompraNoMax ? 30000 : Number(values.maxVlUltCompra || 30000)]}
+                          onChange={(_, newValue) => {
+                            const [min, max] = newValue;
+                            form.setFieldValue('minVlUltCompra', min);
+                            form.setFieldValue('maxVlUltCompra', max);
+                          }}
+                          valueLabelDisplay="auto"
+                          min={0}
+                          max={30000}
+                          step={50}
+                          marks={false}
+                          getAriaValueText={(v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
+                          valueLabelFormat={(v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
+                        />
+                      )}
+                    </Field>
+                    <Field name="minVlUltCompra">
+                      {({ form }) => (
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={-1}>
+                          <Typography variant="caption" color="textSecondary">
+                            {editMinVl ? (
+                              <InputBase
+                                autoFocus
+                                defaultValue={Number(values.minVlUltCompra || 0)}
+                                onBlur={(e) => {
+                                  const maxAllowed = form.values.vlUltCompraNoMax ? 30000 : Number(form.values.maxVlUltCompra || 30000);
+                                  let v = parseCurrency(e.target.value, maxAllowed);
+                                  if (v > maxAllowed) v = maxAllowed;
+                                  form.setFieldValue('minVlUltCompra', v);
+                                  setEditMinVl(false);
+                                }}
+                                onKeyDown={(e)=>{ if(e.key==='Enter'){ e.currentTarget.blur(); } if(e.key==='Escape'){ setEditMinVl(false);} }}
+                                style={{ width: 90 }}
+                              />
+                            ) : (
+                              <span style={{ cursor: 'pointer' }} onClick={() => setEditMinVl(true)}>{formatBRL0(values.minVlUltCompra || 0)}</span>
+                            )}
+                            {' — '}
+                            {values.vlUltCompraNoMax ? (
+                              '∞'
+                            ) : editMaxVl ? (
+                              <InputBase
+                                autoFocus
+                                defaultValue={Number(values.maxVlUltCompra || 30000)}
+                                onBlur={(e) => {
+                                  let v = parseCurrency(e.target.value, 30000);
+                                  if (v < Number(form.values.minVlUltCompra || 0)) v = Number(form.values.minVlUltCompra || 0);
+                                  form.setFieldValue('maxVlUltCompra', v);
+                                  setEditMaxVl(false);
+                                }}
+                                onKeyDown={(e)=>{ if(e.key==='Enter'){ e.currentTarget.blur(); } if(e.key==='Escape'){ setEditMaxVl(false);} }}
+                                style={{ width: 90 }}
+                              />
+                            ) : (
+                              <span style={{ cursor: 'pointer' }} onClick={() => setEditMaxVl(true)}>{formatBRL0(values.maxVlUltCompra || 30000)}</span>
+                            )}
+                          </Typography>
+                          <Field name="vlUltCompraNoMax">
+                            {({ form: f2 }) => {
+                              const active = !!f2.values.vlUltCompraNoMax;
+                              return (
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    const nv = !active;
+                                    f2.setFieldValue('vlUltCompraNoMax', nv);
+                                    if (nv) {
+                                      f2.setFieldValue('maxVlUltCompra', 30000);
+                                    }
+                                  }}
+                                  aria-label={active ? 'Máximo infinito ativo' : 'Ativar máximo infinito'}
+                                >
+                                  <AllInclusiveIcon style={{ color: active ? '#16a34a' : '#c4c4c4' }} />
+                                </IconButton>
+                              );
+                            }}
+                          </Field>
+                        </Box>
+                      )}
+                    </Field>
+                  </Box>
                 </Grid>
 
+                {/* Linha 2: Encomenda + Range de Data da Última Compra */}
                 <Grid item xs={12} md={6}>
-                  <Field
-                    as={TextField}
-                    label={i18n.t("contactListItems.filterDialog.maxCreditLimit")}
-                    name="maxCreditLimit"
-                    fullWidth
-                    variant="outlined"
-                    margin="dense"
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-                    }}
-                  />
+                  <FormControl variant="outlined" margin="dense" fullWidth>
+                    <InputLabel id="florder-select-label">Encomenda</InputLabel>
+                    <Field as={Select} labelId="florder-select-label" id="florder-select" name="florder" label="Encomenda">
+                      <MenuItem value=""><em>—</em></MenuItem>
+                      <MenuItem value="Sim">Sim</MenuItem>
+                      <MenuItem value="Não">Não</MenuItem>
+                    </Field>
+                  </FormControl>
                 </Grid>
-
-                <Grid item xs={12}>
+                <Grid item xs={12} md={6}>
+                  <Field name="dtUltCompraStart">
+                    {({ form }) => {
+                      const start = form.values.dtUltCompraStart || format(new Date(), 'yyyy-MM-dd');
+                      const end = form.values.dtUltCompraEnd || format(new Date(), 'yyyy-MM-dd');
+                      return (
+                        <>
+                          <Button fullWidth variant="outlined" size="small" style={{ height: 43 }} onClick={(e)=>{ setRangeAnchor(e.currentTarget); setRangeOpen(true); }}>
+                            {`Última Compra: ${format(parseISO(start), 'dd/MM')} — ${format(parseISO(end), 'dd/MM/yy')}`}
+                          </Button>
+                          <Popover open={rangeOpen} anchorEl={rangeAnchor} onClose={()=> setRangeOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                            <DateRangePicker
+                              open
+                              toggle={() => setRangeOpen(false)}
+                              initialDateRange={{ startDate: parseISO(start), endDate: parseISO(end) }}
+                              definedRanges={[
+                                { label: 'Hoje', startDate: new Date(), endDate: new Date() },
+                                { label: 'Últimos 7 dias', startDate: addDays(new Date(), -6), endDate: new Date() },
+                                { label: 'Últimos 30 dias', startDate: addDays(new Date(), -29), endDate: new Date() },
+                                { label: 'Semana atual', startDate: startOfWeek(new Date(), { weekStartsOn: 1 }), endDate: endOfWeek(new Date(), { weekStartsOn: 1 }) },
+                                { label: 'Mês atual', startDate: startOfMonth(new Date()), endDate: endOfMonth(new Date()) },
+                              ]}
+                              onChange={(r)=>{
+                                if (!r?.startDate || !r?.endDate) return;
+                                form.setFieldValue('dtUltCompraStart', format(r.startDate, 'yyyy-MM-dd'));
+                                form.setFieldValue('dtUltCompraEnd', format(r.endDate, 'yyyy-MM-dd'));
+                                setRangeOpen(false);
+                              }}
+                            />
+                          </Popover>
+                        </>
+                      );
+                    }}
+                  </Field>
+                </Grid>
+                
+                {/* Linha 3: Tags em uma única linha */}
+                <Grid item xs={12} md={12}>
                   <Autocomplete
                     multiple
                     id="tags"

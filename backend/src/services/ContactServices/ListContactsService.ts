@@ -22,6 +22,8 @@ interface Request {
   orderBy?: string;
   order?: string;
   segment?: string | string[];
+  dtUltCompraStart?: string;
+  dtUltCompraEnd?: string;
 }
 
 interface Response {
@@ -41,7 +43,9 @@ const ListContactsService = async ({
                                      limit,
                                      orderBy,
                                      order,
-                                     segment
+                                     segment,
+                                     dtUltCompraStart,
+                                     dtUltCompraEnd
                                    }: Request): Promise<Response> => {
   let whereCondition: Filterable["where"] = {};
 
@@ -59,6 +63,21 @@ const ListContactsService = async ({
     };
   }
 
+  // Filtro por intervalo de última compra
+  if (dtUltCompraStart || dtUltCompraEnd) {
+    const range: any = {};
+    if (dtUltCompraStart) {
+      range[Op.gte] = dtUltCompraStart;
+    }
+    if (dtUltCompraEnd) {
+      range[Op.lte] = dtUltCompraEnd;
+    }
+    whereCondition = {
+      ...whereCondition,
+      dtUltCompra: range
+    };
+  }
+
   if (searchParam) {
     const sanitizedSearchParam = removeAccents(searchParam.toLocaleLowerCase().trim());
     whereCondition = {
@@ -67,6 +86,13 @@ const ListContactsService = async ({
         {
           name: where(
             fn("LOWER", fn("unaccent", col("Contact.name"))),
+            "LIKE",
+            `%${sanitizedSearchParam}%`
+          )
+        },
+        {
+          contactName: where(
+            fn("LOWER", fn("unaccent", col("Contact.contactName"))),
             "LIKE",
             `%${sanitizedSearchParam}%`
           )
@@ -190,6 +216,7 @@ const ListContactsService = async ({
       "companyId",
       "channel",
       // Adiciona novos campos aos atributos
+      "contactName",
       "cpfCnpj",
       "representativeCode",
       "city",
@@ -199,6 +226,7 @@ const ListContactsService = async ({
       "foundationDate",
       "creditLimit",
       "segment",
+      "dtUltCompra",
       // Campos persistidos
       "isWhatsappValid",
       "validatedAt"

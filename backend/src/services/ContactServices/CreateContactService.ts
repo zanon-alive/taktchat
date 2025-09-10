@@ -41,6 +41,8 @@ interface Request {
   segment?: string;
   contactName?: string;
   florder?: boolean;
+  dtUltCompra?: Date | string | null;
+  vlUltCompra?: number | string | null;
 }
 
 const CreateContactService = async ({
@@ -66,7 +68,9 @@ const CreateContactService = async ({
                                       creditLimit,
                                       segment,
                                       contactName,
-                                      florder
+                                      florder,
+                                      dtUltCompra,
+                                      vlUltCompra,
                                     }: Request): Promise<Contact> => {
   const numberExists = await Contact.findOne({
     where: { number, companyId }
@@ -115,6 +119,34 @@ const CreateContactService = async ({
     foundationDateValue = null;
   }
 
+  // Validação/normalização da data de última compra
+  let dtUltCompraValue: Date | null = null;
+  if (dtUltCompra && typeof dtUltCompra === 'string' && dtUltCompra !== '') {
+    const d = new Date(dtUltCompra);
+    if (isNaN(d.getTime())) {
+      throw new AppError("INVALID_LAST_PURCHASE_DATE");
+    } else {
+      dtUltCompraValue = d;
+    }
+  }
+  if (typeof dtUltCompra === 'string' && dtUltCompra === '') {
+    dtUltCompraValue = null;
+  }
+
+  // Normalização do valor da última compra (aceita string BRL)
+  const parseMoney = (val: any): number | null => {
+    if (val === undefined || val === null || val === '') return null;
+    if (typeof val === 'number') return val;
+    const cleaned = String(val)
+      .replace(/\s+/g, '')
+      .replace(/R\$?/gi, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? null : num;
+  };
+  const vlUltCompraValue = parseMoney(vlUltCompra as any);
+
   const contactData: {
     name: string;
     number: string;
@@ -136,6 +168,8 @@ const CreateContactService = async ({
     segment: string | null;
     contactName?: string | null;
     florder?: boolean;
+    dtUltCompra?: Date | null;
+    vlUltCompra?: number | null;
   } = {
     name: name || '',
     number: number || '',
@@ -162,6 +196,8 @@ const CreateContactService = async ({
     segment: emptyToNull(segment),
     contactName: typeof contactName === 'string' ? (contactName.trim() || null) : null,
     florder: !!florder,
+    dtUltCompra: dtUltCompraValue,
+    vlUltCompra: vlUltCompraValue,
   };
 
   // Apenas adiciona o userId se ele for fornecido

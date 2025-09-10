@@ -141,12 +141,12 @@ export async function ImportContactsService(
 
     // Campos adicionais: apenas se atuais forem nulos/vazios e houver valor na planilha
     const emptyToNull = (v: any) => v === undefined || v === null || (typeof v === 'string' && v.trim() === '') ? null : v;
-    const keepIfEmpty = (key: keyof typeof incoming) => {
-      const val = (incoming as any)[key];
+    const keepIfEmpty = (key: string) => {
+      const val = (incoming as any)[key as any];
       if (val === undefined || val === null || (typeof val === 'string' && val.toString().trim() === '')) return;
-      const current = (existing as any)[key];
+      const current = (existing as any)[key as any];
       if (current === null || current === undefined || (typeof current === 'string' && String(current).trim() === '')) {
-        (updatePayload as any)[key] = typeof val === 'string' ? val.toString().trim() : val;
+        (updatePayload as any)[key as any] = typeof val === 'string' ? val.toString().trim() : val;
       }
     };
 

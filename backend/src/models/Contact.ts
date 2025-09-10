@@ -162,6 +162,18 @@ class Contact extends Model<Contact> {
   })
   creditLimit: string;
 
+  @Column({
+    type: 'DATEONLY',
+    allowNull: true
+  })
+  dtUltCompra: Date;
+
+  @Column({
+    type: DataType.DECIMAL(12, 2),
+    allowNull: true
+  })
+  vlUltCompra: number;
+
   @CreatedAt
   createdAt: Date;
 

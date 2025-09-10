@@ -129,6 +129,8 @@ const ContactSchema = Yup.object().shape({
     .max(50, "Número muito longo!")
     .required("Obrigatório"),
   email: Yup.string().email("E-mail inválido"),
+  contactName: Yup.string().nullable(),
+  florder: Yup.boolean().nullable(),
   cpfCnpj: Yup.string()
     .test('cpfCnpj', 'CPF/CNPJ inválido', function(value) {
       if (!value) return true;
@@ -152,7 +154,9 @@ const ContactForm = ({ initialContact, onSave, onCancel }) => {
     situation: initialContact?.situation || 'Ativo',
     fantasyName: initialContact?.fantasyName || '',
     foundationDate: initialContact?.foundationDate || '',
-    creditLimit: initialContact?.creditLimit || ''
+    creditLimit: initialContact?.creditLimit || '',
+    contactName: initialContact?.contactName || '',
+    florder: Boolean(initialContact?.florder) || false
   });
 
   useEffect(() => {
@@ -165,7 +169,9 @@ const ContactForm = ({ initialContact, onSave, onCancel }) => {
       situation: initialContact?.situation || 'Ativo',
       fantasyName: initialContact?.fantasyName || '',
       foundationDate: initialContact?.foundationDate || '',
-      creditLimit: initialContact?.creditLimit || ''
+      creditLimit: initialContact?.creditLimit || '',
+      contactName: initialContact?.contactName || '',
+      florder: Boolean(initialContact?.florder) || false
     });
   }, [initialContact]);
 
@@ -229,6 +235,34 @@ const ContactForm = ({ initialContact, onSave, onCancel }) => {
                 fullWidth
                 className={classes.field}
               />
+            </Grid>
+
+            {/* Linha 1.1 - Nome do Contato (contactName) e Encomenda (florder) */}
+            <Grid item xs={12} sm={6}>
+              <Field
+                as={TextField}
+                label="Nome do Contato"
+                name="contactName"
+                variant="outlined"
+                margin="dense"
+                fullWidth
+                className={classes.field}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <div className={classes.field} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <label htmlFor="florder" style={{ minWidth: 100 }}>Encomenda</label>
+                <input
+                  id="florder"
+                  name="florder"
+                  type="checkbox"
+                  checked={Boolean(values.florder)}
+                  onChange={(e) => handleChange({ target: { name: 'florder', value: e.target.checked } })}
+                  onBlur={handleBlur}
+                  style={{ transform: 'scale(1.1)' }}
+                />
+                <span>{values.florder ? 'Sim' : 'Não'}</span>
+              </div>
             </Grid>
 
             {/* Linha 2 - Número e Cidade */}

@@ -277,6 +277,11 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             <Link href={`mailto:${contact.email}`}>{contact.email}</Link>
                                         </Typography>
+                                        {contact.contactName && (
+                                          <Typography style={{ color: "primary", fontSize: 12 }}>
+                                            {`Nome do Contato: ${contact.contactName}`}
+                                          </Typography>
+                                        )}
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.cpfCnpj && `CPF/CNPJ: ${contact.cpfCnpj}`}
                                         </Typography>
@@ -286,6 +291,19 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.city && `Cidade: ${contact.city}`}
                                         </Typography>
+                                        <Typography style={{ color: "primary", fontSize: 12 }}>
+                                            {`Encomenda: ${contact.florder ? 'Sim' : 'Não'}`}
+                                        </Typography>
+                                        {contact.dtUltCompra && (
+                                          <Typography style={{ color: "primary", fontSize: 12 }}>
+                                            {`Última Compra: ${new Date(contact.dtUltCompra).toLocaleDateString()}`}
+                                          </Typography>
+                                        )}
+                                        {typeof contact.vlUltCompra !== 'undefined' && contact.vlUltCompra !== null && (
+                                          <Typography style={{ color: "primary", fontSize: 12 }}>
+                                            {`Valor Última Compra: R$ ${Number(contact.vlUltCompra).toFixed(2).replace('.', ',')}`}
+                                          </Typography>
+                                        )}
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.instagram && `Instagram: ${contact.instagram}`}
                                         </Typography>

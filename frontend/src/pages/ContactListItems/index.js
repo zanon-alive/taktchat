@@ -9,7 +9,7 @@ import React, {
 
 import { toast } from "react-toastify";
 import { useParams, useHistory } from "react-router-dom";
-import Button from "@material-ui/core/Button";
+import IconDock, { DefaultIconSet } from "../../components/IconDock";
  
 
  
@@ -29,9 +29,10 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
 import useContactLists from "../../hooks/useContactLists";
-import { Chip, Typography, Tooltip } from "@material-ui/core";
+import { Chip, Typography, Tooltip, Popover, Button } from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
 import ContactAvatar from "../../components/ContactAvatar";
-import { Search, List as ListIcon, Upload as UploadIcon, Filter as FilterIcon, Plus as PlusIcon, Edit, Trash2, CheckCircle, Ban, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Search, List as ListIcon, Upload as UploadIcon, Filter as FilterIcon, Plus as PlusIcon, Edit, Trash2, CheckCircle, Ban, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eraser as EraserIcon } from "lucide-react";
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 import planilhaExemplo from "../../assets/planilha.xlsx";
@@ -306,6 +307,37 @@ const ContactListItems = () => {
     }
   };
 
+  // Ações globais usadas no IconDock
+  const handleDisableAutoUpdate = async () => {
+    try {
+      await api.put(`/contact-lists/${contactListId}`, { savedFilter: null });
+      const updated = await findContactList(contactListId);
+      setContactList(updated);
+      // Recarregar lista sem filtro salvo
+      dispatch({ type: "RESET" });
+      setSearchParam("");
+      setPageNumber(1);
+      setRefreshKey((k) => k + 1);
+      toast.success('Filtro salvo limpo.');
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
+  const handleSyncNow = async () => {
+    try {
+      await api.post(`/contact-lists/${contactListId}/sync`);
+      toast.success('Sincronização iniciada.');
+      // Recarregar lista sem F5
+      dispatch({ type: "RESET" });
+      setSearchParam("");
+      setPageNumber(1);
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   const handleImportContacts = async () => {
     try {
       const formData = new FormData();
@@ -458,6 +490,9 @@ const ContactListItems = () => {
   };
 
   const FilterSummary = () => {
+    // Popover de detalhes
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [open, setOpen] = useState(false);
     const f = contactList && contactList.savedFilter;
     if (!f) return null;
 
@@ -473,6 +508,22 @@ const ContactListItems = () => {
       const min = formatCurrency(f.minCreditLimit) || '—';
       const max = formatCurrency(f.maxCreditLimit) || '—';
       parts.push({ label: 'Limite', values: [`${min} – ${max}`] });
+    }
+    // Encomenda (Sim/Não)
+    if (typeof f.florder !== 'undefined') {
+      const v = f.florder === true ? 'Sim' : f.florder === false ? 'Não' : null;
+      if (v) parts.push({ label: 'Encomenda', values: [v] });
+    }
+    // Última Compra (período)
+    if (f.dtUltCompraStart || f.dtUltCompraEnd) {
+      try {
+        const s = f.dtUltCompraStart ? new Date(f.dtUltCompraStart) : null;
+        const e = f.dtUltCompraEnd ? new Date(f.dtUltCompraEnd) : null;
+        const fmt = (d) => d ? d.toLocaleDateString('pt-BR') : '—';
+        parts.push({ label: 'Última Compra', values: [`${fmt(s)} – ${fmt(e)}`] });
+      } catch (_) {
+        // silencioso
+      }
     }
     if (Array.isArray(f.tags) && f.tags.length) {
       const tagNames = allTags.length ? allTags.filter(t => f.tags.includes(t.id)).map(t => t.name) : f.tags.map(id => `#${id}`);
@@ -509,43 +560,87 @@ const ContactListItems = () => {
       }
     };
 
+    // Helpers
+    const fmtCurrency = (val) => {
+      if (val == null || val === '') return '—';
+      const num = Number(String(val).replace(/\s+/g,'').replace(/R\$?/i,'').replace(/\./g,'').replace(/,/g,'.'));
+      if (isNaN(num)) return String(val);
+      return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+    };
+    const fmtDate = (s) => {
+      if (!s) return '—';
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? String(s) : d.toLocaleDateString('pt-BR');
+    };
+
     return (
-      <div style={{ padding: '8px 12px' }}>
+      <div style={{ padding: '6px 8px 2px 8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, rowGap: 6 }}>
-          <Typography variant="caption" style={{ color: '#666' }}>
-            Filtro salvo:
-          </Typography>
-          {parts.map((p, idx) => (
-            <React.Fragment key={p.label}>
-              {idx > 0 && (
-                <Typography variant="caption" style={{ color: '#999' }}>{'>'}</Typography>
-              )}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <Typography variant="caption" style={{ fontWeight: 600 }}>{p.label}:</Typography>
-                {p.values.map((v, i) => (
-                  <Chip key={`${p.label}-${i}`} size="small" label={v} />
-                ))}
-              </div>
-            </React.Fragment>
-          ))}
-          <Chip size="small" label="Auto-atualiza diariamente" color="primary" variant="outlined" />
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Button
               size="small"
-              variant="contained"
-              onClick={() => setConfirmClearListOpen(true)}
-              style={{ backgroundColor: '#dc2626', color: '#fff' }}
-              startIcon={<Trash2 size={16} />}
+              variant="outlined"
+              onMouseEnter={(e) => { setAnchorEl(e.currentTarget); setOpen(true); }}
+              startIcon={<FilterIcon size={16} color="#059669" />}
             >
-              Limpar itens da lista
+              Filtro salvo
             </Button>
-            <Button size="small" variant="outlined" color="primary" onClick={handleSyncNow}>
-              Sincronizar agora
-            </Button>
-            <Button size="small" variant="outlined" color="secondary" onClick={handleDisableAutoUpdate}>
-              Limpar filtro
-            </Button>
+            <Tooltip title="Limpar filtro salvo" placement="top" arrow>
+              <IconButton size="small" onClick={handleDisableAutoUpdate}>
+                <EraserIcon size={18} color="#be185d" />
+              </IconButton>
+            </Tooltip>
           </div>
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={() => setOpen(false)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            PaperProps={{ onMouseLeave: () => setOpen(false) }}
+            disableAutoFocus
+            disableEnforceFocus
+            disableRestoreFocus
+          >
+            <div style={{ padding: 16, maxWidth: 440 }}>
+              <Typography variant="subtitle2" gutterBottom>Detalhes do filtro salvo</Typography>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {Array.isArray(f.channel) && f.channel.length && (
+                  <div><strong>Canal:</strong> {f.channel.join(', ')}</div>
+                )}
+                {Array.isArray(f.representativeCode) && f.representativeCode.length && (
+                  <div><strong>Representante:</strong> {f.representativeCode.join(', ')}</div>
+                )}
+                {Array.isArray(f.city) && f.city.length && (
+                  <div><strong>Cidade:</strong> {f.city.join(', ')}</div>
+                )}
+                {Array.isArray(f.segment) && f.segment.length && (
+                  <div><strong>Segmento:</strong> {f.segment.join(', ')}</div>
+                )}
+                {Array.isArray(f.situation) && f.situation.length && (
+                  <div><strong>Situação:</strong> {f.situation.join(', ')}</div>
+                )}
+                {Array.isArray(f.foundationMonths) && f.foundationMonths.length && (
+                  <div><strong>Fundação (mês):</strong> {f.foundationMonths.join(', ')}</div>
+                )}
+                {(f.minCreditLimit || f.maxCreditLimit) && (
+                  <div><strong>Crédito:</strong> {fmtCurrency(f.minCreditLimit)} – {f.maxCreditLimit ? fmtCurrency(f.maxCreditLimit) : '∞'}</div>
+                )}
+                {typeof f.florder !== 'undefined' && (
+                  <div><strong>Encomenda:</strong> {f.florder ? 'Sim' : 'Não'}</div>
+                )}
+                {(f.dtUltCompraStart || f.dtUltCompraEnd) && (
+                  <div><strong>Última compra (período):</strong> {fmtDate(f.dtUltCompraStart)} – {fmtDate(f.dtUltCompraEnd)}</div>
+                )}
+                {(f.minVlUltCompra != null || f.maxVlUltCompra != null) && (
+                  <div><strong>Valor da última compra:</strong> {fmtCurrency(f.minVlUltCompra)} – {fmtCurrency(f.maxVlUltCompra)}</div>
+                )}
+                {Array.isArray(f.tags) && f.tags.length && (
+                  <div><strong>Tags:</strong> {f.tags.length}</div>
+                )}
+              </div>
+            </div>
+          </Popover>
         </div>
       </div>
     );
@@ -632,12 +727,15 @@ const ContactListItems = () => {
             {/* Cabeçalho */}
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
-               Lista de Contatos > {contactList.name}
+               Lista de Contatos {"›"} {contactList.name}
               </h1>
             </header>
 
+            {/* Filtro salvo (acima da busca) */}
+            <FilterSummary />
+
             {/* Barra de Ações e Filtros */}
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 md:flex-nowrap">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 md:flex-nowrap mb-2 md:mb-2">
               {/* Busca (Esquerda) */}
               <div className="w-full flex items-center gap-2 flex-1 min-w-0 justify-start">
                 <div className="relative flex-1 min-w-[260px] max-w-[620px]">
@@ -652,41 +750,18 @@ const ContactListItems = () => {
                 </div>
               </div>
 
-              {/* Ações (Direita) */}
-              <div className="w-full md:w-auto flex flex-row gap-2 flex-wrap flex-none items-center justify-start">
-                <button
-                  onClick={goToContactLists}
-                  className="shrink-0 px-4 py-2 text-sm font-semibold uppercase text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-                >
-                  <ListIcon className="w-4 h-4 mr-2" />
-                  {i18n.t("contactListItems.buttons.lists")}
-                </button>
-                <button
-                  onClick={() => { fileUploadRef.current.value = null; fileUploadRef.current.click(); }}
-                  className="shrink-0 px-4 py-2 text-sm font-semibold uppercase text-white bg-pink-300 hover:bg-pink-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 flex items-center"
-                >
-                  <UploadIcon className="w-4 h-4 mr-2" />
-                  {i18n.t("contactListItems.buttons.import")}
-                </button>
-                <button
-                  onClick={handleOpenFilterModal}
-                  className="shrink-0 px-4 py-2 text-sm font-semibold uppercase text-white bg-green-600 hover:bg-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center"
-                >
-                  <FilterIcon className="w-4 h-4 mr-2" />
-                  Filtrar
-                </button>
-                <button
-                  onClick={handleOpenContactListItemModal}
-                  className="shrink-0 px-4 py-2 text-sm font-semibold uppercase text-white bg-green-400 hover:bg-green-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 flex items-center"
-                >
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  {i18n.t("contactListItems.buttons.add")}
-                </button>
-              </div>
+              {/* Dock minimalista (somente ícones com tooltip) */}
+              <IconDock
+                actions={[
+                  { id: 'import', label: i18n.t("contactListItems.buttons.import"), onClick: () => { if (fileUploadRef.current) { fileUploadRef.current.value = null; fileUploadRef.current.click(); } }, icon: DefaultIconSet({ color: '#111' }).import },
+                  { id: 'filter', label: 'Filtrar', onClick: handleOpenFilterModal, icon: DefaultIconSet({ color: '#111' }).filter, active: filterModalOpen },
+                  { id: 'clearItems', label: 'Limpar itens da lista', onClick: () => setConfirmClearListOpen(true), icon: DefaultIconSet({ color: '#b91c1c' }).clearItems },
+                  { id: 'syncNow', label: 'Sincronizar agora', onClick: handleSyncNow, icon: DefaultIconSet({ color: '#065f46' }).syncNow },
+                ]}
+              />
             </div>
 
-            {/* Resumo de Filtro e botões extras */}
-            <FilterSummary />
+            
             {/* Input de upload oculto */}
             <input
               style={{ display: "none" }}
