@@ -112,6 +112,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
 	const isMounted = useRef(true);
     const [avatarOpen, setAvatarOpen] = useState(false);
+    const [pendingTags, setPendingTags] = useState([]);
 
 	const initialState = {
 		name: "",
@@ -178,6 +179,14 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 				handleClose();
 			} else {
 				const { data } = await api.post("/contacts", { ...values, disableBot: values.disableBot });
+				// Sincroniza tags pendentes após criação, se houver
+				if (Array.isArray(pendingTags) && pendingTags.length > 0) {
+					try {
+						await api.post('/tags/sync', { contactId: data.id, tags: pendingTags });
+					} catch (syncErr) {
+						// silencioso para não bloquear o fluxo
+					}
+				}
 				if (onSave) {
 					onSave(data);
 				}
@@ -438,13 +447,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										{contact?.id ? (
 											<TagsContainer contact={contact} />
 										) : (
-											<TextField
-												label="Tags"
-												variant="outlined"
-												margin="dense"
-												fullWidth
-												InputLabelProps={{ shrink: true }}
-											/>
+											<TagsContainer contact={{}} pendingTags={pendingTags} onPendingChange={setPendingTags} />
 										)}
 									</Grid>
 									<Grid item xs={12} md={6}>

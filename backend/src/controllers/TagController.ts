@@ -10,6 +10,7 @@ import ShowService from "../services/TagServices/ShowService";
 import DeleteService from "../services/TagServices/DeleteService";
 import SimpleListService from "../services/TagServices/SimpleListService";
 import SyncTagService from "../services/TagServices/SyncTagsService";
+import Tag from "../models/Tag";
 import KanbanListService from "../services/TagServices/KanbanListService";
 import ContactTag from "../models/ContactTag";
 
@@ -139,10 +140,77 @@ export const syncTags = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const data = req.body;
+  const data = req.body as any;
   const { companyId } = req.user;
 
-  const tags = await SyncTagService({ ...data, companyId });
+  // Normaliza a entrada de tags para aceitar:
+  // - string ("CLIENTES")
+  // - array de strings (["CLIENTES", "VIP"])
+  // - array de objetos com id ou name ([{ id: 1, name: "CLIENTES" }])
+  const normalizeToExistingTags = async (): Promise<Array<{ id: number }>> => {
+    let incoming = data?.tags;
+    if (incoming === undefined || incoming === null) return [];
+
+    // Se vier como string única
+    if (typeof incoming === "string") {
+      incoming = [incoming];
+    }
+
+    // Se vier como lista separada por vírgulas
+    if (Array.isArray(incoming) === false && typeof incoming === "object" && (incoming as any).toString) {
+      // mantém como está
+    }
+
+    const result: Array<{ id: number }> = [];
+
+    if (Array.isArray(incoming)) {
+      // Strings ou objetos
+      const names: string[] = [];
+      const ids: number[] = [];
+      for (const t of incoming) {
+        if (t && typeof t === "object") {
+          if (typeof (t as any).id === "number") ids.push((t as any).id);
+          else if (typeof (t as any).name === "string") names.push((t as any).name);
+        } else if (typeof t === "string") {
+          // separa por vírgula se necessário
+          const parts = t.split(',').map(s => s.trim()).filter(Boolean);
+          names.push(...parts);
+        } else if (typeof t === "number") {
+          ids.push(t);
+        }
+      }
+
+      // Busca por ids válidos dessa empresa
+      if (ids.length) {
+        const foundById = await Tag.findAll({ where: { id: ids, companyId } });
+        result.push(...foundById.map(t => ({ id: t.id })));
+      }
+
+      // Busca por nome (case-insensitive) nessa empresa
+      if (names.length) {
+        const uniqueNames = Array.from(new Set(names.map(n => n.trim()).filter(Boolean)));
+        if (uniqueNames.length) {
+          const foundByName = await Tag.findAll({
+            where: { companyId },
+          });
+          const mapByLower = new Map(foundByName.map(t => [String(t.name).toLowerCase(), t]));
+          for (const nm of uniqueNames) {
+            const match = mapByLower.get(nm.toLowerCase());
+            if (match) result.push({ id: match.id });
+          }
+        }
+      }
+    }
+
+    // Remove duplicados
+    const uniq = Array.from(new Set(result.map(r => r.id))).map(id => ({ id }));
+    return uniq;
+  };
+
+  const existingTags = await normalizeToExistingTags();
+  const payload = existingTags.length ? { ...data, tags: existingTags } : { ...data, tags: [] };
+
+  const tags = await SyncTagService({ ...payload, companyId });
 
   return res.json(tags);
 };

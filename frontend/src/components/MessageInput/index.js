@@ -43,6 +43,7 @@ import {
   Video,
   PenLine,
   MessageSquare,
+  Braces,
   Paperclip,
   MoreHorizontal,
 } from "lucide-react";
@@ -136,18 +137,15 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   messageInputWrapper: {
-    padding: 0,
-    marginRight: 7,
-    marginBottom: 5,
-    background: "transparent",
-    backgroundColor: "transparent !important",
+    //padding: 10,
+    //marginRight: 7,
+    marginBottom: 0,
+    
     backgroundImage: ((theme.palette.mode || theme.palette.type) === 'light') ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
-    backgroundRepeat: "repeat",
-    backgroundSize: "auto",
-    backgroundPosition: "center bottom",
+    
     display: "flex",
     borderRadius: 0,
-    flex: 1,
+    //flex: 1,
     position: "relative",
     boxShadow: "none !important",
     border: "none",
@@ -169,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiInputBase-inputMultiline': {
       padding: 0,
-      lineHeight: 1.3,
+      
       maxHeight: 24,
       overflowY: 'auto',
     },
@@ -457,7 +455,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketChannel }) => {
+const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketChannel, contactData, ticketData }) => {
 
   const classes = useStyles();
   const theme = useTheme();
@@ -478,6 +476,8 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
   const { user } = useContext(AuthContext);
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
+  // Menu de variáveis/Tags
+  const [varsAnchorEl, setVarsAnchorEl] = useState(null);
 
   const [signMessagePar, setSignMessagePar] = useState(false);
   const { get: getSetting } = useCompanySettings();
@@ -492,6 +492,119 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
 
   const isMobile = useMediaQuery('(max-width: 767px)'); // Ajuste o valor conforme necessário
   const [placeholderText, setPlaceHolderText] = useState("");
+
+  // Expansor de placeholders: aceita {chave}, {{chave}} e #chave
+  const expandPlaceholders = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    const c = contactData || {};
+    const safe = (v) => (v === undefined || v === null ? "" : String(v));
+    const fullName = safe(c.name || c.contactName || c.fantasyName);
+    const firstName = fullName.split(/\s+/)[0] || "";
+    const lastName = fullName.split(/\s+/).slice(1).join(' ') || "";
+    const number = safe(c.number);
+    const email = safe(c.email);
+    const city = safe(c.city);
+    const cpfCnpj = safe(c.cpfCnpj);
+    const representativeCode = safe(c.representativeCode);
+    const segment = safe(c.segment);
+    const contactIdStr = safe(c.id);
+
+    // Dados do atendimento/ticket
+    const t = ticketData || {};
+    const ticketIdStr = safe(t.id || ticketId);
+    const ticketUuid = safe(t.uuid);
+    const queueName = safe(t.queue?.name || t.queueName);
+    const conexao = safe(t.whatsapp?.name || t.connectionName || ticketChannel);
+    const protocolo = safe(t.protocol || t.uuid || t.id);
+
+    // Dados do atendente/empresa
+    const attendant = safe((user && user.name) || "");
+    const companyName = safe(user?.companyName || user?.tenant?.name || "");
+
+    // Datas/horas/saudações
+    const now = new Date();
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const data = `${pad2(now.getDate())}/${pad2(now.getMonth()+1)}/${now.getFullYear()}`;
+    const hora = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    const dataHora = `${data} ${hora}`;
+    const h = now.getHours();
+    const periodoDia = h < 12 ? 'manhã' : (h < 18 ? 'tarde' : 'noite');
+    const saudacao = h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
+
+    const valueMap = {
+      // nomes (pt e en)
+      'nome': fullName,
+      'name': fullName,
+      'primeiro_nome': firstName,
+      'first_name': firstName,
+      'ultimo_nome': lastName,
+      'last_name': lastName,
+      // telefone/whatsapp
+      'numero': number,
+      'telefone': number,
+      'whatsapp': number,
+      'phone': number,
+      // email
+      'email': email,
+      // cidade
+      'cidade': city,
+      'city': city,
+      // documentos/códigos
+      'cpf_cnpj': cpfCnpj,
+      'cnpj_cpf': cpfCnpj,
+      'representante': representativeCode,
+      'representative_code': representativeCode,
+      'segmento': segment,
+      'segment': segment,
+      // ids
+      'id_contato': contactIdStr,
+      'contact_id': contactIdStr,
+      // atendimento
+      'ticket': ticketIdStr,
+      'ticket_id': ticketIdStr,
+      'protocolo': protocolo,
+      'queue': queueName,
+      'fila': queueName,
+      'conexao': conexao,
+      'connection': conexao,
+      'atendente': attendant,
+      'agent': attendant,
+      // empresa
+      'empresa': companyName,
+      // data/hora / contexto
+      'data': data,
+      'hora': hora,
+      'data_hora': dataHora,
+      'data-hora': dataHora,
+      'periodo_dia': periodoDia,
+      'periodo-dia': periodoDia,
+      'saudacao': saudacao,
+    };
+
+    const normalizeKey = (k) =>
+      String(k || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}+/gu, '')
+        .trim();
+
+    // 1) {chave} e {{chave}} => quando não houver valor, substitui por vazio
+    let out = text
+      .replace(/\{\{\s*([^}]+?)\s*\}\}|\{\s*([^}]+?)\s*\}/g, (m, k1, k2) => {
+        const key = normalizeKey(k1 || k2);
+        const val = valueMap[key];
+        return val !== undefined ? val : "";
+      });
+
+    // 2) #chave (apenas tokens separados por não-letra ou início/fim) => sem valor vira vazio
+    out = out.replace(/(^|[^\w\-])#([\w\-]+)/g, (m, prefix, key) => {
+      const norm = normalizeKey(key);
+      const val = valueMap[norm];
+      return prefix + (val !== undefined ? val : "");
+    });
+
+    return out;
+  };
 
   // Medidor de áudio (waveform simples)
   const audioContextRef = useRef(null);
@@ -712,9 +825,68 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
     }
 
     setInputMessage("");
-    setInputMessage(value.value);
+    setInputMessage(expandPlaceholders(value.value));
     setTypeBar(false);
   };
+
+  // Inserção no cursor atual do input
+  const insertAtCursor = (text) => {
+    try {
+      const input = inputRef.current;
+      if (!input) {
+        setInputMessage((prev) => (prev || "") + text);
+        return;
+      }
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? input.value.length;
+      const before = inputMessage.slice(0, start);
+      const after = inputMessage.slice(end);
+      const next = `${before}${text}${after}`;
+      setInputMessage(next);
+      setTimeout(() => {
+        input.focus();
+        const pos = start + text.length;
+        input.setSelectionRange(pos, pos);
+      }, 0);
+    } catch {
+      setInputMessage((prev) => (prev || "") + text);
+    }
+  };
+
+  const handleOpenVarsMenu = (e) => setVarsAnchorEl(e.currentTarget);
+  const handleCloseVarsMenu = () => setVarsAnchorEl(null);
+
+  const varTags = [
+    { group: 'Contato', items: [
+      { label: 'Nome', token: '{nome}' },
+      { label: 'Primeiro nome', token: '{primeiro_nome}' },
+      { label: 'Último nome', token: '{ultimo_nome}' },
+      { label: 'Número/WhatsApp', token: '{numero}' },
+      { label: 'Email', token: '{email}' },
+      { label: 'Cidade', token: '{cidade}' },
+      { label: 'CPF/CNPJ', token: '{cpf_cnpj}' },
+      { label: 'Cód. Representante', token: '{representante}' },
+      { label: 'Segmento', token: '{segmento}' },
+      { label: 'ID Contato', token: '{id_contato}' },
+    ]},
+    { group: 'Atendimento', items: [
+      { label: 'Ticket', token: '{ticket}' },
+      { label: 'Protocolo', token: '{protocolo}' },
+      { label: 'Fila', token: '{fila}' },
+      { label: 'Conexão', token: '{conexao}' },
+      { label: 'Atendente', token: '{atendente}' },
+    ]},
+    { group: 'Empresa', items: [
+      { label: 'Empresa', token: '{empresa}' },
+    ]},
+    { group: 'Data/Hora', items: [
+      { label: 'Data', token: '{data}' },
+      { label: 'Hora', token: '{hora}' },
+      { label: 'Data/Hora', token: '{data_hora}' },
+      { label: 'Período do dia', token: '{periodo_dia}' },
+      { label: 'Saudação', token: '{saudacao}' },
+    ]},
+  ];
 
   const handleAddEmoji = (e) => {
     let emoji = e.native;
@@ -861,7 +1033,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
       ? `${user.name} - Mensagem Privada`
       : user.name;
 
-    const sendMessage = inputMessage.trim();
+    const sendMessage = expandPlaceholders(inputMessage.trim());
 
     const message = {
       read: 1,
@@ -1495,6 +1667,15 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
             </div>
             {!privateMessageInputVisible && (
               <>
+                <Tooltip title="Variáveis">
+                  <IconButton
+                    aria-label="variables"
+                    component="span"
+                    onClick={handleOpenVarsMenu}
+                  >
+                    <Braces size={18} className={classes.sendMessageIcons} />
+                  </IconButton>
+                </Tooltip>
                 <Tooltip title="Mensagem rápida">
                   <IconButton
                     aria-label="flash"
@@ -1504,6 +1685,28 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                     <Zap size={18} className={classes.sendMessageIcons} />
                   </IconButton>
                 </Tooltip>
+                <Menu
+                  anchorEl={varsAnchorEl}
+                  keepMounted
+                  open={Boolean(varsAnchorEl)}
+                  onClose={handleCloseVarsMenu}
+                  id="vars-menu"
+                  anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  style={{ zIndex: 1700, maxHeight: 360 }}
+                >
+                  {varTags.map((grp, gi) => (
+                    <div key={`grp-${gi}`}>
+                      <MenuItem disabled style={{ opacity: 0.7, fontWeight: 600 }}>{grp.group}</MenuItem>
+                      {grp.items.map((it, ii) => (
+                        <MenuItem key={`it-${gi}-${ii}`} onClick={() => { insertAtCursor(it.token); handleCloseVarsMenu(); }}>
+                          {it.label} <span style={{ opacity: 0.6, marginLeft: 6 }}>{it.token}</span>
+                        </MenuItem>
+                      ))}
+                      {gi < varTags.length - 1 && <Divider />}
+                    </div>
+                  ))}
+                </Menu>
                 {inputMessage || showSelectMessageCheckbox ? (
                   <>
                     <IconButton

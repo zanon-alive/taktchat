@@ -1,14 +1,15 @@
-import { Chip, TextField, Checkbox } from "@material-ui/core";
+import { Chip, TextField, Checkbox, Popover } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import React, { useEffect, useRef, useState } from "react";
 import { isArray, isString } from "lodash";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function TagsContainer({ contact }) {
+export function TagsContainer({ contact, pendingTags = [], onPendingChange }) {
 
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
+    const [anchorEl, setAnchorEl] = useState(null);
     const isMounted = useRef(true);
 
     useEffect(() => {
@@ -18,16 +19,18 @@ export function TagsContainer({ contact }) {
     }, [])
 
     useEffect(() => {
-        if (isMounted.current) {
-            loadTags().then(() => {
-                if (Array.isArray(contact.tags)) {
-                    setSelecteds(contact.tags);
-                } else {
-                    setSelecteds([]);
-                }
-            });
-        }
-    }, [contact]);
+        if (!isMounted.current) return;
+        loadTags().then(() => {
+            if (contact && contact.id && Array.isArray(contact.tags)) {
+                setSelecteds(contact.tags);
+            } else if (!contact?.id && Array.isArray(pendingTags)) {
+                setSelecteds(pendingTags);
+            } else {
+                setSelecteds([]);
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [contact?.id]);
 
     const createTag = async (data) => {
         try {
@@ -80,7 +83,11 @@ export function TagsContainer({ contact }) {
             optionsChanged = value;
         }
         setSelecteds(optionsChanged);
-        await syncTags({ contactId: contact.id, tags: optionsChanged });
+        if (contact && contact.id) {
+            await syncTags({ contactId: contact.id, tags: optionsChanged });
+        } else if (typeof onPendingChange === 'function') {
+            onPendingChange(optionsChanged);
+        }
     }
 
     function getRandomHexColor() {
@@ -95,6 +102,11 @@ export function TagsContainer({ contact }) {
         return hexColor;
     }
 
+    const openPopover = Boolean(anchorEl);
+
+    const handleOpenAll = (e) => setAnchorEl(e.currentTarget);
+    const handleCloseAll = () => setAnchorEl(null);
+
     return (
         <Autocomplete
             multiple
@@ -103,7 +115,7 @@ export function TagsContainer({ contact }) {
             value={selecteds}
             freeSolo
             fullWidth
-            style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+            style={{ overflow: 'hidden' }}
             disableCloseOnSelect
             onChange={(e, v, r) => onChange(v, r)}
             getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
@@ -127,7 +139,7 @@ export function TagsContainer({ contact }) {
                 const shown = value.slice(0, 2);
                 const more = value.length - shown.length;
                 return (
-                    <div style={{ display: 'flex', flexWrap: 'nowrap', overflow: 'hidden', alignItems: 'center', maxWidth: '100%', flexShrink: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         {shown.map((option, index) => (
                             <Chip
                                 key={`tag-${index}`}
@@ -135,15 +147,13 @@ export function TagsContainer({ contact }) {
                                 style={{
                                     backgroundColor: option.color || '#eee',
                                     color: option.color ? '#FFF' : '#333',
-                                    marginRight: 2,                                    
-                                    fontWeight: 600,
+                                    fontWeight: 500,
                                     borderRadius: 9999,
                                     fontSize: "0.75rem",
-                                    whiteSpace: "nowrap",
-                                    height: 24,
+                                    height: 20,
                                 }}
                                 label={(
-                                    <span style={{ display: 'block', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    <span style={{ display: 'block', maxWidth: 55, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         {typeof option === 'string' ? option : option.name}
                                     </span>
                                 )}
@@ -152,13 +162,35 @@ export function TagsContainer({ contact }) {
                             />
                         ))}
                         {more > 0 && (
-                            <Chip
-                                variant="outlined"
-                                size="small"
-                                label="..."
-                                style={{ borderRadius: 9999, height: 24, padding: '0 8px', marginTop: 0, marginBottom: 0 }}
-                                tabIndex={-1}
-                            />
+                            <>
+                                <Chip
+                                    variant="outlined"
+                                    size="small"
+                                    label={`+${more}`}
+                                    onClick={handleOpenAll}
+                                    style={{ borderRadius: 9999, height: 20, padding: '1px 3px', marginTop: 0, marginBottom: 0, cursor: 'pointer' }}
+                                />
+                                <Popover
+                                    open={openPopover}
+                                    anchorEl={anchorEl}
+                                    onClose={handleCloseAll}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                    PaperProps={{ style: { maxWidth: 360, padding: 5 } }}
+                                >
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxWidth: 340 }}>
+                                        {value.map((option, idx) => (
+                                            <Chip
+                                                key={`all-tag-${idx}`}
+                                                variant="outlined"
+                                                size="small"
+                                                style={{ backgroundColor: option.color || '#eee', color: option.color ? '#FFF' : '#333', fontWeight: 600, borderRadius: 9999 }}
+                                                label={typeof option === 'string' ? option : option.name}
+                                            />
+                                        ))}
+                                    </div>
+                                </Popover>
+                            </>
                         )}
                     </div>
                 );
@@ -179,16 +211,12 @@ export function TagsContainer({ contact }) {
                             paddingTop: 4,
                             paddingBottom: 4,
                             alignItems: 'center',
-                            overflow: 'hidden',
-                            display: 'flex',
-                            flexWrap: 'nowrap',
-                            whiteSpace: 'nowrap',
                             boxSizing: 'border-box',
                         }
                     }}
                     inputProps={{
                         ...params.inputProps,
-                        style: { ...(params.inputProps?.style || {}), padding: 0, minWidth: 8, flex: '0 0 8px' }
+                        style: { ...(params.inputProps?.style || {}), padding: 0, minWidth: 40, flex: '0 0 40px' }
                     }}
                 />
             )}

@@ -19,6 +19,7 @@ interface ContactData {
   email?: string;
   number?: string;
   name?: string;
+  contactName?: string;
   acceptAudioMessage?: boolean;
   active?: boolean;
   extraInfo?: ExtraInfo[];
@@ -57,6 +58,7 @@ const UpdateContactService = async ({
   const {
     email,
     name,
+    contactName,
     number,
     extraInfo,
     acceptAudioMessage,
@@ -138,7 +140,7 @@ const UpdateContactService = async ({
     attributes: [
       "id", "name", "number", "channel", "email", "companyId",
       "acceptAudioMessage", "active", "disableBot", "profilePicUrl", "remoteJid",
-      "urlPicture", "florder",
+      "urlPicture", "florder", "contactName",
       // Adicionar novos campos aos atributos
       "cpfCnpj", "representativeCode", "city", "instagram",
       "situation", "fantasyName", "foundationDate", "creditLimit", "segment", "dtUltCompra", "vlUltCompra"
@@ -232,6 +234,7 @@ const UpdateContactService = async ({
   const updateData: any = {
     name: resolvedName,
     number: number !== undefined ? number : contact.number,
+    contactName: contactName !== undefined ? emptyToNull(contactName) : (contact as any).contactName,
     // Email: nunca salvar como null (modelo não permite). Vazio => "".
     email: email !== undefined
       ? (email === null ? "" : (typeof email === "string" ? email.trim() : (contact.email ?? "")))
@@ -275,7 +278,7 @@ const UpdateContactService = async ({
     attributes: [
       "id", "name", "number", "channel", "email", "companyId",
       "acceptAudioMessage", "active", "disableBot", "profilePicUrl", "remoteJid",
-      "urlPicture", "florder", "vlUltCompra",
+      "urlPicture", "florder", "vlUltCompra", "contactName",
       // Adicionar novos campos aos atributos
       "cpfCnpj", "representativeCode", "city", "instagram",
       "situation", "fantasyName", "foundationDate", "creditLimit", "segment", "dtUltCompra"
