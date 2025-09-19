@@ -121,6 +121,22 @@ public
 # Windows
 Thumbs.db
 
+# WhatsApp-Web.js (LocalAuth) - sessões e perfil do Chromium
+# A pasta abaixo é criada pelo whatsapp-web.js e não deve ir para o repositório
+wwebjs_auth/
+**/wwebjs_auth/
+.wwebjs_auth/
+**/.wwebjs_auth/
+
+# Alguns navegadores/puppeteer criam subpastas de perfil dentro da sessão
+**/wwebjs_auth/**/Default/
+**/wwebjs_auth/**/Session Storage/
+**/wwebjs_auth/**/Local Storage/
+**/wwebjs_auth/**/Cache/
+**/wwebjs_auth/**/Service Worker/
+**/wwebjs_auth/**/IndexedDB/
+**/wwebjs_auth/**/GPUCache/
+
 # Custom: Whaticket logs, status, backups, stash, restore
 # Evita commitar arquivos de status/logs/merge temporários
 # (ajuste conforme padrão dos seus scripts)
