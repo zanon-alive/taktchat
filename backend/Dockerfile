@@ -90,7 +90,8 @@ RUN mkdir -p ./private
 RUN apt-get update \
   && apt-get install -y chromium
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 EXPOSE 8080
 
