@@ -6,7 +6,8 @@ import {
   getLabelsStatusWWeb,
   getLabelsProgressWWeb,
   cancelLabelsOperationWWeb,
-  initializeWhatsAppWebConnection
+  initializeWhatsAppWebConnection,
+  getLabelsQrImageWWeb
 } from "../controllers/WhatsAppWebLabelsController";
 
 const whatsappWebLabelsRoutes = express.Router();
@@ -19,6 +20,9 @@ whatsappWebLabelsRoutes.get("/whatsapp-web/labels/:labelId/contacts", isAuth, ge
 
 // Verificar status da conexão WhatsApp-Web.js
 whatsappWebLabelsRoutes.get("/whatsapp-web/status", isAuth, getLabelsStatusWWeb);
+
+// Obter QR Code como imagem (DataURL PNG)
+whatsappWebLabelsRoutes.get("/whatsapp-web/qr-image", isAuth, getLabelsQrImageWWeb);
 
 // Progresso do carregamento de labels
 whatsappWebLabelsRoutes.get("/whatsapp-web/labels/progress", isAuth, getLabelsProgressWWeb);

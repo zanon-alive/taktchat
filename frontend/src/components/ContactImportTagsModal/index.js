@@ -96,6 +96,9 @@ const ContactImportTagsModal = ({ isOpen, handleClose, onImport }) => {
   const [qrOpen, setQrOpen] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [qrStatus, setQrStatus] = useState("idle"); // idle | initializing | qr_generated | authenticated | connected | disconnected
+  const [qrUpdatedAt, setQrUpdatedAt] = useState(0);
+  const [qrNote, setQrNote] = useState("");
+  const QR_REFRESH_MS = 55000; // auto refresh ~55s
   const qrPollRef = useRef(null);
   // Progresso de carregamento de labels (WhatsApp-Web.js)
   const [labelsProgress, setLabelsProgress] = useState({ percent: 0, phase: 'idle' });
@@ -412,7 +415,39 @@ const ContactImportTagsModal = ({ isOpen, handleClose, onImport }) => {
           const { hasQR, qrCode: code, status, connected } = statusResponse.data || {};
           setQrStatus(status || (connected ? 'connected' : 'initializing'));
           if (hasQR && code) {
-            setQrCode(code);
+            try {
+              // Tenta obter imagem do QR como DataURL do backend
+              const imgResp = await api.get(`/whatsapp-web/qr-image?whatsappId=${selectedWhatsappId}`);
+              const dataUrl = imgResp?.data?.dataUrl;
+              if (dataUrl && typeof dataUrl === 'string') {
+                setQrCode(dataUrl);
+                setQrUpdatedAt(Date.now());
+                setQrNote('O QR expira em ~1 minuto. Atualizaremos automaticamente se necessário.');
+              } else {
+                // Fallback: usa serviço externo se backend não retornou DataURL
+                const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(code)}`;
+                setQrCode(url);
+                setQrUpdatedAt(Date.now());
+                setQrNote('O QR expira em ~1 minuto. Atualizaremos automaticamente se necessário.');
+              }
+            } catch (_) {
+              // Fallback: usa serviço externo se falhar
+              const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(code)}`;
+              setQrCode(url);
+              setQrUpdatedAt(Date.now());
+              setQrNote('O QR expira em ~1 minuto. Atualizaremos automaticamente se necessário.');
+            }
+          }
+          // Auto-refresh: se estamos exibindo QR há muito tempo, peça um novo
+          if (status === 'qr_generated' && qrUpdatedAt && (Date.now() - qrUpdatedAt > QR_REFRESH_MS)) {
+            try {
+              setQrNote('QR expirado. Gerando um novo...');
+              setQrCode('');
+              setQrUpdatedAt(Date.now());
+              await api.post(`/whatsapp-web/initialize?whatsappId=${selectedWhatsappId}`);
+            } catch (_) {
+              // mantém tentativa no próximo ciclo
+            }
           }
           if (connected) {
             // Conectado: para polling, fecha modal após pequena pausa
@@ -423,6 +458,7 @@ const ContactImportTagsModal = ({ isOpen, handleClose, onImport }) => {
             setTimeout(() => {
               setQrOpen(false);
               setQrCode("");
+              setQrNote('');
             }, 1200);
           }
         } catch (e) {
@@ -923,27 +959,21 @@ const ContactImportTagsModal = ({ isOpen, handleClose, onImport }) => {
               width={300}
               height={300}
               style={{ borderRadius: 8, border: '1px solid #eee' }}
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCode)}`}
+              src={qrCode}
             />
           )}
           <Typography variant="caption" color="textSecondary" style={{ marginTop: 8 }}>
             Abra o aplicativo WhatsApp no celular → Dispositivos conectados → Conectar um dispositivo → aponte a câmera para o QR.
           </Typography>
+          {qrNote && (
+            <Typography variant="caption" color="textSecondary" style={{ marginTop: 4 }}>
+              {qrNote}
+            </Typography>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setQrOpen(false)} color="primary">Fechar</Button>
-        {qrCode && (
-          <Button
-            color="primary"
-            onClick={() => {
-              const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCode)}`;
-              window.open(url, '_blank');
-            }}
-          >
-            Abrir em nova aba
-          </Button>
-        )}
       </DialogActions>
     </Dialog>
     </>

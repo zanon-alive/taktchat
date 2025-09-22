@@ -31,6 +31,30 @@ export const getDeviceLabelsWWeb = async (req: Request, res: Response) => {
   }
 };
 
+export const getLabelsQrImageWWeb = async (req: Request, res: Response) => {
+  try {
+    const companyId = (req.user as any)?.companyId;
+    const whatsappId = req.query.whatsappId ? Number(req.query.whatsappId) : undefined;
+
+    const whatsAppWebLabelsService = require("../services/WbotServices/WhatsAppWebLabelsService").default;
+    const GetDefaultWhatsApp = require("../helpers/GetDefaultWhatsApp").default;
+
+    const def = await GetDefaultWhatsApp(whatsappId, companyId);
+    const qr = whatsAppWebLabelsService.getQRCode(def.id);
+    if (!qr) {
+      return res.status(404).json({ success: false, error: "QR Code não disponível" });
+    }
+
+    // Gera DataURL PNG a partir da string do QR
+    const QRCode = require('qrcode');
+    const dataUrl: string = await QRCode.toDataURL(qr, { margin: 1, scale: 6 });
+
+    return res.json({ success: true, whatsappId: def.id, dataUrl });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error?.message || 'Erro ao gerar imagem do QR Code' });
+  }
+};
+
 export const cancelLabelsOperationWWeb = async (req: Request, res: Response) => {
   try {
     const companyId = (req.user as any)?.companyId;
