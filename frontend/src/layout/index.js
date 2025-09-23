@@ -55,6 +55,8 @@ import Brightness4Icon from "@material-ui/icons/Brightness4";
 import Brightness7Icon from "@material-ui/icons/Brightness7";
 import { getBackendUrl } from "../config";
 import useSettings from "../hooks/useSettings";
+import useVersion from "../hooks/useVersion";
+import pkg from "../../package.json";
 
 // import { SocketContext } from "../context/Socket/SocketContext";
 
@@ -318,6 +320,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   );
 
   const settings = useSettings();
+  const { setVersion } = useVersion();
 
   useEffect(() => {
     const getSetting = async () => {
@@ -339,6 +342,21 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   
 
   useEffect(() => {
+    // Envia a versão do frontend para o backend (/version)
+    // Envia somente se a versão atual for diferente da última registrada
+    (async () => {
+      try {
+        const current = pkg?.version || "";
+        const lastSent = localStorage.getItem("frontendVersionSent") || "";
+        if (current && current !== lastSent) {
+          await setVersion(current);
+          localStorage.setItem("frontendVersionSent", current);
+        }
+      } catch (e) {
+        // silencioso: não bloquear UI caso backend indisponível
+      }
+    })();
+
     // if (localStorage.getItem("public-token") === null) {
     //   handleLogout()
     // }
@@ -469,7 +487,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         </div>
         <List className={classes.containerWithScroll}>
           {/* {mainListItems} */}
-          <MainListItems collapsed={!drawerOpen} />
+          <MainListItems collapsed={!drawerOpen} drawerClose={drawerClose} />
         </List>
         <Divider />
       </Drawer>

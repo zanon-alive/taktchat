@@ -13,6 +13,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v2
 
+      - name: Read backend version
+        id: pkg
+        run: |
+          echo "Reading backend/package.json version..."
+          VER=$(node -p -e "require('./backend/package.json').version")
+          echo "version=$VER" >> $GITHUB_OUTPUT
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -24,4 +31,11 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: felipergrosa/whaticket-backend:latest
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp || github.run_started_at }}
+            BACKEND_VERSION=${{ steps.pkg.outputs.version || '' }}
+          tags: |
+            felipergrosa/whaticket-backend:latest
+            felipergrosa/whaticket-backend:${{ github.sha }}
+            felipergrosa/whaticket-backend:v${{ steps.pkg.outputs.version }}

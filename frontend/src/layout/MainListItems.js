@@ -226,7 +226,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam] = useState("");
   const [chats, dispatch] = useReducer(reducer, []);
-  const [versionInfo, setVersionInfo] = useState({ frontend: "", commit: "", buildDate: "" });
+  const [versionInfo, setVersionInfo] = useState({ frontend: "", backend: "", commit: "", buildDate: "" });
   const [managementHover, setManagementHover] = useState(false);
   const [campaignHover, setCampaignHover] = useState(false);
   const [flowHover, setFlowHover] = useState(false)
@@ -270,6 +270,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
     async function fetchVersion() {
       const data = await getVersion();
       const frontendVersion = data?.version || "N/A";
+      const backendVersion = data?.backend?.version || "N/A";
       const commit = data?.backend?.commit || "N/A";
       const buildDateRaw = data?.backend?.buildDate || "N/A";
       let buildDate = buildDateRaw;
@@ -281,7 +282,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
       } catch (e) {
         // ignore parse errors, keep raw string
       }
-      setVersionInfo({ frontend: frontendVersion, commit, buildDate });
+      setVersionInfo({ frontend: frontendVersion, backend: backendVersion, commit, buildDate });
     }
     fetchVersion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -847,7 +848,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 <img style={{ width: "100%", padding: "10px" }} src={logo} alt="image" />            
               </Hidden> 
               */}
-          <Tooltip title={`BACKEND BUILD: ${versionInfo.buildDate} | Commit: ${versionInfo.commit}`}>
+          <Tooltip title={`BACKEND BUILD: ${versionInfo.buildDate} | Commit: ${versionInfo.commit} | Frontend: ${versionInfo.frontend}`}>
             <Typography
               style={{
                 fontSize: "12px",
@@ -857,7 +858,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 cursor: "default",
               }}
             >
-              {`Versão ${versionInfo.frontend}`}
+              {`Versão ${versionInfo.backend}`}
             </Typography>
           </Tooltip>
         </React.Fragment>

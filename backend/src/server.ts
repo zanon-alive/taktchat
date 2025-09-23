@@ -36,23 +36,101 @@ import { startQueueProcess } from "./queues";
 const port = Number(process.env.PORT) || 8080;
 const server = app.listen(port, async () => {
   // Log de versão após inicialização do Sequelize (evita ModelNotInitializedError)
-  getBackendVersion().then(backendVersion => {
+  (async () => {
     const safeRead = (p: string) => {
       try { return fs.readFileSync(p, "utf8").trim(); } catch { return ""; }
     };
     const safeExec = (cmd: string) => {
       try { return execSync(cmd).toString().trim(); } catch { return ""; }
     };
-    const commit = process.env.GIT_COMMIT
-      || safeRead(path.join(process.cwd(), ".git-commit"))
-      || safeExec("git rev-parse --short HEAD")
-      || "N/A";
-    const buildDate = process.env.BUILD_DATE
-      || safeRead(path.join(process.cwd(), ".build-date"))
-      || new Date().toISOString();
+    const findGitDir = (): string => {
+      // Procura pela pasta/arquivo .git subindo até 4 níveis a partir do CWD
+      let dir = process.cwd();
+      for (let i = 0; i < 4; i += 1) {
+        const gitPath = path.join(dir, ".git");
+        try {
+          if (fs.existsSync(gitPath)) {
+            try {
+              const stat = fs.lstatSync(gitPath);
+              if (stat.isDirectory()) {
+                return gitPath; // .git é diretório
+              }
+              // .git é arquivo com ponteiro gitdir
+              const content = fs.readFileSync(gitPath, "utf8");
+              const m = content.match(/gitdir:\s*(.*)\s*/i);
+              if (m && m[1]) {
+                const gitDirPath = path.isAbsolute(m[1]) ? m[1] : path.resolve(dir, m[1]);
+                if (fs.existsSync(gitDirPath)) return gitDirPath;
+              }
+            } catch { /* ignore */ }
+          }
+        } catch { /* ignore */ }
+        const parent = path.dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+      }
+      return "";
+    };
+    const readCommitFromGitDir = (): string => {
+      try {
+        const gitDir = findGitDir();
+        if (!gitDir) return "";
+        const head = fs.readFileSync(path.join(gitDir, "HEAD"), "utf8").trim();
+        if (head.startsWith("ref:")) {
+          const ref = head.split(":")[1].trim();
+          const refPath = path.join(gitDir, ref);
+          if (fs.existsSync(refPath)) {
+            const full = fs.readFileSync(refPath, "utf8").trim();
+            return full.substring(0, 7);
+          }
+        } else if (/^[0-9a-f]{7,40}$/i.test(head)) {
+          return head.substring(0, 7);
+        }
+      } catch { /* ignore */ }
+      return "";
+    };
 
+    // Detecta versão do package.json (ou ENV) para manter produção e dev alinhados
+    let pkgVersion = process.env.BACKEND_VERSION || "";
+    if (!pkgVersion) {
+      try {
+        const pkgPath = path.join(process.cwd(), "package.json");
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+        pkgVersion = pkg?.version || "";
+      } catch {
+        pkgVersion = "";
+      }
+    }
+    if (!pkgVersion) pkgVersion = "N/A";
+
+    // Atualiza/sincroniza tabela Versions (id=1) com a versão atual do backend
+    try {
+      const existing = await Version.findByPk(1);
+      if (existing) {
+        if (existing.versionBackend !== pkgVersion) {
+          await existing.update({ versionBackend: pkgVersion });
+        }
+      } else {
+        await Version.create({ id: 1, versionBackend: pkgVersion, versionFrontend: existing?.versionFrontend || null as any });
+      }
+    } catch (e) {
+      // Falha ao sincronizar versão no banco não impede startup
+      // eslint-disable-next-line no-console
+      console.warn("WARN: falha ao sincronizar Versions.versionBackend:", (e as any)?.message || e);
+    }
+
+    // Busca valor visível no log (mantém compatibilidade com getBackendVersion())
+    const backendVersion = await getBackendVersion();
+
+    // Calcula commit e data de build. Não dependa de git em runtime; suprime stderr.
+    const fileCommit = safeRead(path.join(process.cwd(), ".git-commit"));
+    const gitCommit = safeExec("git rev-parse --short HEAD") || readCommitFromGitDir();
+    const commit = process.env.GIT_COMMIT || fileCommit || gitCommit || "N/A";
+    const buildDate = process.env.BUILD_DATE || safeRead(path.join(process.cwd(), ".build-date")) || new Date().toISOString();
+
+    // eslint-disable-next-line no-console
     console.log(`BACKEND BUILD: ${buildDate} | Commit: ${commit} | Version: ${backendVersion}`);
-  });
+  })();
   const companies = await Company.findAll({
     where: { status: true },
     attributes: ["id"]
