@@ -565,28 +565,96 @@ function getCampaignValidConfirmationMessages(campaign) {
 }
 
 function getProcessedMessage(msg: string, variables: any[], contact: any) {
-  let finalMessage = msg;
+  let finalMessage = msg || "";
 
-  if (finalMessage.includes("{nome}")) {
-    finalMessage = finalMessage.replace(/{nome}/g, contact.name);
-  }
+  const name: string = contact?.name || "";
+  const firstName: string = (name || "").trim().split(/\s+/)[0] || name;
+  const email: string = contact?.email || "";
+  const number: string = contact?.number || "";
 
-  if (finalMessage.includes("{email}")) {
-    finalMessage = finalMessage.replace(/{email}/g, contact.email);
-  }
+  const now = moment();
+  const dateStr = now.format("DD/MM/YYYY");
+  const timeStr = now.format("HH:mm:ss");
+  const dateTimeStr = now.format("DD/MM/YYYY HH:mm:ss");
 
-  if (finalMessage.includes("{numero}")) {
-    finalMessage = finalMessage.replace(/{numero}/g, contact.number);
-  }
+  const hour = now.hour();
+  const periodo = hour < 12 ? "manhã" : hour < 18 ? "tarde" : "noite";
+  const saudacao = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
 
-  if (variables[0]?.value !== '[]') {
-    variables.forEach(variable => {
-      if (finalMessage.includes(`{${variable.key}}`)) {
-        const regex = new RegExp(`{${variable.key}}`, "g");
-        finalMessage = finalMessage.replace(regex, variable.value);
-      }
-    });
-  }
+  const replacements: Record<string, string> = {
+    "nome": name,
+    "primeiro-nome": firstName,
+    "email": email,
+    "numero": number,
+    "data": dateStr,
+    "hora": timeStr,
+    "data-hora": dateTimeStr,
+    "periodo-dia": periodo,
+    "saudacao": saudacao,
+  };
+
+  Object.keys(replacements).forEach((key) => {
+    const value = replacements[key] ?? "";
+    const rx = new RegExp(`\\{${key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\}`, "g");
+    finalMessage = finalMessage.replace(rx, value);
+  });
+
+  try {
+    if (Array.isArray(variables) && variables.length > 0 && variables[0]?.value !== '[]') {
+      variables.forEach((variable: any) => {
+        if (!variable?.key) return;
+        const raw = String(variable.key);
+        const rx = new RegExp(`\\{${raw.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\}`, "g");
+        finalMessage = finalMessage.replace(rx, String(variable.value ?? ""));
+      });
+    }
+  } catch {}
+
+  // Aliases pt-BR -> chaves reais do modelo de contato
+  try {
+    const aliasMap: Record<string, string> = {
+      "cidade": "city",
+      "situacao": "situation",
+      "fantasia": "fantasyName",
+      "data-fundacao": "foundationDate",
+      "limite-credito": "creditLimit",
+      "segmento": "segment",
+      "cnpj-cpf": "cpfCnpj",
+      "codigo-representante": "representativeCode",
+    };
+    if (contact && typeof contact === 'object') {
+      Object.entries(aliasMap).forEach(([alias, key]) => {
+        if (key in contact && contact[key] != null) {
+          const value = String(contact[key]);
+          const rx = new RegExp(`\\{${alias.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\}`, "g");
+          finalMessage = finalMessage.replace(rx, value);
+        }
+      });
+    }
+  } catch {}
+
+  try {
+    const toKebab = (s: string) => s
+      .replace(/([a-z])([A-Z])/g, "$1-$2")
+      .replace(/[ _]+/g, "-")
+      .toLowerCase();
+    if (contact && typeof contact === 'object') {
+      Object.keys(contact).forEach((key) => {
+        const val = (contact as any)[key];
+        if (val === null || val === undefined) return;
+        if (["string","number","boolean"].includes(typeof val)) {
+          const value = String(val);
+          const rxKey = new RegExp(`\\{${key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\}`, "g");
+          finalMessage = finalMessage.replace(rxKey, value);
+          const kebab = toKebab(key);
+          if (kebab !== key) {
+            const rxKebab = new RegExp(`\\{${kebab.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\}`, "g");
+            finalMessage = finalMessage.replace(rxKebab, value);
+          }
+        }
+      });
+    }
+  } catch {}
 
   return finalMessage;
 }
@@ -835,10 +903,7 @@ async function isNumberSuppressed(number: string, companyId: number): Promise<bo
       include: [{ model: Tag, through: { attributes: [] } }]
     });
     if (!contact) return false;
-    // Regras de opt-out/bloqueio
-    if (contact.disableBot === true) return true;
-    if (contact.active === false) return true;
-    if (contact.situation && contact.situation !== 'Ativo') return true;
+    // Apenas regras de TAG de supressão (DNC/OPT-OUT/STOP/SAIR/etc.)
     const suppressionNames = (await getSuppressionTagNames(companyId)).map(s => s.toLowerCase());
     const names = (contact as any).tags?.map((t: any) => (t?.name || "").toLowerCase()) || [];
     return names.some(n => suppressionNames.includes(n));
@@ -999,10 +1064,19 @@ async function handlePrepareContact(job) {
     if (messages.length >= 0) {
       const radomIndex = randomValue(0, messages.length);
 
+      // Enriquecer dados do contato com informações do CRM (Contact)
+      let enrichedContact: any = contact;
+      try {
+        const crmContact = await Contact.findOne({ where: { number: campaignShipping.number, companyId: campaign.companyId } });
+        if (crmContact) {
+          enrichedContact = { ...contact, ...(crmContact as any).dataValues };
+        }
+      } catch {}
+
       const message = getProcessedMessage(
         messages[radomIndex] || "",
         variables,
-        contact
+        enrichedContact
       );
 
       campaignShipping.message = message === null ? "" : `\u200c ${message}`;
@@ -1014,10 +1088,17 @@ async function handlePrepareContact(job) {
         getCampaignValidConfirmationMessages(campaign);
       if (confirmationMessages.length) {
         const radomIndex = randomValue(0, confirmationMessages.length);
+        let enrichedContact: any = contact;
+        try {
+          const crmContact = await Contact.findOne({ where: { number: campaignShipping.number, companyId: campaign.companyId } });
+          if (crmContact) {
+            enrichedContact = { ...contact, ...(crmContact as any).dataValues };
+          }
+        } catch {}
         const message = getProcessedMessage(
           confirmationMessages[radomIndex] || "",
           variables,
-          contact
+          enrichedContact
         );
         campaignShipping.confirmationMessage = `\u200c ${message}`;
       }

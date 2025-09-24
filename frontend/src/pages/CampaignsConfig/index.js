@@ -32,7 +32,6 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import ForbiddenPage from "../../components/ForbiddenPage";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import AIIntegrationSelector from "../../components/AIIntegrationSelector";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -95,11 +94,7 @@ const CampaignsConfig = () => {
 
   const { getPlanCompany } = usePlans();
 
-  // --- Integração IA Global + Prompt Base ---
-  const [aiIntegrationId, setAiIntegrationId] = useState("");
-  const [aiIntegrationObj, setAiIntegrationObj] = useState(null);
-  const [aiBasePrompt, setAiBasePrompt] = useState("");
-  const [encryptionEnabled, setEncryptionEnabled] = useState(true);
+  // IA global removida desta tela: configuração agora é por campanha no modal de Nova Campanha
 
   useEffect(() => {
     async function fetchData() {
@@ -139,31 +134,9 @@ const CampaignsConfig = () => {
     });
   }, []);
 
-  // Status de criptografia (backend)
-  useEffect(() => {
-    const loadEncryptionStatus = async () => {
-      try {
-        const { data } = await api.get('/ai/encryption-status');
-        setEncryptionEnabled(Boolean(data?.encryptionEnabled));
-      } catch (_) {
-        setEncryptionEnabled(true); // assume habilitado se não conseguir verificar
-      }
-    };
-    loadEncryptionStatus();
-  }, []);
+  // Removido: status de criptografia. A configuração de IA passou para o modal de campanha.
 
-  // Carregar integração IA preferida e prompt base dos settings
-  useEffect(() => {
-    api.get("/campaign-settings").then(({ data }) => {
-      try {
-        const map = new Map((Array.isArray(data) ? data : []).map(it => [it.key, it.value]));
-        const savedIntegrationId = map.get("aiIntegrationId");
-        const savedPrompt = map.get("aiBasePrompt");
-        if (savedIntegrationId) setAiIntegrationId(savedIntegrationId);
-        if (typeof savedPrompt === "string") setAiBasePrompt(savedPrompt);
-      } catch (_) {}
-    });
-  }, []);
+  // Removido: leitura de integração IA/prompt base. Agora é por campanha.
 
   const handleOnChangeVariable = (e) => {
     if (e.target.value !== null) {
@@ -173,11 +146,7 @@ const CampaignsConfig = () => {
     }
   };
 
-  // Handler do seletor de integração IA
-  const handleAIIntegrationChange = (id, integrationObj) => {
-    setAiIntegrationId(id || "");
-    setAiIntegrationObj(integrationObj || null);
-  };
+  // Removido: handler de integração IA (a seleção agora é por campanha)
 
   const handleOnChangeSettings = (e) => {
     const changedProp = {};
@@ -234,9 +203,7 @@ const CampaignsConfig = () => {
       payload.suppressionTagNames = Array.from(new Set(list));
     }
 
-    // Persistir integração IA e prompt base
-    payload.aiIntegrationId = aiIntegrationId || "";
-    payload.aiBasePrompt = aiBasePrompt || "";
+    // Removido: integração IA e prompt base agora são por campanha
 
     await api.post("/campaign-settings", { settings: payload });
     toast.success("Configurações salvas");
@@ -343,76 +310,7 @@ const CampaignsConfig = () => {
 
               <Box className={classes.tabPanelsContainer}>
                 <Grid spacing={1} container>
-                  {/* IA para campanhas (integração global + prompt base) */}
-                  <Grid xs={12} item>
-                    <Typography component={"h1"} style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      IA para campanhas
-                      <Tooltip
-                        title={
-                          <span>
-                            Selecione uma integração global (OpenAI/Gemini) e defina um prompt base para gerar mensagens aleatórias e variações nas campanhas.<br/>
-                            Dicas: inclua contexto do negócio, persona do público, objetivo e restrições (ex.: evitar termos sensíveis).
-                          </span>
-                        }
-                        placement="right"
-                      >
-                        <InfoOutlinedIcon fontSize="small" style={{ opacity: 0.7 }} />
-                      </Tooltip>
-                    </Typography>
-                  </Grid>
-                  {!encryptionEnabled && (
-                    <Grid xs={12} item>
-                      <Paper className={classes.paper} variant="outlined" style={{ background: '#fff8e1', borderColor: '#ffb300', alignItems: 'stretch', flexDirection: 'column' }}>
-                        <Typography style={{ fontWeight: 600, marginBottom: 4 }}>Atenção: criptografia de API Key não habilitada</Typography>
-                        <Typography variant="body2">
-                          Defina a variável de ambiente <b>OPENAI_ENCRYPTION_KEY</b> (ou <b>DATA_KEY</b>) no backend para que a sua API Key seja armazenada de forma criptografada.
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  )}
-                  <Grid xs={12} md={6} item>
-                    <AIIntegrationSelector
-                      value={aiIntegrationId}
-                      onChange={handleAIIntegrationChange}
-                      label="Integração IA (OpenAI/Gemini)"
-                      required
-                      helperText="Selecione qual integração usar para gerar variações e mensagens aleatórias"
-                    />
-                  </Grid>
-                  <Grid xs={12} item>
-                    <TextField
-                      label="Prompt base para geração de mensagens"
-                      variant="outlined"
-                      fullWidth
-                      multiline
-                      rows={5}
-                      value={aiBasePrompt}
-                      onChange={(e) => setAiBasePrompt(e.target.value)}
-                      placeholder={`Você é um assistente de marketing que cria mensagens curtas, claras e personalizadas para WhatsApp.\nInstruções:\n- Use linguagem natural, tom profissional e amigável.\n- Inclua variação de abertura, CTA e urgência suave.\n- Adapte-se ao contexto do negócio, público e oferta.\n- Evite palavras de spam e termos proibidos.\n- Nunca inclua links encurtados sem autorização.\n- Mensagens de 200-350 caracteres.\n- Personalize usando variáveis {nome}, {empresa}, {vendedor}.`}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Tooltip
-                              title={
-                                <span>
-                                  Dicas de uso:<br/>
-                                  • Descreva público-alvo, oferta, objetivo e restrições.<br/>
-                                  • Liste 2-3 exemplos de mensagens que você gosta (estilo).<br/>
-                                  • Indique palavras que devem/ não devem aparecer.<br/>
-                                  • Informe variáveis disponíveis: {`{nome}`}, {`{empresa}`}, {`{cidade}`}.<br/>
-                                  Ideias: follow-up, confirmação, recuperação de carrinho, reativação, lançamento.
-                                </span>
-                              }
-                              placement="left"
-                            >
-                              <InfoOutlinedIcon fontSize="small" style={{ opacity: 0.7, cursor: 'help' }} />
-                            </Tooltip>
-                          </InputAdornment>
-                        )
-                      }}
-                      helperText="Use este prompt como base. O criador de campanhas poderá adaptar/combinar com instruções específicas"
-                    />
-                  </Grid>
+                  {/* Seção de IA global removida: configuração agora por campanha no modal de criação */}
                   <Grid xs={12} item>
                     <Typography component={"h1"} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       Intervalos

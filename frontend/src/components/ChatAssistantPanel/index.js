@@ -12,6 +12,9 @@ import {
   useTheme,
   InputBase,
   Popover,
+  Typography,
+  Chip,
+  Box,
 } from "@material-ui/core";
 import ContentCopyIcon from "@material-ui/icons/FileCopy";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
@@ -24,6 +27,7 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import { Bot as BotIcon } from "lucide-react";
 import api from "../../services/api";
 import { useHistory } from "react-router-dom";
+import OpenAIService from "../../services/openaiService";
 
 const LANGS = [
   { code: "pt-BR", label: "Português (Brasil)" },
@@ -32,29 +36,42 @@ const LANGS = [
 ];
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 72,
+  root: ({ dialogMode }) => ({
+    position: dialogMode ? 'relative' : 'absolute',
+    left: dialogMode ? 'auto' : 16,
+    right: dialogMode ? 'auto' : 16,
+    bottom: dialogMode ? 'auto' : 72,
     zIndex: 200,
-    minWidth: 0,
-    borderRadius: 10,
+    minWidth: dialogMode ? 0 : 320,
+    width: dialogMode ? '100%' : 'auto',
+    borderRadius: 12,
     background: '#ffffff',
-    boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+    boxShadow: '0 8px 28px rgba(0,0,0,0.18)',
     display: 'flex',
     flexDirection: 'column',
-    padding: 8,
+    padding: dialogMode ? 16 : 8,
     margin: 0,
-    height: 'auto',
-    maxHeight: 280,
-    overflowY: 'auto',
+    height: dialogMode ? 'auto' : 'auto',
+    maxHeight: dialogMode ? '80vh' : 320,
+    overflow: dialogMode ? 'visible' : 'hidden',
     [theme.breakpoints.down('sm')]: {
-      left: 8,
-      right: 8,
-      bottom: 96,
-      maxHeight: 300,
+      left: dialogMode ? 'auto' : 8,
+      right: dialogMode ? 'auto' : 8,
+      bottom: dialogMode ? 'auto' : 96,
+      maxWidth: '100%',
+      maxHeight: dialogMode ? '100%' : 320,
+      padding: dialogMode ? 12 : 8,
     },
+  }),
+  dialogHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: 600,
   },
   header: {
     display: 'flex',
@@ -143,6 +160,25 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     gap: 8,
   },
+  contextInfo: {
+    marginBottom: 8,
+    padding: '6px 10px',
+    borderRadius: 8,
+    background: theme.mode === 'light' ? '#f5f5f5' : '#1e2a30',
+    border: theme.mode === 'light' ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255,255,255,0.12)',
+    fontSize: 12,
+    lineHeight: 1.45,
+  },
+  presetsRow: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 8,
+  },
+  presetChip: {
+    fontSize: 11,
+    height: 24,
+  },
   providerChip: {
     padding: '4px 8px',
     borderRadius: 16,
@@ -165,6 +201,12 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 6,
     marginTop: 4,
     height: 28,
+  },
+  campaignActions: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
   },
   smallIconButton: {
     padding: 4,
@@ -218,8 +260,17 @@ const ChatAssistantPanel = ({
   setInputMessage,
   queueId,
   whatsappId,
+  assistantContext = "ticket",
+  targetField,
+  onApply,
+  actions = ["apply"],
+  contextSummary,
+  presets = [],
+  dialogMode = false,
+  disableClickAway = false,
+  title,
 }) => {
-  const classes = useStyles();
+  const classes = useStyles({ dialogMode });
   const theme = useTheme();
   const [tab, setTab] = useState(1); // 0=Corretor 1=Aprimorar 2=Tradutor
   const [targetLang, setTargetLang] = useState("pt-BR");
@@ -233,8 +284,38 @@ const ChatAssistantPanel = ({
   const [initializing, setInitializing] = useState(false);
   const [providerAnchor, setProviderAnchor] = useState(null);
   const providerLabel = provider === 'gemini' ? 'Gemini' : 'OpenAI';
+  const [lockedProvider, setLockedProvider] = useState(false);
+  const [integrationConfig, setIntegrationConfig] = useState(null);
 
-  const mode = useMemo(() => (tab === 2 ? "translate" : tab === 0 ? "spellcheck" : "enhance"), [tab]);
+  const transformMode = useMemo(() => (tab === 2 ? "translate" : tab === 0 ? "spellcheck" : "enhance"), [tab]);
+  const effectiveActions = useMemo(() => {
+    if (!actions || !actions.length) return ["apply"];
+    return actions;
+  }, [actions]);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    const loadConfig = async () => {
+      try {
+        const config = await OpenAIService.getActiveConfig();
+        if (!active) return;
+        if (config) {
+          if (config?.type) {
+            setProvider(config.type);
+            setLockedProvider(true);
+          }
+          setIntegrationConfig(config);
+        } else {
+          setLockedProvider(false);
+        }
+      } catch (_) {
+        setLockedProvider(false);
+      }
+    };
+    loadConfig();
+    return () => { active = false; };
+  }, [open, queueId]);
 
   useEffect(() => {
     if (tab === 0 && targetLang === "pt-BR") {
@@ -247,8 +328,21 @@ const ChatAssistantPanel = ({
       setLoading(true);
       setError("");
       setResult("");
-      const payload = { mode, text: inputMessage, integrationType: provider, queueId, whatsappId };
-      if (mode === "translate") payload.targetLang = targetLang;
+      const payload = {
+        mode: transformMode,
+        text: inputMessage,
+        integrationType: provider,
+        queueId,
+        whatsappId,
+        context: {
+          panelMode: transformMode,
+          targetField,
+          summary: contextSummary,
+          presets: presets?.map(p => p.label) || [],
+          assistantContext,
+        }
+      };
+      if (transformMode === "translate") payload.targetLang = targetLang;
       const { data } = await api.post("/ai/transform", payload);
       setResult(data?.result || "");
     } catch (err) {
@@ -278,6 +372,10 @@ const ChatAssistantPanel = ({
     try { localStorage.setItem('ai_provider', provider); } catch {}
   }, [provider]);
 
+  // No contexto de campanha, ignoramos bloqueio para permitir troca de provedor
+  const isCampaign = assistantContext === 'campaign';
+  const effectiveLocked = isCampaign ? false : lockedProvider;
+
   const openProviderMenu = (e) => setProviderAnchor(e.currentTarget);
   const closeProviderMenu = () => setProviderAnchor(null);
   const handlePickProvider = (p) => { setProvider(p); closeProviderMenu(); };
@@ -289,18 +387,64 @@ const ChatAssistantPanel = ({
     } catch (_) {}
   };
 
-  const handleInsert = () => {
+  const applyToEditor = (action) => {
     if (!result) return;
-    setInputMessage(result);
+    if (typeof onApply === "function") {
+      onApply(action, result);
+    } else if (typeof setInputMessage === "function") {
+      if (action === "append") {
+        setInputMessage(prev => {
+          const base = typeof prev === "string" ? prev : "";
+          return base ? `${base}\n\n${result}` : result;
+        });
+      } else {
+        setInputMessage(result);
+      }
+    }
     onClose?.();
   };
 
   if (!open) return null;
 
-  return (
-    <ClickAwayListener onClickAway={onClose}>
-      <Paper className={classes.root} elevation={6}>
-        <div className={classes.body}>
+  const content = (
+    <Paper className={classes.root} elevation={6}>
+      {dialogMode && (
+        <div className={classes.dialogHeader}>
+          <Typography className={classes.dialogTitle} variant="subtitle1">
+            {title || "Assistente de chat"}
+          </Typography>
+          <div className={classes.dialogHeaderActions}>
+            <IconButton size="small" onClick={onClose}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </div>
+        </div>
+      )}
+      <div className={classes.body}>
+          {contextSummary && (
+            <Typography className={classes.contextInfo} variant="caption">
+              {contextSummary}
+            </Typography>
+          )}
+
+          {presets && presets.length > 0 && (
+            <Box className={classes.presetsRow}>
+              {presets.map((preset) => (
+                <Chip
+                  key={preset.label}
+                  label={preset.label}
+                  size="small"
+                  className={classes.presetChip}
+                  clickable
+                  onClick={() => {
+                    if (typeof setInputMessage === "function") {
+                      setInputMessage(preset.prompt);
+                    }
+                  }}
+                />
+              ))}
+            </Box>
+          )}
 
 
           {/* Seletor de idioma (apenas Tradutor) */}
@@ -345,7 +489,7 @@ const ChatAssistantPanel = ({
                 )}
               </div>
               <div className={classes.actionButtons}>
-                {/* Abrir seletor de provedor */}
+                {/* Seletor de provedor (sempre visível) */}
                 <Tooltip title={`Selecionar provedor de IA (atual: ${providerLabel})`} placement="top">
                   <span>
                     <IconButton onClick={openProviderMenu} className={classes.smallIconButton} size="small">
@@ -362,7 +506,7 @@ const ChatAssistantPanel = ({
                 </Tooltip>
                 <Tooltip title="Inserir no editor" placement="top">
                   <span>
-                    <IconButton onClick={handleInsert} disabled={!result || loading} className={classes.smallIconButton} size="small">
+                    <IconButton onClick={() => applyToEditor('apply')} disabled={!result || loading} className={classes.smallIconButton} size="small">
                       <CheckIcon fontSize="small" />
                     </IconButton>
                   </span>
@@ -381,14 +525,16 @@ const ChatAssistantPanel = ({
           >
             <div className={classes.providerMenu}>
               <div
-                onClick={() => handlePickProvider('openai')}
+                onClick={() => !effectiveLocked && handlePickProvider('openai')}
                 className={`${classes.providerChip} ${provider === 'openai' ? classes.providerChipActive : ''}`}
+                style={{ pointerEvents: effectiveLocked ? 'none' : 'auto', opacity: effectiveLocked && provider !== 'openai' ? 0.4 : 1 }}
               >
                 OA
               </div>
               <div
-                onClick={() => handlePickProvider('gemini')}
+                onClick={() => !effectiveLocked && handlePickProvider('gemini')}
                 className={`${classes.providerChip} ${provider === 'gemini' ? classes.providerChipActive : ''}`}
+                style={{ pointerEvents: effectiveLocked ? 'none' : 'auto', opacity: effectiveLocked && provider !== 'gemini' ? 0.4 : 1 }}
               >
                 GE
               </div>
@@ -396,8 +542,16 @@ const ChatAssistantPanel = ({
           </Popover>
         </div>
       </Paper>
+  );
+
+  if (dialogMode || disableClickAway) {
+    return content;
+  }
+
+  return (
+    <ClickAwayListener onClickAway={onClose}>
+      {content}
     </ClickAwayListener>
   );
 };
-
 export default ChatAssistantPanel;

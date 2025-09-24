@@ -67,18 +67,71 @@ const AIIntegrationSelector = ({
 
   useEffect(() => {
     if (value && integrations.length > 0) {
-      const integration = integrations.find(int => int.id === value);
-      setSelectedIntegration(integration);
+      const integration = integrations.find(int => String(int.id) === String(value));
+      setSelectedIntegration(integration || null);
     } else {
       setSelectedIntegration(null);
     }
   }, [value, integrations]);
 
-  const handleChange = (event) => {
+  // Hidrata detalhes completos quando já existe um value (edição) mas faltam campos
+  useEffect(() => {
+    (async () => {
+      if (!value) return;
+      if (selectedIntegration && (selectedIntegration.model || selectedIntegration.maxTokens || selectedIntegration.apiKey)) return;
+      try {
+        const { data } = await api.get(`/queueIntegration/${value}`);
+        let payload = (data && (data.queueIntegration || data)) || null;
+        if (payload && payload.jsonContent) {
+          try {
+            const parsed = JSON.parse(payload.jsonContent);
+            const masked = typeof parsed?.apiKey === 'string' && parsed.apiKey.endsWith('********');
+            payload = {
+              ...payload,
+              apiKey: masked ? parsed.apiKey : (parsed.apiKey || payload.apiKey),
+              model: parsed.model ?? payload.model,
+              temperature: parsed.temperature ?? payload.temperature,
+              maxTokens: parsed.maxTokens ?? payload.maxTokens,
+              maxMessages: parsed.maxMessages ?? payload.maxMessages,
+              topP: parsed.topP ?? payload.topP,
+              presencePenalty: parsed.presencePenalty ?? payload.presencePenalty,
+              creativity: parsed.creativityLevel ?? payload.creativity,
+            };
+          } catch (_) {}
+        }
+        if (payload) setSelectedIntegration(prev => ({ ...(prev || {}), ...payload }));
+      } catch (_) {}
+    })();
+  }, [value, selectedIntegration]);
+
+  const handleChange = async (event) => {
     const integrationId = event.target.value;
-    const integration = integrations.find(int => int.id === integrationId);
-    
-    onChange(integrationId, integration);
+    let integration = integrations.find(int => String(int.id) === String(integrationId));
+    try {
+      // Busca detalhes completos desta integração
+      const { data } = await api.get(`/queueIntegration/${integrationId}`);
+      let payload = (data && (data.queueIntegration || data)) || null;
+      if (payload && payload.jsonContent) {
+        try {
+          const parsed = JSON.parse(payload.jsonContent);
+          const masked = typeof parsed?.apiKey === 'string' && parsed.apiKey.endsWith('********');
+          payload = {
+            ...payload,
+            apiKey: masked ? parsed.apiKey : (parsed.apiKey || payload.apiKey),
+            model: parsed.model ?? payload.model,
+            temperature: parsed.temperature ?? payload.temperature,
+            maxTokens: parsed.maxTokens ?? payload.maxTokens,
+            maxMessages: parsed.maxMessages ?? payload.maxMessages,
+            topP: parsed.topP ?? payload.topP,
+            presencePenalty: parsed.presencePenalty ?? payload.presencePenalty,
+            creativity: parsed.creativityLevel ?? payload.creativity,
+          };
+        } catch (_) {}
+      }
+      if (payload) integration = { ...integration, ...payload };
+    } catch (_) {}
+    setSelectedIntegration(integration || null);
+    onChange(integrationId, integration || null);
   };
 
   if (loading) {
@@ -145,27 +198,38 @@ const AIIntegrationSelector = ({
             📋 Configurações da Integração
           </Typography>
           <Box display="flex" flexWrap="wrap" gap={1}>
-            <Chip 
-              label={`Modelo: ${selectedIntegration.model || "Não definido"}`} 
-              size="small" 
-              className={classes.chip}
-            />
-            <Chip 
-              label={`Temperatura: ${selectedIntegration.temperature || "1"}`} 
-              size="small" 
-              className={classes.chip}
-            />
-            <Chip 
-              label={`Máx. Tokens: ${selectedIntegration.maxTokens || "100"}`} 
-              size="small" 
-              className={classes.chip}
-            />
-            <Chip 
-              label={`API Key: ${selectedIntegration.apiKey ? "✅ Configurada" : "❌ Não configurada"}`} 
-              size="small" 
-              className={classes.chip}
-              color={selectedIntegration.apiKey ? "primary" : "secondary"}
-            />
+            {(() => {
+              const get = (obj, keys) => keys.reduce((acc, k) => acc ?? obj?.[k], undefined);
+              const model = get(selectedIntegration, ["model", "defaultModel", "modelDefault", "model_name"]);
+              const temperature = get(selectedIntegration, ["temperature", "temp", "temperatureDefault"]) ?? get(selectedIntegration, ["creativity"]);
+              const maxTokens = get(selectedIntegration, ["maxTokens", "max_tokens", "maxTokensDefault"]);
+              const hasKey = (selectedIntegration.apiKey || selectedIntegration.hasApiKey || selectedIntegration.apiKeyMasked || selectedIntegration.encryptedKey || selectedIntegration.keyConfigured);
+              return (
+                <>
+                  <Chip 
+                    label={`Modelo: ${model || "Não definido"}`} 
+                    size="small" 
+                    className={classes.chip}
+                  />
+                  <Chip 
+                    label={`Temperatura: ${temperature ?? "1"}`} 
+                    size="small" 
+                    className={classes.chip}
+                  />
+                  <Chip 
+                    label={`Máx. Tokens: ${maxTokens ?? "100"}`} 
+                    size="small" 
+                    className={classes.chip}
+                  />
+                  <Chip 
+                    label={`API Key: ${hasKey ? "✅ Configurada" : "❌ Não configurada"}`} 
+                    size="small" 
+                    className={classes.chip}
+                    color={hasKey ? "primary" : "secondary"}
+                  />
+                </>
+              );
+            })()}
           </Box>
         </Box>
       )}

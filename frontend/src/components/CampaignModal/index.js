@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
 
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
@@ -17,6 +17,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import Chip from '@material-ui/core/Chip';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
@@ -29,7 +30,6 @@ import moment from "moment";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import AIIntegrationSelector from "../AIIntegrationSelector";
 import {
   Box,
   FormControl,
@@ -45,6 +45,8 @@ import ConfirmationModal from "../ConfirmationModal";
 import UserStatusIcon from "../UserModal/statusIcon";
 import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
 import useQueues from "../../hooks/useQueues";
+import ChatAssistantPanel from "../ChatAssistantPanel";
+import { Sparkles } from "lucide-react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -134,13 +136,6 @@ const CampaignModal = ({
     openTicket: "disabled",
     dispatchStrategy: "single",
     allowedWhatsappIds: [],
-    // IA - metadados opcionais por campanha
-    aiIntegrationId: null,
-    aiPrompt1: "",
-    aiPrompt2: "",
-    aiPrompt3: "",
-    aiPrompt4: "",
-    aiPrompt5: ""
   };
 
   // Validação de mídia permitida
@@ -199,11 +194,24 @@ const CampaignModal = ({
 
   const renderTagsToolbar = (values, setFieldValue, targetField) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 8px' }}>
-      <Button size="small" variant="outlined" onClick={(e) => { setTagsTargetField(targetField); handleOpenTags(e); }}>Inserir #Tags</Button>
-      <Tooltip title="Use variáveis como {nome}, {empresa}, {ticket}. Elas serão substituídas no envio.">
-        <Typography variant="body2" style={{ opacity: 0.8 }}>
-          Dica: personalize sua mensagem com variáveis.
-        </Typography>
+      <Button size="small" variant="outlined" onClick={(e) => { setTagsTargetField(targetField); handleOpenTags(e); }}>#Tags</Button>
+      
+      <Tooltip title="Como usar as tags?">
+        <IconButton size="small" onClick={handleOpenInfo} aria-label="como usar as tags">
+          <InfoOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Assistente de IA">
+        <span>
+          <IconButton
+            size="small"
+            onClick={() => handleOpenAssistant(targetField, values)}
+            aria-label="assistente de ia"
+            disabled={!campaignEditable}
+          >
+            <Sparkles size={16} />
+          </IconButton>
+        </span>
       </Tooltip>
     </div>
   );
@@ -263,19 +271,10 @@ const CampaignModal = ({
   const [queues, setQueues] = useState([]);
   const [allQueues, setAllQueues] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchParam, setSearchParam] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedQueue, setSelectedQueue] = useState(null);
+  const [selectedQueue, setSelectedQueue] = useState("");
   const { findAll: findAllQueues } = useQueues();
 
-  // --- IA: geração de variações ---
-  const [aiDialogOpen, setAiDialogOpen] = useState(false);
-  const [aiTone, setAiTone] = useState("amigável");
-  const [aiNumVariations, setAiNumVariations] = useState(2);
-  const [aiBusinessContext, setAiBusinessContext] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiGenerated, setAiGenerated] = useState([]);
-  const [aiTargetField, setAiTargetField] = useState("message1");
   // Biblioteca de arquivos (FileManager)
   const [fileLibraryOpen, setFileLibraryOpen] = useState(false);
   const [fileLists, setFileLists] = useState([]);
@@ -283,10 +282,23 @@ const CampaignModal = ({
   const [filesSearch, setFilesSearch] = useState("");
   const [fileLibraryTargetIndex, setFileLibraryTargetIndex] = useState(null); // 0..4
   const setFieldValueRef = useRef(null);
+  const formValuesRef = useRef(initialState);
+
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [assistantTargetField, setAssistantTargetField] = useState(null);
+  const [assistantDraft, setAssistantDraft] = useState("");
+  const [assistantContextSummary, setAssistantContextSummary] = useState("");
+  const [assistantPresets, setAssistantPresets] = useState([]);
+  const assistantQueueIdRef = useRef(null);
+  const assistantWhatsappIdRef = useRef(null);
 
   // Tags (#tags) - semelhante ao PromptModal
   const [tagsAnchorEl, setTagsAnchorEl] = useState(null);
   const [tagsSearch, setTagsSearch] = useState("");
+  const [infoAnchorEl, setInfoAnchorEl] = useState(null);
+  const openInfo = Boolean(infoAnchorEl);
+  const handleOpenInfo = (event) => setInfoAnchorEl(event.currentTarget);
+  const handleCloseInfo = () => setInfoAnchorEl(null);
   const mustacheVars = [
     { key: "firstName", label: "primeiro-nome", desc: "Primeiro nome do contato", category: "Contato" },
     { key: "name", label: "nome", desc: "Nome completo do contato", category: "Contato" },
@@ -311,6 +323,110 @@ const CampaignModal = ({
     { key: "periodo_dia", label: "periodo-dia", desc: "Período do dia", category: "Saudação/Contexto" },
     { key: "name_company", label: "empresa", desc: "Nome da empresa", category: "Empresa" },
   ];
+
+  const availableTagsList = mustacheVars.map((item) => `{${item.label}}`);
+
+  const assistantFieldConfigs = useMemo(() => {
+    const messageConfigs = [
+      { field: "message1", title: "Mensagem principal 1", purpose: "primeiro disparo da campanha", category: "message" },
+      { field: "message2", title: "Mensagem principal 2", purpose: "sequência após a primeira mensagem", category: "message" },
+      { field: "message3", title: "Mensagem principal 3", purpose: "reforço intermediário da campanha", category: "message" },
+      { field: "message4", title: "Mensagem principal 4", purpose: "manter o engajamento do contato", category: "message" },
+      { field: "message5", title: "Mensagem principal 5", purpose: "último disparo da campanha", category: "message" },
+    ];
+    const confirmationConfigs = [
+      { field: "confirmationMessage1", title: "Confirmação 1", purpose: "confirmar o recebimento e orientar o contato", category: "confirmation" },
+      { field: "confirmationMessage2", title: "Confirmação 2", purpose: "reforçar a confirmação com tom cordial", category: "confirmation" },
+      { field: "confirmationMessage3", title: "Confirmação 3", purpose: "agradecer e reforçar próximos passos", category: "confirmation" },
+      { field: "confirmationMessage4", title: "Confirmação 4", purpose: "encerrar o fluxo com orientação final", category: "confirmation" },
+      { field: "confirmationMessage5", title: "Confirmação 5", purpose: "último lembrete de confirmação", category: "confirmation" },
+    ];
+    return [...messageConfigs, ...confirmationConfigs].reduce((acc, item) => {
+      acc[item.field] = item;
+      return acc;
+    }, {});
+  }, []);
+
+  const messagePresetBuilders = [
+    {
+      label: "Boas-vindas calorosa",
+      buildPrompt: (config) => `Escreva uma mensagem acolhedora em português para ${config.title}, destacando ${config.purpose}. Use tom amigável, incentive resposta e preserve todas as tags ({nome}, {primeiro-nome}, etc.).`
+    },
+    {
+      label: "Mensagem com CTA clara",
+      buildPrompt: (config) => `Gere uma mensagem objetiva para ${config.title}, com call-to-action direto e tom profissional. Preserve as tags disponíveis e use emojis moderados.`
+    },
+    {
+      label: "Versão curta",
+      buildPrompt: (config) => `Crie uma versão curta e impactante para ${config.title}, em até 3 frases curtas, mantendo as tags {nome} e demais tags intactas.`
+    }
+  ];
+
+  const confirmationPresetBuilders = [
+    {
+      label: "Confirmação amigável",
+      buildPrompt: (config) => `Gere uma mensagem de confirmação amigável para ${config.title}, agradecendo o contato, reforçando próxima etapa e mantendo todas as tags intactas.`
+    },
+    {
+      label: "Confirmação com CTA",
+      buildPrompt: (config) => `Escreva uma confirmação objetiva para ${config.title}, incluindo instruções claras de próxima ação e preservando {tags}.`
+    },
+    {
+      label: "Confirmação curta",
+      buildPrompt: (config) => `Produza uma mensagem de confirmação curta (até 2 frases) para ${config.title}, mantendo formalidade leve e todas as tags.`
+    }
+  ];
+
+  const sanitizeAssistantText = (text = "") => {
+    let safeText = String(text);
+    safeText = safeText.replace(/\{\s*([a-zA-Z0-9_-]+)\s*\}/g, "{$1}");
+    safeText = safeText.replace(/\n{3,}/g, "\n\n");
+    return safeText.trim();
+  };
+
+  const buildAssistantSummary = (field, values) => {
+    const config = assistantFieldConfigs[field] || { title: field, purpose: "gerar a mensagem" };
+    const highlightedTags = availableTagsList.slice(0, 8).join(", ");
+    const campaignName = values?.name ? `Campanha: ${values.name}. ` : "";
+    return `${campaignName}${config.title} — objetivo: ${config.purpose}. Tags disponíveis: ${highlightedTags}${availableTagsList.length > 8 ? ", ..." : ""}`;
+  };
+
+  const buildAssistantPresets = (field) => {
+    const config = assistantFieldConfigs[field] || { title: field, purpose: "gerar a mensagem", category: "message" };
+    const builders = config.category === "confirmation" ? confirmationPresetBuilders : messagePresetBuilders;
+    return builders.map((preset) => ({
+      label: preset.label,
+      prompt: preset.buildPrompt(config),
+    }));
+  };
+
+  const handleCloseAssistant = () => {
+    setAssistantOpen(false);
+    setAssistantTargetField(null);
+  };
+
+  const handleOpenAssistant = (field, values) => {
+    if (!campaignEditable) return;
+    setAssistantTargetField(field);
+    const currentValue = values?.[field] || "";
+    setAssistantDraft(currentValue);
+    setAssistantContextSummary(buildAssistantSummary(field, values));
+    setAssistantPresets(buildAssistantPresets(field));
+    setAssistantOpen(true);
+  };
+
+  const handleApplyAssistant = (action, generatedText) => {
+    if (!assistantTargetField || !setFieldValueRef.current) return;
+    const sanitized = sanitizeAssistantText(generatedText);
+    const currentValue = formValuesRef.current?.[assistantTargetField] || "";
+    let nextValue = sanitized;
+    if (action === "append") {
+      nextValue = currentValue ? `${currentValue}\n\n${sanitized}` : sanitized;
+    }
+    setFieldValueRef.current(assistantTargetField, nextValue);
+    setAssistantDraft(nextValue);
+    handleCloseAssistant();
+  };
   const groupedVars = mustacheVars.reduce((acc, v) => {
     const cat = v.category || "Outros";
     acc[cat] = acc[cat] || [];
@@ -357,10 +473,6 @@ const CampaignModal = ({
     setFieldValue(getMediaUrlFieldByTab(idx), null);
     setFieldValue(getMediaNameFieldByTab(idx), null);
   };
-  const extractPlaceholders = (text = "") => {
-    const matches = text.match(/\{[^}]+\}/g) || [];
-    return Array.from(new Set(matches));
-  };
 
   useEffect(() => {
     return () => {
@@ -381,29 +493,19 @@ const CampaignModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (searchParam.length < 3) {
-      setLoading(false);
-      setSelectedQueue("");
-      return;
-    }
-    const delayDebounceFn = setTimeout(() => {
+  // Carrega todos os usuários sob demanda (ao abrir o campo)
+  const ensureUsersLoaded = async () => {
+    if (options && options.length > 0) return;
+    try {
       setLoading(true);
-      const fetchUsers = async () => {
-        try {
-          const { data } = await api.get("/users/");
-          setOptions(data.users);
-          setLoading(false);
-        } catch (err) {
-          setLoading(false);
-          toastError(err);
-        }
-      };
-
-      fetchUsers();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchParam]);
+      const { data } = await api.get("/users/");
+      setOptions(data.users || []);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isMounted.current) {
@@ -571,17 +673,6 @@ const CampaignModal = ({
     }
   };
 
-  const getCurrentAiPromptField = () => {
-    switch (messageTab) {
-      case 0: return "aiPrompt1";
-      case 1: return "aiPrompt2";
-      case 2: return "aiPrompt3";
-      case 3: return "aiPrompt4";
-      case 4: return "aiPrompt5";
-      default: return "aiPrompt1";
-    }
-  };
-
   const handleChooseFromLibrary = async (opt) => {
     try {
       const idx = Number.isInteger(fileLibraryTargetIndex) ? fileLibraryTargetIndex : messageTab;
@@ -723,7 +814,7 @@ const CampaignModal = ({
         </div>
         <Formik
           initialValues={campaign}
-          enableReinitialize={true}
+          enableReinitialize
           validationSchema={CampaignSchema}
           onSubmit={(values, actions) => {
             setTimeout(() => {
@@ -732,26 +823,18 @@ const CampaignModal = ({
             }, 400);
           }}
         >
-          {({ values, errors, touched, isSubmitting, setFieldValue }) => (
-            <Form>
-              {(() => { setFieldValueRef.current = setFieldValue; return null; })()}
-              <DialogContent dividers>
-                <Grid spacing={2} container>
-                  {/* Botão IA - aplica na mensagem da aba atual */}
-                  <Grid xs={12} item>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => {
-                        setAiTargetField(getMessageFieldByTab(messageTab));
-                        setAiGenerated([]);
-                        setAiDialogOpen(true);
-                      }}
-                      disabled={!campaignEditable}
-                    >
-                      Gerar variações com IA (aba atual)
-                    </Button>
-                  </Grid>
+          {({ values, errors, touched, isSubmitting, setFieldValue }) => {
+            setFieldValueRef.current = setFieldValue;
+            formValuesRef.current = values;
+            const assistantQueueId = selectedQueue || values.queueId || (Array.isArray(selectedUser?.queues) ? selectedUser.queues[0]?.id : null);
+            const assistantWhatsappId = whatsappId || values.whatsappId || values.whatsappIds || null;
+            assistantQueueIdRef.current = assistantQueueId || null;
+            assistantWhatsappIdRef.current = assistantWhatsappId || null;
+
+            return (
+              <Form>
+                <DialogContent dividers>
+                  <Grid spacing={2} container>
                   {/* Popover de #Tags */}
                   <Popover
                     open={openTags}
@@ -806,30 +889,42 @@ const CampaignModal = ({
                       </div>
                     </div>
                   </Popover>
-                  {/* Integração IA (override) e Prompt por aba */}
-                  <Grid xs={12} item>
-                    <AIIntegrationSelector
-                      value={values.aiIntegrationId}
-                      onChange={(integrationId) => setFieldValue('aiIntegrationId', integrationId)}
-                      helperText="Selecione uma integração IA para esta campanha (opcional)"
-                    />
-                  </Grid>
-                  <Grid xs={12} item>
-                    {renderTagsToolbar(values, setFieldValue, getCurrentAiPromptField())}
-                    <TextField
-                      label="Prompt da campanha (aba atual)"
-                      placeholder="Descreva o contexto, objetivo e restrições para gerar as variações desta aba."
-                      variant="outlined"
-                      margin="dense"
-                      fullWidth
-                      multiline
-                      rows={4}
-                      value={values[getCurrentAiPromptField()] || ""}
-                      onChange={(e) => setFieldValue(getCurrentAiPromptField(), e.target.value)}
-                      helperText="Dica: use variáveis como {nome}, {empresa}, {pedido}."
-                      disabled={!campaignEditable}
-                    />
-                  </Grid>
+                  {/* Popover de instruções (i) */}
+                  <Popover
+                    open={openInfo}
+                    anchorEl={infoAnchorEl}
+                    onClose={handleCloseInfo}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  >
+                    <div style={{ padding: 14, maxWidth: 520 }}>
+                      <Typography variant="subtitle1" style={{ marginBottom: 8 }}>Como usar as tags</Typography>
+                      <Typography variant="body2" paragraph>
+                        Escreva as variáveis no texto entre chaves. Ex.: {`{nome}`}, {`{primeiro-nome}`}, {`{data}`}, {`{saudacao}`}.
+                      </Typography>
+                      <Typography variant="subtitle2">Tags nativas</Typography>
+                      <ul style={{ marginTop: 4, marginBottom: 8, paddingLeft: 18 }}>
+                        <li>{`{nome}`} — Nome completo do contato</li>
+                        <li>{`{primeiro-nome}`} — Primeiro nome do contato</li>
+                        <li>{`{email}`} — Email do contato</li>
+                        <li>{`{numero}`} — Número do contato</li>
+                        <li>{`{data}`} — Data atual (DD/MM/AAAA)</li>
+                        <li>{`{hora}`} — Hora atual (HH:MM:SS)</li>
+                        <li>{`{data-hora}`} — Data e hora atuais</li>
+                        <li>{`{periodo-dia}`} — manhã, tarde ou noite</li>
+                        <li>{`{saudacao}`} — Bom dia, Boa tarde, Boa noite</li>
+                      </ul>
+                      <Typography variant="subtitle2">Campos do cadastro</Typography>
+                      <Typography variant="body2" paragraph>
+                        Você pode usar <strong>qualquer campo do cadastro do contato</strong> como tag. Ex.: {`{fantasyName}`} ou {`{fantasy-name}`}, {`{cpfCnpj}`} ou {`{cpf-cnpj}`}, {`{city}`}.
+                        O nome da tag pode ser o <em>nome exato do campo</em> ou sua versão <em>kebab-case</em> (com hífens).
+                      </Typography>
+                      <Typography variant="subtitle2">Variáveis personalizadas</Typography>
+                      <Typography variant="body2">
+                        Também é possível definir variáveis nas configurações da campanha. Use-as como {`{minha-variavel}`}. 
+                      </Typography>
+                    </div>
+                  </Popover>
                   <Grid xs={12} md={4} item>
                     <Field
                       as={TextField}
@@ -1101,6 +1196,8 @@ const CampaignModal = ({
                       getOptionLabel={(option) => `${option.name}`}
                       value={selectedUser}
                       size="small"
+                      openOnFocus
+                      onOpen={ensureUsersLoaded}
                       onChange={(e, newValue) => {
                         setSelectedUser(newValue);
                         if (newValue != null && Array.isArray(newValue.queues)) {
@@ -1116,7 +1213,7 @@ const CampaignModal = ({
                       }}
                       options={options}
                       filterOptions={filterOptions}
-                      freeSolo
+                      freeSolo={false}
                       fullWidth
                       autoHighlight
                       disabled={!campaignEditable || values.openTicket === 'disabled'}
@@ -1128,7 +1225,6 @@ const CampaignModal = ({
                           {...params}
                           label={i18n.t("transferTicketModal.fieldLabel")}
                           variant="outlined"
-                          onChange={(e) => setSearchParam(e.target.value)}
                           InputProps={{
                             ...params.InputProps,
                             endAdornment: (
@@ -1332,118 +1428,9 @@ const CampaignModal = ({
                           {renderTabAttachment(4, values, !campaignEditable)}
                         </>
                       )}
-                    </Box>
+                      </Box>
                   </Grid>
-                  {/* Dialog de IA */}
-                  <Dialog open={aiDialogOpen} onClose={() => setAiDialogOpen(false)} maxWidth="sm" fullWidth>
-                    <DialogTitle>Gerar variações com IA</DialogTitle>
-                    <DialogContent dividers>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <TextField
-                            select
-                            SelectProps={{ native: true }}
-                            label="Tom da mensagem"
-                            fullWidth
-                            margin="dense"
-                            variant="outlined"
-                            value={aiTone}
-                            onChange={(e) => setAiTone(e.target.value)}
-                          >
-                            <option value="amigável">Amigável</option>
-                            <option value="profissional">Profissional</option>
-                            <option value="promocional">Promocional</option>
-                          </TextField>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            type="number"
-                            label="Nº de variações"
-                            fullWidth
-                            margin="dense"
-                            variant="outlined"
-                            inputProps={{ min: 1, max: 5 }}
-                            value={aiNumVariations}
-                            onChange={(e) => setAiNumVariations(Math.max(1, Math.min(5, Number(e.target.value) || 1)))}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            label="Contexto do negócio (opcional)"
-                            fullWidth
-                            margin="dense"
-                            variant="outlined"
-                            multiline
-                            rows={3}
-                            value={aiBusinessContext}
-                            onChange={(e) => setAiBusinessContext(e.target.value)}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={async () => {
-                              try {
-                                setAiLoading(true);
-                                setAiGenerated([]);
-                                const baseText = values[aiTargetField] || "";
-                                const variables = extractPlaceholders(baseText);
-                                const promptExtra = values[getCurrentAiPromptField()] || "";
-                                const { data } = await api.post('/ai/generate-campaign-messages', {
-                                  baseText,
-                                  variables,
-                                  tone: aiTone,
-                                  numVariations: aiNumVariations,
-                                  language: 'pt-BR',
-                                  businessContext: [promptExtra, aiBusinessContext].filter(Boolean).join('\n')
-                                });
-                                setAiGenerated(Array.isArray(data?.variations) ? data.variations : []);
-                              } catch (err) {
-                                toastError(err);
-                              } finally {
-                                setAiLoading(false);
-                              }
-                            }}
-                            disabled={aiLoading}
-                          >
-                            {aiLoading ? 'Gerando...' : 'Gerar'}
-                          </Button>
-                        </Grid>
-                        {aiGenerated.length > 0 && (
-                          <Grid item xs={12}>
-                            <div style={{ marginTop: 8 }}>
-                              {aiGenerated.map((text, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
-                                  <TextField
-                                    value={text}
-                                    fullWidth
-                                    variant="outlined"
-                                    multiline
-                                    rows={2}
-                                  />
-                                  <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    onClick={() => {
-                                      // aplica no campo atual usando Formik
-                                      setFieldValue(aiTargetField, text);
-                                      toast.success('Variação aplicada ao campo da aba atual.');
-                                    }}
-                                  >
-                                    Aplicar
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          </Grid>
-                        )}
-                      </Grid>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={() => setAiDialogOpen(false)} color="primary" variant="outlined">Fechar</Button>
-                    </DialogActions>
-                  </Dialog>
+                </Grid>
                   {/* Dialog de Pré-visualização de Mídia */}
                   <Dialog open={previewOpen} onClose={closePreview} maxWidth="md" fullWidth>
                     <DialogTitle>{previewName || 'Pré-visualização'}</DialogTitle>
@@ -1486,16 +1473,18 @@ const CampaignModal = ({
                           const open = !!expandedFileIds[fl.id];
                           return (
                             <div key={fl.id} style={{ border: '1px solid #eee', borderRadius: 6, marginBottom: 8 }}>
-                              <div style={{ padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                                   onClick={async () => {
-                                     setExpandedFileIds(prev => ({ ...prev, [fl.id]: !open }));
-                                     if (!open) {
-                                       try {
-                                         const { data } = await api.get(`/files/${fl.id}`);
-                                         setExpandedFileIds(prev => ({ ...prev, [fl.id]: data }));
-                                       } catch (_) {}
-                                     }
-                                   }}>
+                              <div
+                                style={{ padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                onClick={async () => {
+                                  setExpandedFileIds(prev => ({ ...prev, [fl.id]: !open }));
+                                  if (!open) {
+                                    try {
+                                      const { data } = await api.get(`/files/${fl.id}`);
+                                      setExpandedFileIds(prev => ({ ...prev, [fl.id]: data }));
+                                    } catch (_) {}
+                                  }
+                                }}
+                              >
                                 <strong>{fl.name}</strong>
                                 <span style={{ fontSize: 12, opacity: 0.7 }}>{open ? 'Ocultar' : 'Mostrar'}</span>
                               </div>
@@ -1529,89 +1518,114 @@ const CampaignModal = ({
                       <Button onClick={() => setFileLibraryOpen(false)} color="primary" variant="outlined">Fechar</Button>
                     </DialogActions>
                   </Dialog>
-                  
-                  {(campaign.mediaPath || attachment) && (
-                    <Grid xs={12} item>
-                      <Button startIcon={<AttachFileIcon />}>
-                        {attachment != null
-                          ? attachment.name
-                          : campaign.mediaName}
-                      </Button>
-                      {campaignEditable && (
-                        <IconButton
-                          onClick={() => setConfirmationOpen(true)}
-                          color="primary"
-                        >
-                          <DeleteOutlineIcon color="secondary" />
-                        </IconButton>
-                      )}
-                    </Grid>
+
+                </DialogContent>
+                <DialogActions>
+                  {campaign.status === "CANCELADA" && (
+                    <Button
+                      color="primary"
+                      onClick={() => restartCampaign()}
+                      variant="outlined"
+                    >
+                      {i18n.t("campaigns.dialog.buttons.restart")}
+                    </Button>
                   )}
-                </Grid>
-              </DialogContent>
-              <DialogActions>
-                {campaign.status === "CANCELADA" && (
+                  {campaign.status === "EM_ANDAMENTO" && (
+                    <Button
+                      color="primary"
+                      onClick={() => cancelCampaign()}
+                      variant="outlined"
+                    >
+                      {i18n.t("campaigns.dialog.buttons.cancel")}
+                    </Button>
+                  )}
+                  {!attachment && !campaign.mediaPath && campaignEditable && (
+                    <Button
+                      color="primary"
+                      onClick={() => setFileLibraryOpen(true)}
+                      disabled={isSubmitting}
+                      variant="outlined"
+                    >
+                      {i18n.t("campaigns.dialog.buttons.attach")}
+                    </Button>
+                  )}
                   <Button
-                    color="primary"
-                    onClick={() => restartCampaign()}
-                    variant="outlined"
-                  >
-                    {i18n.t("campaigns.dialog.buttons.restart")}
-                  </Button>
-                )}
-                {campaign.status === "EM_ANDAMENTO" && (
-                  <Button
-                    color="primary"
-                    onClick={() => cancelCampaign()}
-                    variant="outlined"
-                  >
-                    {i18n.t("campaigns.dialog.buttons.cancel")}
-                  </Button>
-                )}
-                {!attachment && !campaign.mediaPath && campaignEditable && (
-                  <Button
-                    color="primary"
-                    onClick={() => setFileLibraryOpen(true)}
-                    disabled={isSubmitting}
-                    variant="outlined"
-                  >
-                    {i18n.t("campaigns.dialog.buttons.attach")}
-                  </Button>
-                )}
-                <Button
-                  onClick={handleClose}
-                  color="primary"
-                  disabled={isSubmitting}
-                  variant="outlined"
-                >
-                  {i18n.t("campaigns.dialog.buttons.close")}
-                </Button>
-                {(campaignEditable || campaign.status === "CANCELADA") && (
-                  <Button
-                    type="submit"
+                    onClick={handleClose}
                     color="primary"
                     disabled={isSubmitting}
-                    variant="contained"
-                    className={classes.btnWrapper}
+                    variant="outlined"
                   >
-                    {campaignId
-                      ? `${i18n.t("campaigns.dialog.buttons.edit")}`
-                      : `${i18n.t("campaigns.dialog.buttons.add")}`}
-                    {isSubmitting && (
-                      <CircularProgress
-                        size={24}
-                        className={classes.buttonProgress}
-                      />
-                    )}
+                    {i18n.t("campaigns.dialog.buttons.close")}
                   </Button>
-                )}
-              </DialogActions>
-            </Form>
-          )}
+                  {(campaignEditable || campaign.status === "CANCELADA") && (
+                    <Button
+                      type="submit"
+                      color="primary"
+                      disabled={isSubmitting}
+                      variant="contained"
+                      className={classes.btnWrapper}
+                    >
+                      {campaignId
+                        ? `${i18n.t("campaigns.dialog.buttons.edit")}`
+                        : `${i18n.t("campaigns.dialog.buttons.add")}`}
+                      {isSubmitting && (
+                        <CircularProgress
+                          size={24}
+                          className={classes.buttonProgress}
+                        />
+                      )}
+                    </Button>
+                  )}
+                </DialogActions>
+              </Form>
+            );
+          }}
         </Formik>
+
+        {assistantOpen && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 2500,
+              background: 'rgba(0, 0, 0, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 32
+            }}
+            onClick={handleCloseAssistant}
+          >
+            <div
+              style={{
+                position: 'relative',
+                maxWidth: 920,
+                width: '100%',
+                pointerEvents: 'auto'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ChatAssistantPanel
+                open={assistantOpen}
+                onClose={handleCloseAssistant}
+                inputMessage={assistantDraft}
+                setInputMessage={setAssistantDraft}
+                queueId={assistantQueueIdRef.current}
+                whatsappId={assistantWhatsappIdRef.current}
+                assistantContext="campaign"
+                targetField={assistantTargetField}
+                actions={["replace", "append", "apply"]}
+                contextSummary={assistantContextSummary}
+                presets={assistantPresets}
+                onApply={handleApplyAssistant}
+                dialogMode
+                title="Assistente de chat"
+              />
+            </div>
+          </div>
+        )}
       </Dialog>
     </div>
   );
 };
-
 export default CampaignModal;
