@@ -20,6 +20,10 @@ interface QueueData {
   integrationId?: number;
   fileListId?: number;
   closeTicket?: boolean;
+  autoSendStrategy?: "none" | "on_enter" | "on_request" | "manual";
+  confirmationTemplate?: string;
+  maxFilesPerSession?: number;
+  ragCollection?: string;
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {

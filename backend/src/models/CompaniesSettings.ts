@@ -125,6 +125,12 @@ import {
 
     @Column
     showNotificationPending: boolean;
+
+    @Column
+    openaiApiKey: string;
+
+    @Column
+    openaiModel: string;
   }
   
   export default CompaniesSettings;

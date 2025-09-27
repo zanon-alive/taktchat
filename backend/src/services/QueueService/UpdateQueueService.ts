@@ -19,6 +19,10 @@ interface QueueData {
   integrationId?: number | null;
   fileListId?: number | null;
   closeTicket?: boolean;
+  autoSendStrategy?: "none" | "on_enter" | "on_request" | "manual";
+  confirmationTemplate?: string;
+  maxFilesPerSession?: number;
+  ragCollection?: string;
 }
 
 const UpdateQueueService = async (

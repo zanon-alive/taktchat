@@ -38,7 +38,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     ativarRoteador,
     integrationId,
     fileListId,
-    closeTicket
+    closeTicket,
+    autoSendStrategy,
+    confirmationTemplate,
+    maxFilesPerSession,
+    ragCollection
   } = req.body;
   const { companyId } = req.user;
 
@@ -55,7 +59,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     orderQueue: orderQueue === "" ? null : orderQueue,
     integrationId: integrationId === "" ? null : integrationId,
     fileListId: fileListId === "" ? null : fileListId,
-    closeTicket
+    closeTicket,
+    autoSendStrategy: autoSendStrategy || "none",
+    confirmationTemplate: confirmationTemplate || null,
+    maxFilesPerSession: maxFilesPerSession || 3,
+    ragCollection: ragCollection || null
   });
 
   const io = getIO();

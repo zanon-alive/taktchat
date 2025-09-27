@@ -38,6 +38,9 @@ import Checkbox from '@mui/material/Checkbox';
 
 import OptionsChatBot from "../ChatBots/options";
 import CustomToolTip from "../ToolTips";
+import { Tooltip, Box } from "@material-ui/core";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import HelpIcon from "@material-ui/icons/Help";
 
 import SchedulesForm from "../SchedulesForm";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
@@ -107,6 +110,12 @@ const QueueSchema = Yup.object().shape({
     .required("Required"),
   color: Yup.string().min(3, "Parâmetros incompletos!").max(9, "Parâmetros acima do esperado!").required(),
   greetingMessage: Yup.string(),
+  orderQueue: Yup.number().min(1, "Ordem deve ser maior que 0").required("Ordem da fila é obrigatória"),
+  tempoRoteador: Yup.number().min(0, "Tempo deve ser positivo"),
+  maxFilesPerSession: Yup.number().min(1, "Mínimo 1 arquivo").max(10, "Máximo 10 arquivos"),
+  autoSendStrategy: Yup.string().oneOf(["none", "on_enter", "on_request", "manual"], "Estratégia inválida"),
+  confirmationTemplate: Yup.string(),
+  ragCollection: Yup.string(),
   chatbots: Yup.array()
     .of(
       Yup.object().shape({
@@ -125,12 +134,16 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
     greetingMessage: "",
     chatbots: [],
     outOfHoursMessage: "",
-    orderQueue: "",
+    orderQueue: 1,
     tempoRoteador: 0,
     ativarRoteador: false,
     integrationId: "",
     fileListId: "",
-    closeTicket: false
+    closeTicket: false,
+    autoSendStrategy: "none",
+    confirmationTemplate: "",
+    maxFilesPerSession: 3,
+    ragCollection: ""
   };
 
   const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
@@ -140,18 +153,17 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
   const [selectedQueue, setSelectedQueue] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isStepContent, setIsStepContent] = useState(true);
-  const [isNameEdit, setIsNamedEdit] = useState(null);
+  const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [searchParam, setSearchParam] = useState("");
+  const [file, setFile] = useState([]);
   const [isGreetingMessageEdit, setGreetingMessageEdit] = useState(null);
+  const [isNameEdit, setIsNamedEdit] = useState(null);
   const [queues, setQueues] = useState([]);
-
   const [integrations, setIntegrations] = useState([]);
   const [schedulesEnabled, setSchedulesEnabled] = useState(false);
   const [tab, setTab] = useState(0);
-  const [file, setFile] = useState(null);
-  const { user, socket } = useContext(AuthContext);
-  const [searchParam, setSearchParam] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [tipsExpanded, setTipsExpanded] = useState(false);
   const [selectedQueueOption, setSelectedQueueOption] = useState("");
   const { findAll: findAllQueues } = useQueues();
   const [allQueues, setAllQueues] = useState([]);
@@ -222,7 +234,16 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
         const { data } = await api.get(`/queue/${queueId}`);
 
         setQueue((prevState) => {
-          return { ...prevState, ...data };
+          return { 
+            ...prevState, 
+            ...data,
+            orderQueue: data.orderQueue || 1,
+            tempoRoteador: data.tempoRoteador || 0,
+            maxFilesPerSession: data.maxFilesPerSession || 3,
+            autoSendStrategy: data.autoSendStrategy || "none",
+            confirmationTemplate: data.confirmationTemplate || "",
+            ragCollection: data.ragCollection || ""
+          };
         });
 
         if (isArray(data.schedules) && data.schedules.length > 0)
@@ -239,12 +260,16 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
         greetingMessage: "",
         chatbots: [],
         outOfHoursMessage: "",
-        orderQueue: "",
-        tempoRoteador: "",
+        orderQueue: 1,
+        tempoRoteador: 0,
         ativarRoteador: false,
         integrationId: "",
         fileListId: "",
-        closeTicket: false
+        closeTicket: false,
+        autoSendStrategy: "none",
+        confirmationTemplate: "",
+        maxFilesPerSession: 3,
+        ragCollection: ""
       });
     };
   }, [queueId, open]);
@@ -448,11 +473,22 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
           value={tab}
           indicatorColor="primary"
           textColor="primary"
-          onChange={(e, v) => setTab(v)}
+          onChange={(e, v) => {
+            console.log('Mudando para aba:', v);
+            setTab(v);
+          }}
           aria-label="disabled tabs example"
         >
           <Tab label={i18n.t("queueModal.title.queueData")} />
           {schedulesEnabled && <Tab label={i18n.t("queueModal.title.text")} />}
+          <Tab 
+            label={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <HelpIcon fontSize="small" />
+                Dicas de Uso
+              </div>
+            } 
+          />
         </Tabs>
         {tab === 0 && (
           <Formik
@@ -470,51 +506,99 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
             {({ setFieldValue, touched, errors, isSubmitting, values }) => (
               <Form>
                 <DialogContent dividers>
-                  <Field
-                    as={TextField}
-                    label={i18n.t("queueModal.form.name")}
-                    autoFocus
-                    name="name"
-                    error={touched.name && Boolean(errors.name)}
-                    helperText={touched.name && errors.name}
-                    variant="outlined"
-                    margin="dense"
-                    className={classes.textField}
-                  />
-                  <Field
-                    as={TextField}
-                    label={i18n.t("queueModal.form.color")}
-                    name="color"
-                    id="color"
-                    onFocus={() => {
-                      setColorPickerModalOpen(true);
-                      greetingRef.current.focus();
-                    }}
-                    error={touched.color && Boolean(errors.color)}
-                    helperText={touched.color && errors.color}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <div
-                            style={{ backgroundColor: values.color }}
-                            className={classes.colorAdorment}
-                          ></div>
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <IconButton
-                          size="small"
-                          color="default"
-                          onClick={() => setColorPickerModalOpen(!colorPickerModalOpen)}
-                        >
-                          <Colorize />
+                  {/* PRIMEIRA LINHA: Nome, Cor, Ordem da Fila */}
+                  <Grid container spacing={2} style={{ marginBottom: 16 }}>
+                    <Grid item xs={12} md={5}>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("queueModal.form.name")}
+                        InputProps={{
+                          endAdornment: (
+                            <Tooltip title="Nome da fila que aparecerá no chatbot. Ex: 'Vendas', 'Suporte', 'Financeiro'. Seja claro e objetivo para facilitar a escolha do cliente." arrow placement="top">
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help', marginLeft: 8 }} />
+                            </Tooltip>
+                          )
+                        }}
+                        autoFocus
+                        name="name"
+                        error={touched.name && Boolean(errors.name)}
+                        helperText={touched.name && errors.name}
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        placeholder="Ex: Vendas, Suporte, Financeiro"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <Field
+                        as={TextField}
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {i18n.t("queueModal.form.color")}
+                            <Tooltip title="Cor que identificará esta fila no sistema. Escolha cores distintas para facilitar a identificação visual pelos agentes." arrow placement="top">
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
+                        name="color"
+                        id="color"
+                        onFocus={() => {
+                          setColorPickerModalOpen(true);
+                          greetingRef.current.focus();
+                        }}
+                        error={touched.color && Boolean(errors.color)}
+                        helperText={touched.color && errors.color}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <div
+                                style={{ backgroundColor: values.color }}
+                                className={classes.colorAdorment}
+                              ></div>
+                            </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <IconButton
+                              size="small"
+                              color="default"
+                              onClick={() => setColorPickerModalOpen(!colorPickerModalOpen)}
+                            >
+                              <Colorize />
+                            </IconButton>
+                          ),
+                        }}
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={3}>
+                      <Field
+                        as={TextField}
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {i18n.t("queueModal.form.orderQueue")}
+                            <Tooltip title="Ordem de exibição da fila no menu do chatbot. Número menor aparece primeiro. Ex: 1=Vendas, 2=Suporte, 3=Financeiro" arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
+                        name="orderQueue"
+                        type="number"
+                        error={touched.orderQueue && Boolean(errors.orderQueue)}
+                        helperText={touched.orderQueue && errors.orderQueue}
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        placeholder="1, 2, 3..."
+                        inputProps={{ min: 1, max: 999 }}
+                        value={values.orderQueue || 1}
+                      />
+                    </Grid>
+                  </Grid>
 
-                        </IconButton>
-                      ),
-                    }}
-                    variant="outlined"
-                    margin="dense"
-                  />
                   <ColorBoxModal
                     open={colorPickerModalOpen}
                     handleClose={() => setColorPickerModalOpen(false)}
@@ -523,115 +607,266 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                     }}
                     currentColor={values.color}
                   />
-                  
-                  <Field
-                    as={TextField}
-                    label={i18n.t("queueModal.form.orderQueue")}
-                    name="orderQueue"
-                    type="orderQueue"
-                    error={touched.orderQueue && Boolean(errors.orderQueue)}
-                    helperText={touched.orderQueue && errors.orderQueue}
-                    variant="outlined"
-                    margin="dense"
-                    className={classes.textField1}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Field
-                        as={Switch}
-                        color="primary"
-                        name="closeTicket"
-                        checked={values.closeTicket}
+
+                  {/* SEGUNDA LINHA: Flags e Tempo de Rodízio */}
+                  <Grid container spacing={2} style={{ marginBottom: 16 }}>
+                    <Grid item xs={12} md={4}>
+                      <FormControlLabel
+                        control={
+                          <Field
+                            as={Switch}
+                            color="primary"
+                            name="ativarRoteador"
+                            checked={values.ativarRoteador}
+                          />
+                        }
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {i18n.t("queueModal.form.rotate")}
+                            <Tooltip title="Ativa rodízio automático entre agentes. Distribui tickets igualmente entre todos os agentes disponíveis da fila, evitando sobrecarga." arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
                       />
-                    }
-                    label={i18n.t("queueModal.form.closeTicket")}
-                  />
-                  <div>
-                    <FormControlLabel
-                      control={
-                        <Field
-                          as={Switch}
-                          color="primary"
-                          name="ativarRoteador"
-                          checked={values.ativarRoteador}
-                        />
-                      }
-                      label={i18n.t("queueModal.form.rotate")}
-                    />
-                    <Field
-                      as={Select}
-                      label={i18n.t("queueModal.form.timeRotate")}
-                      name="tempoRoteador"
-                      id="tempoRoteador"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.selectField}
-                    >
-                      <MenuItem value="0" selected disabled>{i18n.t("queueModal.form.timeRotate")}</MenuItem>
-                      <MenuItem value="2">2 minutos</MenuItem>
-                      <MenuItem value="5">5 minutos</MenuItem>
-                      <MenuItem value="10">10 minutos</MenuItem>
-                      <MenuItem value="15">15 minutos</MenuItem>
-                      <MenuItem value="30">30 minutos</MenuItem>
-                      <MenuItem value="45">45 minutos</MenuItem>
-                      <MenuItem value="60">60 minutos</MenuItem>
-                    </Field>
-                  </div>
-                  <div>
-                    {showIntegrations && (
-                      <FormControl
-                        variant="outlined"
-                        margin="dense"
-                        className={classes.FormControl}
-                        fullWidth
-                      >
-                        <InputLabel id="integrationId-selection-label">
-                          {i18n.t("queueModal.form.integrationId")}
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <FormControlLabel
+                        control={
+                          <Field
+                            as={Switch}
+                            color="primary"
+                            name="closeTicket"
+                            checked={values.closeTicket}
+                          />
+                        }
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {i18n.t("queueModal.form.closeTicket")}
+                            <Tooltip title="Fecha automaticamente o ticket quando cliente escolhe esta fila. Útil para filas informativas ou de finalização de atendimento." arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <FormControl variant="outlined" margin="dense" fullWidth>
+                        <InputLabel>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {i18n.t("queueModal.form.timeRotate")}
+                            <Tooltip title="Tempo de espera antes de rotacionar para próximo agente. Só funciona se 'Ativar Rodízio' estiver ligado." arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
                         </InputLabel>
                         <Field
                           as={Select}
-                          label={i18n.t("queueModal.form.integrationId")}
-                          name="integrationId"
-                          id="integrationId"
-                          placeholder={i18n.t("queueModal.form.integrationId")}
-                          labelId="integrationId-selection-label"
-                          value={values.integrationId || ""}
+                          label={i18n.t("queueModal.form.timeRotate")}
+                          name="tempoRoteador"
+                          id="tempoRoteador"
                         >
-                          <MenuItem value={""} >{"Nenhum"}</MenuItem>
-                          {integrations.map((integration) => (
-                            <MenuItem key={integration.id} value={integration.id}>
-                              {integration.name}
+                          <MenuItem value="0" disabled>Selecione o tempo</MenuItem>
+                          <MenuItem value="2">2 minutos</MenuItem>
+                          <MenuItem value="5">5 minutos</MenuItem>
+                          <MenuItem value="10">10 minutos</MenuItem>
+                          <MenuItem value="15">15 minutos</MenuItem>
+                          <MenuItem value="30">30 minutos</MenuItem>
+                          <MenuItem value="45">45 minutos</MenuItem>
+                          <MenuItem value="60">60 minutos</MenuItem>
+                        </Field>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+
+                  {/* TERCEIRA LINHA: Integração + Lista de Arquivos */}
+                  <Grid container spacing={2} style={{ marginBottom: 16 }}>
+                    {showIntegrations && (
+                      <Grid item xs={12} md={6}>
+                        <FormControl variant="outlined" margin="dense" fullWidth>
+                          <InputLabel>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              {i18n.t("queueModal.form.integrationId")}
+                              <Tooltip title="Integração com sistemas externos (Dialogflow, N8N, etc.). Permite automação avançada e fluxos personalizados para esta fila." arrow>
+                                <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                              </Tooltip>
+                            </div>
+                          </InputLabel>
+                          <Field
+                            as={Select}
+                            label={i18n.t("queueModal.form.integrationId")}
+                            name="integrationId"
+                            id="integrationId"
+                            value={values.integrationId || ""}
+                          >
+                            <MenuItem value="">Nenhuma integração</MenuItem>
+                            {integrations.map((integration) => (
+                              <MenuItem key={integration.id} value={integration.id}>
+                                {integration.name}
+                              </MenuItem>
+                            ))}
+                          </Field>
+                        </FormControl>
+                      </Grid>
+                    )}
+                    
+                    <Grid item xs={12} md={showIntegrations ? 6 : 12}>
+                      <FormControl variant="outlined" margin="dense" fullWidth>
+                        <InputLabel>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {i18n.t("queueModal.form.fileListId")}
+                            <Tooltip title="Lista de arquivos que podem ser enviados automaticamente nesta fila. Configure catálogos, manuais, formulários, etc. Funciona com o sistema inteligente abaixo." arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        </InputLabel>
+                        <Field
+                          as={Select}
+                          label={i18n.t("queueModal.form.fileListId")}
+                          name="fileListId"
+                          id="fileListId"
+                          value={values.fileListId || ""}
+                        >
+                          <MenuItem value="">Nenhuma lista de arquivos</MenuItem>
+                          {file.map(f => (
+                            <MenuItem key={f.id} value={f.id}>
+                              {f.name}
                             </MenuItem>
                           ))}
                         </Field>
-
                       </FormControl>
-                    )}
-                    <FormControl
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.FormControl}
-                      fullWidth
-                    >
-                      <InputLabel id="fileListId-selection-label">{i18n.t("queueModal.form.fileListId")}</InputLabel>
+                    </Grid>
+                  </Grid>
+                  
+                  {/* SEÇÃO: Configurações Inteligentes de Arquivos */}
+                  <Typography variant="h6" style={{ marginTop: 24, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    🤖 Configurações Inteligentes de Arquivos
+                    <Tooltip title="Sistema que automatiza o envio de arquivos baseado no comportamento do cliente. Funciona apenas se uma 'Lista de arquivos' estiver selecionada acima." arrow>
+                      <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                    </Tooltip>
+                  </Typography>
+                  
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <FormControl variant="outlined" margin="dense" fullWidth>
+                        <InputLabel>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            Estratégia de Envio
+                            <Tooltip title={
+                              <div>
+                                <strong>Estratégias disponíveis:</strong><br/>
+                                • <strong>Nenhum:</strong> Desativa envio automático<br/>
+                                • <strong>Ao Entrar na Fila:</strong> Pergunta se quer receber arquivos quando cliente entra<br/>
+                                • <strong>Sob Demanda:</strong> Analisa mensagens e sugere arquivos relevantes<br/>
+                                • <strong>Manual:</strong> Apenas agentes decidem quando enviar
+                              </div>
+                            } arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        </InputLabel>
+                        <Field
+                          as={Select}
+                          label="Estratégia de Envio"
+                          name="autoSendStrategy"
+                          id="autoSendStrategy"
+                          value={values.autoSendStrategy || "none"}
+                        >
+                          <MenuItem value="none">🚫 Nenhum</MenuItem>
+                          <MenuItem value="on_enter">🚪 Ao Entrar na Fila</MenuItem>
+                          <MenuItem value="on_request">🔍 Sob Demanda</MenuItem>
+                          <MenuItem value="manual">👤 Manual</MenuItem>
+                        </Field>
+                      </FormControl>
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
                       <Field
-                        as={Select}
-                        label={i18n.t("queueModal.form.fileListId")}
-                        name="fileListId"
-                        id="fileListId"
-                        placeholder={i18n.t("queueModal.form.fileListId")}
-                        labelId="fileListId-selection-label"
-                        value={values.fileListId || ""}
-                      >
-                        <MenuItem value={""} >{"Nenhum"}</MenuItem>
-                        {file.map(f => (
-                          <MenuItem key={f.id} value={f.id}>
-                            {f.name}
-                          </MenuItem>
-                        ))}
-                      </Field>
-                    </FormControl>
-                  </div>
+                        as={TextField}
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            Máximo de Arquivos por Sessão
+                            <Tooltip title="Limite de arquivos que podem ser enviados por conversa. Evita spam e melhora a experiência do cliente. Recomendado: 3-5 arquivos." arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
+                        name="maxFilesPerSession"
+                        type="number"
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        inputProps={{ min: 1, max: 10 }}
+                        placeholder="3"
+                        value={values.maxFilesPerSession || 3}
+                        helperText="Recomendado: 3-5 arquivos por conversa"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <Field
+                        as={TextField}
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            Template de Confirmação
+                            <Tooltip title={
+                              <div>
+                                <strong>Mensagem enviada antes dos arquivos.</strong><br/>
+                                <strong>Variáveis disponíveis:</strong><br/>
+                                • {'{{name}}'} - Nome do contato<br/>
+                                • {'{{number}}'} - Número do WhatsApp<br/>
+                                • {'{{protocol}}'} - Protocolo do ticket<br/>
+                                <strong>Exemplo:</strong> "Olá {'{{name}}'}, gostaria de receber nosso catálogo?"
+                              </div>
+                            } arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
+                        name="confirmationTemplate"
+                        multiline
+                        rows={3}
+                        fullWidth
+                        variant="outlined"
+                        margin="dense"
+                        placeholder={`Olá ${'{{name}}'}! Gostaria de receber nosso catálogo de produtos? Digite 1 para SIM ou 2 para NÃO`}
+                        helperText={`Use ${'{{name}}'}, ${'{{number}}'}, ${'{{protocol}}'} para personalizar a mensagem`}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <Field
+                        as={TextField}
+                        label={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            Coleção RAG
+                            <Tooltip title={
+                              <div>
+                                <strong>Sistema de busca inteligente de arquivos.</strong><br/>
+                                O sistema analisa mensagens do cliente e sugere arquivos relevantes automaticamente.<br/>
+                                <strong>Como funciona:</strong><br/>
+                                • Cliente escreve "preciso do manual"<br/>
+                                • Sistema busca arquivos com palavra "manual" nos metadados<br/>
+                                • Sugere arquivos mais relevantes baseado no score<br/>
+                                <strong>Futuro:</strong> Integração com IA para busca semântica avançada
+                              </div>
+                            } arrow>
+                              <HelpOutlineIcon fontSize="small" color="action" style={{ cursor: 'help' }} />
+                            </Tooltip>
+                          </div>
+                        }
+                        name="ragCollection"
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        placeholder="Ex: catalogo_produtos, manuais_tecnicos, formularios"
+                        helperText="✅ Funcional: Sistema inteligente de sugestão de arquivos baseado em palavras-chave"
+                      />
+                    </Grid>
+                  </Grid>
+                  
                   <div>
                     <Field
                       as={TextField}
@@ -1204,7 +1439,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
             )}
           </Formik>
         )}
-        {tab === 1 && (
+        {tab === 1 && schedulesEnabled && (
           <Paper style={{ padding: 20 }}>
             <SchedulesForm
               loading={false}
@@ -1214,8 +1449,85 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
             />
           </Paper>
         )}
+        {(tab === 2 || (!schedulesEnabled && tab === 1)) && (
+          <DialogContent dividers style={{ maxHeight: '70vh', overflow: 'auto' }}>
+            {console.log('Renderizando aba Dicas de Uso, tab:', tab, 'schedulesEnabled:', schedulesEnabled)}
+            
+            {/* TESTE SIMPLES */}
+            <div style={{ padding: 20, textAlign: 'center' }}>
+              <HelpIcon style={{ fontSize: 48, color: '#1976d2', marginBottom: 16 }} />
+              <Typography variant="h4" style={{ fontWeight: 'bold', marginBottom: 16, color: '#1976d2' }}>
+                🚀 Dicas de Uso - Filas Inteligentes
+              </Typography>
+              <Typography variant="body1" style={{ marginBottom: 24 }}>
+                Esta é a nova aba de dicas! Aqui você encontrará orientações completas sobre como configurar e usar as filas inteligentes.
+              </Typography>
+              
+              <div style={{ background: '#f5f5f5', padding: 16, borderRadius: 8, marginBottom: 16 }}>
+                <Typography variant="h6" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                  📋 Configuração Básica:
+                </Typography>
+                <ul style={{ textAlign: 'left', margin: 0, paddingLeft: 20 }}>
+                  <li><strong>Nome da Fila:</strong> Use nomes claros como "Vendas", "Suporte", "Financeiro"</li>
+                  <li><strong>Cor:</strong> Escolha cores distintas para facilitar identificação</li>
+                  <li><strong>Lista de Arquivos:</strong> Crie e selecione uma lista com seus documentos</li>
+                  <li><strong>Estratégia de Envio:</strong> Defina quando os arquivos serão oferecidos</li>
+                </ul>
+              </div>
+
+              <div style={{ background: '#e3f2fd', padding: 16, borderRadius: 8, marginBottom: 16 }}>
+                <Typography variant="h6" style={{ fontWeight: 'bold', marginBottom: 8, color: '#1976d2' }}>
+                  🎯 Estratégias de Envio:
+                </Typography>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                  <div style={{ background: 'white', padding: 12, borderRadius: 4 }}>
+                    <Typography variant="subtitle2" style={{ fontWeight: 'bold', color: '#d32f2f' }}>
+                      🚫 Nenhum
+                    </Typography>
+                    <Typography variant="body2">
+                      Arquivos não são oferecidos automaticamente
+                    </Typography>
+                  </div>
+                  <div style={{ background: 'white', padding: 12, borderRadius: 4 }}>
+                    <Typography variant="subtitle2" style={{ fontWeight: 'bold', color: '#388e3c' }}>
+                      🚪 Ao Entrar
+                    </Typography>
+                    <Typography variant="body2">
+                      Pergunta se quer receber arquivos ao entrar na fila
+                    </Typography>
+                  </div>
+                  <div style={{ background: 'white', padding: 12, borderRadius: 4 }}>
+                    <Typography variant="subtitle2" style={{ fontWeight: 'bold', color: '#f57c00' }}>
+                      🤖 Sob Demanda
+                    </Typography>
+                    <Typography variant="body2">
+                      IA analisa mensagens e sugere arquivos
+                    </Typography>
+                  </div>
+                  <div style={{ background: 'white', padding: 12, borderRadius: 4 }}>
+                    <Typography variant="subtitle2" style={{ fontWeight: 'bold', color: '#7b1fa2' }}>
+                      👤 Manual
+                    </Typography>
+                    <Typography variant="body2">
+                      Apenas agentes decidem quando enviar
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                variant="contained" 
+                color="primary"
+                onClick={() => setTab(0)}
+                style={{ marginTop: 16 }}
+              >
+                ⚙️ Voltar para Configuração
+              </Button>
+            </div>
+          </DialogContent>
+        )}
       </Dialog>
-    </div >
+    </div>
   );
 };
 

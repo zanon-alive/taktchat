@@ -112,6 +112,21 @@ class Queue extends Model<Queue> {
   @Column
   closeTicket: boolean;
 
+  // Novos campos para controle inteligente de arquivos
+  @Default("none")
+  @Column(DataType.ENUM("none", "on_enter", "on_request", "manual"))
+  autoSendStrategy: "none" | "on_enter" | "on_request" | "manual";
+
+  @Column(DataType.TEXT)
+  confirmationTemplate: string;
+
+  @Default(3)
+  @Column
+  maxFilesPerSession: number;
+
+  @Column
+  ragCollection: string;
+
   @HasMany(() => Prompt, {
     onUpdate: "SET NULL",
     onDelete: "SET NULL",

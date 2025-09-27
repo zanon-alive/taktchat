@@ -9,6 +9,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictNullChecks": false,

@@ -48,6 +48,7 @@ import Queue from "../../models/Queue";
 import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
 import VerifyCurrentSchedule from "../CompanyService/VerifyCurrentSchedule";
 import Campaign from "../../models/Campaign";
+import QueueAutoFileService from "../QueueServices/QueueAutoFileService";
 import CampaignShipping from "../../models/CampaignShipping";
 import { Op } from "sequelize";
 import { campaignQueue, parseToMilliseconds, randomValue } from "../../queues";
@@ -58,6 +59,7 @@ import ListUserQueueServices from "../UserQueueServices/ListUserQueueServices";
 import cacheLayer from "../../libs/cache";
 import { addLogs } from "../../helpers/addLogs";
 import SendWhatsAppMedia, { getMessageOptions } from "./SendWhatsAppMedia";
+import QueueRAGService from "../QueueServices/QueueRAGService";
 
 import ShowQueueIntegrationService from "../QueueIntegrationServices/ShowQueueIntegrationService";
 import { createDialogflowSessionWithModel } from "../QueueIntegrationServices/CreateSessionDialogflow";
@@ -1533,49 +1535,38 @@ const verifyQueue = async (
       }
     }
 
+    // Nova lógica inteligente de arquivos
     if (!isNil(queues[0].fileListId)) {
-      console.log("log... 1278");
       try {
-        const publicFolder = path.resolve(
-          __dirname,
-          "..",
-          "..",
-          "..",
-          "public"
-        );
+        // Avaliar se deve enviar arquivos automaticamente
+        const decision = await QueueAutoFileService.evaluateAutoSend({
+          ticket,
+          contact,
+          queue: queues[0],
+          trigger: "on_enter"
+        });
 
-        const files = await ShowFileService(
-          queues[0].fileListId,
-          ticket.companyId
-        );
-
-        const folder = path.resolve(
-          publicFolder,
-          `company${ticket.companyId}`,
-          "fileList",
-          String(files.id)
-        );
-
-        for (const [index, file] of files.options.entries()) {
-          const mediaSrc = {
-            fieldname: "medias",
-            originalname: file.path,
-            encoding: "7bit",
-            mimetype: file.mediaType,
-            filename: file.path,
-            path: path.resolve(folder, file.path)
-          } as Express.Multer.File;
-
-          await SendWhatsAppMedia({
-            media: mediaSrc,
+        if (decision.shouldSend) {
+          await QueueAutoFileService.sendFiles({
             ticket,
-            body: file.name,
-            isPrivate: false,
-            isForwarded: false
+            contact,
+            queue: queues[0],
+            files: decision.files,
+            skipConfirmation: !decision.confirmationNeeded
           });
+        } else {
+          logger.info({
+            ticketId: ticket.id,
+            queueId: queues[0].id,
+            reason: decision.reason
+          }, "Files not sent automatically");
         }
       } catch (error) {
-        logger.info(error);
+        logger.error({
+          error,
+          ticketId: ticket.id,
+          queueId: queues[0].id
+        }, "Error in smart file handling");
       }
     }
 

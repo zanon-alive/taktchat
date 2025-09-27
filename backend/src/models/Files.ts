@@ -7,7 +7,8 @@ import {
   PrimaryKey,
   AutoIncrement,
   HasMany,
-  ForeignKey
+  ForeignKey,
+  DataType
 } from "sequelize-typescript";
 import Company from "./Company";
 import FilesOptions from "./FilesOptions";
@@ -30,6 +31,22 @@ class Files extends Model<Files> {
 
   @Column
   message: string;
+
+  // Novos campos para metadados de catálogo
+  @Column
+  isActive: boolean;
+
+  @Column
+  validFrom: Date;
+
+  @Column
+  validUntil: Date;
+
+  @Column(DataType.JSONB)
+  tags: object;
+
+  @Column
+  fileSlug: string;
 
   @CreatedAt
   createdAt: Date;

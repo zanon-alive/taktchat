@@ -34,6 +34,16 @@ class FilesOptions extends Model<FilesOptions> {
   @Column
   mediaType: string;
 
+  // Novos campos para metadados por arquivo
+  @Column
+  isActive: boolean;
+
+  @Column(DataType.TEXT)
+  keywords: string;
+
+  @Column(DataType.TEXT)
+  description: string;
+
   @Column(DataType.VIRTUAL)
   get url(): string {
     if (!this.path) {

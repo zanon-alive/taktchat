@@ -44,7 +44,7 @@ jobs:
           push: true
           build-args: |
             GIT_COMMIT=${{ github.sha }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp || github.run_started_at }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
             BACKEND_VERSION=${{ steps.vcalc.outputs.version_label }}
           tags: |
             felipergrosa/whaticket-backend:latest

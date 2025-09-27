@@ -32,7 +32,11 @@ const ListQueueIntegrationService = async ({
 
   whereCondition = {
     ...whereCondition,
-    companyId
+    companyId,
+    // Excluir presets da lista de integrações
+    type: {
+      [Op.notLike]: 'preset-%'
+    }
   };
 
   const limit = 20;
