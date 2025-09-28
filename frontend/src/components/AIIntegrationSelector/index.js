@@ -75,11 +75,11 @@ const AIIntegrationSelector = ({
     const fetchIntegrations = async () => {
       try {
         const { data } = await api.get("/queueIntegration", {
-          params: { type: "openai,gemini" }
+          params: { type: "openai,gemini,deepseek,grok" }
         });
         
         const aiIntegrations = data.queueIntegrations?.filter(
-          integration => integration.type === "openai" || integration.type === "gemini"
+          integration => ["openai","gemini","deepseek","grok"].includes(integration.type)
         ) || [];
         
         setIntegrations(aiIntegrations);
@@ -175,8 +175,8 @@ const AIIntegrationSelector = ({
     return (
       <Box style={{ padding: 16, backgroundColor: "#fff3cd", border: "1px solid #ffeaa7", borderRadius: 4 }}>
         <Typography variant="body2" color="textSecondary">
-          ⚠️ Nenhuma integração OpenAI/Gemini configurada. 
-          Configure uma integração em <strong>Integrações → Adicionar → OpenAI/Gemini</strong>
+          ⚠️ Nenhuma integração OpenAI/Gemini configurada.
+          Configure em <strong>Configurações de IA (/ai-settings)</strong>
         </Typography>
       </Box>
     );

@@ -141,8 +141,44 @@ export default function AISettings() {
       language: "Português (Brasil)",
       brandVoice: "",
       allowedVariables: "{nome} {cidade}"
+    },
+    deepseek: {
+      enabled: false,
+      apiKey: "",
+      baseURL: "https://api.deepseek.com",
+      model: "deepseek-chat",
+      temperature: 0.7,
+      maxTokens: 1000,
+      creativity: "Média",
+      tone: "Profissional",
+      emotions: "Médio",
+      hashtags: "Sem hashtags",
+      length: "Médio",
+      language: "Português (Brasil)",
+      brandVoice: "",
+      allowedVariables: "{nome} {cidade}"
+    },
+    grok: {
+      enabled: false,
+      apiKey: "",
+      baseURL: "https://api.x.ai/v1",
+      model: "grok-2-latest",
+      temperature: 0.7,
+      maxTokens: 1000,
+      creativity: "Média",
+      tone: "Profissional",
+      emotions: "Médio",
+      hashtags: "Sem hashtags",
+      length: "Médio",
+      language: "Português (Brasil)",
+      brandVoice: "",
+      allowedVariables: "{nome} {cidade}"
     }
   });
+
+  // Modelos disponíveis por provedor
+  const [providerModels, setProviderModels] = useState({ openai: [], gemini: [], deepseek: [], grok: [] });
+  const [modelsLoading, setModelsLoading] = useState({});
   
   const [ragSettings, setRagSettings] = useState({
     enabled: true,
@@ -273,6 +309,30 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
           brandVoice: jsonContent.brandVoice || "",
           allowedVariables: jsonContent.allowedVariables || ""
         };
+
+  const fetchProviderModels = async (provider) => {
+    try {
+      setModelsLoading(prev => ({ ...prev, [provider]: true }));
+      const cfg = providers[provider] || {};
+      const params = new URLSearchParams();
+      params.set('provider', provider);
+      // backend aceita apiKey/baseURL via query antes de salvar integração
+      if (cfg.apiKey) params.set('apiKey', cfg.apiKey);
+      if (cfg.baseURL) params.set('baseURL', cfg.baseURL);
+      const { data } = await api.get(`/ai/models?${params.toString()}`);
+      const models = Array.isArray(data?.models) ? data.models : [];
+      setProviderModels(prev => ({ ...prev, [provider]: models }));
+      if (models.length && !models.includes(cfg.model)) {
+        handleProviderChange(provider, 'model', models[0]);
+      }
+      toast.success(`Modelos carregados de ${provider.toUpperCase()}: ${models.length}`);
+    } catch (error) {
+      console.warn(`Falha ao carregar modelos de ${provider}:`, error);
+      toast.error(`Não foi possível carregar modelos de ${provider.toUpperCase()}`);
+    } finally {
+      setModelsLoading(prev => ({ ...prev, [provider]: false }));
+    }
+  };
       });
       
       setPresets(loadedPresets);
@@ -291,6 +351,8 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
         console.log("Integrações carregadas:", integrations);
         const openaiConfig = integrations.queueIntegrations?.find(i => i.type === "openai");
         const geminiConfig = integrations.queueIntegrations?.find(i => i.type === "gemini");
+        const deepseekConfig = integrations.queueIntegrations?.find(i => i.type === "deepseek");
+        const grokConfig = integrations.queueIntegrations?.find(i => i.type === "grok");
         console.log("OpenAI config:", openaiConfig);
         console.log("Gemini config:", geminiConfig);
       
@@ -344,6 +406,58 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
               model: config.model || geminiConfig.model || "gemini-pro",
               temperature: config.temperature || geminiConfig.temperature || 0.7,
               maxTokens: config.maxTokens || geminiConfig.maxTokens || 1000,
+              creativity: config.creativityLevel === 'low' ? 'Baixa' : config.creativityLevel === 'high' ? 'Alta' : 'Média',
+              tone: config.enhanceDefaults?.tone || "Profissional",
+              emotions: config.enhanceDefaults?.emojiLevel || "Médio",
+              hashtags: config.enhanceDefaults?.hashtags || "Sem hashtags",
+              length: config.enhanceDefaults?.length || "Médio",
+              language: config.enhanceDefaults?.language || "Português (Brasil)",
+              brandVoice: config.brandVoice || "",
+              allowedVariables: (config.permittedVariables || []).join(" ")
+            }
+          }));
+        }
+
+        if (deepseekConfig) {
+          let config = {};
+          if (deepseekConfig.jsonContent) {
+            try { config = JSON.parse(deepseekConfig.jsonContent); } catch (e) { console.warn("Erro ao parsear jsonContent do DeepSeek:", e); }
+          }
+          setProviders(prev => ({
+            ...prev,
+            deepseek: {
+              enabled: true,
+              apiKey: config.apiKey || deepseekConfig.apiKey || "",
+              baseURL: config.baseURL || "https://api.deepseek.com",
+              model: config.model || "deepseek-chat",
+              temperature: config.temperature || 0.7,
+              maxTokens: config.maxTokens || 1000,
+              creativity: config.creativityLevel === 'low' ? 'Baixa' : config.creativityLevel === 'high' ? 'Alta' : 'Média',
+              tone: config.enhanceDefaults?.tone || "Profissional",
+              emotions: config.enhanceDefaults?.emojiLevel || "Médio",
+              hashtags: config.enhanceDefaults?.hashtags || "Sem hashtags",
+              length: config.enhanceDefaults?.length || "Médio",
+              language: config.enhanceDefaults?.language || "Português (Brasil)",
+              brandVoice: config.brandVoice || "",
+              allowedVariables: (config.permittedVariables || []).join(" ")
+            }
+          }));
+        }
+
+        if (grokConfig) {
+          let config = {};
+          if (grokConfig.jsonContent) {
+            try { config = JSON.parse(grokConfig.jsonContent); } catch (e) { console.warn("Erro ao parsear jsonContent do Grok:", e); }
+          }
+          setProviders(prev => ({
+            ...prev,
+            grok: {
+              enabled: true,
+              apiKey: config.apiKey || grokConfig.apiKey || "",
+              baseURL: config.baseURL || "https://api.x.ai/v1",
+              model: config.model || "grok-2-latest",
+              temperature: config.temperature || 0.7,
+              maxTokens: config.maxTokens || 1000,
               creativity: config.creativityLevel === 'low' ? 'Baixa' : config.creativityLevel === 'high' ? 'Alta' : 'Média',
               tone: config.enhanceDefaults?.tone || "Profissional",
               emotions: config.enhanceDefaults?.emojiLevel || "Médio",
@@ -522,6 +636,30 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
       toast.error(`Falha ao testar ${provider.toUpperCase()}`);
     } finally {
       setTesting(prev => ({ ...prev, [provider]: false }));
+    }
+  };
+
+  // Carrega modelos do provedor após informar API Key (DeepSeek/Grok)
+  const fetchProviderModels = async (provider) => {
+    try {
+      setModelsLoading(prev => ({ ...prev, [provider]: true }));
+      const cfg = providers[provider] || {};
+      const params = new URLSearchParams();
+      params.set('provider', provider);
+      if (cfg.apiKey) params.set('apiKey', cfg.apiKey);
+      if (cfg.baseURL) params.set('baseURL', cfg.baseURL);
+      const { data } = await api.get(`/ai/models?${params.toString()}`);
+      const models = Array.isArray(data?.models) ? data.models : [];
+      setProviderModels(prev => ({ ...prev, [provider]: models }));
+      if (models.length && !models.includes(cfg.model)) {
+        handleProviderChange(provider, 'model', models[0]);
+      }
+      toast.success(`Modelos carregados de ${provider.toUpperCase()}: ${models.length}`);
+    } catch (error) {
+      console.warn(`Falha ao carregar modelos de ${provider}:`, error);
+      toast.error(`Não foi possível carregar modelos de ${provider.toUpperCase()}`);
+    } finally {
+      setModelsLoading(prev => ({ ...prev, [provider]: false }));
     }
   };
 
@@ -835,6 +973,21 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
     });
   };
 
+  // Botão para atualizar fontes manualmente
+  const refreshSources = async () => {
+    try {
+      const { data: ragData } = await api.get("/helps/rag/sources");
+      setRagSources({
+        fileManager: ragData.fileManager || [],
+        conversations: ragData.conversations || 0,
+        externalLinks: ragData.externalLinks || []
+      });
+      toast.success("Fontes atualizadas!");
+    } catch (error) {
+      toast.error("Erro ao atualizar fontes");
+    }
+  };
+
   const addExternalLink = async () => {
     if (!newExternalLink.trim()) {
       toast.error("URL é obrigatória");
@@ -842,15 +995,52 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
     }
     
     try {
-      await api.post("/helps/rag/index-url", {
+      const response = await api.post("/helps/rag/index-url", {
         url: newExternalLink,
         title: `Site externo: ${newExternalLink}`
       });
       
-      setRagSources(prev => ({
-        ...prev,
-        externalLinks: [...prev.externalLinks, { url: newExternalLink, title: `Site externo: ${newExternalLink}` }]
-      }));
+      console.log('[RAG] indexUrl response:', response.data);
+      
+      // Aguardar um pouco e recarregar fontes (aumentei para 2s)
+      setTimeout(async () => {
+        try {
+          const { data: ragData } = await api.get("/helps/rag/sources");
+          console.log('[RAG] sources response:', ragData);
+          setRagSources({
+            fileManager: ragData.fileManager || [],
+            conversations: ragData.conversations || 0,
+            externalLinks: ragData.externalLinks || []
+          });
+          
+          // Se ainda estiver vazio, tentar novamente após mais 2s
+          if (ragData.externalLinks.length === 0) {
+            console.log('[RAG] Links externos ainda vazios, tentando novamente...');
+            setTimeout(async () => {
+              try {
+                const { data: ragData2 } = await api.get("/helps/rag/sources");
+                console.log('[RAG] sources response (retry):', ragData2);
+                setRagSources({
+                  fileManager: ragData2.fileManager || [],
+                  conversations: ragData2.conversations || 0,
+                  externalLinks: ragData2.externalLinks || []
+                });
+              } catch {}
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('[RAG] Erro ao recarregar fontes:', err);
+          // fallback: adiciona item localmente
+          setRagSources(prev => ({
+            ...prev,
+            externalLinks: [...prev.externalLinks, { 
+              url: response.data?.url || newExternalLink, 
+              title: response.data?.title || `Site externo: ${newExternalLink}`,
+              contentLength: response.data?.contentLength || 0
+            }]
+          }));
+        }
+      }, 2000);
       
       setNewExternalLink("");
       toast.success("Link externo adicionado à base de conhecimento!");
@@ -859,7 +1049,7 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
       if (error.response?.status === 409) {
         toast.warning("Este link já foi indexado anteriormente");
       } else {
-        toast.error("Erro ao adicionar link externo: " + (error.response?.data?.message || error.message));
+        toast.error("Erro ao adicionar link externo: " + (error.response?.data?.error || error.message));
       }
     }
   };
@@ -867,11 +1057,21 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
   const removeExternalLink = async (url) => {
     try {
       await api.delete(`/helps/rag/external-link`, { data: { url } });
-      
-      setRagSources(prev => ({
-        ...prev,
-        externalLinks: prev.externalLinks.filter(link => link.url !== url)
-      }));
+      // Recarregar fontes para refletir remoção
+      try {
+        const { data: ragData } = await api.get("/helps/rag/sources");
+        setRagSources({
+          fileManager: ragData.fileManager || [],
+          conversations: ragData.conversations || 0,
+          externalLinks: ragData.externalLinks || []
+        });
+      } catch (_) {
+        // fallback local
+        setRagSources(prev => ({
+          ...prev,
+          externalLinks: prev.externalLinks.filter(link => link.url !== url)
+        }));
+      }
       
       toast.success("Link externo removido!");
     } catch (error) {
@@ -953,13 +1153,43 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
                           margin="normal"
                         />
                         
-                        <TextField
-                          fullWidth
-                          label="Modelo"
-                          value={config.model}
-                          onChange={(e) => handleProviderChange(providerName, 'model', e.target.value)}
-                          margin="normal"
-                        />
+                        {
+                          (providerModels[providerName] && providerModels[providerName].length > 0) ? (
+                            <FormControl fullWidth margin="normal" variant="outlined">
+                              <InputLabel>Modelo</InputLabel>
+                              <Select
+                                label="Modelo"
+                                value={config.model || ''}
+                                onChange={(e) => handleProviderChange(providerName, 'model', e.target.value)}
+                              >
+                                {providerModels[providerName].map((m) => (
+                                  <MenuItem key={m} value={m}>{m}</MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          ) : (
+                            <TextField
+                              fullWidth
+                              label="Modelo"
+                              value={config.model}
+                              onChange={(e) => handleProviderChange(providerName, 'model', e.target.value)}
+                              margin="normal"
+                            />
+                          )
+                        }
+
+                        {/* Base URL somente leitura para DeepSeek e Grok */}
+                        {(providerName === 'deepseek' || providerName === 'grok') && (
+                          <TextField
+                            fullWidth
+                            label="Base URL"
+                            value={config.baseURL}
+                            onChange={(e) => handleProviderChange(providerName, 'baseURL', e.target.value)}
+                            margin="normal"
+                            InputProps={{ readOnly: true }}
+                            helperText="Somente leitura (pré-definido para o provedor)"
+                          />
+                        )}
                         
                         <Grid container spacing={2}>
                           <Grid item xs={6}>
@@ -1133,6 +1363,18 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
                           >
                             Testar Conexão
                           </Button>
+                          {(providerName === 'openai' || providerName === 'gemini' || providerName === 'deepseek' || providerName === 'grok') && (
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              startIcon={modelsLoading[providerName] ? <CircularProgress size={16} /> : <RefreshIcon />}
+                              onClick={() => fetchProviderModels(providerName)}
+                              disabled={modelsLoading[providerName] || !config.apiKey}
+                              className={classes.testButton}
+                            >
+                              Carregar Modelos
+                            </Button>
+                          )}
                           
                           <Button
                             variant="outlined"
@@ -1144,6 +1386,18 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
                             📋 Templates
                           </Button>
                         </Box>
+                        
+                        {/* Badge de modelos carregados */}
+                        {providerModels[providerName] && providerModels[providerName].length > 0 && (
+                          <Box mt={1}>
+                            <Chip
+                              label={`Modelos: ${providerModels[providerName].length}`}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                            />
+                          </Box>
+                        )}
                       </>
                     )}
                   </CardContent>
@@ -1237,9 +1491,19 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
           
           <Card className={classes.card}>
             <CardContent>
-              <Typography variant="h6" className={classes.sectionTitle}>
-                📊 Base de Conhecimento Atual
-              </Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6" className={classes.sectionTitle}>
+                  📊 Base de Conhecimento Atual
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<RefreshIcon />}
+                  onClick={refreshSources}
+                >
+                  Atualizar Fontes
+                </Button>
+              </Box>
               
               <Grid container spacing={2}>
                 <Grid item xs={12} md={4}>
@@ -1375,12 +1639,30 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
               <Typography variant="h6" style={{ color: '#1976d2', marginBottom: 8 }}>
                 📚 Tipos de arquivo suportados
               </Typography>
-              <Typography variant="body2">
-                <strong>Documentos:</strong> PDF, TXT, MD, CSV, JSON<br/>
-                <strong>Imagens:</strong> JPG, PNG, GIF, BMP, WebP, TIFF<br/>
-                <strong>Conversas:</strong> Auto-indexação de tickets históricos<br/>
-                <strong>Sites externos:</strong> Qualquer URL pública
-              </Typography>
+              <Grid container spacing={1}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2">
+                    <strong>Documentos:</strong> PDF, TXT, MD, CSV, JSON
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Imagens:</strong> JPG, PNG, BMP, WebP, TIFF (OCR automático)
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>GIF animados:</strong> OCR em frames-chave com IA
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2">
+                    <strong>Vídeos:</strong> MP4, AVI, MOV, MKV, WebM (transcrição Whisper)
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Áudios:</strong> MP3, WAV, M4A, FLAC, AAC, OGG (transcrição automática)
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Conversas & Sites externos:</strong> Tickets históricos, URLs públicas e sitemaps XML
+                  </Typography>
+                </Grid>
+              </Grid>
             </CardContent>
           </Card>
         </TabPanel>
@@ -1653,170 +1935,201 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
             </Card>
           )}
         </TabPanel>
-
         {/* Tab 4: Analytics */}
         <TabPanel value={tabValue} index={3}>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
+            <Grid item xs={12}>
+              <Card className={classes.card}>
                 <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Total de Requisições
+                  <Typography variant="h6" className={classes.sectionTitle}>
+                    🎯 Tipos de arquivo suportados
                   </Typography>
-                  <Typography className={classes.metricValue}>
-                    {stats.totalRequests.toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Taxa de Sucesso
-                  </Typography>
-                  <Typography className={classes.metricValue}>
-                    {stats.successRate}%
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Latência Média
-                  </Typography>
-                  <Typography className={classes.metricValue}>
-                    {stats.avgLatency}ms
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Provedor Principal
-                  </Typography>
-                  <Typography className={classes.metricValue}>
-                    {stats.topProvider}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
 
-          {/* Seção de Prompts */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 32, marginBottom: 16 }}>
-            <Typography variant="h6" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              🤖 Estatísticas de Prompts
-            </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => window.location.href = '/prompts'}
-              style={{ textTransform: 'none' }}
-            >
-              Gerenciar Prompts
-            </Button>
-          </div>
-          
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Total de Prompts
-                  </Typography>
-                  <Typography className={classes.metricValue}>
-                    {stats.prompts?.totalPrompts || 0}
-                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="subtitle2" color="primary" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                        Documentos:
+                      </Typography>
+                      <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                        PDF, TXT, MD, CSV, JSON
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="subtitle2" color="primary" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                        Imagens:
+                      </Typography>
+                      <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                        JPG, PNG, BMP, WebP, TIFF
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="subtitle2" color="primary" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                        Vídeos:
+                      </Typography>
+                      <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                        MP4, AVI, MOV, MKV, WebM
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="subtitle2" color="primary" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                        Áudios:
+                      </Typography>
+                      <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                        MP3, WAV, M4A, FLAC, AAC
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="primary" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                        GIF Animados:
+                      </Typography>
+                      <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                        OCR em frames-chave para extrair texto
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="primary" style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                        Sites externos:
+                      </Typography>
+                      <Typography variant="body2" style={{ lineHeight: 1.6 }}>
+                        URLs públicas, sitemaps XML
+                      </Typography>
+                    </Grid>
+                  </Grid>
+
+                  <Box mt={2} p={2} style={{ backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+                    <Typography variant="body2" color="textSecondary" style={{ fontStyle: 'italic' }}>
+                      💡 <strong>Transcrição automática:</strong> Vídeos e áudios são transcritos usando Whisper (OpenAI) quando há API Key configurada.
+                      <br />
+                      🔍 <strong>OCR inteligente:</strong> Imagens e GIFs têm texto extraído automaticamente via reconhecimento óptico.
+                    </Typography>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Prompts Ativos
-                  </Typography>
-                  <Typography className={classes.metricValue} style={{ color: '#4caf50' }}>
-                    {stats.prompts?.activePrompts || 0}
-                  </Typography>
-                </CardContent>
-              </Card>
+
+            {/* Seção de Prompts */}
+            <Grid item xs={12}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 32, marginBottom: 16 }}>
+                <Typography variant="h6" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  🤖 Estatísticas de Prompts
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => window.location.href = '/prompts'}
+                  style={{ textTransform: 'none' }}
+                >
+                  Gerenciar Prompts
+                </Button>
+              </div>
             </Grid>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Tokens Consumidos
-                  </Typography>
-                  <Typography className={classes.metricValue} style={{ color: '#ff9800' }}>
-                    {(stats.prompts?.totalTokens || 0).toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Tempo Médio
-                  </Typography>
-                  <Typography className={classes.metricValue} style={{ color: '#2196f3' }}>
-                    {stats.prompts?.avgResponseTime || 0}s
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-          
-          <Grid container spacing={3} style={{ marginTop: 8 }}>
-            <Grid item xs={12} md={3}>
-              <Card className={classes.metricCard}>
-                <CardContent>
-                  <Typography variant="h6" color="textSecondary">
-                    Taxa de Sucesso
-                  </Typography>
-                  <Typography className={classes.metricValue} style={{ color: '#4caf50' }}>
-                    {stats.prompts?.successRate || 0}%
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-          
-          <Card className={classes.card} style={{ marginTop: 24 }}>
-            <CardContent>
-              <Typography variant="h6" className={classes.sectionTitle}>
-                <BrainIcon />
-                Sistema de IA Unificado - Status
-              </Typography>
-              
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="body2" style={{ marginBottom: 8 }}>
-                    ✅ <strong>AIOrchestrator:</strong> Fallback automático ativo<br/>
-                    ✅ <strong>RAG Expandido:</strong> PDFs + Imagens + Conversas<br/>
-                    ✅ <strong>FileManager:</strong> Integrado ao cérebro IA<br/>
-                    ✅ <strong>Auto-indexação:</strong> Conversas históricas
-                  </Typography>
+
+            <Grid item xs={12}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">
+                        Total de Prompts
+                      </Typography>
+                      <Typography className={classes.metricValue}>
+                        {stats.prompts?.totalPrompts || 0}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="body2">
-                    🔄 <strong>Processadores ativos:</strong><br/>
-                    • PDF com OCR fallback<br/>
-                    • Imagens com Tesseract OCR<br/>
-                    • Conversas com detecção de temas<br/>
-                    • Chunking inteligente
-                  </Typography>
+                <Grid item xs={12} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">
+                        Prompts Ativos
+                      </Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#4caf50' }}>
+                        {stats.prompts?.activePrompts || 0}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">
+                        Tokens Consumidos
+                      </Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#ff9800' }}>
+                        {(stats.prompts?.totalTokens || 0).toLocaleString()}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">
+                        Tempo Médio
+                      </Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#2196f3' }}>
+                        {stats.prompts?.avgResponseTime || 0}s
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 </Grid>
               </Grid>
-            </CardContent>
-          </Card>
-          
+            </Grid>
+
+            <Grid item xs={12}>
+              <Grid container spacing={3} style={{ marginTop: 8 }}>
+                <Grid item xs={12} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">
+                        Taxa de Sucesso
+                      </Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#4caf50' }}>
+                        {stats.prompts?.successRate || 0}%
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Card className={classes.card} style={{ marginTop: 24 }}>
+                <CardContent>
+                  <Typography variant="h6" className={classes.sectionTitle}>
+                    <BrainIcon />
+                    Sistema de IA Unificado - Status
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body2" style={{ marginBottom: 8 }}>
+                        ✅ <strong>AIOrchestrator:</strong> Fallback automático ativo<br/>
+                        ✅ <strong>RAG Expandido:</strong> PDFs + Imagens + Conversas<br/>
+                        ✅ <strong>FileManager:</strong> Integrado ao cérebro IA<br/>
+                        ✅ <strong>Auto-indexação:</strong> Conversas históricas
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body2">
+                        🔄 <strong>Processadores ativos:</strong><br/>
+                        • PDF com OCR fallback<br/>
+                        • Imagens com Tesseract OCR<br/>
+                        • Conversas com detecção de temas<br/>
+                        • Chunking inteligente
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </TabPanel>
       </Paper>
 
@@ -1833,4 +2146,4 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
       />
     </div>
   );
-}
+};

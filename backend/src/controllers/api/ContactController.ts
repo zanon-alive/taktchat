@@ -220,7 +220,7 @@ export const count = async (req: Request, res:Response): Promise<Response> => {
             }
           });
         } catch (error) {
-          logger.info("Erro ao processar Tags", error)
+          logger.info(`Erro ao processar Tag '${tagName}' para o contato ${contact.id}:`, error);
         }
       }
     }

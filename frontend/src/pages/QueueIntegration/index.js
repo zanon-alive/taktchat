@@ -154,9 +154,10 @@ const QueueIntegration = () => {
       const fetchIntegrations = async () => {
         try {
           const { data } = await api.get("/queueIntegration/", {
-            params: { searchParam, pageNumber },
+            params: { searchParam, pageNumber, excludeTypes: "openai,gemini,knowledge" },
           });
-          dispatch({ type: "LOAD_INTEGRATIONS", payload: data.queueIntegrations });
+          const sanitized = (data.queueIntegrations || []).filter((i) => !["openai","gemini","knowledge"].includes(String(i.type||'').toLowerCase()));
+          dispatch({ type: "LOAD_INTEGRATIONS", payload: sanitized });
           setHasMore(data.hasMore);
           setLoading(false);
         } catch (err) {
@@ -172,6 +173,11 @@ const QueueIntegration = () => {
     // const socket = socketManager.GetSocket();
 
     const onQueueEvent = (data) => {
+      // Ignorar eventos de integrações de IA nesta tela
+      const t = (data?.queueIntegration?.type || "").toLowerCase();
+      if (["openai", "gemini", "knowledge"].includes(t)) {
+        return;
+      }
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_INTEGRATIONS", payload: data.queueIntegration });
       }
@@ -295,7 +301,9 @@ const QueueIntegration = () => {
               </TableHead>
               <TableBody>
                 <>
-                  {queueIntegration.map((integration) => (
+                  {queueIntegration
+                    .filter((integration) => !["openai", "gemini", "knowledge"].includes(String(integration.type || '').toLowerCase()))
+                    .map((integration) => (
                     <TableRow key={integration.id}>
                       <TableCell >
                         {integration.type === "dialogflow" && (<Avatar

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import OpenAI from "openai";
+import axios from "axios";
 import GetIntegrationByTypeService from "../services/QueueIntegrationServices/GetIntegrationByTypeService";
 import ResolveAIIntegrationService from "../services/IA/ResolveAIIntegrationService";
 import IAClientFactory from "../services/IA/IAClientFactory";
@@ -195,40 +196,94 @@ export const listModels = async (req: Request, res: Response) => {
   try {
     const { provider } = (req.query || {}) as { provider?: string };
     const { companyId } = req.user;
-    const prov = provider === 'gemini' ? 'gemini' : 'openai';
+    const prov = (provider || 'openai').toLowerCase();
 
     if (prov === 'openai') {
-      // Tenta obter integração da empresa; se não houver, retorna lista recomendada estática
       try {
         const integration = await GetIntegrationByTypeService({ companyId, type: 'openai' });
         const cfg = (typeof integration?.jsonContent === 'string') ? JSON.parse(integration.jsonContent) : (integration?.jsonContent || {});
-        if (cfg?.apiKey) {
-          // Opcional: poderíamos listar via API aqui, mas manteremos lista recomendada por estabilidade
-          return res.status(200).json({ provider: 'openai', models: [
-            'gpt-4o', 'gpt-4o-mini', 'gpt-4o-realtime', 'gpt-3.5-turbo-1106'
-          ]});
+        const apiKey = (cfg?.apiKey) || (req.query as any)?.apiKey || (req.headers['x-api-key'] as string);
+        if (apiKey) {
+          const resp = await axios.get('https://api.openai.com/v1/models', {
+            headers: { Authorization: `Bearer ${apiKey}` }
+          });
+          const ids: string[] = Array.isArray(resp.data?.data)
+            ? resp.data.data.map((m: any) => m.id).filter(Boolean)
+            : [];
+          // Filtro simples para modelos de chat principais
+          const filtered = ids.filter(id => /gpt|o-mini|o$|o-/.test(id));
+          return res.status(200).json({ provider: 'openai', models: filtered.length ? filtered : ids });
         }
-      } catch {}
+      } catch (_) {}
+      // Fallback estático
       return res.status(200).json({ provider: 'openai', models: [
         'gpt-4o', 'gpt-4o-mini', 'gpt-4o-realtime', 'gpt-3.5-turbo-1106'
       ]});
+    }
+
+    // deepseek (OpenAI-compatible)
+    if (prov === 'deepseek') {
+      try {
+        const integration = await GetIntegrationByTypeService({ companyId, type: 'deepseek' });
+        const cfg = (typeof integration?.jsonContent === 'string') ? JSON.parse(integration.jsonContent) : (integration?.jsonContent || {});
+        const apiKey = (cfg?.apiKey) || (req.query as any)?.apiKey || (req.headers['x-api-key'] as string);
+        const baseURL = (cfg?.baseURL) || ((req.query as any)?.baseURL as string) || 'https://api.deepseek.com';
+        if (apiKey) {
+          const resp = await axios.get(`${baseURL.replace(/\/$/, '')}/v1/models`, {
+            headers: { Authorization: `Bearer ${apiKey}` }
+          });
+          const models = Array.isArray(resp.data?.data)
+            ? resp.data.data.map((m: any) => m.id).filter(Boolean)
+            : [];
+          return res.status(200).json({ provider: 'deepseek', models });
+        }
+      } catch (_) {}
+      return res.status(200).json({ provider: 'deepseek', models: ['deepseek-chat', 'deepseek-reasoner'] });
+    }
+
+    // grok (xAI, OpenAI-compatible)
+    if (prov === 'grok') {
+      try {
+        const integration = await GetIntegrationByTypeService({ companyId, type: 'grok' });
+        const cfg = (typeof integration?.jsonContent === 'string') ? JSON.parse(integration.jsonContent) : (integration?.jsonContent || {});
+        const apiKey = (cfg?.apiKey) || (req.query as any)?.apiKey || (req.headers['x-api-key'] as string);
+        const baseURL = (cfg?.baseURL) || ((req.query as any)?.baseURL as string) || 'https://api.x.ai/v1';
+        if (apiKey) {
+          const resp = await axios.get(`${baseURL.replace(/\/$/, '')}/models`, {
+            headers: { Authorization: `Bearer ${apiKey}` }
+          });
+          const models = Array.isArray(resp.data?.data)
+            ? resp.data.data.map((m: any) => m.id).filter(Boolean)
+            : [];
+          return res.status(200).json({ provider: 'grok', models });
+        }
+      } catch (_) {}
+      return res.status(200).json({ provider: 'grok', models: ['grok-2-latest'] });
     }
 
     // gemini
     try {
       const integration = await GetIntegrationByTypeService({ companyId, type: 'gemini' });
       const cfg = (typeof integration?.jsonContent === 'string') ? JSON.parse(integration.jsonContent) : (integration?.jsonContent || {});
-      if (cfg?.apiKey) {
-        return res.status(200).json({ provider: 'gemini', models: [
-          'gemini-2.0-pro', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'
-        ]});
+      const apiKey = (cfg?.apiKey) || (req.query as any)?.apiKey || (req.headers['x-api-key'] as string);
+      if (apiKey) {
+        // Google Generative Language API
+        const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+        const resp = await axios.get(url);
+        const names: string[] = Array.isArray(resp.data?.models)
+          ? resp.data.models.map((m: any) => m.name).filter(Boolean)
+          : [];
+        // Exemplo de nomes: "models/gemini-1.5-flash" -> extrair parte útil
+        const formatted = names.map(n => (typeof n === 'string' && n.includes('/')) ? n.split('/').pop()! : n);
+        return res.status(200).json({ provider: 'gemini', models: formatted });
       }
-    } catch {}
+    } catch (_) {}
+    // Fallback estático
     return res.status(200).json({ provider: 'gemini', models: [
       'gemini-2.0-pro', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'
     ]});
   } catch (error: any) {
-    return res.status(200).json({ provider: 'openai', models: [] });
+    return res.status(200).json({ provider: (req.query as any)?.provider || 'openai', models: [] });
   }
 };
 

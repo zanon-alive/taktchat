@@ -20,4 +20,9 @@ ragRoutes.get("/helps/rag/sources", isAuth, RAGController.listSources);
 ragRoutes.post("/helps/rag/index-url", isAuth, RAGController.indexUrl);
 ragRoutes.delete("/helps/rag/external-link", isAuth, RAGController.removeExternalLink);
 
+// Sitemap e reindexação
+ragRoutes.post("/helps/rag/index-sitemap", isAuth, RAGController.indexSitemap);
+ragRoutes.post("/helps/rag/reindex-document/:id", isAuth, RAGController.reindexDocument);
+ragRoutes.post("/helps/rag/reindex-all", isAuth, RAGController.reindexAll);
+
 export default ragRoutes;

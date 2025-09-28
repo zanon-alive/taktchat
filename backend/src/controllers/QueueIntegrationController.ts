@@ -10,16 +10,20 @@ import UpdateQueueIntegrationService from "../services/QueueIntegrationServices/
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
+  type?: string;
+  excludeTypes?: string;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber } = req.query as IndexQuery;
+  const { searchParam, pageNumber, type, excludeTypes } = req.query as IndexQuery;
   const { companyId } = req.user;
 
   const { queueIntegrations, count, hasMore } = await ListQueueIntegrationService({
     searchParam,
     pageNumber,
-    companyId
+    companyId,
+    type,
+    excludeTypes
   });
 
   // Máscara parcial da apiKey (mantém prefixo e oculta o restante)

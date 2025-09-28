@@ -5,6 +5,10 @@ interface Request {
   searchParam?: string;
   pageNumber?: string | number;
   companyId: number;
+  // Lista de tipos a incluir (separados por vírgula). Ex.: "dialogflow,n8n"
+  type?: string;
+  // Lista de tipos a EXCLUIR (separados por vírgula). Ex.: "openai,gemini,knowledge"
+  excludeTypes?: string;
 }
 
 interface Response {
@@ -16,7 +20,9 @@ interface Response {
 const ListQueueIntegrationService = async ({
   searchParam = "",
   pageNumber = "1",
-  companyId
+  companyId,
+  type,
+  excludeTypes
 }: Request): Promise<Response> => {
   let whereCondition: Filterable["where"] = {
     [Op.or]: [
@@ -38,6 +44,33 @@ const ListQueueIntegrationService = async ({
       [Op.notLike]: 'preset-%'
     }
   };
+
+  // Filtros dinâmicos por tipo
+  const includeTypes = (type || "")
+    .split(",")
+    .map(t => t.trim())
+    .filter(Boolean);
+
+  const excludeTypesList = (excludeTypes || "")
+    .split(",")
+    .map(t => t.trim())
+    .filter(Boolean);
+
+  // Aplica IN se includeTypes for informado
+  if (includeTypes.length > 0) {
+    (whereCondition as any).type = {
+      ...(whereCondition as any).type,
+      [Op.in]: includeTypes
+    };
+  }
+
+  // Aplica NOT IN se excludeTypes for informado
+  if (excludeTypesList.length > 0) {
+    (whereCondition as any).type = {
+      ...(whereCondition as any).type,
+      [Op.notIn]: excludeTypesList
+    };
+  }
 
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
