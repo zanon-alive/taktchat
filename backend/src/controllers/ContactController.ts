@@ -74,6 +74,18 @@ type IndexQuery = {
   segment?: string | string[];
   dtUltCompraStart?: string;
   dtUltCompraEnd?: string;
+  channel?: string | string[];
+  representativeCode?: string | string[];
+  city?: string | string[];
+  situation?: string | string[];
+  foundationMonths?: string | string[];
+  minCreditLimit?: string;
+  maxCreditLimit?: string;
+  minVlUltCompra?: string;
+  maxVlUltCompra?: string;
+  florder?: string;
+  bzEmpresa?: string | string[];
+  isWhatsappValid?: string;
 };
 
 type IndexGetContactQuery = {
@@ -186,11 +198,33 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { id: userId, companyId, profile } = req.user;
 
 
-  let tagsIds: number[] = [];
+let tagsIds: number[] = [];
 
-  if (tagIdsStringified) {
+if (tagIdsStringified) {
+  try {
     tagsIds = JSON.parse(tagIdsStringified);
+  } catch (_) {
+    tagsIds = [];
   }
+}
+
+const tagsQuery = (req.query as any).tags;
+if (tagsQuery) {
+  let parsed: number[] = [];
+  if (Array.isArray(tagsQuery)) {
+    parsed = tagsQuery.map((t: any) => Number(t)).filter((t) => Number.isInteger(t));
+  } else if (typeof tagsQuery === "string") {
+    try {
+      const parsedJson = JSON.parse(tagsQuery);
+      if (Array.isArray(parsedJson)) parsed = parsedJson.map((t: any) => Number(t)).filter(Number.isInteger);
+    } catch {
+      parsed = tagsQuery.split(",").map((t: any) => Number(t.trim())).filter(Number.isInteger);
+    }
+  }
+  if (parsed.length) {
+    tagsIds = Array.from(new Set([...(tagsIds || []), ...parsed].filter(n => Number.isInteger(n))));
+  }
+}
 
   // Parse robusto do parâmetro 'segment' (aceita string, array, JSON ou CSV)
   const parseSegment = (q: any): string | string[] | undefined => {
@@ -224,7 +258,98 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   const segment = parseSegment(req.query);
 
-  const { contacts, count, hasMore } = await ListContactsService({
+  const pickQueryValue = (key: string): any => {
+    const query = req.query as any;
+    if (query[key] !== undefined) return query[key];
+    if (query[`${key}[]`] !== undefined) return query[`${key}[]`];
+    return undefined;
+  };
+
+  const parseStringArrayParam = (key: string): string[] | undefined => {
+    const raw = pickQueryValue(key);
+    if (raw === undefined || raw === null) return undefined;
+    const normalize = (val: any) => (val == null ? "" : String(val)).trim();
+
+    if (Array.isArray(raw)) {
+      const arr = raw.map(normalize).filter(Boolean);
+      return arr.length ? Array.from(new Set(arr)) : undefined;
+    }
+
+    const str = normalize(raw);
+    if (!str) return undefined;
+
+    if (str.startsWith("[") && str.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(str);
+        if (Array.isArray(parsed)) {
+          const arr = parsed.map(normalize).filter(Boolean);
+          return arr.length ? Array.from(new Set(arr)) : undefined;
+        }
+      } catch (_) {
+        // ignora parse inválido
+      }
+    }
+
+    if (str.includes(",")) {
+      const arr = str.split(",").map(normalize).filter(Boolean);
+      return arr.length ? Array.from(new Set(arr)) : undefined;
+    }
+
+    return [str];
+  };
+
+  const parseNumberArrayParam = (key: string): number[] | undefined => {
+    const arr = parseStringArrayParam(key);
+    if (!arr) return undefined;
+    const nums = arr
+      .map(val => Number(val))
+      .filter(val => Number.isInteger(val) && val >= 1 && val <= 12);
+    return nums.length ? Array.from(new Set(nums)) : undefined;
+  };
+
+  const parseDecimalParam = (key: string): number | undefined => {
+    const raw = (req.query as any)[key];
+    if (raw === undefined || raw === null || raw === "") return undefined;
+    const str = String(raw)
+      .trim()
+      .replace(/R\$?\s*/gi, "")
+      .replace(/\./g, "")
+      .replace(/,/g, ".");
+    if (!str) return undefined;
+    const num = Number(str);
+    return Number.isFinite(num) ? num : undefined;
+  };
+
+  const parseFloatParam = (key: string): number | undefined => {
+    const raw = (req.query as any)[key];
+    if (raw === undefined || raw === null || raw === "") return undefined;
+    const num = Number(String(raw).trim().replace(/R\$?\s*/gi, ""));
+    return Number.isFinite(num) ? num : undefined;
+  };
+
+  const parseBooleanParam = (key: string): boolean | undefined => {
+    const raw = (req.query as any)[key];
+    if (raw === undefined || raw === null || raw === "") return undefined;
+    const value = String(raw).trim().toLowerCase();
+    if (["true", "1", "sim", "yes"].includes(value)) return true;
+    if (["false", "0", "nao", "não", "no"].includes(value)) return false;
+    return undefined;
+  };
+
+  const channel = parseStringArrayParam("channel");
+  const representativeCodes = parseStringArrayParam("representativeCode");
+  const cities = parseStringArrayParam("city");
+  const situations = parseStringArrayParam("situation");
+  const foundationMonths = parseNumberArrayParam("foundationMonths");
+  const bzEmpresas = parseStringArrayParam("bzEmpresa");
+  const minCreditLimit = parseDecimalParam("minCreditLimit");
+  const maxCreditLimit = parseDecimalParam("maxCreditLimit");
+  const minVlUltCompra = parseFloatParam("minVlUltCompra");
+  const maxVlUltCompra = parseFloatParam("maxVlUltCompra");
+  const florder = parseBooleanParam("florder");
+  const isWhatsappValid = parseBooleanParam("isWhatsappValid");
+
+  const result = await ListContactsService({
     searchParam,
     pageNumber,
     companyId,
@@ -237,7 +362,19 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     order,
     segment,
     dtUltCompraStart,
-    dtUltCompraEnd
+    dtUltCompraEnd,
+    channel,
+    representativeCode: representativeCodes,
+    city: cities,
+    situation: situations,
+    foundationMonths,
+    minCreditLimit,
+    maxCreditLimit,
+    minVlUltCompra,
+    maxVlUltCompra,
+    florder,
+    bzEmpresa: bzEmpresas,
+    isWhatsappValid
   });
 
   // Dispara validações em background sem bloquear a resposta
@@ -246,7 +383,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const ttlHours = 0;
     const now = Date.now();
     const ttlMs = ttlHours * 60 * 60 * 1000;
-    contacts.forEach(c => {
+    result.contacts.forEach(c => {
       const isWhats = c.channel === "whatsapp";
       const notGroup = !c.isGroup;
       const last = c.validatedAt ? new Date(c.validatedAt as any).getTime() : 0;
@@ -261,7 +398,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     logger.warn({ companyId, error: e?.message }, "[Contacts.index] falha ao agendar validações");
   }
 
-  return res.json({ contacts, count, hasMore });
+  return res.json(result);
 };
 
 export const getContact = async (

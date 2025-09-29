@@ -1,10 +1,10 @@
 # Dockerfile para PostgreSQL com pgvector pré-instalado
-FROM postgres:15
+FROM postgres:14
 
 # Instalar pgvector
 RUN apt-get update \
     && apt-get install -y \
-        postgresql-15-pgvector \
+        postgresql-14-pgvector \
         wget \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*

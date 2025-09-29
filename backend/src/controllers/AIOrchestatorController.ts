@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import AIOrchestrator, { AIRequest, ModuleContext, AIMode } from "../services/IA/AIOrchestrator";
+import { getAIAnalytics } from "../services/IA/AIAnalyticsService";
 
 /**
  * Controller para o AIOrchestrator - endpoint unificado para IA
@@ -207,25 +208,23 @@ export const testProviders = async (req: Request, res: Response) => {
 };
 
 /**
- * Endpoint para obter estatísticas básicas (placeholder)
  */
 export const getStats = async (req: Request, res: Response) => {
   try {
-    const { companyId } = req.user;
-    
-    // TODO: Implementar coleta de estatísticas do banco
-    const stats = {
-      companyId,
-      totalRequests: 0,
-      requestsByProvider: {},
-      requestsByModule: {},
-      averageProcessingTime: 0,
-      successRate: 0,
-      lastRequest: null,
-      message: "Estatísticas serão implementadas na próxima fase"
-    };
+    const {companyId } = req.user;
+    const { days } = req.query;
 
-    return res.status(200).json(stats);
+    const windowDays = typeof days === "string" ? Number(days) : undefined;
+    if (windowDays !== undefined && (Number.isNaN(windowDays) || windowDays <= 0)) {
+      return res.status(400).json({ error: "Parâmetro 'days' deve ser um número positivo." });
+    }
+
+    const analytics = await getAIAnalytics(companyId, { days: windowDays });
+
+    return res.status(200).json({
+      companyId,
+      ...analytics
+    });
 
   } catch (error: any) {
     console.error("[AIController] Error getting stats:", error);

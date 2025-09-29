@@ -54,6 +54,7 @@ import { FlowImgModel } from "../models/FlowImg";
 import { WebhookModel } from "../models/Webhook";
 import KnowledgeDocument from "../models/KnowledgeDocument";
 import KnowledgeChunk from "../models/KnowledgeChunk";
+import AIUsageLog from "../models/AIUsageLog";
 import WhatsappLabel from "../models/WhatsappLabel";
 import ContactWhatsappLabel from "../models/ContactWhatsappLabel";
 
@@ -115,11 +116,12 @@ const models = [
   FlowAudioModel,
   FlowCampaignModel,
   FlowImgModel,
-  WebhookModel
-  , KnowledgeDocument
-  , KnowledgeChunk
-  , WhatsappLabel
-  , ContactWhatsappLabel
+  WebhookModel,
+  KnowledgeDocument,
+  KnowledgeChunk,
+  AIUsageLog,
+  WhatsappLabel,
+  ContactWhatsappLabel
 ];
 
 sequelize.addModels(models);

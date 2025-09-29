@@ -16,14 +16,22 @@ import {
   Chip,
   Select,
   MenuItem,
-  FormControl,
   InputLabel,
+  FormControl,
+  ButtonGroup,
   List,
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  Tooltip
+  Tooltip,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Divider
 } from "@material-ui/core";
 import SaveIcon from '@material-ui/icons/Save';
 import AddIcon from '@material-ui/icons/Add';
@@ -38,6 +46,16 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  Legend
+} from "recharts";
 import PromptEnhancements from "../PromptEnhancements";
 import { showAIErrorToast } from "../../utils/aiErrorHandler";
 import AIConfigValidator from "../AIConfigValidator";
@@ -259,11 +277,19 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
   const [editingPresetIndex, setEditingPresetIndex] = useState(-1);
   
   const [stats, setStats] = useState({
-    totalRequests: 1250,
-    successRate: 98.5,
-    avgLatency: 850,
-    topProvider: "OpenAI",
-    // Estatísticas de Prompts
+    totalRequests: 0,
+    successRate: 0,
+    avgProcessingTimeMs: 0,
+    totalPromptTokens: 0,
+    totalCompletionTokens: 0,
+    totalTokens: 0,
+    totalCostUsd: 0,
+    timeframe: { start: null, end: null, windowDays: 30 },
+    rag: { requests: 0, successRate: 0, topDocuments: [] },
+    providers: [],
+    modules: [],
+    dailyUsage: [],
+    // Estatísticas de Prompts (mantidas)
     prompts: {
       totalPrompts: 0,
       activePrompts: 0,
@@ -273,6 +299,10 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
     }
   });
 
+  const [currentWindow, setCurrentWindow] = useState("7");
+  const [customStart, setCustomStart] = useState(null);
+  const [customEnd, setCustomEnd] = useState(null);
+
   const [availableTags, setAvailableTags] = useState([]);
   const [ragSources, setRagSources] = useState({
     fileManager: [],
@@ -281,10 +311,100 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
   });
   const [newExternalLink, setNewExternalLink] = useState("");
 
+  // Helpers e derivados para Analytics
+  const formatNumber = (value, fractionDigits = 0) => {
+    const numeric = Number(value || 0);
+    return numeric.toLocaleString("pt-BR", {
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits
+    });
+  };
+
+  const formatCurrency = (value) => {
+    const numeric = Number(value || 0);
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numeric);
+  };
+
+  const formatPercentage = (value) => {
+    const numeric = Number(value || 0);
+    return `${numeric.toLocaleString("pt-BR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    })}%`;
+  };
+
+  const formatDuration = (ms) => {
+    const numeric = Number(ms || 0);
+    if (!numeric) return "0 ms";
+    if (numeric >= 1000) {
+      return `${(numeric / 1000).toLocaleString("pt-BR", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      })} s`;
+    }
+    return `${numeric.toFixed(0)} ms`;
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return "--";
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return "--";
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit"
+    });
+  };
+
+  const providersStats = stats.providers || [];
+  const moduleStats = stats.modules || [];
+  const dailyUsage = stats.dailyUsage || [];
+  const ragTopDocuments = (stats.rag?.topDocuments || []).slice(0, 10);
+  const timeframeStart = stats.timeframe?.start ? new Date(stats.timeframe.start) : null;
+  const timeframeEnd = stats.timeframe?.end ? new Date(stats.timeframe.end) : null;
+  const timeframeLabel = timeframeStart && timeframeEnd
+    ? `${timeframeStart.toLocaleDateString("pt-BR")} - ${timeframeEnd.toLocaleDateString("pt-BR")}`
+    : stats.timeframe?.windowDays
+      ? `Últimos ${stats.timeframe.windowDays} dias`
+      : "Período não informado";
+  const totalTokens = stats.totalTokens || ((stats.totalPromptTokens || 0) + (stats.totalCompletionTokens || 0));
+
   useEffect(() => {
     loadSettings();
     loadPresets();
   }, []);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (currentWindow === "custom") {
+          if (customStart) params.set("start", customStart);
+          if (customEnd) params.set("end", customEnd);
+        } else {
+          params.set("days", currentWindow);
+        }
+        const query = params.toString();
+        const endpoint = query ? `/ai/orchestrator/stats?${query}` : "/ai/orchestrator/stats";
+        const { data: statsData } = await api.get(endpoint);
+        const { data: promptStats } = await api.get("/prompts/stats");
+        setStats(prev => ({
+          ...prev,
+          ...statsData,
+          prompts: promptStats
+        }));
+      } catch (error) {
+        console.warn("Falha ao recarregar stats com filtro:", error);
+      }
+    };
+
+    fetchStats();
+  }, [currentWindow, customStart, customEnd]);
 
   const loadPresets = async () => {
     try {
@@ -2012,6 +2132,88 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
               </Card>
             </Grid>
 
+            {/* Controles de Período */}
+            <Grid item xs={12}>
+              <Box display="flex" flexWrap="wrap" alignItems="center" justifyContent="space-between" gap={16}>
+                <ButtonGroup color="primary" variant="outlined">
+                  {["7", "30", "90", "365"].map((days) => (
+                    <Button
+                      key={days}
+                      onClick={() => setCurrentWindow(days)}
+                      variant={currentWindow === days ? "contained" : "outlined"}
+                    >
+                      {days === "7" ? "7 dias" : days === "30" ? "30 dias" : days === "90" ? "90 dias" : "12 meses"}
+                    </Button>
+                  ))}
+                  <Button
+                    onClick={() => setCurrentWindow("custom")}
+                    variant={currentWindow === "custom" ? "contained" : "outlined"}
+                  >
+                    Personalizado
+                  </Button>
+                </ButtonGroup>
+
+                {currentWindow === "custom" && (
+                  <Box display="flex" gap={12} alignItems="center">
+                    <TextField
+                      type="date"
+                      label="Início"
+                      InputLabelProps={{ shrink: true }}
+                      value={customStart || ""}
+                      onChange={(e) => setCustomStart(e.target.value || null)}
+                      size="small"
+                    />
+                    <TextField
+                      type="date"
+                      label="Fim"
+                      InputLabelProps={{ shrink: true }}
+                      value={customEnd || ""}
+                      onChange={(e) => setCustomEnd(e.target.value || null)}
+                      size="small"
+                    />
+                  </Box>
+                )}
+              </Box>
+            </Grid>
+
+            {/* Resumo (Analytics) */}
+            <Grid item xs={12}>
+              <Grid container spacing={3} style={{ marginTop: 8 }}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">Requisições</Typography>
+                      <Typography className={classes.metricValue}>{formatNumber(stats.totalRequests)}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">Taxa de Sucesso</Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#4caf50' }}>{formatPercentage(stats.successRate)}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">Custo (USD)</Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#9c27b0' }}>{formatCurrency(stats.totalCostUsd)}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card className={classes.metricCard}>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary">Tempo Médio</Typography>
+                      <Typography className={classes.metricValue} style={{ color: '#2196f3' }}>{formatDuration(stats.avgProcessingTimeMs)}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Grid>
+
             {/* Seção de Prompts */}
             <Grid item xs={12}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 32, marginBottom: 16 }}>
@@ -2126,6 +2328,193 @@ Estou pronto para ajudar a aprimorar sua comunicação! 📝`,
                       </Typography>
                     </Grid>
                   </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Tabela: Provedores */}
+            <Grid item xs={12}>
+              <Card className={classes.card} style={{ marginTop: 24 }}>
+                <CardContent>
+                  <Typography variant="h6" className={classes.sectionTitle}>Provedores</Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Provedor</TableCell>
+                          <TableCell align="right">Requisições</TableCell>
+                          <TableCell align="right">Sucesso</TableCell>
+                          <TableCell align="right">Tempo Médio</TableCell>
+                          <TableCell align="right">Tokens (Prompt/Resposta)</TableCell>
+                          <TableCell align="right">Custo (USD)</TableCell>
+                          <TableCell align="right">Última Execução</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {providersStats.map((p) => (
+                          <TableRow key={p.provider}>
+                            <TableCell>{p.provider}</TableCell>
+                            <TableCell align="right">{formatNumber(p.requests)}</TableCell>
+                            <TableCell align="right">{formatPercentage(p.successRate)}</TableCell>
+                            <TableCell align="right">{formatDuration(p.avgProcessingTimeMs)}</TableCell>
+                            <TableCell align="right">{`${formatNumber(p.promptTokens)}/${formatNumber(p.completionTokens)}`}</TableCell>
+                            <TableCell align="right">{formatCurrency(p.costUsd)}</TableCell>
+                            <TableCell align="right">{formatDate(p.lastRequest)}</TableCell>
+                          </TableRow>
+                        ))}
+                        {providersStats.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={7} align="center">Nenhum dado disponível para o período ({timeframeLabel}).</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Tabela: Módulos */}
+            <Grid item xs={12}>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography variant="h6" className={classes.sectionTitle}>Módulos</Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Módulo</TableCell>
+                          <TableCell align="right">Requisições</TableCell>
+                          <TableCell align="right">Sucesso</TableCell>
+                          <TableCell align="right">Tempo Médio</TableCell>
+                          <TableCell align="right">Tokens (Prompt/Resposta)</TableCell>
+                          <TableCell align="right">Custo (USD)</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {moduleStats.map((m) => (
+                          <TableRow key={m.module}>
+                            <TableCell>{m.module}</TableCell>
+                            <TableCell align="right">{formatNumber(m.requests)}</TableCell>
+                            <TableCell align="right">{formatPercentage(m.successRate)}</TableCell>
+                            <TableCell align="right">{formatDuration(m.avgProcessingTimeMs)}</TableCell>
+                            <TableCell align="right">{`${formatNumber(m.promptTokens)}/${formatNumber(m.completionTokens)}`}</TableCell>
+                            <TableCell align="right">{formatCurrency(m.costUsd)}</TableCell>
+                          </TableRow>
+                        ))}
+                        {moduleStats.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} align="center">Nenhum dado disponível para o período ({timeframeLabel}).</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Lista: Top Documentos RAG */}
+            <Grid item xs={12}>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography variant="h6" className={classes.sectionTitle}>Top Documentos RAG</Typography>
+                  <List>
+                    {ragTopDocuments.length === 0 && (
+                      <Typography variant="body2">Sem dados no período ({timeframeLabel}).</Typography>
+                    )}
+                    {ragTopDocuments.map((d) => (
+                      <ListItem key={d.documentId} dense>
+                        <ListItemText primary={d.title} secondary={`Usos: ${formatNumber(d.hits)} • Último: ${formatDate(d.lastUsedAt)}`}/>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Tabela: Histórico Diário */}
+            <Grid item xs={12}>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography variant="h6" className={classes.sectionTitle}>Histórico Diário</Typography>
+                  <Box height={240} mb={2}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={dailyUsage} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorRequests" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#1976d2" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#1976d2" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#9c27b0" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#9c27b0" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey={(entry) => formatDate(entry.date)} tick={{ fontSize: 12 }} />
+                        <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 12 }} stroke="#1976d2"/>
+                        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} stroke="#9c27b0" domain={[0, 'auto']}/>
+                        <RechartsTooltip formatter={(value, name) => {
+                          if (name === "costUsd") return [formatCurrency(value), "Custo (USD)"];
+                          if (name === "requests") return [formatNumber(value), "Requisições"];
+                          return value;
+                        }}
+                        labelFormatter={(label) => `Dia ${label}`}
+                        />
+                        <Legend />
+                        <Area
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="requests"
+                          stroke="#1976d2"
+                          fill="url(#colorRequests)"
+                          name="Requisições"
+                          strokeWidth={2}
+                        />
+                        <Area
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="costUsd"
+                          stroke="#9c27b0"
+                          fill="url(#colorCost)"
+                          name="Custo (USD)"
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Data</TableCell>
+                          <TableCell align="right">Requisições</TableCell>
+                          <TableCell align="right">Sucesso</TableCell>
+                          <TableCell align="right">RAG</TableCell>
+                          <TableCell align="right">Custo (USD)</TableCell>
+                          <TableCell align="right">Tempo Médio</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {dailyUsage.map((d) => (
+                          <TableRow key={d.date}>
+                            <TableCell>{formatDate(d.date)}</TableCell>
+                            <TableCell align="right">{formatNumber(d.requests)}</TableCell>
+                            <TableCell align="right">{formatPercentage(d.successRate)}</TableCell>
+                            <TableCell align="right">{formatNumber(d.ragRequests)}</TableCell>
+                            <TableCell align="right">{formatCurrency(d.costUsd)}</TableCell>
+                            <TableCell align="right">{formatDuration(d.avgProcessingTimeMs)}</TableCell>
+                          </TableRow>
+                        ))}
+                        {dailyUsage.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} align="center">Nenhum dado disponível para o período ({timeframeLabel}).</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </CardContent>
               </Card>
             </Grid>

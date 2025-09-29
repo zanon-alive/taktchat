@@ -2,6 +2,7 @@ import IAClientFactory from "./IAClientFactory";
 import ResolveAIIntegrationService, { Provider } from "./ResolveAIIntegrationService";
 import { IAClient, ChatRequest, ChatWithHistoryRequest } from "./IAClient";
 import { search as ragSearch } from "../RAG/RAGSearchService";
+import AIUsageLogger from "./AIUsageLogger";
 
 export type ModuleContext = "campaign" | "ticket" | "prompt" | "general";
 export type AIMode = "enhance" | "translate" | "spellcheck" | "chat" | "rag";
@@ -54,7 +55,10 @@ export interface AIResponse {
   // Metadados da resposta
   provider: Provider;
   model: string;
-  tokensUsed?: number;
+  promptTokens?: number;
+  completionTokens?: number;
+  costUsd?: number;
+  errorCode?: string;
   processingTime: number;
   
   // Contexto RAG (se usado)
@@ -126,14 +130,26 @@ export default class AIOrchestrator {
       // 4. Log da requisição (básico por enquanto)
       await this.logRequest(request, response);
 
+      // 5. Persistir log de uso para analytics
+      const ragDocumentIds = Array.isArray(ragResults)
+        ? Array.from(new Set(ragResults
+            .map(r => r?.documentId)
+            .filter((id): id is number => typeof id === "number")))
+        : [];
+
+      await AIUsageLogger.record(request, response, {
+        ragDocumentIds
+      });
+
       return response;
 
     } catch (error: any) {
       console.error(`[AIOrchestrator] Request ${requestId} failed:`, error);
       
-      return {
+      const failureResponse: AIResponse = {
         success: false,
         error: error?.message || "Erro interno do orquestrador IA",
+        errorCode: error?.code,
         provider: "none" as Provider,
         model: "unknown",
         processingTime: Date.now() - startTime,
@@ -141,6 +157,13 @@ export default class AIOrchestrator {
         requestId,
         timestamp: new Date()
       };
+
+      await AIUsageLogger.record(request, failureResponse, {
+        errorCode: error?.code,
+        errorMessage: error?.message || null
+      });
+
+      return failureResponse;
     }
   }
 

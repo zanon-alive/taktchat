@@ -1,4 +1,4 @@
-import { Sequelize, fn, col, where, Op, Filterable } from "sequelize";
+import { Sequelize, fn, col, where, Op, Filterable, literal } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ContactTag from "../../models/ContactTag";
@@ -24,6 +24,18 @@ interface Request {
   segment?: string | string[];
   dtUltCompraStart?: string;
   dtUltCompraEnd?: string;
+  channel?: string[];
+  representativeCode?: string[];
+  city?: string[];
+  situation?: string[];
+  foundationMonths?: number[];
+  minCreditLimit?: number;
+  maxCreditLimit?: number;
+  minVlUltCompra?: number;
+  maxVlUltCompra?: number;
+  florder?: boolean;
+  bzEmpresa?: string[];
+  isWhatsappValid?: boolean;
 }
 
 interface Response {
@@ -45,11 +57,24 @@ const ListContactsService = async ({
                                      order,
                                      segment,
                                      dtUltCompraStart,
-                                     dtUltCompraEnd
-                                   }: Request): Promise<Response> => {
+                                     dtUltCompraEnd,
+                                     channel,
+                                     representativeCode,
+                                     city,
+                                     situation,
+                                     foundationMonths,
+                                     minCreditLimit,
+                                     maxCreditLimit,
+                                     minVlUltCompra,
+                                     maxVlUltCompra,
+                                     florder,
+                                     bzEmpresa,
+                                     isWhatsappValid
+  }: Request): Promise<Response> => {
   let whereCondition: Filterable["where"] = {};
+  const additionalWhere: any[] = [];
 
-  if (profile !== 'admin') {
+  if (profile !== 'admin' && userId) {
     const userTickets = await Ticket.findAll({
       where: { userId },
       attributes: ["contactId"],
@@ -149,6 +174,100 @@ const ListContactsService = async ({
     companyId
   };
 
+  if (Array.isArray(channel) && channel.length > 0) {
+    whereCondition = {
+      ...whereCondition,
+      channel: { [Op.in]: channel }
+    };
+  }
+
+  if (Array.isArray(representativeCode) && representativeCode.length > 0) {
+    whereCondition = {
+      ...whereCondition,
+      representativeCode: { [Op.in]: representativeCode }
+    };
+  }
+
+  if (Array.isArray(city) && city.length > 0) {
+    whereCondition = {
+      ...whereCondition,
+      city: { [Op.in]: city }
+    };
+  }
+
+  if (Array.isArray(situation) && situation.length > 0) {
+    whereCondition = {
+      ...whereCondition,
+      situation: { [Op.in]: situation }
+    };
+  }
+
+  if (typeof isWhatsappValid === "boolean") {
+    whereCondition = {
+      ...whereCondition,
+      isWhatsappValid
+    };
+  }
+
+  if (Array.isArray(bzEmpresa) && bzEmpresa.length > 0) {
+    const likeConditions = bzEmpresa
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+      .map(item => ({ bzEmpresa: { [Op.iLike]: `%${item}%` } }));
+
+    if (likeConditions.length === 1) {
+      whereCondition = {
+        ...whereCondition,
+        ...likeConditions[0]
+      };
+    } else if (likeConditions.length > 1) {
+      additionalWhere.push({ [Op.or]: likeConditions });
+    }
+  }
+
+  if (Array.isArray(foundationMonths) && foundationMonths.length > 0) {
+    const months = foundationMonths.filter(m => Number.isInteger(m) && m >= 1 && m <= 12);
+    if (months.length > 0) {
+      additionalWhere.push(literal('"foundationDate" IS NOT NULL'));
+      additionalWhere.push(literal(`EXTRACT(MONTH FROM "foundationDate") IN (${months.join(',')})`));
+    }
+  }
+
+  if (typeof minCreditLimit === "number" || typeof maxCreditLimit === "number") {
+    const creditLimitExpr = literal(`CAST(
+      CASE
+        WHEN TRIM("creditLimit") = '' THEN NULL
+        WHEN POSITION(',' IN TRIM("creditLimit")) > 0 THEN
+          REPLACE(REPLACE(REPLACE(TRIM(REPLACE("creditLimit", 'R$', '')), '.', ''), ',', '.'), ' ', '')
+        ELSE
+          REPLACE(TRIM(REPLACE("creditLimit", 'R$', '')), ' ', '')
+      END AS NUMERIC
+    )`);
+
+    additionalWhere.push(literal('"creditLimit" IS NOT NULL'));
+    additionalWhere.push(literal("TRIM(\"creditLimit\") <> ''"));
+
+    if (typeof minCreditLimit === "number" && typeof maxCreditLimit === "number") {
+      additionalWhere.push(Sequelize.where(creditLimitExpr, { [Op.between]: [minCreditLimit, maxCreditLimit] }));
+    } else if (typeof minCreditLimit === "number") {
+      additionalWhere.push(Sequelize.where(creditLimitExpr, { [Op.gte]: minCreditLimit }));
+    } else if (typeof maxCreditLimit === "number") {
+      additionalWhere.push(Sequelize.where(creditLimitExpr, { [Op.lte]: maxCreditLimit }));
+    }
+  }
+
+  if (typeof minVlUltCompra === "number" || typeof maxVlUltCompra === "number") {
+    additionalWhere.push(literal('"vlUltCompra" IS NOT NULL'));
+
+    if (typeof minVlUltCompra === "number" && typeof maxVlUltCompra === "number") {
+      additionalWhere.push(Sequelize.where(col("vlUltCompra"), { [Op.between]: [minVlUltCompra, maxVlUltCompra] }));
+    } else if (typeof minVlUltCompra === "number") {
+      additionalWhere.push(Sequelize.where(col("vlUltCompra"), { [Op.gte]: minVlUltCompra }));
+    } else if (typeof maxVlUltCompra === "number") {
+      additionalWhere.push(Sequelize.where(col("vlUltCompra"), { [Op.lte]: maxVlUltCompra }));
+    }
+  }
+
   if (typeof segment !== "undefined") {
     const normalize = (v: any) => (typeof v === "string" ? v.trim() : v);
     const segNorm = Array.isArray(segment)
@@ -210,8 +329,16 @@ const ListContactsService = async ({
   const field = orderBy && allowedFields[orderBy] ? allowedFields[orderBy] : "name";
   const dir = (order && order.toUpperCase() === "DESC") ? "DESC" : "ASC";
 
+  const finalWhere: any = { ...whereCondition };
+  if (additionalWhere.length > 0) {
+    finalWhere[Op.and] = [
+      ...(Array.isArray(finalWhere[Op.and]) ? finalWhere[Op.and] : []),
+      ...additionalWhere
+    ];
+  }
+
   const { count, rows: contacts } = await Contact.findAndCountAll({
-    where: whereCondition,
+    where: finalWhere,
     attributes: [
       "id",
       "name",

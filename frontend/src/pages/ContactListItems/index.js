@@ -805,23 +805,16 @@ const ContactListItems = () => {
                 <table className="w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300 sticky top-0 z-10">
                     <tr className="uppercase text-xs text-gray-500 dark:text-gray-400 tracking-wider">
-                      <th scope="col" className="w-[44px] p-2 text-center">#</th>
-                      <th scope="col" className="pl-3 pr-3 py-2 w-[220px]">
+                      <th scope="col" className="pl-3 pr-3 py-2 w-[150px]">
                         <button onClick={() => handleSort('name')} className="flex items-center gap-1 select-none font-medium">
                           NOME
                           <span className="text-[15px] opacity-70">{sortField === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                         </button>
                       </th>
-                      <th scope="col" className="pl-3 pr-3 py-2 w-[140px]">
+                      <th scope="col" className="pl-3 pr-3 py-2 w-[160px]">
                         <button onClick={() => handleSort('number')} className="flex items-center gap-1 select-none w-full font-medium">
                           WHATSAPP
                           <span className="text-[15px] opacity-70">{sortField === 'number' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
-                        </button>
-                      </th>
-                      <th scope="col" className="hidden xl:table-cell pl-3 pr-3 py-2 w-[160px]">
-                        <button onClick={() => handleSort('email')} className="flex items-center gap-1 select-none font-medium">
-                          EMAIL
-                          <span className="text-[15px] opacity-70">{sortField === 'email' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span>
                         </button>
                       </th>
                       <th scope="col" className="pl-3 pr-3 py-2 w-[120px]">
@@ -866,14 +859,7 @@ const ContactListItems = () => {
                   <tbody>
                     {sortedContacts.map((contact) => (
                       <tr key={contact.id} className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <td className="px-2 py-3 text-center">
-                          {contact.isWhatsappValid ? (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <Ban className="w-4 h-4 text-gray-400" />
-                          )}
-                        </td>
-                        <td className="px-3 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center gap-2 max-w-[180px] overflow-hidden text-ellipsis">
+                        <td className="px-3 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center gap-2 max-w-[260px] overflow-hidden text-ellipsis">
                           <Tooltip {...CustomTooltipProps} title={contact.name}>
                             <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 flex-shrink-0 overflow-hidden">
                               <ContactAvatar 
@@ -883,14 +869,14 @@ const ContactListItems = () => {
                             </div>
                           </Tooltip>
                           <Tooltip {...CustomTooltipProps} title={contact.name}>
-                            <span className="truncate" style={{maxWidth: 'calc(100% - 32px)'}}>
+                            <span className="truncate max-w-[200px]">
                               {contact.name}
                             </span>
                           </Tooltip>
                         </td>
                         <td className="pl-3 pr-3 py-2">
                           <div className="flex items-center gap-1 text-[14px] leading-tight">
-                            <span className="truncate max-w-[110px]">{formatPhoneNumber(contact.number)}</span>
+                            <span className="truncate max-w-[140px]">{formatPhoneNumber(contact.number)}</span>
                             {!!contact.isWhatsappValid ? (
                               <Tooltip {...CustomTooltipProps} title={`WhatsApp válido${contact.validatedAt ? ` • ${new Date(contact.validatedAt).toLocaleString('pt-BR')}` : ""}`}>
                                 <CheckCircle className="w-4 h-4 text-green-700 flex-shrink-0" />
@@ -901,11 +887,6 @@ const ContactListItems = () => {
                               </Tooltip>
                             )}
                           </div>
-                        </td>
-                        <td className="hidden xl:table-cell px-3 py-2 max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap">
-                          <Tooltip {...CustomTooltipProps} title={contact.email}>
-                            <span className="truncate">{contact.email}</span>
-                          </Tooltip>
                         </td>
                         {/* Cidade */}
                         <td className="px-3 py-2 max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap">
@@ -998,7 +979,7 @@ const ContactListItems = () => {
                         </td>
                       </tr>
                     ))}
-                    {loading && <TableRowSkeleton avatar columns={11} />}
+                    {loading && <TableRowSkeleton avatar columns={9} />}
                   </tbody>
                 </table>
               </div>
@@ -1040,13 +1021,6 @@ const ContactListItems = () => {
             <div className="md:hidden flex flex-col gap-2 mt-4 items-center">
               {sortedContacts.map((contact) => (
                 <div key={contact.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 flex items-center gap-3 w-full max-w-[375px] mx-auto">
-                  <div className="flex items-center justify-center">
-                    {contact.isWhatsappValid ? (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <Ban className="w-4 h-4 text-gray-400" />
-                    )}
-                  </div>
                   <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 overflow-hidden flex-shrink-0">
                     <ContactAvatar 
                       contact={contact.contact || contact}
@@ -1062,8 +1036,13 @@ const ContactListItems = () => {
                         {contact.email}
                       </span>
                     )}
-                    <span className="text-[12px] text-gray-500 dark:text-gray-400 truncate">
+                    <span className="text-[12px] text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
                       {formatPhoneNumber(contact.number)}
+                      {!!contact.isWhatsappValid ? (
+                        <CheckCircle className="w-4 h-4 text-green-700 flex-shrink-0" />
+                      ) : (
+                        <Ban className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      )}
                     </span>
                     {(contact.contact && (contact.contact.city || contact.contact.segment || contact.contact.bzEmpresa)) && (
                       <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate">

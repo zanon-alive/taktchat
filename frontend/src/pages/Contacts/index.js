@@ -28,7 +28,7 @@ import {
     FileUp,
     FileDown,
     UserPlus,
-    Filter,
+    SlidersHorizontal,
     X,
     Phone,
     CheckCircle,
@@ -53,7 +53,6 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
 import NewTicketModal from "../../components/NewTicketModal";
-import { TagsFilter } from "../../components/TagsFilter";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import formatSerializedId from '../../utils/formatSerializedId';
 import { v4 as uuidv4 } from "uuid";
@@ -61,6 +60,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 
 import ContactImportWpModal from "../../components/ContactImportWpModal";
 import ContactImportTagsModal from "../../components/ContactImportTagsModal";
+import FilterContactModal from "../../components/FilterContactModal"; // NOVO IMPORT
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import BulkEditContactsModal from "../../components/BulkEditContactsModal";
@@ -72,6 +72,8 @@ const CustomTooltipProps = {
   enterDelay: 300,
   leaveDelay: 100,
 };
+
+const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 const reducer = (state, action) => {
     if (action.type === "SET_CONTACTS") {
@@ -145,6 +147,7 @@ const Contacts = () => {
     const prevLimitRef = useRef(null);
     const [selectedContactId, setSelectedContactId] = useState(null);
     const [contactModalOpen, setContactModalOpen] = useState(false);
+    const [filterContactModalOpen, setFilterContactModalOpen] = useState(false); // NOVO ESTADO PARA O MODAL DE FILTRO DE CONTATOS
     
     // Hook de paginação
     const {
@@ -173,7 +176,7 @@ const Contacts = () => {
     const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
     const [contactTicket, setContactTicket] = useState({});
     const fileUploadRef = useRef(null);
-    const [selectedTags, setSelectedTags] = useState([]);
+    const [appliedFilters, setAppliedFilters] = useState({}); // Novo estado para os filtros aplicados
     const [segmentFilter, setSegmentFilter] = useState([]); // array de segmentos vindos da URL
     const { setCurrentTicket } = useContext(TicketsContext);
 
@@ -189,6 +192,122 @@ const Contacts = () => {
     const { getAll: getAllSettings } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
     const [enableLGPD, setEnableLGPD] = useState(false);
+
+    const currencyFormatter = useMemo(() => new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0
+    }), []);
+
+    const safeNumber = useCallback((value) => {
+        if (value === null || value === undefined || value === "") return null;
+        const num = Number(value);
+        return Number.isFinite(num) ? num : null;
+    }, []);
+
+    const formatCurrency = useCallback((value) => {
+        const num = safeNumber(value);
+        if (num === null) return null;
+        return currencyFormatter.format(num);
+    }, [currencyFormatter, safeNumber]);
+
+    const formatDate = useCallback((value) => {
+        if (!value) return null;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return null;
+        return date.toLocaleDateString("pt-BR");
+    }, []);
+
+    const filtersSummary = useMemo(() => {
+        if (!appliedFilters || Object.keys(appliedFilters).length === 0) return [];
+
+        const items = [];
+
+        const toArray = (value) => {
+            if (Array.isArray(value)) {
+                return value
+                    .map((entry) => (entry == null ? "" : String(entry).trim()))
+                    .filter(Boolean);
+            }
+            if (value === undefined || value === null) return [];
+            const trimmed = String(value).trim();
+            return trimmed ? [trimmed] : [];
+        };
+
+        const pushArray = (value, label) => {
+            const arr = toArray(value);
+            if (arr.length) {
+                items.push({ label, value: arr.join(", ") });
+            }
+        };
+
+        pushArray(appliedFilters.channel, "Canal");
+        pushArray(appliedFilters.city, "Cidade");
+        pushArray(appliedFilters.segment, "Segmento");
+        pushArray(appliedFilters.situation, "Situação");
+        pushArray(appliedFilters.representativeCode, "Representante");
+        pushArray(appliedFilters.bzEmpresa, "Empresa");
+
+        const foundation = Array.isArray(appliedFilters.foundationMonths)
+            ? appliedFilters.foundationMonths
+            : toArray(appliedFilters.foundationMonths);
+        if (foundation.length) {
+            const monthNames = foundation
+                .map((m) => MONTH_LABELS[(Number(m) || 0) - 1])
+                .filter(Boolean);
+            if (monthNames.length) {
+                items.push({ label: "Fundação", value: monthNames.join(", ") });
+            }
+        }
+
+        const addRange = (min, max, label) => {
+            const minVal = safeNumber(min);
+            const maxVal = safeNumber(max);
+            if (minVal === null && maxVal === null) return;
+
+            let text = "";
+            if (minVal !== null && maxVal !== null) {
+                text = `${formatCurrency(minVal)} — ${formatCurrency(maxVal)}`;
+            } else if (minVal !== null) {
+                text = `≥ ${formatCurrency(minVal)}`;
+            } else {
+                text = `≤ ${formatCurrency(maxVal)}`;
+            }
+            items.push({ label, value: text });
+        };
+
+        addRange(appliedFilters.minCreditLimit, appliedFilters.maxCreditLimit, "Limite de Crédito");
+        addRange(appliedFilters.minVlUltCompra, appliedFilters.maxVlUltCompra, "Última Compra");
+
+        const startDate = formatDate(appliedFilters.dtUltCompraStart);
+        const endDate = formatDate(appliedFilters.dtUltCompraEnd);
+        if (startDate || endDate) {
+            const rangeLabel = startDate && endDate
+                ? `${startDate} — ${endDate}`
+                : startDate
+                    ? `A partir de ${startDate}`
+                    : `Até ${endDate}`;
+            items.push({ label: "Data da Última Compra", value: rangeLabel });
+        }
+
+        if (typeof appliedFilters.florder === "boolean") {
+            items.push({ label: "Encomenda", value: appliedFilters.florder ? "Sim" : "Não" });
+        }
+
+        if (typeof appliedFilters.isWhatsappValid === "boolean" && appliedFilters.isWhatsappValid === false) {
+            items.push({ label: "WhatsApp", value: "Somente Inválidos" });
+        }
+
+        return items;
+    }, [appliedFilters, formatCurrency, formatDate, safeNumber]);
+
+    const hasActiveFilters = filtersSummary.length > 0;
+
+    const filterButtonClass = hasActiveFilters
+        ? "shrink-0 w-10 h-10 flex items-center justify-center text-green-700 bg-green-50 dark:bg-green-900/30 border border-green-400 dark:border-green-500 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+        : "shrink-0 w-10 h-10 flex items-center justify-center text-gray-700 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500";
+
+    const filterIconClass = hasActiveFilters ? "w-5 h-5 text-green-600" : "w-5 h-5";
 
     // Estados para seleção avançada
     const [lastSelectedIndex, setLastSelectedIndex] = useState(null); // Desktop: shift-select
@@ -259,7 +378,7 @@ const Contacts = () => {
         setPageNumber(1);
         setSelectedContactIds([]); // Limpar seleção ao mudar filtro/pesquisa
         setIsSelectAllChecked(false); // Desmarcar "Selecionar Tudo"
-    }, [searchParam, selectedTags, segmentFilter]);
+    }, [searchParam, appliedFilters, segmentFilter]);
 
     // Lê 'segment' da URL e normaliza para array
     useEffect(() => {
@@ -315,13 +434,13 @@ const Contacts = () => {
                     params: { 
                         searchParam: debouncedSearchParam, 
                         pageNumber, 
-                        contactTag: JSON.stringify(selectedTags), 
                         limit: contactsPerPage, 
                         isGroup: "false",
-                        // 'tags' não é suportado no backend; usa 'name' como fallback
                         orderBy: sortField === 'tags' ? 'name' : sortField,
                         order: sortDirection,
                         segment: segmentFilter,
+                        ...appliedFilters, // Inclui todos os filtros aplicados
+                        contactTag: appliedFilters.tags ? JSON.stringify(appliedFilters.tags).replace(/\\/g, '\\\\') : undefined, // Tags precisam ser stringified e escapmente escapadas
                     },
                 });
                 // Ignora respostas de solicitações antigas
@@ -351,7 +470,7 @@ const Contacts = () => {
     }, [
         debouncedSearchParam,
         pageNumber,
-        selectedTags,
+        appliedFilters,
         contactsPerPage,
         sortField,
         sortDirection,
@@ -422,9 +541,13 @@ const Contacts = () => {
         }
     };
 
-    const handleSelectedTags = (selecteds) => {
-        const tags = selecteds.map((t) => t.id);
-        setSelectedTags(tags);
+    const handleApplyFiltersFromModal = (filters) => {
+        setAppliedFilters(filters);
+    };
+
+    const handleClearFilters = () => {
+        setAppliedFilters({});
+        setFilterContactModalOpen(false);
     };
 
     const handleSearch = (event) => {
@@ -439,6 +562,14 @@ const Contacts = () => {
     const handleCloseContactModal = () => {
         setSelectedContactId(null);
         setContactModalOpen(false);
+    };
+
+    const handleOpenFilterContactModal = () => { // NOVA FUNÇÃO
+        setFilterContactModalOpen(true);
+    };
+
+    const handleCloseFilterContactModal = () => { // NOVA FUNÇÃO
+        setFilterContactModalOpen(false);
     };
 
     // A lista já vem paginada e ordenada do backend (params: limit, pageNumber, orderBy, order).
@@ -651,6 +782,14 @@ const Contacts = () => {
                     onImport={handleImportWithTags}
                 />
 
+                {/* NOVO MODAL DE FILTRO DE CONTATOS */}
+                <FilterContactModal
+                    isOpen={filterContactModalOpen}
+                    onClose={handleCloseFilterContactModal}
+                    onFiltered={handleApplyFiltersFromModal}
+                    initialFilter={appliedFilters}
+                />
+
                 <ConfirmationModal
                     title={
                         deletingContact
@@ -724,12 +863,19 @@ const Contacts = () => {
                 </header>
 
                 {/* Barra de Ações e Filtros - Mobile (2 linhas) */}
-                <div className="min-[1200px]:hidden flex flex-col gap-2 w-full max-w-[375px] mx-auto">
+                <div className="min-[1200px]:hidden flex flex-col gap-2 w-full max-w-[375px] mx-auto mb-4">
                     {/* Linha 1: Filtros + Botões */}
                     <div className="w-full flex items-center gap-2 flex-wrap">
-                        <div className="relative flex-1 min-w-0">
-                            <TagsFilter onFiltered={handleSelectedTags} />
-                        </div>
+                        {/* NOVO BOTÃO DE FILTRO (MOBILE) */}
+                        <Tooltip {...CustomTooltipProps} title="Filtrar Contatos">
+                            <button
+                                onClick={handleOpenFilterContactModal}
+                                className={filterButtonClass}
+                                aria-label="Filtrar Contatos"
+                            >
+                                <SlidersHorizontal className={filterIconClass} />
+                            </button>
+                        </Tooltip>
                         <div className="flex items-center gap-2 flex-wrap">
                             <PopupState variant="popover" popupId="contacts-import-export-menu-mobile">
                                 {(popupState) => (
@@ -822,14 +968,52 @@ const Contacts = () => {
                     </div>
                 </div>
 
+                {hasActiveFilters && filtersSummary.length > 0 && (
+                    <div className="min-[1200px]:hidden flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mt-1 w-full max-w-[375px] mx-auto">
+                        <SlidersHorizontal className="w-4 h-4 text-green-600" />
+                        {filtersSummary.map((item, index) => (
+                            <span
+                                key={`${item.label}-${index}`}
+                                className="px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-700"
+                            >
+                                <span className="font-semibold">{item.label}:</span> {item.value}
+                            </span>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleClearFilters}
+                            className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                        >
+                            Limpar filtros
+                        </button>
+                    </div>
+                )}
+
+                {hasActiveFilters && filtersSummary.length > 0 && (
+                    <div className="hidden min-[1200px]:flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mb-4">
+                        <SlidersHorizontal className="w-4 h-4 text-green-600" />
+                        {filtersSummary.map((item, index) => (
+                            <span
+                                key={`${item.label}-${index}`}
+                                className="px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-700"
+                            >
+                                <span className="font-semibold">{item.label}:</span> {item.value}
+                            </span>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleClearFilters}
+                            className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                        >
+                            Limpar filtros
+                        </button>
+                    </div>
+                )}
+
                 {/* Barra de Ações e Filtros - Desktop (1 linha) */}
-                <div className="hidden min-[1200px]:flex items-center gap-3 flex-nowrap">
+                <div className="hidden min-[1200px]:flex items-center gap-3 flex-nowrap mb-4">
                     {/* Filtros e Busca (Esquerda) */}
                     <div className="w-full flex items-center gap-2 flex-1 min-w-0 justify-start">
-                        <div className="relative">
-                            <TagsFilter onFiltered={handleSelectedTags} />
-                        </div>
-
                         {/* Busca com largura limitada */}
                         <div className="relative flex-1 ">
                             <input
@@ -847,7 +1031,17 @@ const Contacts = () => {
                     </div>
 
                     {/* Ações Principais (Direita) */}
-                    <div className="w-full md:w-auto flex flex-row gap-2 flex-none whitespace-nowrap items-center">
+                    <div className="w-full md:w-auto flex flex-row gap-2 flex-none whitespace-nowrap items-center ">
+                        {/* NOVO BOTÃO DE FILTRO (DESKTOP) */}
+                        <Tooltip {...CustomTooltipProps} title="Filtrar Contatos">
+                            <button
+                                onClick={handleOpenFilterContactModal}
+                                className={filterButtonClass}
+                                aria-label="Filtrar Contatos"
+                            >
+                                <SlidersHorizontal className={filterIconClass} />
+                            </button>
+                        </Tooltip>
                         <PopupState variant="popover" popupId="contacts-import-export-menu">
                             {(popupState) => (
                                 <>
@@ -977,6 +1171,13 @@ const Contacts = () => {
                     </tr>
                 </thead>
                 <tbody>
+                    {!loading && sortedContacts.length === 0 && (
+                        <tr>
+                            <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-300">
+                                Nenhum contato encontrado com os filtros selecionados. Tente ajustar os campos.
+                            </td>
+                        </tr>
+                    )}
                     {sortedContacts.map((contact, rowIndex) => (
                         <ContactRow 
                             key={contact.id}
@@ -1082,6 +1283,11 @@ const Contacts = () => {
 
     {/* Lista de Contatos (Mobile) */}
     <div className="min-[1200px]:hidden flex flex-col gap-1.5 mt-3 w-full max-w-[375px] mx-auto">
+        {!loading && sortedContacts.length === 0 && (
+            <div className="text-center text-sm text-gray-500 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                Nenhum contato encontrado com os filtros selecionados. Tente ajustar os campos.
+            </div>
+        )}
         {sortedContacts.map((contact) => (
             <ContactCard
                 key={contact.id}

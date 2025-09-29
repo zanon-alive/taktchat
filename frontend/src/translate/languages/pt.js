@@ -409,6 +409,10 @@ const messages = {
           importYourPhone: "Importar do aparelho padrão",
           importToExcel: "Importar / Exportar do Excel",
         },
+        filterTagsModal: {
+          title: "Filtrar Contatos",
+          close: "Fechar",
+        },
       },
       forwardMessage: {
         text: "Encaminhada",
