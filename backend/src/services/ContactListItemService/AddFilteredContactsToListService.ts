@@ -567,18 +567,50 @@ const AddFilteredContactsToListService = async ({
       let errors = 0;
       await processWithConcurrency(candidates, validationConcurrency, async cand => {
         try {
-          const checked = await CheckContactNumber(cand.number, companyId);
-          if (checked) {
-            payload.push({
-              contactListId,
-              companyId,
-              name: cand.name,
-              number: checked,
-              email: cand.email,
-              isGroup: cand.isGroup || false,
-              isWhatsappValid: true
-            });
+          // Normalizar número para garantir consistência
+          const normalizedNumber = cand.number.replace(/\D/g, '');
+          if (normalizedNumber.length >= 10) {
+            cand.number = normalizedNumber;
           }
+
+          // Validar número WhatsApp se habilitado
+          if (shouldValidateWhatsappEarly) {
+            try {
+              const validatedNumber = await CheckContactNumber(cand.number, companyId);
+              if (validatedNumber) {
+                cand.number = validatedNumber;
+                (cand as any).isWhatsappValid = true;
+              } else {
+                (cand as any).isWhatsappValid = false;
+                errors++;
+                return; // Pular contato inválido
+              }
+            } catch (error: any) {
+              const msg = error?.message || "";
+              if (
+                msg === "invalidNumber" ||
+                msg === "ERR_WAPP_INVALID_CONTACT" ||
+                /não está cadastrado/i.test(msg)
+              ) {
+                (cand as any).isWhatsappValid = false;
+                errors++;
+                return; // Pular contato inválido
+              } else {
+                logger.warn(`Erro ao validar contato ${cand.name}:`, { number: cand.number, error: msg });
+                (cand as any).isWhatsappValid = null;
+              }
+            }
+          }
+
+          payload.push({
+            contactListId,
+            companyId,
+            name: cand.name,
+            number: cand.number,
+            email: cand.email,
+            isGroup: cand.isGroup || false,
+            isWhatsappValid: (cand as any).isWhatsappValid
+          });
         } catch {
           // ignora inválidos
           errors += 1;

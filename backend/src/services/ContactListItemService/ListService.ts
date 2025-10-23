@@ -112,7 +112,12 @@ const ListService = async ({
         const found = await Contact.findOne({
           where: {
             companyId,
-            number: { [Op.in]: [raw, digits].filter(Boolean) as string[] }
+            [Op.or]: [
+              { number: raw },
+              { number: digits },
+              { number: { [Op.like]: `%${digits}%` } },
+              { number: { [Op.like]: `%${raw}%` } }
+            ]
           },
           attributes: [
             "id",
