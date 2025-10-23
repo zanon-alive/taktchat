@@ -5,46 +5,60 @@ import ModalImage from "react-modal-image";
 import api from "../../services/api";
 
 const useStyles = makeStyles(theme => ({
-	messageMedia: {
-		objectFit: "cover",
-		marginBottom: 7,
-		maxWidth: 250,
-		maxHeight: 180,
-		width: "auto",
-		height: "auto",
-		borderTopLeftRadius: 8,
-		borderTopRightRadius: 8,
-		borderBottomLeftRadius: 8,
-		borderBottomRightRadius: 8,
-		// Controle rigoroso de tamanho
-		display: "block",
-		boxSizing: "border-box",
-		[theme.breakpoints.down('sm')]: {
-			maxWidth: 200,
-			maxHeight: 150,
-		},
-	},
-	mediaWrapper: {
-		position: "relative",
-		display: "inline-block",
-	},
-	hdBadge: {
-		position: "absolute",
-		top: 6,
-		left: 6,
-		backgroundColor: "rgba(0,0,0,0.6)",
-		color: "#fff",
-		fontWeight: 700,
-		fontSize: 10,
-		padding: "2px 4px",
-		borderRadius: 3,
-		lineHeight: 1,
-		zIndex: 2,
-		border: theme.mode === 'light' ? "1px solid rgba(255,255,255,0.8)" : "1px solid rgba(255,255,255,0.5)",
-		letterSpacing: 0.5,
-		userSelect: "none",
-		pointerEvents: "none",
-	},
+  messageMedia: {
+    objectFit: "cover",
+    marginBottom: 7,
+    maxWidth: "350px !important",
+    maxHeight: "180px !important",
+    width: "auto !important",
+    height: "auto !important",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    display: "block",
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: "200px !important",
+      maxHeight: "150px !important",
+    },
+  },
+  stickerMedia: {
+    objectFit: "cover",
+    maxWidth: "120px !important", // Tamanho fixo pequeno para stickers
+    maxHeight: "120px !important",
+    width: "auto !important",
+    height: "auto !important",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    display: "block",
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: "100px !important",
+      maxHeight: "100px !important",
+    },
+  },
+  mediaWrapper: {
+    position: "relative",
+    display: "inline-block",
+  },
+  hdBadge: {
+    position: "absolute",
+    top: 6,
+    left: 6,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 10,
+    padding: "2px 4px",
+    borderRadius: 3,
+    lineHeight: 1,
+    zIndex: 2,
+    border: theme.mode === 'light' ? "1px solid rgba(255,255,255,0.8)" : "1px solid rgba(255,255,255,0.5)",
+    letterSpacing: 0.5,
+    userSelect: "none",
+    pointerEvents: "none",
+  },
 }));
 
 const ModalImageCors = ({ imageUrl }) => {
@@ -53,11 +67,18 @@ const ModalImageCors = ({ imageUrl }) => {
 	const [blobUrl, setBlobUrl] = useState("");
 	const [isHd, setIsHd] = useState(false);
 	const [isGif, setIsGif] = useState(false);
+	const [isSticker, setIsSticker] = useState(false);
 
 	useEffect(() => {
 		if (!imageUrl) return;
 		// Detecta GIF pela URL inicial
-		setIsGif(/\.gif(\?.*)?$/i.test(imageUrl || ""));
+		const isGifUrl = /\.gif(\?.*)?$/i.test(imageUrl || "");
+		// Detecta sticker pela URL (.webp ou .gif pequenos)
+		const isStickerUrl = /\.(webp|gif)(\?.*)?$/i.test(imageUrl || "");
+		
+		setIsGif(isGifUrl);
+		setIsSticker(isStickerUrl);
+		
 		const fetchImage = async () => {
 			const { data, headers } = await api.get(imageUrl, {
 				responseType: "blob",
@@ -65,6 +86,10 @@ const ModalImageCors = ({ imageUrl }) => {
 			const contentType = headers["content-type"] || "";
 			if (contentType.includes("gif")) {
 				setIsGif(true);
+				setIsSticker(true); // GIFs são tratados como stickers
+			}
+			if (contentType.includes("webp")) {
+				setIsSticker(true);
 			}
 			const url = window.URL.createObjectURL(
 				new Blob([data], { type: contentType })
@@ -90,11 +115,11 @@ const ModalImageCors = ({ imageUrl }) => {
 		<div className={classes.mediaWrapper}>
 			{!isGif && isHd && <span className={classes.hdBadge}>HD</span>}
 			<ModalImage
-				className={classes.messageMedia}
+				className={isSticker ? classes.stickerMedia : classes.messageMedia}
 				smallSrcSet={fetching ? imageUrl : blobUrl}
 				medium={fetching ? imageUrl : blobUrl}
 				large={fetching ? imageUrl : blobUrl}
-				alt="image"
+				alt={isSticker ? "sticker" : "image"}
 				showRotate={true}
 			/>
 		</div>

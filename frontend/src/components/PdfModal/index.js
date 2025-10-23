@@ -16,16 +16,14 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.mode === "light" ? "#f5f5f5" : "#1f1f1f",
     borderRadius: 8,
     overflow: "hidden",
-    width: 120,
-    height: 160,
+    width: 140,
+    height: 180,
     position: "relative",
     cursor: "pointer",
-    // Controle rigoroso de tamanho
     flexShrink: 0,
-    boxSizing: "border-box",
     [theme.breakpoints.down('sm')]: {
-      width: 90,
-      height: 120,
+      width: 110,
+      height: 140,
     },
   },
   pdfIconFallback: {

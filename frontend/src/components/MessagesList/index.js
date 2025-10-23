@@ -62,10 +62,6 @@ const useStyles = makeStyles((theme) => ({
     // Remover restrição que causava barra horizontal
     // minWidth: 300,
     minHeight: 200,
-    // CRÍTICO: Força contenção absoluta
-    maxWidth: "100%",
-    boxSizing: "border-box",
-    contain: "layout style",
   },
   loadingCenter: {
     position: 'absolute',
@@ -196,14 +192,11 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 20,
     marginTop: 2,
     minWidth: 150,
-    maxWidth: 300,
+    maxWidth: 350, // Mesmo tamanho que messageRight
     height: "auto",
     display: "block",
     position: "relative",
-    // Controle rigoroso de overflow
-    overflow: "hidden",
     wordWrap: "break-word",
-    wordBreak: "break-word",
     "&:hover #messageActionsButton": {
       display: "flex",
       position: "absolute",
@@ -226,7 +219,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
     [theme.breakpoints.down('sm')]: {
       marginRight: 10,
-      maxWidth: 250,
+      maxWidth: 280,
     },
   },
 
@@ -274,7 +267,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 20,
     marginTop: 2,
     minWidth: 100,
-    maxWidth: 350,
+    maxWidth: 350, // Mesmo tamanho que messageLeft
     height: "auto",
     display: "block",
     position: "relative",
@@ -296,7 +289,11 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    [theme.breakpoints.down('sm')]: {
+      marginLeft: 10,
+      maxWidth: 280,
+    },
   },
 
   messageRightPrivate: {
@@ -385,20 +382,38 @@ const useStyles = makeStyles((theme) => ({
 
   messageMedia: {
     objectFit: "cover",
-    maxWidth: 250,
-    maxHeight: 180,
-    width: "auto",
-    height: "auto",
+    maxWidth: "350px !important",
+    maxHeight: "180px !important",
+    width: "auto !important",
+    height: "auto !important",
     marginBottom: 12,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
-    // Força contenção dentro do container
     display: "block",
     [theme.breakpoints.down('sm')]: {
-      maxWidth: 200,
-      maxHeight: 150,
+      maxWidth: "200px !important",
+      maxHeight: "150px !important",
+    },
+  },
+
+  // Classe específica para stickers/GIFs - tamanho pequeno fixo
+  stickerMedia: {
+    objectFit: "cover",
+    maxWidth: "120px !important",
+    maxHeight: "120px !important",
+    width: "auto !important",
+    height: "auto !important",
+    marginBottom: 12,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    display: "block",
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: "100px !important",
+      maxHeight: "100px !important",
     },
   },
 
@@ -407,9 +422,6 @@ const useStyles = makeStyles((theme) => ({
     display: "inline-block",
     maxWidth: "100%",
     overflow: "hidden",
-    // Força contenção rigorosa
-    width: "fit-content",
-    boxSizing: "border-box",
   },
 
   hdBadge: {
