@@ -28,6 +28,12 @@ services:
       JWT_REFRESH_SECRET: supersecretrefresh
       SESSIONS_DRIVER: fs
       SESSIONS_DIR: private/sessions
+      # Configurações de validação WhatsApp (REVERTIDO AO ORIGINAL)
+      CONTACT_FILTER_ASYNC_VALIDATION: "false"
+      CONTACT_VALIDATION_BATCH_SIZE: "50"
+      CONTACT_FILTER_DIRECT_SQL: "false"
+      CONTACT_FILTER_VALIDATE_WHATSAPP: "true"
+      CONTACT_FILTER_INSERT_CHUNK_SIZE: "1000"
     networks:
       - nobreluminarias
     ports:

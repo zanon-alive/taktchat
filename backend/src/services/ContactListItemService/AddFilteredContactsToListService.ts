@@ -1,9 +1,9 @@
-import { Sequelize, Op, literal } from "sequelize";
+import { Sequelize, Op, literal, QueryTypes } from "sequelize";
 import Contact from "../../models/Contact";
 import ContactListItem from "../../models/ContactListItem";
-import ContactTag from "../../models/ContactTag";
 import logger from "../../utils/logger";
 import CheckContactNumber from "../WbotServices/CheckNumber";
+import sequelize from "../../database";
 
 interface FilterParams {
   channel?: string[];
@@ -50,15 +50,27 @@ const normalizePhoneNumber = (value: string | null | undefined): { normalized: s
   return { normalized, digits: normalized };
 };
 
-const registerNumber = (
-  value: string | null | undefined,
-  numbers: Set<string>,
-  digitsSet: Set<string>
-): void => {
-  if (!value) return;
-  numbers.add(value);
-  const digits = String(value).replace(/\D/g, "");
-  if (digits) digitsSet.add(digits);
+const digitsOnly = (value: string | null | undefined): string => String(value ?? "").replace(/\D/g, "");
+
+const processWithConcurrency = async <T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>
+): Promise<void> => {
+  if (items.length === 0) return;
+  const limit = Math.max(1, concurrency);
+  let index = 0;
+
+  const run = async (): Promise<void> => {
+    while (index < items.length) {
+      const currentIndex = index;
+      index += 1;
+      await worker(items[currentIndex]);
+    }
+  };
+
+  const runners = Array.from({ length: Math.min(limit, items.length) }, () => run());
+  await Promise.all(runners);
 };
 
 const AddFilteredContactsToListService = async ({
@@ -131,6 +143,149 @@ const AddFilteredContactsToListService = async ({
     }
 
     logger.info(`Filtros após normalização: ${JSON.stringify(filters)}`);
+
+    // Verificar se há filtros efetivos (além de flags booleanas)
+    const hasEffectiveFilters = Boolean(
+      (filters.channel && filters.channel.length > 0) ||
+      (filters.representativeCode && filters.representativeCode.length > 0) ||
+      (filters.city && filters.city.length > 0) ||
+      (filters.segment && filters.segment.length > 0) ||
+      (filters.situation && filters.situation.length > 0) ||
+      (filters.bzEmpresa && String(filters.bzEmpresa).trim()) ||
+      (filters.tags && filters.tags.length > 0) ||
+      (filters.foundationMonths && filters.foundationMonths.length > 0) ||
+      filters.minCreditLimit || filters.maxCreditLimit ||
+      (filters as any).dtUltCompraStart || (filters as any).dtUltCompraEnd ||
+      (filters as any).minVlUltCompra != null || (filters as any).maxVlUltCompra != null ||
+      ((filters as any).florder !== undefined && (filters as any).florder !== null)
+    );
+
+    if (!hasEffectiveFilters) {
+      logger.info('Nenhum filtro específico informado - adicionando todos os contatos da empresa');
+    }
+
+    // Caminho direto SQL: quando não validamos WhatsApp no ato
+    const directSQL = String(process.env.CONTACT_FILTER_DIRECT_SQL || 'true').toLowerCase() === 'true';
+    const shouldValidateWhatsappEarly = String(process.env.CONTACT_FILTER_VALIDATE_WHATSAPP || 'false').toLowerCase() === 'true';
+    
+    if (directSQL && !shouldValidateWhatsappEarly) {
+      const conds: string[] = ['c."companyId" = :companyId'];
+      const repl: any = { companyId, contactListId };
+
+      const addIn = (col: string, arr?: string[]) => {
+        if (arr && arr.length > 0) {
+          conds.push(`c.${col} IN (:${col.replace(/\W/g,'_')})`);
+          repl[col.replace(/\W/g,'_')] = arr;
+        }
+      };
+
+      // Só adiciona filtros se há filtros efetivos
+      if (hasEffectiveFilters) {
+        addIn('"channel"', filters.channel);
+        addIn('"representativeCode"', filters.representativeCode);
+        addIn('"city"', filters.city);
+        addIn('"segment"', filters.segment);
+        addIn('"situation"', filters.situation);
+
+        if (filters.bzEmpresa && String(filters.bzEmpresa).trim()) {
+          repl.bzEmpresa = `%${String(filters.bzEmpresa).trim()}%`;
+          conds.push('c."bzEmpresa" ILIKE :bzEmpresa');
+        }
+
+        if ((filters as any).florder !== undefined && (filters as any).florder !== null) {
+          const raw = (filters as any).florder;
+          const s = String(raw).trim().toLowerCase();
+          const b = (typeof raw === 'boolean') ? raw : ["true","1","sim","yes"].includes(s) ? true : ["false","0","nao","não","no"].includes(s) ? false : null;
+          if (b !== null) {
+            repl.florder = b;
+            conds.push('c."florder" = :florder');
+          }
+        }
+
+        if ((filters as any).dtUltCompraStart) {
+          repl.dtStart = (filters as any).dtUltCompraStart;
+          conds.push('c."dtUltCompra" >= :dtStart');
+        }
+        if ((filters as any).dtUltCompraEnd) {
+          repl.dtEnd = (filters as any).dtUltCompraEnd;
+          conds.push('c."dtUltCompra" <= :dtEnd');
+        }
+
+        if ((filters as any).minVlUltCompra != null) {
+          const v = Number((filters as any).minVlUltCompra);
+          if (!Number.isNaN(v)) {
+            repl.minV = v;
+            conds.push('c."vlUltCompra" >= :minV');
+          }
+        }
+        if ((filters as any).maxVlUltCompra != null) {
+          const v = Number((filters as any).maxVlUltCompra);
+          if (!Number.isNaN(v)) {
+            repl.maxV = v;
+            conds.push('c."vlUltCompra" <= :maxV');
+          }
+        }
+
+        if (filters.foundationMonths && filters.foundationMonths.length > 0) {
+          const months = filters.foundationMonths.map(n => Number(n)).filter(n => Number.isInteger(n) && n>=1 && n<=12);
+          if (months.length > 0) {
+            conds.push('c."foundationDate" IS NOT NULL');
+            conds.push(`EXTRACT(MONTH FROM c."foundationDate") IN (${months.join(',')})`);
+          }
+        }
+
+        if (filters.minCreditLimit || filters.maxCreditLimit) {
+          const parseMoney = (val: string): number => {
+            const raw = String(val).trim().replace(/\s+/g,'').replace(/R\$?/gi,'');
+            let num: number;
+            if (raw.includes(',')) num = parseFloat(raw.replace(/\./g,'').replace(/,/g,'.')); else num = parseFloat(raw);
+            return isNaN(num) ? 0 : num;
+          };
+          const hasMin = typeof filters.minCreditLimit !== 'undefined' && filters.minCreditLimit !== '';
+          const hasMax = typeof filters.maxCreditLimit !== 'undefined' && filters.maxCreditLimit !== '';
+          const minValue = hasMin ? parseMoney(filters.minCreditLimit as string) : undefined;
+          const maxValue = hasMax ? parseMoney(filters.maxCreditLimit as string) : undefined;
+          const creditLimitSql = `CAST(CASE WHEN TRIM(c."creditLimit") = '' THEN NULL WHEN POSITION(',' IN TRIM(c."creditLimit")) > 0 THEN REPLACE(REPLACE(REPLACE(TRIM(REPLACE(c."creditLimit", 'R$', '')), '.', ''), ',', '.'), ' ', '') ELSE REPLACE(TRIM(REPLACE(c."creditLimit", 'R$', '')), ' ', '') END AS NUMERIC)`;
+          if (hasMin && hasMax) {
+            repl.minCredit = minValue;
+            repl.maxCredit = maxValue;
+            conds.push(`${creditLimitSql} BETWEEN :minCredit AND :maxCredit`);
+          } else if (hasMin) {
+            repl.minCredit = minValue;
+            conds.push(`${creditLimitSql} >= :minCredit`);
+          } else if (hasMax) {
+            repl.maxCredit = maxValue;
+            conds.push(`${creditLimitSql} <= :maxCredit`);
+          }
+        }
+
+        if (filters.tags && filters.tags.length > 0) {
+          repl.tagIds = filters.tags;
+          repl.tagsLen = filters.tags.length;
+          conds.push(`c."id" IN (SELECT "contactId" FROM (SELECT "contactId", COUNT(DISTINCT "tagId") AS tag_count FROM "ContactTags" WHERE "tagId" IN (:tagIds) GROUP BY "contactId") t WHERE t.tag_count = :tagsLen)`);
+        }
+      }
+
+      const whereSql = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
+      const insertSql = `
+        INSERT INTO "ContactListItems"
+          ("name","number","email","contactListId","companyId","isGroup","createdAt","updatedAt")
+        SELECT c."name", c."number", COALESCE(c."email", ''), :contactListId, :companyId, c."isGroup", NOW(), NOW()
+        FROM "Contacts" c
+        ${whereSql}
+        ON CONFLICT ("contactListId","number") DO NOTHING;
+      `;
+
+      const before = await ContactListItem.count({ where: { contactListId } });
+      await sequelize.query(insertSql, { replacements: repl, type: QueryTypes.INSERT });
+      const after = await ContactListItem.count({ where: { contactListId } });
+      const added = Math.max(0, after - before);
+      logger.info(`Resultado da adição (INSERT SELECT): ${added} adicionados`);
+
+      // Job assíncrono removido - validação volta a ser síncrona como era antes
+
+      return { added, duplicated: 0, errors: 0 };
+    }
 
     // Construir condições de filtro para a consulta principal
     const whereConditions: any[] = [{ companyId }];
@@ -257,45 +412,20 @@ const AddFilteredContactsToListService = async ({
 
     // Filtro de tags
     if (filters.tags && filters.tags.length > 0) {
-      try {
-        logger.info(`Filtrando por tags: ${filters.tags.join(', ')}`);
-        
-        // Buscar contatos que possuem todas as tags especificadas
-        const contactTags = await ContactTag.findAll({
-          where: { tagId: { [Op.in]: filters.tags } },
-          attributes: ['contactId', 'tagId'],
-          raw: true
-        });
-        
-        // Agrupar por contactId
-        const contactTagsMap = new Map();
-        contactTags.forEach(ct => {
-          if (!contactTagsMap.has(ct.contactId)) {
-            contactTagsMap.set(ct.contactId, new Set());
-          }
-          contactTagsMap.get(ct.contactId).add(ct.tagId);
-        });
-        
-        const contactIdsWithTags = Array.from(contactTagsMap.entries())
-          .filter(([_, tagIds]) => filters.tags!.every(tagId => tagIds.has(tagId)))
-          .map(([contactId, _]) => contactId);
-        
-        logger.info(`Encontrados ${contactIdsWithTags.length} contatos com as tags especificadas`);
-        
-        if (contactIdsWithTags.length > 0) {
-          whereConditions.push({ id: { [Op.in]: contactIdsWithTags } });
-        } else {
-          // Se não houver contatos com todas as tags, retornar vazio
-          return { added: 0, duplicated: 0, errors: 0 };
-        }
-      } catch (error: any) {
-        logger.error(`Erro ao processar filtro de tags:`, {
-          message: error.message,
-          stack: error.stack,
-          tags: filters.tags
-        });
-        throw new Error(`Erro ao processar filtro de tags: ${error.message}`);
+      const tagIds = filters.tags.join(",");
+      if (!tagIds) {
+        return { added: 0, duplicated: 0, errors: 0 };
       }
+      // Evita alias inexistente; usa coluna "id" diretamente
+      whereConditions.push(literal(`"id" IN (
+        SELECT "contactId" FROM (
+          SELECT "contactId", COUNT(DISTINCT "tagId") AS tag_count
+          FROM "ContactTags"
+          WHERE "tagId" IN (${tagIds})
+          GROUP BY "contactId"
+        ) AS tag_filter
+        WHERE tag_filter.tag_count = ${filters.tags.length}
+      )`));
     }
 
     // Filtro de "Encomenda" (florder)
@@ -408,141 +538,82 @@ const AddFilteredContactsToListService = async ({
       throw new Error(`Erro ao buscar contatos: ${error.message}`);
     }
 
-    // Buscar itens já existentes na lista para evitar duplicatas
-    const existingItems = await ContactListItem.findAll({
-      where: { contactListId },
-      attributes: ['number', 'email'],
-      raw: true
-    });
-    logger.info(`Encontrados ${existingItems.length} contatos já existentes na lista (checando por número e email)`);
+    // Caminho rápido: sem deduplicação prévia em memória. O banco resolverá via índice único.
+    type Candidate = { name: string; number: string; email: string; isGroup?: boolean };
+    const candidates: Candidate[] = contacts.map(c => {
+      const name = c?.get ? c.get("name") : (c as any).name;
+      const numberRaw = c?.get ? c.get("number") : (c as any).number;
+      const emailRaw = c?.get ? c.get("email") : (c as any).email;
+      const { normalized } = normalizePhoneNumber(numberRaw);
+      const finalNumber = normalized || (numberRaw ? String(numberRaw).trim() : "");
+      return {
+        name: name || "",
+        number: finalNumber,
+        email: emailRaw ? String(emailRaw).trim() : "",
+        isGroup: (c as any).isGroup || false
+      };
+    }).filter(c => c.number && c.name);
 
-    // Criar conjuntos para verificação rápida de duplicatas
-    const existingNumbers = new Set((existingItems as any[]).map(item => item.number).filter(Boolean));
-    const existingNumbersDigits = new Set(
-      (existingItems as any[])
-        .map(item => (item.number ? String(item.number).replace(/\D/g, "") : null))
-        .filter(Boolean) as string[]
-    );
-    const existingEmails = new Set((existingItems as any[]).map(item => item.email).filter(Boolean));
-  
-    // Adicionar contatos à lista
-    let added = 0;
-    let duplicated = 0;
-    let errors = 0;
+    logger.info(`Pré-processamento (SQL path) gerou ${candidates.length} candidatos`);
 
-    for (const contact of contacts) {
-      try {
-        const rawNumber = contact.number ? String(contact.number) : "";
-        const digitsRaw = rawNumber.replace(/\D/g, "");
-        const { normalized: normalizedNumber, digits: normalizedDigits } = normalizePhoneNumber(contact.number);
-        const hasNormalized = !!normalizedNumber;
+    const chunkSize = Number(process.env.CONTACT_FILTER_INSERT_CHUNK_SIZE || 1000);
+    const shouldValidate = String(process.env.CONTACT_FILTER_VALIDATE_WHATSAPP || 'false').toLowerCase() === 'true';
+    const validationConcurrency = Number(process.env.CONTACT_FILTER_VALIDATION_CONCURRENCY || 10);
 
-        const isDuplicateByNumber =
-          (!!rawNumber && existingNumbers.has(rawNumber)) ||
-          (hasNormalized && existingNumbers.has(normalizedNumber!)) ||
-          (!!digitsRaw && existingNumbersDigits.has(digitsRaw)) ||
-          (!!normalizedDigits && existingNumbersDigits.has(normalizedDigits));
+    const countBefore = await ContactListItem.count({ where: { contactListId } });
 
-        const isDuplicateByEmail = contact.email && existingEmails.has(contact.email);
-
-        if (isDuplicateByNumber || isDuplicateByEmail) {
-          logger.debug(`Contato duplicado por ${isDuplicateByNumber ? 'número' : 'email'}: ${contact.name} (${contact.number || contact.email})`);
-          duplicated++;
-          continue;
-        }
-
-        // Validar número antes de inserir
-        let validationStatus: 'valid' | 'invalid' | 'unknown' = 'unknown';
-        let validatedNumber: string | null = null;
-        const numberToCheck = hasNormalized ? normalizedNumber! : (contact.number ? String(contact.number) : null);
-
-        if (numberToCheck) {
-          try {
-            const response = await CheckContactNumber(numberToCheck, companyId);
-            if (response) {
-              validationStatus = 'valid';
-              validatedNumber = response;
-            }
-          } catch (e: any) {
-            const msg = e?.message || "";
-            if (
-              msg === "invalidNumber" ||
-              msg === "ERR_WAPP_INVALID_CONTACT" ||
-              /não está cadastrado/i.test(msg)
-            ) {
-              validationStatus = 'invalid';
-              logger.info(`[AddFilteredContacts] número inválido – contato ignorado`, {
-                number: numberToCheck,
-                contactListId,
-                companyId
-              });
-            } else {
-              validationStatus = 'unknown';
-              logger.warn(`[AddFilteredContacts] falha ao validar número no WhatsApp; mantendo verificação como desconhecida`, {
-                number: numberToCheck,
-                contactListId,
-                companyId,
-                error: msg
-              });
-            }
+    if (shouldValidate) {
+      const payload: any[] = [];
+      let errors = 0;
+      await processWithConcurrency(candidates, validationConcurrency, async cand => {
+        try {
+          const checked = await CheckContactNumber(cand.number, companyId);
+          if (checked) {
+            payload.push({
+              contactListId,
+              companyId,
+              name: cand.name,
+              number: checked,
+              email: cand.email,
+              isGroup: cand.isGroup || false,
+              isWhatsappValid: true
+            });
           }
+        } catch {
+          // ignora inválidos
+          errors += 1;
         }
+      });
 
-        if (validationStatus === 'invalid') {
-          errors++;
-          continue;
-        }
-
-        const finalNumber = validatedNumber || (hasNormalized ? normalizedNumber : contact.number);
-
-        // Adicionar contato à lista
-        const newItem = await ContactListItem.create({
+      for (let i = 0; i < payload.length; i += chunkSize) {
+        const slice = payload.slice(i, i + chunkSize);
+        await ContactListItem.bulkCreate(slice as any[], { returning: false, validate: false, individualHooks: false, ignoreDuplicates: true });
+      }
+    } else {
+      for (let i = 0; i < candidates.length; i += chunkSize) {
+        const slice = candidates.slice(i, i + chunkSize).map(c => ({
           contactListId,
-          name: contact.name,
-          number: finalNumber,
-          email: contact.email,
           companyId,
-          city: (contact as any).city || null,
-          segment: (contact as any).segment || null,
-          situation: (contact as any).situation || null,
-          creditLimit: (contact as any).creditLimit || null,
-          bzEmpresa: (contact as any).bzEmpresa || null,
-          isWhatsappValid: validationStatus === 'valid' ? true : null
-        });
-
-        // Atualizar os conjuntos de verificação para evitar duplicatas na mesma execução
-        if (contact.number) {
-          registerNumber(contact.number, existingNumbers, existingNumbersDigits);
-        }
-        if (hasNormalized) {
-          registerNumber(normalizedNumber!, existingNumbers, existingNumbersDigits);
-        }
-        if (finalNumber) {
-          registerNumber(finalNumber, existingNumbers, existingNumbersDigits);
-        }
-        if (contact.email) existingEmails.add(contact.email);
-
-        added++;
-      } catch (error: any) {
-        logger.error(`Erro ao adicionar contato ${contact.id} à lista:`, {
-          message: error.message,
-          stack: error.stack,
-          contactId: contact.id,
-          contactListId,
-          name: contact.name,
-          number: contact.number
-        });
-        errors++;
+          name: c.name,
+          number: c.number,
+          email: c.email,
+          isGroup: c.isGroup || false,
+          isWhatsappValid: null
+        }));
+        await ContactListItem.bulkCreate(slice as any[], { returning: false, validate: false, individualHooks: false, ignoreDuplicates: true });
       }
     }
 
-    logger.info(`Resultado da adição: ${added} adicionados, ${duplicated} duplicados, ${errors} erros`);
+    const countAfter = await ContactListItem.count({ where: { contactListId } });
+    const added = Math.max(0, countAfter - countBefore);
+    const duplicated = Math.max(0, candidates.length - added);
+    const errors = 0;
 
-    return {
-      added,
-      duplicated,
-      errors
-    };
+    logger.info(`Resultado da adição (SQL path): ${added} adicionados, ${duplicated} duplicados, ${errors} erros`);
+
+    // Job assíncrono removido - validação volta a ser síncrona como era antes
+
+    return { added, duplicated, errors };
   } catch (error: any) {
     // Capturar erros não tratados em outras partes do serviço
     logger.error('Erro não tratado no serviço de adição de contatos filtrados:', {

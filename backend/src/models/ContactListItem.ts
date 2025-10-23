@@ -39,6 +39,9 @@ class ContactListItem extends Model<ContactListItem> {
   @Column
   isWhatsappValid: boolean;
 
+  @Column
+  validatedAt: Date;
+
   @CreatedAt
   createdAt: Date;
 

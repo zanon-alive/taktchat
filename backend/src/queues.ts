@@ -88,6 +88,7 @@ export const scheduleMonitor = new BullQueue("ScheduleMonitor", connection);
 export const sendScheduledMessages = new BullQueue("SendSacheduledMessages", connection);
 export const campaignQueue = new BullQueue("CampaignQueue", connection);
 export const queueMonitor = new BullQueue("QueueMonitor", connection);
+export const validateWhatsappContactsQueue = new BullQueue("ValidateWhatsappContacts", connection);
 
 export const messageQueue = new BullQueue("MessageQueue", connection, {
   limiter: {
@@ -2106,6 +2107,11 @@ export async function startQueueProcess() {
   userMonitor.process("VerifyLoginStatus", handleLoginStatus);
 
   queueMonitor.process("VerifyQueueStatus", handleVerifyQueue);
+
+  validateWhatsappContactsQueue.process("validateWhatsappContacts", async (job) => {
+    const validateJob = await import("./jobs/validateWhatsappContactsQueue");
+    return validateJob.default.handle(job);
+  });
 
   scheduleMonitor.add(
     "Verify",
