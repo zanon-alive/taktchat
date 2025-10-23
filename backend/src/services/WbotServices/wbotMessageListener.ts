@@ -807,7 +807,22 @@ const verifyContact = async (
   const isPhoneLike = !isGroup && cleaned.length >= 8 && cleaned.length <= 15;
   if (!isPhoneLike) {
     const existing = await Contact.findOne({ where: { remoteJid: msgContact.id, companyId } });
-    return existing; // pode devolver undefined/null se não existir
+    if (existing) {
+      return existing;
+    }
+    // Se não existe, cria um contato básico para evitar erro null
+    const basicContactData = {
+      name: msgContact.name || msgContact.id,
+      number: cleaned || msgContact.id,
+      profilePicUrl: "",
+      isGroup,
+      companyId,
+      remoteJid: msgContact.id,
+      whatsappId: wbot.id,
+      wbot
+    };
+    const newContact = await CreateOrUpdateContactService(basicContactData);
+    return newContact;
   }
 
   console.log('[verifyContact] isGroup:', isGroup, '| msgContact.id:', msgContact.id, '| msgContact.name:', msgContact.name, '| cleaned:', cleaned);
@@ -4121,6 +4136,12 @@ const handleMessage = async (
     }
 
     const contact = await verifyContact(msgContact, wbot, companyId);
+
+    // Validação de segurança: se contact for null, interrompe processamento
+    if (!contact) {
+      console.error('[handleMessage] ERROR: verifyContact retornou null para:', msgContact.id);
+      return;
+    }
 
     let unreadMessages = 0;
 

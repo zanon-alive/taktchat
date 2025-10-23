@@ -188,6 +188,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 20,
     marginTop: 2,
     minWidth: 150,
+    maxWidth: 350,
     height: "auto",
     display: "block",
     position: "relative",
@@ -210,7 +211,11 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    [theme.breakpoints.down('sm')]: {
+      marginRight: 10,
+      maxWidth: 280,
+    },
   },
 
   // Balão maior apenas para áudios recebidos
@@ -368,18 +373,26 @@ const useStyles = makeStyles((theme) => ({
 
   messageMedia: {
     objectFit: "cover",
-    width: 400,
+    maxWidth: 320,
+    maxHeight: 240,
+    width: "auto",
     height: "auto",
-    marginBottom: 20,
+    marginBottom: 12,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: 280,
+      maxHeight: 200,
+    },
   },
 
   mediaWrapper: {
     position: "relative",
     display: "inline-block",
+    maxWidth: "100%",
+    overflow: "hidden",
   },
 
   hdBadge: {
@@ -710,7 +723,7 @@ const MessagesList = ({
       <div className={classes.mediaWrapper}>
         {!isGif && isHd && <span className={classes.hdBadge}>HD</span>}
         <video
-          className={className}
+          className={`${className} ${classes.messageMedia}`}
           src={src}
           controls
           ref={videoRef}

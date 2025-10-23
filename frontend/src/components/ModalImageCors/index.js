@@ -8,11 +8,18 @@ const useStyles = makeStyles(theme => ({
 	messageMedia: {
 		objectFit: "cover",
 		marginBottom: 7,
-		height: "auto", // Redimensionar automaticamente a altura para manter a proporção
+		maxWidth: 320,
+		maxHeight: 240,
+		width: "auto",
+		height: "auto",
 		borderTopLeftRadius: 8,
 		borderTopRightRadius: 8,
 		borderBottomLeftRadius: 8,
 		borderBottomRightRadius: 8,
+		[theme.breakpoints.down('sm')]: {
+			maxWidth: 280,
+			maxHeight: 200,
+		},
 	},
 	mediaWrapper: {
 		position: "relative",
