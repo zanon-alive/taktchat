@@ -27,6 +27,7 @@ interface Request {
   defaultTicketsManagerWidth?: number;
   allowRealTime?: string;
   allowConnections?: string;
+  allowedContactTags?: number[];
 }
 
 interface Response {
@@ -56,7 +57,8 @@ const CreateUserService = async ({
   showDashboard,
   defaultTicketsManagerWidth = 550,
   allowRealTime,
-  allowConnections
+  allowConnections,
+  allowedContactTags = []
 }: Request): Promise<Response> => {
   if (companyId !== undefined) {
     const company = await Company.findOne({
@@ -127,7 +129,8 @@ const CreateUserService = async ({
       showDashboard,
       defaultTicketsManagerWidth,
       allowRealTime,
-      allowConnections
+      allowConnections,
+      allowedContactTags
     },
     { include: ["queues", "company"] }
   );

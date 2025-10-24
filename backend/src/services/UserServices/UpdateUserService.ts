@@ -31,6 +31,7 @@ interface UserData {
   allowConnections?: string;
   profileImage?: string;
   language?: string;
+  allowedContactTags?: number[];
 }
 
 interface Request {
@@ -92,6 +93,12 @@ const UpdateUserService = async ({
   if (userData.profileImage) { dataToUpdate.profileImage = userData.profileImage; }
   if (userData.allowConnections) { dataToUpdate.allowConnections = userData.allowConnections; }
   if (userData.language) { dataToUpdate.language = userData.language; }
+  // Atualiza allowedContactTags apenas se enviado (pode ser [] para limpar)
+  if (userData.hasOwnProperty("allowedContactTags")) {
+    dataToUpdate.allowedContactTags = Array.isArray(userData.allowedContactTags)
+      ? userData.allowedContactTags
+      : [];
+  }
   
   // Lógica especial para a conexão (whatsappId):
   // Só atualiza se o campo for enviado.
@@ -142,7 +149,8 @@ const UpdateUserService = async ({
     defaultTicketsManagerWidth: user.defaultTicketsManagerWidth,
     allowRealTime: user.allowRealTime,
     allowConnections: user.allowConnections,
-    profileImage: user.profileImage
+    profileImage: user.profileImage,
+    allowedContactTags: user.allowedContactTags
   };
 
   return serializedUser;

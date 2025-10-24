@@ -36,7 +36,8 @@ const ShowUserService = async (id: string | number, companyId: string | number):
         "allHistoric",
         "allowRealTime",
         "allowConnections",
-        "language"
+        "language",
+        "allowedContactTags"
       ],
       include: [
         { model: Queue, as: "queues", attributes: ["id", "name", "color"] },
