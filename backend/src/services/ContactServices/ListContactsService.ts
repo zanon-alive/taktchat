@@ -84,22 +84,13 @@ const ListContactsService = async ({
     }
   }
 
-  // Regra de acesso para não-admins: somente contatos com pelo menos UMA tag dentro de allowedContactTags.
-  // Se não houver allowedContactTags definidas para o usuário, retorna lista vazia.
-  if (profile !== 'admin' && userId) {
-    if (userAllowedContactTags.length > 0) {
-      const contactsWithAllowedTags = await ContactTag.findAll({
-        where: { tagId: { [Op.in]: userAllowedContactTags } },
-        attributes: ["contactId"],
-        group: ["contactId"]
-      });
-      const allowedContactIds = contactsWithAllowedTags.map(ct => ct.contactId);
-
-      whereCondition.id = allowedContactIds.length > 0 ? { [Op.in]: allowedContactIds } : { [Op.in]: [] };
-    } else {
-      // Usuário restrito sem tags liberadas: não vê contatos
-      whereCondition.id = { [Op.in]: [] };
-    }
+  // Regra de acesso para não-admins: somente contatos que POSSUEM ao menos uma das tags permitidas
+  // Se não houver allowedContactTags, retorna lista vazia
+  const isRestrictedUser = profile !== 'admin' && !!userId;
+  const mustFilterByAllowedTags = isRestrictedUser && userAllowedContactTags.length > 0;
+  if (isRestrictedUser && !mustFilterByAllowedTags) {
+    // Usuário sem tags permitidas => nenhum contato
+    whereCondition.id = { [Op.in]: [] };
   }
 
   // Filtro por intervalo de última compra
@@ -351,6 +342,18 @@ const ListContactsService = async ({
     ];
   }
 
+  // Monta include base de tags (sem filtro)
+  const baseTagsInclude: any = {
+    association: "tags",
+    attributes: ["id", "name", "color"],
+    required: false
+  };
+
+  // Se usuário restrito, força JOIN com Tag filtrando pelas allowedContactTags
+  const restrictedTagsInclude: any = mustFilterByAllowedTags
+    ? { association: "tags", attributes: ["id", "name", "color"], where: { id: { [Op.in]: userAllowedContactTags } }, required: true }
+    : baseTagsInclude;
+
   const { count, rows: contacts } = await Contact.findAndCountAll({
     where: finalWhere,
     attributes: [
@@ -380,12 +383,7 @@ const ListContactsService = async ({
       "isWhatsappValid",
       "validatedAt"
     ],
-    include: [
-      {
-        association: "tags",
-        attributes: ["id", "name", "color"]
-      },
-    ],
+    include: [restrictedTagsInclude],
     distinct: true,
     limit: pageLimit,
     offset,

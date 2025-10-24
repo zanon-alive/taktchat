@@ -101,6 +101,7 @@ const CreateOrUpdateContactService = async ({
 }: Request): Promise<Contact> => {
   try {
     let createContact = false;
+    let shouldEmitUpdate = false;
     const publicFolder = path.resolve(__dirname, "..", "..", "..", "public");
     const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
     // Após sanitizar o número…
@@ -180,6 +181,10 @@ if (!isGroup) {
     let updateImage = (!contact || contact?.profilePicUrl !== profilePicUrl && profilePicUrl !== "") && wbot || false;
 
     if (contact) {
+      // Captura valores anteriores para detectar mudanças
+      const oldName = contact.name;
+      const oldProfilePicUrl = contact.profilePicUrl;
+      
       contact.remoteJid = remoteJid;
       contact.profilePicUrl = profilePicUrl || null;
       contact.isGroup = isGroup;
@@ -250,6 +255,11 @@ if (!isGroup) {
       }
       await contact.update(contactData);
       await contact.reload();
+      
+      // Marca para emitir update se nome ou avatar mudaram
+      if (oldName !== contact.name || oldProfilePicUrl !== contact.profilePicUrl) {
+        shouldEmitUpdate = true;
+      }
 
     } else if (wbot && ['whatsapp'].includes(channel)) {
       const settings = await CompaniesSettings.findOne({ where: { companyId } });
@@ -316,6 +326,7 @@ if (!isGroup) {
       });
 
       await contact.reload();
+      shouldEmitUpdate = true; // Avatar atualizado
     } else {
       if (['facebook', 'instagram'].includes(channel)) {
         let filename;
@@ -333,6 +344,7 @@ if (!isGroup) {
         });
 
         await contact.reload();
+        shouldEmitUpdate = true; // Avatar atualizado (facebook/instagram)
       }
     }
 
@@ -351,7 +363,8 @@ if (!isGroup) {
           action: "create",
           contact
         });
-    } else {
+    } else if (shouldEmitUpdate) {
+      // Só emite update se houve mudança real (nome, avatar, etc)
       io.of(`/workspace-${companyId}`)
         .emit(`company-${companyId}-contact`, {
           action: "update",
