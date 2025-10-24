@@ -26,6 +26,7 @@ interface SerializedUser {
   userClosePendingTicket?: string;
   showDashboard?: string;
   token?: string;
+  allowedContactTags?: number[];
 }
 
 interface Request {

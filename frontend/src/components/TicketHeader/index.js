@@ -13,9 +13,10 @@ const useStyles = makeStyles(theme => ({
 		background: theme.palette.total,
 		flex: "none",
 		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-		height: 68,
-		padding: "0 0px 0 20px",
+		minHeight: 68,
+		padding: "8px 0px 8px 20px",
 		position: 'relative',
+		alignItems: 'flex-start',
 		[theme.breakpoints.down("sm")]: {
 			flexWrap: "nowrap",
 			alignItems: 'center',
@@ -55,7 +56,14 @@ const TicketHeader = ({ loading, children }) => {
 					square
 					className={classes.ticketHeader}
 				>
-					<IconButton color="primary" size="small" edge="start" aria-label="voltar" onClick={handleBack}>
+					<IconButton 
+						color="primary" 
+						size="small" 
+						edge="start" 
+						aria-label="voltar" 
+						onClick={handleBack}
+						style={{ alignSelf: 'flex-start', marginTop: 8 }}
+					>
 						<ArrowBackIos fontSize="small" />
 					</IconButton>
 					{children}

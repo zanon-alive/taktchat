@@ -184,6 +184,10 @@ class User extends Model<User> {
   @Column(DataType.DATE) // Added for password reset expiration
   passwordResetExpires: Date | null;
 
+  @Default([])
+  @Column(DataType.ARRAY(DataType.INTEGER))
+  allowedContactTags: number[];
+
   @BeforeDestroy
   static async updateChatbotsUsersReferences(user: User) {
     await Chatbot.update({ optUserId: null }, { where: { optUserId: user.id } });

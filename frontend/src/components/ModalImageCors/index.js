@@ -8,18 +8,16 @@ const useStyles = makeStyles(theme => ({
   messageMedia: {
     objectFit: "cover",
     marginBottom: 7,
-    maxWidth: "350px !important",
-    maxHeight: "180px !important",
-    width: "auto !important",
-    height: "auto !important",
+    width: "256px !important",
+    height: "256px !important",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     display: "block",
     [theme.breakpoints.down('sm')]: {
-      maxWidth: "200px !important",
-      maxHeight: "150px !important",
+      width: "220px !important",
+      height: "220px !important",
     },
   },
   stickerMedia: {

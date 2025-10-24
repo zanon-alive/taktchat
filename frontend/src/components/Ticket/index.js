@@ -103,7 +103,6 @@ const Ticket = () => {
   const [ticket, setTicket] = useState({});
   const [dragDropFiles, setDragDropFiles] = useState([]);
   const [showComposer, setShowComposer] = useState(false);
-  const [externalHeaderActive, setExternalHeaderActive] = useState(false);
   const { companyId } = user;
 
   useEffect(() => {
@@ -176,17 +175,11 @@ const Ticket = () => {
     };
   }, [ticketId]);
 
-  // Controla header externo (topo) e abre o drawer quando solicitado
+  // Abre o drawer quando solicitado
   useEffect(() => {
-    try {
-      setExternalHeaderActive(!!window.__externalHeaderActive);
-    } catch {}
-    const onToggleHeader = (e) => setExternalHeaderActive(!!(e?.detail?.active));
     const onOpenContactDrawer = () => setDrawerOpen(true);
-    window.addEventListener('external-header-toggle', onToggleHeader);
     window.addEventListener('open-contact-drawer', onOpenContactDrawer);
     return () => {
-      window.removeEventListener('external-header-toggle', onToggleHeader);
       window.removeEventListener('open-contact-drawer', onOpenContactDrawer);
     };
   }, []);
@@ -330,24 +323,20 @@ const Ticket = () => {
         })}
         style={{ background: "transparent", boxShadow: "none", border: 0 }}
       >
-        {/* <div id="TicketHeader"> */}
-        {!externalHeaderActive && (
-          <TicketHeader loading={loading}>
-            {ticket.contact !== undefined && (
-              <div id="TicketHeader" style={{ flex: 1, minWidth: 0 }}>
-                <TicketInfo
-                  contact={contact}
-                  ticket={ticket}
-                  onClick={handleDrawerToggle}
-                />
-              </div>
-            )}
-            <TicketActionButtons
-              ticket={ticket}
-            />
-          </TicketHeader>
-        )}
-        {/* </div> */}
+        <TicketHeader loading={loading}>
+          {ticket.contact !== undefined && (
+            <div id="TicketHeader" style={{ flex: 1, minWidth: 0 }}>
+              <TicketInfo
+                contact={contact}
+                ticket={ticket}
+                onClick={handleDrawerToggle}
+              />
+            </div>
+          )}
+          <TicketActionButtons
+            ticket={ticket}
+          />
+        </TicketHeader>
         <ReplyMessageProvider>
           <ForwardMessageProvider>
             <EditMessageProvider>

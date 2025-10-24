@@ -11,6 +11,7 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
+import ContactTag from "../../models/ContactTag";
 
 interface Request {
   searchParam?: string;
@@ -21,7 +22,7 @@ interface Request {
   dateEnd?: string;
   updatedAt?: string;
   showAll?: string;
-  userId?: string; // <<-- ALTERAÇÃO 1: 'userId' agora é opcional
+  userId?: string; 
   withUnreadMessages?: string;
   queueIds: number[];
   tags: number[];
@@ -51,9 +52,6 @@ const ListTicketsServiceKanban = async ({
   withUnreadMessages,
   companyId
 }: Request): Promise<Response> => {
-  // <<-- ALTERAÇÃO 2: A condição inicial foi simplificada para não depender mais do 'userId'.
-  // A lógica antiga era: { [Op.or]: [{ userId }, { status: "pending" }], ... }
-  // Isso forçava a visualização a ser individual.
   let whereCondition: Filterable["where"] = {
     queueId: { [Op.or]: [queueIds, null] }
   };
@@ -163,9 +161,6 @@ const ListTicketsServiceKanban = async ({
     };
   }
 
-  // <<-- ALTERAÇÃO 3: Adicionada verificação 'if (userId && ...)'
-  // Este bloco de código é específico para um usuário e quebraria o sistema
-  // se executado sem um 'userId'. Agora ele só roda se o 'userId' for fornecido.
   if (userId && withUnreadMessages === "true") {
     const user = await ShowUserService(userId, companyId);
     const userQueueIds = user.queues.map(queue => queue.id);
@@ -226,6 +221,42 @@ const ListTicketsServiceKanban = async ({
     ...whereCondition,
     companyId
   };
+
+  // Política de acesso por tags para kanban (AND): se userId fornecido e usuário não-admin
+  // possuir allowedContactTags, incluir tickets de contatos cujas tags estejam TODAS dentro do conjunto permitido.
+  if (userId) {
+    const user = await ShowUserService(userId, companyId);
+    const allowed = (user as any)?.allowedContactTags as number[] | undefined;
+    if (user.profile !== "admin" && Array.isArray(allowed) && allowed.length > 0) {
+      // Contatos que possuem alguma tag fora do conjunto permitido
+      const disallowed = await ContactTag.findAll({
+        where: { tagId: { [Op.notIn]: allowed } },
+        attributes: ["contactId"],
+        group: ["contactId"]
+      });
+      const disallowedIds = disallowed.map(r => r.contactId);
+      // Contatos cujas tags são todas permitidas (AND)
+      const allowedWithTags = await ContactTag.findAll({
+        where: { contactId: { [Op.notIn]: disallowedIds } },
+        attributes: ["contactId"],
+        group: ["contactId"]
+      });
+      const allowedContactIds = Array.from(new Set(allowedWithTags.map(r => r.contactId)));
+      if (allowedContactIds.length > 0) {
+        whereCondition = {
+          [Op.and]: [
+            { companyId },
+            {
+              [Op.or]: [
+                whereCondition,
+                { contactId: { [Op.in]: allowedContactIds } }
+              ]
+            }
+          ]
+        } as any;
+      }
+    }
+  }
 
   const { count, rows: tickets } = await Ticket.findAndCountAll({
     where: whereCondition,

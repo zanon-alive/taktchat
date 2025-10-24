@@ -18,6 +18,7 @@ interface Request {
   isGroup?: string;
   userId?: number;
   profile?: string;
+  allowedContactTags?: number[]; // Adicionar a nova propriedade
   limit?: string;
   orderBy?: string;
   order?: string;
@@ -52,6 +53,7 @@ const ListContactsService = async ({
                                      isGroup,
                                      userId,
                                      profile,
+                                     allowedContactTags, // Adicionar a nova propriedade
                                      limit,
                                      orderBy,
                                      order,
@@ -74,6 +76,14 @@ const ListContactsService = async ({
   let whereCondition: Filterable["where"] = {};
   const additionalWhere: any[] = [];
 
+  let userAllowedContactTags: number[] = [];
+  if (userId) {
+    const user = await User.findByPk(userId);
+    if (user && user.allowedContactTags && user.allowedContactTags.length > 0) {
+      userAllowedContactTags = user.allowedContactTags;
+    }
+  }
+
   if (profile !== 'admin' && userId) {
     const userTickets = await Ticket.findAll({
       where: { userId },
@@ -81,11 +91,29 @@ const ListContactsService = async ({
       group: ["contactId"]
     });
 
-    const contactIds = userTickets.map(t => t.contactId);
+    const contactIdsFromTickets = userTickets.map(t => t.contactId);
+    let combinedContactIds: number[] = [];
 
-    whereCondition.id = {
-      [Op.in]: contactIds
-    };
+    if (userAllowedContactTags.length > 0) {
+      const contactsWithAllowedTags = await ContactTag.findAll({
+        where: { tagId: { [Op.in]: userAllowedContactTags } },
+        attributes: ["contactId"],
+        group: ["contactId"]
+      });
+      const contactIdsFromTags = contactsWithAllowedTags.map(ct => ct.contactId);
+      combinedContactIds = [...new Set([...contactIdsFromTickets, ...contactIdsFromTags])];
+    } else {
+      combinedContactIds = contactIdsFromTickets;
+    }
+
+    if (combinedContactIds.length > 0) {
+      whereCondition.id = {
+        [Op.in]: combinedContactIds
+      };
+    } else {
+      // Se não houver tickets ou tags permitidas, o usuário não deve ver nenhum contato
+      whereCondition.id = { [Op.in]: [] };
+    }
   }
 
   // Filtro por intervalo de última compra

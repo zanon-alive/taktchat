@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 import Ticket from "../models/Ticket";
+import AppError from "../errors/AppError";
+import User from "../models/User";
 
 import CreateTicketService from "../services/TicketServices/CreateTicketService";
 import DeleteTicketService from "../services/TicketServices/DeleteTicketService";
@@ -224,6 +226,7 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
 
   // A linha abaixo ainda é necessária para obter o companyId
   const { companyId } = req.user;
+  const userId = Number(req.user.id);
 
   let queueIds: number[] = [];
   let tagsIds: number[] = [];
@@ -252,7 +255,7 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     dateEnd,
     updatedAt,
     showAll,
-    // userId, // <<-- ALTERAÇÃO PRINCIPAL: REMOÇÃO DESTA LINHA
+    userId: String(userId), 
     queueIds,
     withUnreadMessages,
     companyId
@@ -288,9 +291,26 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { id: userId, companyId } = req.user;
+  const { id: userId, companyId, profile } = req.user as any;
 
-  const contact = await ShowTicketService(ticketId, companyId);
+  const ticket = await ShowTicketService(ticketId, companyId);
+
+  // Verificação de acesso: admin sempre pode; usuário pode se for dono do ticket
+  // ou se o contato tiver TODAS as tags contidas em allowedContactTags do usuário.
+  // Contato sem tags: não libera acesso extra (somente o dono).
+  if (profile !== "admin") {
+    const me = await User.findByPk(Number(userId));
+    const allowedTagIds: number[] = (me && Array.isArray((me as any).allowedContactTags)) ? (me as any).allowedContactTags : [];
+    const isOwner = Number(ticket.userId) === Number(userId);
+    // AND: todas as tags do contato devem estar em allowedTagIds
+    const contactTagIds: number[] = Array.isArray((ticket as any)?.contact?.tags)
+      ? ((ticket as any).contact.tags as any[]).map((t: any) => t.id)
+      : [];
+    const hasAllTags = contactTagIds.length > 0 && contactTagIds.every(id => allowedTagIds.includes(id));
+    if (!isOwner && !hasAllTags) {
+      throw new AppError("FORBIDDEN_CONTACT_ACCESS", 403);
+    }
+  }
 
   await CreateLogTicketService({
     userId,
@@ -298,7 +318,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     type: "access"
   });
 
-  return res.status(200).json(contact);
+  return res.status(200).json(ticket);
 };
 
 export const showLog = async (req: Request, res: Response): Promise<Response> => {
@@ -315,7 +335,7 @@ export const showFromUUID = async (
   res: Response
 ): Promise<Response> => {
   const { uuid } = req.params;
-  const { id: userId, companyId } = req.user;
+  const { id: userId, companyId, profile } = req.user as any;
 
 
   const ticket: Ticket = await ShowTicketUUIDService(uuid, companyId);
@@ -328,6 +348,20 @@ export const showFromUUID = async (
     ticketId: ticket.id,
     type: "access"
   });
+
+  // Verificação de acesso por tags/dono do ticket (mesma regra do show)
+  if (profile !== "admin") {
+    const me = await User.findByPk(Number(userId));
+    const allowedTagIds: number[] = (me && Array.isArray((me as any).allowedContactTags)) ? (me as any).allowedContactTags : [];
+    const isOwner = Number(ticket.userId) === Number(userId);
+    const contactTagIds: number[] = Array.isArray((ticket as any)?.contact?.tags)
+      ? ((ticket as any).contact.tags as any[]).map((t: any) => t.id)
+      : [];
+    const hasAllTags = contactTagIds.every(id => allowedTagIds.includes(id));
+    if (!isOwner && !hasAllTags) {
+      throw new AppError("FORBIDDEN_CONTACT_ACCESS", 403);
+    }
+  }
 
   return res.status(200).json(ticket);
 };

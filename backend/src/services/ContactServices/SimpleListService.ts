@@ -1,13 +1,18 @@
 import Contact from "../../models/Contact";
 import AppError from "../../errors/AppError";
-import { FindOptions, Op } from "sequelize";
+import { FindOptions, Op, literal } from "sequelize";
+import Ticket from "../../models/Ticket";
+import ContactTag from "../../models/ContactTag";
+import User from "../../models/User";
 
 export interface SearchContactParams {
   companyId: string | number;
   name?: string;
+  userId?: number;
+  profile?: string;
 }
 
-const SimpleListService = async ({ name, companyId }: SearchContactParams): Promise<Contact[]> => {
+const SimpleListService = async ({ name, companyId, userId, profile }: SearchContactParams): Promise<Contact[]> => {
   let options: FindOptions = {
     order: [
       ['name', 'ASC']
@@ -22,9 +27,68 @@ const SimpleListService = async ({ name, companyId }: SearchContactParams): Prom
     }
   }
 
-  options.where = {
-    ...options.where,
-    companyId
+  // Regra de acesso por tags (AND):
+  // - Admin: vê tudo
+  // - Usuário normal:
+  //   (a) Sempre pode ver contatos SEM TAG
+  //   (b) Pode ver contatos de tickets dele
+  //   (c) Pode ver contatos cujas tags (se existirem) sejam TODAS contidas em allowedContactTags
+  if (profile !== "admin" && userId) {
+    const user = await User.findByPk(userId);
+
+    // (a) Contatos sem tag (visíveis a todos)
+    const noTagRows = await Contact.findAll({
+      where: {
+        companyId,
+        id: { [Op.notIn]: literal('(SELECT DISTINCT "contactId" FROM "ContactTags")') }
+      },
+      attributes: ["id"]
+    });
+    const noTagIds = noTagRows.map(c => c.id);
+
+    // (b) Contatos de tickets do usuário
+    const userTickets = await Ticket.findAll({
+      where: { userId, companyId },
+      attributes: ["contactId"],
+      group: ["contactId"]
+    });
+    const fromTickets = userTickets.map(t => t.contactId);
+
+    let allowedIds = Array.from(new Set([...noTagIds, ...fromTickets]));
+
+    // (c) AND: contatos cujas tags estão TODAS contidas nas allowedContactTags
+    if (user && Array.isArray(user.allowedContactTags) && user.allowedContactTags.length > 0) {
+      // contatos com alguma tag fora do conjunto permitido
+      const disallowed = await ContactTag.findAll({
+        where: { tagId: { [Op.notIn]: user.allowedContactTags } },
+        attributes: ["contactId"],
+        group: ["contactId"]
+      });
+      const disallowedIds = disallowed.map(r => r.contactId);
+      const allowedWithTags = await ContactTag.findAll({
+        where: { contactId: { [Op.notIn]: disallowedIds } },
+        attributes: ["contactId"],
+        group: ["contactId"]
+      });
+      const fromAndTags = allowedWithTags.map(r => r.contactId);
+      allowedIds = Array.from(new Set([...allowedIds, ...fromAndTags]));
+    }
+
+    // Se não houver nenhum contato permitido, retorna lista vazia
+    if (allowedIds.length === 0) {
+      return [];
+    }
+
+    options.where = {
+      ...options.where,
+      companyId,
+      id: { [Op.in]: allowedIds }
+    };
+  } else {
+    options.where = {
+      ...options.where,
+      companyId
+    }
   }
 
   const contacts = await Contact.findAll(options);

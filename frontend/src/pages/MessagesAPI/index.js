@@ -4,7 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Paper, Grid, TextField, Typography, Button, CircularProgress, AppBar, Tabs, Tab, Box } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import { Field, Form, Formik } from "formik";
-import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
 import axios from "axios";

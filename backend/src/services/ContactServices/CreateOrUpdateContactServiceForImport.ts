@@ -26,6 +26,7 @@ interface Request {
   foundationDate?: Date;
   segment?: string;
   bzEmpresa?: string;
+  silentMode?: boolean; // Adicionar a nova propriedade
 }
 
 const CreateOrUpdateContactServiceForImport = async ({
@@ -47,7 +48,8 @@ const CreateOrUpdateContactServiceForImport = async ({
   fantasyName,
   foundationDate,
   segment,
-  bzEmpresa
+  bzEmpresa,
+  silentMode // Adicionar a nova propriedade
 }: Request): Promise<Contact> => {
   const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
 
@@ -161,19 +163,23 @@ const CreateOrUpdateContactServiceForImport = async ({
 
     await contact.update(updatePayload);
 
-    io.of(`/workspace-${companyId}`)
-      .emit(`company-${companyId}-contact`, {
-        action: "update",
-        contact
-      });
+    if (!silentMode) { // Emitir evento apenas se não estiver em modo silencioso
+      io.of(`/workspace-${companyId}`)
+        .emit(`company-${companyId}-contact`, {
+          action: "update",
+          contact
+        });
+    }
   } else {
     contact = await Contact.create(contactData);
 
-    io.of(`/workspace-${companyId}`)
-      .emit(`company-${companyId}-contact`, {
-        action: "create",
-        contact
-      });
+    if (!silentMode) { // Emitir evento apenas se não estiver em modo silencioso
+      io.of(`/workspace-${companyId}`)
+        .emit(`company-${companyId}-contact`, {
+          action: "create",
+          contact
+        });
+    }
   }
 
   // Chama o serviço centralizado para atualizar nome/avatar com proteção

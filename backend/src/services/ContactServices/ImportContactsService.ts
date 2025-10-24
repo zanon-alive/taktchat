@@ -34,11 +34,14 @@ export function resetImportProgress(progressId: string) {
   importProgressMap.delete(progressId);
 }
 
+import CreateOrUpdateContactServiceForImport from "./CreateOrUpdateContactServiceForImport"; // Importar o serviço
+
 export async function ImportContactsService(
   companyId: number,
   file: Express.Multer.File | undefined,
   tagMapping?: any,
-  whatsappId?: number
+  whatsappId?: number,
+  silentMode?: boolean // Adicionar a nova propriedade
 ) {
   let contacts: any[] = [];
   const options = (tagMapping && tagMapping.__options) ? tagMapping.__options : {};
@@ -258,12 +261,10 @@ export async function ImportContactsService(
       if (!payload.name || String(payload.name).trim() === '') {
         payload.name = number;
       }
-      contact = await Contact.create(payload);
+      contact = await CreateOrUpdateContactServiceForImport({ ...payload, silentMode });
       contactList.push(contact);
       createdCount++;
     } else {
-      contact = existing;
-
       // Update não destrutivo: só atualiza campos vazios/placeholder
       const updatePayload: any = {};
 
@@ -305,8 +306,10 @@ export async function ImportContactsService(
       keepIfEmpty('segment');
 
       if (Object.keys(updatePayload).length > 0) {
-        await existing.update(updatePayload);
+        contact = await CreateOrUpdateContactServiceForImport({ ...updatePayload, id: existing.id, silentMode });
         updatedCount++;
+      } else {
+        contact = existing; // Se não houver atualização, mantém o contato existente
       }
     }
 

@@ -14,6 +14,7 @@ interface AuthenticatedRequest extends Request {
     companyId: number;
     profile: string;
     username?: string;
+    allowedContactTags?: number[]; // Adicionar a nova propriedade
   };
   files?: any;
 }
@@ -123,7 +124,7 @@ interface ContactData {
 
 export const importXls = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
-  const { number, name, email, validateContact, tags, cpfCnpj, representativeCode, city, instagram, situation, fantasyName, foundationDate, creditLimit, segment } = req.body;
+  const { number, name, email, validateContact, tags, cpfCnpj, representativeCode, city, instagram, situation, fantasyName, foundationDate, creditLimit, segment, silentMode } = req.body; // Adicionar silentMode
   const simpleNumber = String(number).replace(/[^\d.-]+/g, '');
   let validNumber = simpleNumber;
 
@@ -193,10 +194,10 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
   return res.status(200).json(contact);
 };
 
-export const index = async (req: Request, res: Response): Promise<Response> => {
+export const index = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   const { searchParam, pageNumber, contactTag: tagIdsStringified, isGroup, limit, orderBy, order, dtUltCompraStart, dtUltCompraEnd } = req.query as IndexQuery;
   // <<-- ALTERAÇÃO 1: Adicionado 'profile' para obter o perfil do usuário
-  const { id: userId, companyId, profile } = req.user;
+  const { id: userId, companyId, profile, allowedContactTags } = req.user;
 
 
 let tagsIds: number[] = [];
@@ -357,7 +358,8 @@ if (tagsQuery) {
     tagsIds,
     isGroup,
     userId: Number(userId),
-    profile, // <<-- ALTERAÇÃO 2: 'profile' é enviado para o serviço
+    profile,
+    allowedContactTags, // Passar a nova propriedade para o serviço
     limit,
     orderBy,
     order,
@@ -422,9 +424,9 @@ export const getContact = async (
 // Retorna uma lista simples de contatos (nome opcional), usada por "/contacts/list"
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { name } = req.query as unknown as SearchContactParams;
-  const { companyId } = req.user;
+  const { companyId, id: userId, profile } = req.user as any;
 
-  const contacts = await SimpleListService({ name, companyId });
+  const contacts = await SimpleListService({ name, companyId, userId: Number(userId), profile });
 
   return res.json(contacts);
 };
@@ -1262,14 +1264,14 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
 
   export const importWithTags = async (req: Request, res: Response): Promise<Response> => {
     const { companyId } = req.user;
-    const { tagMapping, whatsappId, progressId } = req.body as any;
+    const { tagMapping, whatsappId, progressId, silentMode } = req.body as any; // Adicionar silentMode
 
     try {
       // Importar contatos com mapeamento de tags
       if (tagMapping && progressId) {
         tagMapping.__options = { ...(tagMapping.__options || {}), progressId };
       }
-      const result = await ImportContactsService(companyId, undefined, tagMapping, whatsappId);
+      const result = await ImportContactsService(companyId, undefined, tagMapping, whatsappId, silentMode); // Passar silentMode
       return res.status(200).json(result);
     } catch (error) {
       logger.error("Erro ao importar contatos com tags:", error);

@@ -44,6 +44,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     rollbackLaneId } = req.body;
   const { companyId } = req.user;
 
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const tag = await CreateService({
     name,
     color,
@@ -77,10 +81,7 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { kanban } = req.body;
-
-  //console.log(kanban)
-  if (req.user.profile !== "admin" && kanban === 1) {
+  if (req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
@@ -106,6 +107,10 @@ export const remove = async (
 ): Promise<Response> => {
   const { tagId } = req.params;
   const { companyId } = req.user;
+
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
 
   await DeleteService(tagId);
 
@@ -142,6 +147,10 @@ export const syncTags = async (
 ): Promise<Response> => {
   const data = req.body as any;
   const { companyId } = req.user;
+
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
 
   // Normaliza a entrada de tags para aceitar:
   // - string ("CLIENTES")

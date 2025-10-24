@@ -33,33 +33,31 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
             top: -1,
         },
         headerContent: {
-            overflow: 'hidden',
             minWidth: 0,
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
         },
         title: {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
             width: '100%',
             maxWidth: '100%',
             minWidth: 0,
             display: 'block',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+            lineHeight: '1.2',
         },
         subheaderRoot: {
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
-            overflow: 'hidden',
         },
         subheaderText: {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
             minWidth: 0,
             width: '100%',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+            lineHeight: '1.2',
         },
         tagsRow: {
             display: 'flex',
@@ -126,7 +124,7 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 				onClick={onClick}
 				style={{ cursor: "pointer", flex: 1, minWidth: 0, paddingTop: 8, paddingBottom: 8, paddingLeft: 4, paddingRight: 4 }}
 				classes={{ content: classes.headerContent }}
-				titleTypographyProps={{ noWrap: true, classes: { root: classes.title } }}
+				titleTypographyProps={{ classes: { root: classes.title } }}
 				subheaderTypographyProps={{ component: 'div', classes: { root: classes.subheaderRoot } }}
 				avatar={(
                     <div className={classes.avatarContainer}>

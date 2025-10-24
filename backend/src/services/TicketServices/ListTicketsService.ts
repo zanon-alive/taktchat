@@ -533,6 +533,39 @@ const ListTicketsService = async ({
     companyId
   };
 
+  // Política de acesso por tags (AND): não-admin pode ver também tickets cujos
+  // contatos tenham TODAS as tags contidas em user.allowedContactTags.
+  if (user.profile !== "admin" && Array.isArray((user as any).allowedContactTags) && (user as any).allowedContactTags.length > 0) {
+    const allowedSet = (user as any).allowedContactTags as number[];
+    // Contatos que possuem alguma tag FORA do conjunto permitido
+    const disallowed = await ContactTag.findAll({
+      where: { tagId: { [Op.notIn]: allowedSet } },
+      attributes: ["contactId"],
+      group: ["contactId"]
+    });
+    const disallowedIds = disallowed.map(r => r.contactId);
+    // Contatos cujas tags são TODAS permitidas (ou contatos sem tags não são expandidos aqui)
+    const allowedWithTags = await ContactTag.findAll({
+      where: { contactId: { [Op.notIn]: disallowedIds } },
+      attributes: ["contactId"],
+      group: ["contactId"]
+    });
+    const allowedContactIds = Array.from(new Set(allowedWithTags.map(r => r.contactId)));
+    if (allowedContactIds.length > 0) {
+      whereCondition = {
+        [Op.and]: [
+          { companyId },
+          {
+            [Op.or]: [
+              whereCondition,
+              { contactId: { [Op.in]: allowedContactIds } }
+            ]
+          }
+        ]
+      } as any;
+    }
+  }
+
   const limit = 40;
   const offset = limit * (+pageNumber - 1);
 

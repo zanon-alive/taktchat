@@ -9,6 +9,8 @@ import {
   Divider,
   IconButton,
   makeStyles,
+  Dialog,
+  DialogContent,
 } from "@material-ui/core";
 
 import {
@@ -43,8 +45,8 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { QueueSelectedContext } from "../../context/QueuesSelected/QueuesSelectedContext";
 import AudioModal from "../AudioModal";
 import AdMetaPreview from "../AdMetaPreview";
-import PdfModal from "../PdfModal";
-import LinkPreview from "../LinkPreview";
+// import PdfModal from "../PdfModal";
+// import LinkPreview from "../LinkPreview";
 
 import { useParams, useHistory } from 'react-router-dom';
 import { getBackendUrl } from "../../config";
@@ -382,10 +384,8 @@ const useStyles = makeStyles((theme) => ({
 
   messageMedia: {
     objectFit: "cover",
-    maxWidth: "350px !important",
-    maxHeight: "180px !important",
-    width: "auto !important",
-    height: "auto !important",
+    width: "256px !important",
+    height: "256px !important",
     marginBottom: 12,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -393,9 +393,34 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: 8,
     display: "block",
     [theme.breakpoints.down('sm')]: {
-      maxWidth: "200px !important",
-      maxHeight: "150px !important",
+      width: "220px !important",
+      height: "220px !important",
     },
+  },
+
+  fileFrame: {
+    width: 256,
+    height: 256,
+    maxWidth: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    borderRadius: 8,
+    backgroundColor: theme.mode === 'light' ? '#f0f0f0' : '#2a2f32',
+    overflow: 'hidden',
+    textAlign: 'center',
+    padding: 12,
+  },
+  fileName: {
+    fontSize: 13,
+    fontWeight: 500,
+    maxWidth: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    marginTop: 6,
+    marginBottom: 8,
   },
 
   // Classe específica para stickers/GIFs - tamanho pequeno fixo
@@ -641,6 +666,9 @@ const MessagesList = ({
 
   const companyId = user.companyId;
 
+  const [videoDialog, setVideoDialog] = useState({ open: false, url: null });
+  const [pdfDialog, setPdfDialog] = useState({ open: false, url: null });
+
   // Helper para decidir qual contato exibir no avatar do áudio
   const backendUrl = getBackendUrl();
   const getAvatarContactForMessage = (msg, fallbackTicketContact = null) => {
@@ -752,7 +780,7 @@ const MessagesList = ({
       <div className={classes.mediaWrapper}>
         {!isGif && isHd && <span className={classes.hdBadge}>HD</span>}
         <video
-          className={`${className} ${classes.messageMedia}`}
+              className={`${classes.messageMedia} ${className || ''}`}
           src={src}
           controls
           ref={videoRef}
@@ -1123,26 +1151,47 @@ const MessagesList = ({
       );
     } else if (message.mediaType === "video") {
       return (
-        <VideoWithHdBadge
-          className={classes.messageMedia}
-          src={message.mediaUrl}
-          isGif={/\.gif(\?.*)?$/i.test(message.mediaUrl || "")}
-        />
+        <div onClick={(e) => { e.preventDefault(); setVideoDialog({ open: true, url: message.mediaUrl }); }} style={{ display: 'inline-block', cursor: 'pointer' }}>
+          <VideoWithHdBadge
+            className={classes.messageMedia}
+            src={message.mediaUrl}
+            isGif={/\.gif(\?.*)?$/i.test(message.mediaUrl || "")}
+          />
+        </div>
       );
     } else if (message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl)) {
-      return <PdfModal url={message.mediaUrl} />;
-    } else {
       return (
-        <>
-          <div className={classes.downloadMedia}>
+        <div className={classes.fileFrame} onClick={(e) => { e.preventDefault(); setPdfDialog({ open: true, url: message.mediaUrl }); }} style={{ cursor: 'pointer' }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>PDF</div>
+            <div className={classes.fileName}>{getFileNameFromUrl(message.mediaUrl) || 'arquivo.pdf'}</div>
             <Button
               startIcon={<GetApp />}
               variant="outlined"
               href={message.mediaUrl}
               onClick={(e) => { e.preventDefault(); handleDirectDownload(message.mediaUrl); }}
             >
-              Download
+              Baixar
             </Button>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <>
+          <div className={classes.fileFrame}>
+            <div>
+              <GetApp color="primary" />
+              <div className={classes.fileName}>{getFileNameFromUrl(message.mediaUrl) || 'arquivo'}</div>
+              <Button
+                startIcon={<GetApp />}
+                variant="outlined"
+                href={message.mediaUrl}
+                onClick={(e) => { e.preventDefault(); handleDirectDownload(message.mediaUrl); }}
+              >
+                Download
+              </Button>
+            </div>
           </div>
           <Divider />
         </>
@@ -1312,7 +1361,20 @@ const MessagesList = ({
           }
           {message.quotedMsg.mediaType === "application" && /\.pdf($|\?)/i.test(message.quotedMsg.mediaUrl)
             && (
-              <PdfModal url={message.quotedMsg.mediaUrl} />
+              <div className={classes.fileFrame} onClick={(e) => { e.preventDefault(); setPdfDialog({ open: true, url: message.quotedMsg.mediaUrl }); }} style={{ cursor: 'pointer' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>PDF</div>
+                  <div className={classes.fileName}>{getFileNameFromUrl(message.quotedMsg.mediaUrl) || 'arquivo.pdf'}</div>
+                  <Button
+                    startIcon={<GetApp />}
+                    variant="outlined"
+                    href={message.quotedMsg.mediaUrl}
+                    onClick={(e) => { e.preventDefault(); handleDirectDownload(message.quotedMsg.mediaUrl); }}
+                  >
+                    Baixar
+                  </Button>
+                </div>
+              </div>
             )
           }
           {message.quotedMsg.mediaType === "application" && !/\.pdf($|\?)/i.test(message.quotedMsg.mediaUrl)
@@ -1387,280 +1449,104 @@ const MessagesList = ({
   };
 
   const renderMessages = () => {
-
-    if (messagesList.length > 0) {
-      const viewMessagesList = messagesList.map((message, index) => {
-        if (message.mediaType === "call_log") {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderTicketsSeparator(message, index)}
-              {renderMessageDivider(message, index)}
-              <div className={classes.messageCenter}>
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {isGroup && (
-                  <span className={classes.messageContactName}>
-                    {message.contact?.name}
-                  </span>
-                )}
-
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 17" width="20" height="17">
-                    <path fill="#df3333" d="M18.2 12.1c-1.5-1.8-5-2.7-8.2-2.7s-6.7 1-8.2 2.7c-.7.8-.3 2.3.2 2.8.2.2.3.3.5.3 1.4 0 3.6-.7 3.6-.7.5-.2.8-.5.8-1v-1.3c.7-1.2 5.4-1.2 6.4-.1l.1.1v1.3c0 .2.1.4.2.6.1.2.3.3.5.4 0 0 2.2.7 3.6.7.2 0 1.4-2 .5-3.1zM5.4 3.2l4.7 4.6 5.8-5.7-.9-.8L10.1 6 6.4 2.3h2.5V1H4.1v4.8h1.3V3.2z"></path>
-                  </svg> <span>{i18n.t("ticketsList.missedCall")} {format(parseISO(message.createdAt), "HH:mm")}</span>
-                </div>
-              </div>
-            </React.Fragment>
-          );
-        }
-
-        if (!message.fromMe) {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderTicketsSeparator(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={clsx(classes.messageLeft, { [classes.messageLeftAudio]: message.mediaType === "audio" })}
-                title={message.queueId && message.queue?.name}
-                onDoubleClick={(e) => hanldeReplyMessage(e, message)}
-              >
-                {showSelectMessageCheckbox && (
-                  <SelectMessageCheckbox
-                    message={message}
-                  />
-                )}
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
-                >
-                  <ExpandMore />
-                </IconButton>
-
-                {message.isForwarded && (
-                  <div>
-                    <span className={classes.forwardMessage}
-                    ><Reply style={{ color: "grey", transform: 'scaleX(-1)' }} /> Encaminhada
-                    </span>
-                    <br />
-                  </div>
-                )}
-                {isGroup && (
-                  <span className={classes.messageContactName}>
-                    {message.contact?.name}
-                  </span>
-                )}
-                {isYouTubeLink(message.body) && (
-                  <>
-                    <YouTubePreview videoUrl={message.body} />
-                  </>
-                )}
-                {!isYouTubeLink(message.body) && extractFirstUrl(message.body) && (
-                  <div style={{ margin: "6px 0" }}>
-                    <LinkPreview url={extractFirstUrl(message.body)} />
-                  </div>
-                )}
-
-                {!lgpdDeleteMessage && message.isDeleted && (
-                  <div>
-                    <span className={classes.deletedMessage}
-                    >🚫 Essa mensagem foi apagada pelo contato &nbsp;
-                    </span>
-                  </div>
-                )}
-
-                 {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === "template" || message.mediaType === "adMetaPreview") && checkMessageMedia(message)}
-
-                <div className={clsx(
-                  classes.textContentItem,
-                  {
-                    [classes.textContentItemDeleted]: message.isDeleted,
-                    // Compacta quando for PDF e body == nome do arquivo
-                    [classes.textContentItemCompact]: (
-                      message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl || "") &&
-                      (getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim()
-                    )
-                  }
-                )}>
-                  {message.quotedMsg && renderQuotedMessage(message)}
-                  {message.mediaType !== "adMetaPreview" && (
-                    (
-                      // Para imagens/vídeos, só mostra body se for diferente do nome do arquivo
-                      (message.mediaUrl !== null && (message.mediaType === "image" || message.mediaType === "video") && (getFileNameFromUrl(message.mediaUrl) || "").trim() !== (message.body || "").trim()) ||
-                      // Para outros tipos (exceto os ignorados abaixo), mostra body normalmente,
-                      // porém NÃO mostra se for PDF e o body for exatamente o nome do arquivo
-                      (
-                        message.mediaType !== "audio" &&
-                        message.mediaType !== "image" &&
-                        message.mediaType != "reactionMessage" &&
-                        message.mediaType != "locationMessage" &&
-                        message.mediaType !== "contactMessage" &&
-                        !(message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl || "") && (getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim())
-                      )
-                    ) && (
-                      <>
-                        {xmlRegex.test(message.body) && (
-                          <span>{message.body}</span>
-                        )}
-                        {!xmlRegex.test(message.body) && (
-                          <MarkdownWrapper>{(lgpdDeleteMessage && message.isDeleted) ? "🚫 _Mensagem apagada_ " : message.body}</MarkdownWrapper>
-                        )}
-                      </>
-                    )
-                  )}
-
-
-                  {message.quotedMsg && message.mediaType === "reactionMessage" && (
-                    <>
-                      <span style={{ marginLeft: "0px" }}>
-                        <MarkdownWrapper>
-                          {"" + message?.contact?.name + " reagiu... " + message.body}
-                        </MarkdownWrapper>
-                      </span>
-                    </>
-                  )}
-
-                  {message.mediaType === "audio" && (
-                    <span className={classes.audioDuration}>
-                      <AudioDurationTag src={message.mediaUrl} />
-                    </span>
-                  )}
-
-                  <span className={classes.timestamp}>
-                    {message.isEdited ? "Editada " + format(parseISO(message.createdAt), "HH:mm") : format(parseISO(message.createdAt), "HH:mm")}
-                  </span>
-                </div>
-              </div>
-            </React.Fragment>
-          );
-        } else {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderTicketsSeparator(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={clsx(
-                  message.isPrivate ? classes.messageRightPrivate : classes.messageRight,
-                  { [classes.messageRightAudio]: message.mediaType === "audio" }
-                )}
-                title={message.queueId && message.queue?.name}
-                onDoubleClick={(e) => hanldeReplyMessage(e, message)}
-              >
-                {showSelectMessageCheckbox && (
-                  <SelectMessageCheckbox
-                    message={message}
-                  />
-                )}
-
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {message.isForwarded && (
-                  <div>
-                    <span className={classes.forwardMessage}
-                    ><Reply style={{ color: "grey", transform: 'scaleX(-1)' }} /> Encaminhada
-                    </span>
-                    <br />
-                  </div>
-                )}
-                {isYouTubeLink(message.body) && (
-                  <>
-                    <YouTubePreview videoUrl={message.body} />
-                  </>
-                )}
-                {!lgpdDeleteMessage && message.isDeleted && (
-                  <div>
-                    <span className={classes.deletedMessage}
-                    >🚫 Essa mensagem foi apagada &nbsp;
-                    </span>
-                  </div>
-                )}
-                {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === "template" || message.mediaType === "adMetaPreview") && checkMessageMedia(message)}
-                <div
-                  className={clsx(
-                    classes.textContentItem,
-                    {
-                      [classes.textContentItemDeleted]: message.isDeleted,
-                      [classes.textContentItemCompact]: (
-                        message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl || "") &&
-                        (getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim()
-                      )
-                    }
-                  )}
-                >
-
-                  {message.quotedMsg && renderQuotedMessage(message)}
-
-                  {
-                    ((message.mediaType === "image" || message.mediaType === "video") && getFileNameFromUrl(message.mediaUrl) === message.body) ||
-                    (
-                      message.mediaType !== "audio" &&
-                      message.mediaType != "reactionMessage" &&
-                      message.mediaType != "locationMessage" &&
-                      message.mediaType !== "contactMessage" &&
-                      // Não mostrar o body se for PDF e body == nome do arquivo
-                      !(message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl || "") && (getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim())
-                    ) && (
-                      <>
-                        {xmlRegex.test(message.body) && (
-                          <div>{formatXml(message.body)}</div>
-
-                        )}
-                        {!xmlRegex.test(message.body) && (<MarkdownWrapper>{message.body}</MarkdownWrapper>)}
-
-                      </>
-                    )}
-                  {message.quotedMsg && message.mediaType === "reactionMessage" && (
-                    <>
-                      <span style={{ marginLeft: "0px" }}>
-                        <MarkdownWrapper>
-                          {"Você reagiu... " + message.body}
-                        </MarkdownWrapper>
-                      </span>
-                    </>
-                  )}
-
-                  {message.mediaType === "audio" && (
-                    <span className={classes.audioDuration}>
-                      <AudioDurationTag src={message.mediaUrl} />
-                    </span>
-                  )}
-
-                  <span className={classes.timestamp}>
-                    {message.isEdited ? "Editada " + format(parseISO(message.createdAt), "HH:mm") : format(parseISO(message.createdAt), "HH:mm")}
-                    {renderMessageAck(message)}
-                  </span>
-                </div>
-              </div>
-            </React.Fragment>
-          );
-        }
-      });
-      return viewMessagesList;
-    } else {
+    if (!messagesList || messagesList.length === 0) {
       return <div>Diga olá para seu novo contato!</div>;
     }
+    const view = messagesList.map((message, index) => {
+      if (message.mediaType === "call_log") {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderTicketsSeparator(message, index)}
+            {renderMessageDivider(message, index)}
+            <div className={classes.messageCenter}>
+              {isGroup && (<span className={classes.messageContactName}>{message.contact?.name}</span>)}
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 17" width="20" height="17"><path fill="#df3333" d="M18.2 12.1c-1.5-1.8-5-2.7-8.2-2.7s-6.7 1-8.2 2.7c-.7.8-.3 2.3.2 2.8.2.2.3.3.5.3 1.4 0 3.6-.7 3.6-.7.5-.2.8-.5.8-1v-1.3c.7-1.2 5.4-1.2 6.4-.1l.1.1v1.3c0 .2.1.4.2.6.1.2.3.3.5.4 0 0 2.2.7 3.6.7.2 0 1.4-2 .5-3.1zM5.4 3.2l4.7 4.6 5.8-5.7-.9-.8L10.1 6 6.4 2.3h2.5V1H4.1v4.8h1.3V3.2z"></path></svg>
+                <span>{i18n.t("ticketsList.missedCall")} {format(parseISO(message.createdAt), "HH:mm")}</span>
+              </div>
+            </div>
+          </React.Fragment>
+        );
+      }
+
+      const isLeft = !message.fromMe;
+      const bubbleClass = clsx(
+        isLeft ? classes.messageLeft : (message.isPrivate ? classes.messageRightPrivate : classes.messageRight),
+        { [isLeft ? classes.messageLeftAudio : classes.messageRightAudio]: message.mediaType === "audio" }
+      );
+
+      return (
+        <React.Fragment key={message.id}>
+          {renderDailyTimestamps(message, index)}
+          {renderTicketsSeparator(message, index)}
+          {renderMessageDivider(message, index)}
+          <div
+            className={bubbleClass}
+            title={message.queueId && message.queue?.name}
+            onDoubleClick={(e) => hanldeReplyMessage(e, message)}
+          >
+            {showSelectMessageCheckbox && (<SelectMessageCheckbox message={message} />)}
+            <IconButton
+              variant="contained"
+              size="small"
+              id="messageActionsButton"
+              disabled={message.isDeleted}
+              className={classes.messageActionsButton}
+              onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
+            >
+              <ExpandMore />
+            </IconButton>
+
+            {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === "template" || message.mediaType === "adMetaPreview") && checkMessageMedia(message)}
+
+            <div className={clsx(
+              classes.textContentItem,
+              {
+                [classes.textContentItemDeleted]: message.isDeleted,
+                [classes.textContentItemCompact]: (
+                  // PDFs: compacta quando body == nome do arquivo
+                  (message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl || "") &&
+                   (getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim())
+                  ||
+                  // Imagens/Vídeos: compacta quando não há legenda ou quando body == nome do arquivo
+                  ((message.mediaType === "image" || message.mediaType === "video") && (
+                    ((message.body || "").trim() === "") ||
+                    ((getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim())
+                  ))
+                )
+              }
+            )}>
+              {message.quotedMsg && renderQuotedMessage(message)}
+              {message.mediaType !== "adMetaPreview" && (
+                (
+                  ((message.mediaType === "image" || message.mediaType === "video") && (getFileNameFromUrl(message.mediaUrl) || "").trim() !== (message.body || "").trim()) ||
+                  (
+                    message.mediaType !== "audio" &&
+                    message.mediaType != "reactionMessage" &&
+                    message.mediaType != "locationMessage" &&
+                    message.mediaType !== "contactMessage" &&
+                    !(message.mediaType === "application" && /\.pdf($|\?)/i.test(message.mediaUrl || "") && (getFileNameFromUrl(message.mediaUrl) || "").trim() === (message.body || "").trim())
+                  )
+                ) && (xmlRegex.test(message.body) ? <span>{formatXml(message.body)}</span> : <MarkdownWrapper>{(lgpdDeleteMessage && message.isDeleted) ? "🚫 _Mensagem apagada_ " : message.body}</MarkdownWrapper>)
+              )}
+
+              {message.mediaType === "audio" && (
+                <span className={classes.audioDuration}>
+                  <AudioDurationTag src={message.mediaUrl} />
+                </span>
+              )}
+
+              <span className={classes.timestamp}>
+                {message.isEdited ? "Editada " + format(parseISO(message.createdAt), "HH:mm") : format(parseISO(message.createdAt), "HH:mm")}
+                {!isLeft && renderMessageAck(message)}
+              </span>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    });
+    return view;
   };
 
   return (
@@ -1729,6 +1615,22 @@ const MessagesList = ({
           <CircularProgress className={classes.circleLoading} />
         </div>
       )}
+
+      <Dialog open={videoDialog.open} onClose={() => setVideoDialog({ open: false, url: null })} maxWidth="md">
+        <DialogContent style={{ padding: 0 }}>
+          {videoDialog.url && (
+            <video src={videoDialog.url} controls style={{ maxWidth: '90vw', maxHeight: '85vh', display: 'block' }} />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pdfDialog.open} onClose={() => setPdfDialog({ open: false, url: null })} maxWidth="lg" fullWidth>
+        <DialogContent style={{ padding: 0 }}>
+          {pdfDialog.url && (
+            <iframe title="PDF" src={pdfDialog.url} style={{ width: '100%', height: '85vh', border: 'none' }} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
