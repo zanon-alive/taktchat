@@ -104,7 +104,8 @@ const reducer = (state, action) => {
             state[contactIndex] = contact;
             return [...state];
         } else {
-            return [contact, ...state];
+            // Não insere contatos que não estão na página/lista atual para evitar "subir para o topo"
+            return state;
         }
     }
 
