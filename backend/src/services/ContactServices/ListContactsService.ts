@@ -79,39 +79,25 @@ const ListContactsService = async ({
   let userAllowedContactTags: number[] = [];
   if (userId) {
     const user = await User.findByPk(userId);
-    if (user && user.allowedContactTags && user.allowedContactTags.length > 0) {
+    if (user && Array.isArray(user.allowedContactTags) && user.allowedContactTags.length > 0) {
       userAllowedContactTags = user.allowedContactTags;
     }
   }
 
+  // Regra de acesso para não-admins: somente contatos com pelo menos UMA tag dentro de allowedContactTags.
+  // Se não houver allowedContactTags definidas para o usuário, retorna lista vazia.
   if (profile !== 'admin' && userId) {
-    const userTickets = await Ticket.findAll({
-      where: { userId },
-      attributes: ["contactId"],
-      group: ["contactId"]
-    });
-
-    const contactIdsFromTickets = userTickets.map(t => t.contactId);
-    let combinedContactIds: number[] = [];
-
     if (userAllowedContactTags.length > 0) {
       const contactsWithAllowedTags = await ContactTag.findAll({
         where: { tagId: { [Op.in]: userAllowedContactTags } },
         attributes: ["contactId"],
         group: ["contactId"]
       });
-      const contactIdsFromTags = contactsWithAllowedTags.map(ct => ct.contactId);
-      combinedContactIds = [...new Set([...contactIdsFromTickets, ...contactIdsFromTags])];
-    } else {
-      combinedContactIds = contactIdsFromTickets;
-    }
+      const allowedContactIds = contactsWithAllowedTags.map(ct => ct.contactId);
 
-    if (combinedContactIds.length > 0) {
-      whereCondition.id = {
-        [Op.in]: combinedContactIds
-      };
+      whereCondition.id = allowedContactIds.length > 0 ? { [Op.in]: allowedContactIds } : { [Op.in]: [] };
     } else {
-      // Se não houver tickets ou tags permitidas, o usuário não deve ver nenhum contato
+      // Usuário restrito sem tags liberadas: não vê contatos
       whereCondition.id = { [Op.in]: [] };
     }
   }

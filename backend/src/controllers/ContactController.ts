@@ -182,14 +182,16 @@ export const importXls = async (req: Request, res: Response): Promise<Response> 
   } catch (error) {
     logger.info("Erro ao associar Tags (importXls)", error);
   }
-  await emitToCompanyNamespace(
-    companyId,
-    `company-${companyId}-contact`,
-    {
-      action: "create",
-      contact
-    }
-  );
+  if (!silentMode) {
+    await emitToCompanyNamespace(
+      companyId,
+      `company-${companyId}-contact`,
+      {
+        action: "create",
+        contact
+      }
+    );
+  }
 
   return res.status(200).json(contact);
 };
@@ -483,6 +485,7 @@ export const empresas = async (req: Request, res: Response): Promise<Response> =
 export const store = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const newContact: ContactData = req.body;
+  const silentMode = (req.body as any)?.silentMode === true || String((req.body as any)?.silentMode).toLowerCase() === 'true';
 
   // Tratar foundationDate para null se for string vazia ou inválida
   if (typeof newContact.foundationDate === 'string' && (newContact.foundationDate === '' || newContact.foundationDate === null)) {
