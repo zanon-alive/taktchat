@@ -11,6 +11,7 @@ import {
 } from "sequelize-typescript";
 import Campaign from "./Campaign";
 import ContactListItem from "./ContactListItem";
+import Whatsapp from "./Whatsapp";
 
 @Table({ tableName: "CampaignShipping" })
 class CampaignShipping extends Model<CampaignShipping> {
@@ -41,6 +42,10 @@ class CampaignShipping extends Model<CampaignShipping> {
   @ForeignKey(() => Campaign)
   @Column
   campaignId: number;
+
+  @ForeignKey(() => Whatsapp)
+  @Column
+  whatsappId: number;
 
   @Column
   confirmationRequestedAt: Date;
@@ -79,6 +84,9 @@ class CampaignShipping extends Model<CampaignShipping> {
 
   @BelongsTo(() => Campaign)
   campaign: Campaign;
+
+  @BelongsTo(() => Whatsapp)
+  whatsapp: Whatsapp;
 }
 
 export default CampaignShipping;
