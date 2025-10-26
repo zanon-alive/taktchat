@@ -5,6 +5,7 @@ import CampaignShipping from "../../models/CampaignShipping";
 import ContactListItem from "../../models/ContactListItem";
 import Whatsapp from "../../models/Whatsapp";
 import ContactList from "../../models/ContactList";
+import logger from "../../utils/logger";
 
 interface ReportFilters {
   status?: string; // pending, processing, delivered, failed, suppressed
@@ -24,6 +25,13 @@ interface DetailedReportResponse {
     confirmationRequested: number;
     confirmed: number;
   };
+  whatsappUsage: Array<{
+    whatsappId: number | null;
+    name: string | null;
+    total: number;
+    delivered: number;
+    failed: number;
+  }>;
   records: any[];
   count: number;
   hasMore: boolean;
@@ -126,9 +134,78 @@ const GetDetailedReportService = async (
     summary[statusKey] = parseInt(item.count, 10);
   });
 
+  let whatsappUsage = [] as Array<{
+    whatsappId: number | null;
+    name: string | null;
+    total: number;
+    delivered: number;
+    failed: number;
+  }>;
+
+  try {
+    const whatsappUsageRaw = await CampaignShipping.findAll({
+      where: { campaignId },
+      attributes: [
+        "whatsappId",
+        [Sequelize.fn("COUNT", Sequelize.col("CampaignShipping.id")), "total"],
+        [
+          Sequelize.fn(
+            "SUM",
+            Sequelize.literal("CASE WHEN status = 'delivered' THEN 1 ELSE 0 END")
+          ),
+          "delivered"
+        ],
+        [
+          Sequelize.fn(
+            "SUM",
+            Sequelize.literal("CASE WHEN status = 'failed' THEN 1 ELSE 0 END")
+          ),
+          "failed"
+        ]
+      ],
+      group: [Sequelize.col("CampaignShipping.whatsappId")],
+      raw: true
+    });
+
+    const whatsappIds = whatsappUsageRaw
+      .map((item: any) => item.whatsappId)
+      .filter((id: number | null | undefined) => id !== null && id !== undefined);
+
+    let whatsappNameMap = new Map<number, string>();
+    if (whatsappIds.length > 0) {
+      const whatsapps = await Whatsapp.findAll({
+        where: { id: whatsappIds },
+        attributes: ["id", "name"],
+        raw: true
+      });
+      whatsappNameMap = new Map<number, string>(
+        whatsapps.map((item: any) => [Number(item.id), item.name])
+      );
+    }
+
+    whatsappUsage = whatsappUsageRaw.map((item: any) => {
+      const whatsappId = item.whatsappId !== null ? Number(item.whatsappId) : null;
+      return {
+        whatsappId,
+        name: whatsappId !== null ? whatsappNameMap.get(whatsappId) || null : null,
+        total: Number(item.total) || 0,
+        delivered: Number(item.delivered) || 0,
+        failed: Number(item.failed) || 0,
+      };
+    });
+  } catch (error) {
+    logger.warn("[GetDetailedReportService] whatsappId column not available, skipping usage aggregation", {
+      campaignId,
+      error: error.message
+    });
+    // Se a coluna não existir (versão antiga do banco), retornamos lista vazia
+    whatsappUsage = [];
+  }
+
   return {
     campaign,
     summary,
+    whatsappUsage,
     records,
     count,
     hasMore: count > offset + limit

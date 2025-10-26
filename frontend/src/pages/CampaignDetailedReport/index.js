@@ -140,6 +140,40 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),
   },
+  messageCell: {
+    maxWidth: 220,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    display: "block",
+  },
+  whatsappUsageCard: {
+    padding: theme.spacing(2),
+    marginTop: theme.spacing(2),
+  },
+  whatsappUsageRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: theme.spacing(1.5),
+    borderRadius: theme.spacing(1),
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    marginBottom: theme.spacing(1),
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+  },
+  whatsappUsageInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  },
+  whatsappUsageStats: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+    flexWrap: "wrap",
+  },
 }));
 
 const CampaignDetailedReport = () => {
@@ -242,7 +276,7 @@ const CampaignDetailedReport = () => {
     );
   }
 
-  const { campaign, summary, records, count, hasMore } = report;
+  const { campaign, summary, records, count, hasMore, whatsappUsage = [] } = report;
 
   // Dados para gráficos
   const pieData = [
@@ -346,6 +380,26 @@ const CampaignDetailedReport = () => {
   };
 
   const whatsappNumbers = getWhatsappNumbers();
+
+  const getMessagePreview = (message) => {
+    if (!message) return "";
+    const normalized = message.replace(/\s+/g, " ").trim();
+    return normalized.length > 25 ? `${normalized.slice(0, 25)}...` : normalized;
+  };
+
+  const getWhatsappLabel = (usage) => {
+    if (usage.name) return usage.name;
+    const match = whatsappNumbers.find(item => Number(item.id) === Number(usage.whatsappId));
+    if (match?.name) return match.name;
+    if (usage.whatsappId) return `WhatsApp #${usage.whatsappId}`;
+    return "WhatsApp não identificado";
+  };
+
+  const getWhatsappSuccessRate = (usage) => {
+    if (!usage.total) return "0,0%";
+    const rate = (usage.delivered / usage.total) * 100;
+    return `${rate.toFixed(1)}%`;
+  };
 
   return (
     <MainContainer>
@@ -585,6 +639,49 @@ const CampaignDetailedReport = () => {
 
       {/* Informações da Campanha */}
       <Grid container spacing={2} style={{ marginTop: 8 }}>
+        {whatsappUsage.length > 0 && (
+          <Grid item xs={12}>
+            <Card className={classes.whatsappUsageCard}>
+              <Box display="flex" alignItems="center" mb={2} justifyContent="space-between">
+                <Box display="flex" alignItems="center" gap={1}>
+                  <PhoneAndroidIcon style={{ color: "#25D366" }} />
+                  <Typography variant="h6">Resumo por Número WhatsApp</Typography>
+                </Box>
+                <Typography variant="body2" color="textSecondary">
+                  Total de envios: {summary.total}
+                </Typography>
+              </Box>
+
+              <Grid container spacing={1}>
+                {whatsappUsage.map((usage, index) => (
+                  <Grid item xs={12} md={6} key={index}>
+                    <Box className={classes.whatsappUsageRow}>
+                      <Box className={classes.whatsappUsageInfo}>
+                        <PhoneAndroidIcon color="primary" />
+                        <Box>
+                          <Typography variant="subtitle1" style={{ fontWeight: 600 }}>
+                            {getWhatsappLabel(usage)}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            ID: {usage.whatsappId ?? "N/A"}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box className={classes.whatsappUsageStats}>
+                        <Chip label={`Total: ${usage.total}`} color="primary" variant="outlined" />
+                        <Chip label={`Entregues: ${usage.delivered}`} color="primary" />
+                        <Chip label={`Falharam: ${usage.failed}`} color="secondary" variant="outlined" />
+                        <Chip label={`Sucesso: ${getWhatsappSuccessRate(usage)}`} color="default" />
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Card>
+          </Grid>
+        )}
+
         {/* Números WhatsApp Utilizados */}
         <Grid item xs={12} md={6}>
           <Card className={classes.infoCard}>
@@ -779,6 +876,7 @@ const CampaignDetailedReport = () => {
                 <TableCell>Status</TableCell>
                 <TableCell>Contato</TableCell>
                 <TableCell>Número</TableCell>
+                <TableCell>Mensagem Enviada</TableCell>
                 <TableCell>Tentativas</TableCell>
                 <TableCell>Data de Envio</TableCell>
                 <TableCell>Último Erro</TableCell>
@@ -787,7 +885,7 @@ const CampaignDetailedReport = () => {
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRowSkeleton columns={7} />
+                <TableRowSkeleton columns={8} />
               ) : (
                 records.map((record) => (
                   <TableRow key={record.id}>
@@ -803,6 +901,21 @@ const CampaignDetailedReport = () => {
                     </TableCell>
                     <TableCell>{record.contact?.name || "-"}</TableCell>
                     <TableCell>{record.number}</TableCell>
+                    <TableCell>
+                      {record.message ? (
+                        <Tooltip title={record.message.trim()} placement="top-start">
+                          <span className={classes.messageCell}>{getMessagePreview(record.message)}</span>
+                        </Tooltip>
+                      ) : record.messageIndex ? (
+                        <Chip
+                          size="small"
+                          color="default"
+                          label={`Mensagem ${record.messageIndex}`}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
                     <TableCell>
                       {record.attempts > 0 ? (
                         <Chip
