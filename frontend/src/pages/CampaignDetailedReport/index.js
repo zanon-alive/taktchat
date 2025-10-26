@@ -40,8 +40,14 @@ import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
 import StopIcon from "@material-ui/icons/Stop";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import SpeedIcon from "@material-ui/icons/Speed";
+import MessageIcon from "@material-ui/icons/Message";
+import PhoneAndroidIcon from "@material-ui/icons/PhoneAndroid";
+import InfoIcon from "@material-ui/icons/Info";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { toast } from "react-toastify";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, LineChart, Line } from "recharts";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -116,6 +122,23 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(2),
     fontWeight: 600,
+  },
+  messageBox: {
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(2),
+    borderRadius: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  messageText: {
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
+    fontFamily: "monospace",
+    fontSize: "0.9rem",
+  },
+  infoCard: {
+    padding: theme.spacing(2),
+    marginTop: theme.spacing(2),
   },
 }));
 
@@ -286,13 +309,43 @@ const CampaignDetailedReport = () => {
   const isPaused = campaign.status === "CANCELADA";
   const isFinished = campaign.status === "FINALIZADA";
 
-  const statusData = [
-    { status: "Entregues", quantidade: summary.delivered },
-    { status: "Pendentes", quantidade: summary.pending },
-    { status: "Falharam", quantidade: summary.failed },
-    { status: "Processando", quantidade: summary.processing },
-    { status: "Suprimidos", quantidade: summary.suppressed },
-  ];
+  // Coleta todas as mensagens configuradas
+  const messages = [
+    campaign.message1,
+    campaign.message2,
+    campaign.message3,
+    campaign.message4,
+    campaign.message5,
+  ].filter(msg => msg && msg.trim() !== "");
+
+  const confirmationMessages = campaign.confirmation ? [
+    campaign.confirmationMessage1,
+    campaign.confirmationMessage2,
+    campaign.confirmationMessage3,
+    campaign.confirmationMessage4,
+    campaign.confirmationMessage5,
+  ].filter(msg => msg && msg.trim() !== "") : [];
+
+  // Parse dos números WhatsApp permitidos
+  const getWhatsappNumbers = () => {
+    if (campaign.dispatchStrategy === "single" && campaign.whatsapp) {
+      return [campaign.whatsapp];
+    }
+    
+    if (campaign.dispatchStrategy === "round_robin" && campaign.allowedWhatsappIds) {
+      try {
+        const ids = JSON.parse(campaign.allowedWhatsappIds);
+        // Aqui retornamos apenas os IDs, pois não temos os nomes no momento
+        return ids.map(id => ({ id, name: `WhatsApp #${id}` }));
+      } catch (e) {
+        return [];
+      }
+    }
+    
+    return campaign.whatsapp ? [campaign.whatsapp] : [];
+  };
+
+  const whatsappNumbers = getWhatsappNumbers();
 
   return (
     <MainContainer>
@@ -500,62 +553,161 @@ const CampaignDetailedReport = () => {
         />
       </Paper>
 
-      {/* Gráficos */}
+      {/* Resumo Visual por Status */}
       <Grid container spacing={2} style={{ marginTop: 8 }}>
-        {/* Gráfico de Pizza */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Card className={classes.dashboardCard}>
-            <CardContent className={classes.chartCard}>
+            <CardContent>
               <Typography variant="h6" gutterBottom>
                 Distribuição por Status
               </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Gráfico de Barras */}
-        <Grid item xs={12} md={6}>
-          <Card className={classes.dashboardCard}>
-            <CardContent className={classes.chartCard}>
-              <Typography variant="h6" gutterBottom>
-                Quantidade por Status
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={statusData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="status" />
-                  <YAxis />
-                  <RechartsTooltip />
-                  <Bar dataKey="quantidade" fill="#8884d8">
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={pieData[index]?.color || "#8884d8"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <Grid container spacing={2}>
+                {pieData.map((item, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Paper style={{ padding: 16, backgroundColor: item.color, color: "#fff" }}>
+                      <Typography variant="h4" style={{ fontWeight: "bold" }}>
+                        {item.value}
+                      </Typography>
+                      <Typography variant="body1">
+                        {item.name}
+                      </Typography>
+                      <Typography variant="caption">
+                        {((item.value / summary.total) * 100).toFixed(1)}% do total
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+
+      {/* Informações da Campanha */}
+      <Grid container spacing={2} style={{ marginTop: 8 }}>
+        {/* Números WhatsApp Utilizados */}
+        <Grid item xs={12} md={6}>
+          <Card className={classes.infoCard}>
+            <Box display="flex" alignItems="center" mb={2}>
+              <PhoneAndroidIcon style={{ marginRight: 8, color: "#25D366" }} />
+              <Typography variant="h6">
+                Números WhatsApp Utilizados
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                Estratégia: {campaign.dispatchStrategy === "single" ? "Número Único" : "Rodízio de Números"}
+              </Typography>
+              {whatsappNumbers.length > 0 ? (
+                whatsappNumbers.map((whatsapp, index) => (
+                  <Chip
+                    key={index}
+                    icon={<PhoneAndroidIcon />}
+                    label={whatsapp.name || `WhatsApp #${whatsapp.id}`}
+                    style={{ margin: 4 }}
+                    color="primary"
+                    variant="outlined"
+                  />
+                ))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  Nenhum número configurado
+                </Typography>
+              )}
+            </Box>
+          </Card>
+        </Grid>
+
+        {/* Resumo de Mensagens */}
+        <Grid item xs={12} md={6}>
+          <Card className={classes.infoCard}>
+            <Box display="flex" alignItems="center" mb={2}>
+              <InfoIcon style={{ marginRight: 8, color: "#2196f3" }} />
+              <Typography variant="h6">
+                Resumo da Configuração
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" gutterBottom>
+                <strong>Total de Mensagens:</strong> {messages.length}
+              </Typography>
+              {campaign.confirmation && (
+                <Typography variant="body2" gutterBottom>
+                  <strong>Mensagens de Confirmação:</strong> {confirmationMessages.length}
+                </Typography>
+              )}
+              <Typography variant="body2" gutterBottom>
+                <strong>Lista de Contatos:</strong> {campaign.contactList?.name || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Agendamento:</strong> {datetimeToClient(campaign.scheduledAt)}
+              </Typography>
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Mensagens Configuradas */}
+      <Paper style={{ padding: 16, marginTop: 16 }}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <MessageIcon style={{ marginRight: 8, color: "#9c27b0" }} />
+          <Typography variant="h6">
+            Mensagens Configuradas
+          </Typography>
+        </Box>
+        
+        {messages.length > 0 ? (
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1">
+                Mensagens Principais ({messages.length})
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box width="100%">
+                {messages.map((message, index) => (
+                  <Box key={index} className={classes.messageBox}>
+                    <Typography variant="caption" color="textSecondary" gutterBottom>
+                      Mensagem {index + 1}
+                    </Typography>
+                    <Typography className={classes.messageText}>
+                      {message}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            Nenhuma mensagem configurada
+          </Typography>
+        )}
+
+        {campaign.confirmation && confirmationMessages.length > 0 && (
+          <Accordion style={{ marginTop: 8 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1">
+                Mensagens de Confirmação ({confirmationMessages.length})
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box width="100%">
+                {confirmationMessages.map((message, index) => (
+                  <Box key={index} className={classes.messageBox}>
+                    <Typography variant="caption" color="textSecondary" gutterBottom>
+                      Confirmação {index + 1}
+                    </Typography>
+                    <Typography className={classes.messageText}>
+                      {message}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        )}
+      </Paper>
 
       {/* Chips de Status Adicional */}
       {campaign.confirmation && (
