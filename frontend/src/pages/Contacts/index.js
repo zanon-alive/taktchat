@@ -33,6 +33,7 @@ import {
     Phone,
     CheckCircle,
     Ban,
+    GitMerge,
 } from "lucide-react";
 import { Facebook, Instagram, WhatsApp, ImportExport, Backup, ContactPhone } from "@material-ui/icons";
 import { Tooltip, Menu, MenuItem } from "@material-ui/core";
@@ -64,6 +65,7 @@ import FilterContactModal from "../../components/FilterContactModal"; // NOVO IM
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import BulkEditContactsModal from "../../components/BulkEditContactsModal";
+import DuplicateContactsModal from "../../components/DuplicateContactsModal";
 
 const CustomTooltipProps = {
   arrow: true,
@@ -189,6 +191,7 @@ const Contacts = () => {
     const [confirmDeleteManyOpen, setConfirmDeleteManyOpen] = useState(false); // Estado para o modal de confirmação de deleção em massa
     const [bulkEditOpen, setBulkEditOpen] = useState(false); // Modal de edição em massa
     const [importTagsModalOpen, setImportTagsModalOpen] = useState(false); // Modal de importação com tags
+    const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
 
     const { getAll: getAllSettings } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
@@ -714,6 +717,61 @@ const Contacts = () => {
         setPageNumber((prevState) => prevState + 1);
     };
 
+    const modalElements = (
+        <>
+            <NewTicketModal
+                modalOpen={newTicketModalOpen}
+                initialContact={contactTicket}
+                onClose={(ticket) => {
+                    handleCloseOrOpenTicket(ticket);
+                }}
+            />
+
+            <ContactModal
+                open={contactModalOpen}
+                onClose={handleCloseContactModal}
+                aria-labelledby="form-dialog-title"
+                contactId={selectedContactId}
+            />
+
+            <ContactImportWpModal
+                isOpen={importContactModalOpen}
+                handleClose={() => setImportContactModalOpen(false)}
+                onSave={onSave}
+                onConfirm={handleimportContact}
+            />
+
+            <ContactImportTagsModal
+                isOpen={importTagsModalOpen}
+                handleClose={() => setImportTagsModalOpen(false)}
+                onImport={handleImportWithTags}
+            />
+
+            <FilterContactModal
+                isOpen={filterContactModalOpen}
+                onClose={handleCloseFilterContactModal}
+                onFiltered={handleApplyFiltersFromModal}
+                initialFilter={appliedFilters}
+            />
+
+            <BulkEditContactsModal
+                open={bulkEditOpen}
+                onClose={() => setBulkEditOpen(false)}
+                selectedContactIds={selectedContactIds}
+                onSuccess={() => setRefreshTick(prev => prev + 1)}
+            />
+
+            <DuplicateContactsModal
+                open={duplicateModalOpen}
+                onClose={() => setDuplicateModalOpen(false)}
+                onActionCompleted={() => {
+                    setRefreshTick(prev => prev + 1);
+                    setDuplicateModalOpen(false);
+                }}
+            />
+        </>
+    );
+
     // Removido infinite scroll para manter paginação fixa por página
 
     const formatPhoneNumber = useCallback((number) => {
@@ -759,19 +817,9 @@ const Contacts = () => {
                 <ContactImportWpModal
                     isOpen={importContactModalOpen}
                     handleClose={() => setImportContactModalOpen(false)}
+                    onSave={onSave}
+                    onConfirm={handleimportContact}
                 />
-
-                <BulkEditContactsModal
-                    open={bulkEditOpen}
-                    onClose={() => setBulkEditOpen(false)}
-                    selectedContactIds={selectedContactIds}
-                    onSuccess={() => {
-                        // Apenas limpa a seleção; a lista será atualizada via socket (eventos "update")
-                        setSelectedContactIds([]);
-                        setIsSelectAllChecked(false);
-                    }}
-                />
-
                 <ContactImportTagsModal
                     isOpen={importTagsModalOpen}
                     handleClose={() => setImportTagsModalOpen(false)}
@@ -847,6 +895,22 @@ const Contacts = () => {
                 >
                     {i18n.t("contacts.confirmationModal.wantImport")}
                 </ConfirmationModal>
+
+                <BulkEditContactsModal
+                    open={bulkEditOpen}
+                    onClose={() => setBulkEditOpen(false)}
+                    selectedContactIds={selectedContactIds}
+                    onSuccess={() => setRefreshTick(prev => prev + 1)}
+                />
+
+                <DuplicateContactsModal
+                    open={duplicateModalOpen}
+                    onClose={() => setDuplicateModalOpen(false)}
+                    onActionCompleted={() => {
+                        setRefreshTick(prev => prev + 1);
+                        setDuplicateModalOpen(false);
+                    }}
+                />
 
                 {/* Cabeçalho */}
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -936,14 +1000,30 @@ const Contacts = () => {
                                 )}
                                 no={() => null}
                             />
+                            {String(user?.profile || "").toLowerCase() === "admin" && (
+                                <Tooltip {...CustomTooltipProps} title="Deduplicar contatos">
+                                    <span>
+                                        <button
+                                            onClick={() => setDuplicateModalOpen(true)}
+                                            disabled={loading}
+                                            className="shrink-0 w-10 h-10 flex items-center justify-center text-indigo-600 bg-white dark:bg-gray-800 border border-indigo-500 dark:border-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/40 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            aria-label="Gerenciar duplicados"
+                                        >
+                                            <GitMerge className="w-5 h-5" />
+                                        </button>
+                                    </span>
+                                </Tooltip>
+                            )}
                             <Tooltip {...CustomTooltipProps} title="Novo Contato">
-                                <button
-                                    onClick={handleOpenContactModal}
-                                    className="shrink-0 w-10 h-10 flex items-center justify-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    aria-label="Novo Contato"
-                                >
-                                    <UserPlus className="w-6 h-6" />
-                                </button>
+                                <span>
+                                    <button
+                                        onClick={handleOpenContactModal}
+                                        className="shrink-0 w-10 h-10 flex items-center justify-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        aria-label="Novo Contato"
+                                    >
+                                        <UserPlus className="w-6 h-6" />
+                                    </button>
+                                </span>
                             </Tooltip>
                         </div>
                     </div>
@@ -1090,30 +1170,48 @@ const Contacts = () => {
                             yes={() => (
                                 selectedContactIds.length > 0 ? (
                                     <Tooltip {...CustomTooltipProps} title={`Editar em massa (${selectedContactIds.length})`}>
-                                        <button
-                                            onClick={() => setBulkEditOpen(true)}
-                                            disabled={loading}
-                                            className="shrink-0 w-10 h-10 flex items-center justify-center text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                                            aria-label={`Editar em massa ${selectedContactIds.length} contato(s)`}
-                                        >
-                                            <Edit className="w-4 h-4" />
-                                        </button>
+                                        <span>
+                                            <button
+                                                onClick={() => setBulkEditOpen(true)}
+                                                disabled={loading}
+                                                className="w-10 h-10 flex items-center justify-center text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                                aria-label={`Editar em massa ${selectedContactIds.length} contato(s)`}
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                        </span>
                                     </Tooltip>
                                 ) : null
                             )}
                             no={() => null}
                         />
-            <Tooltip {...CustomTooltipProps} title="Novo Contato">
-                <button
-                    onClick={handleOpenContactModal}
-                    className="shrink-0 w-10 h-10 flex items-center justify-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label="Novo Contato"
-                >
-                    <UserPlus className="w-6 h-6" />
-                </button>
-            </Tooltip>
-        </div>
-    </div>
+                        {String(user?.profile || "").toLowerCase() === "admin" && (
+                            <Tooltip {...CustomTooltipProps} title="Deduplicar contatos">
+                                <span>
+                                    <button
+                                        onClick={() => setDuplicateModalOpen(true)}
+                                        disabled={loading}
+                                        className="shrink-0 w-10 h-10 flex items-center justify-center text-indigo-600 bg-white dark:bg-gray-800 border border-indigo-500 dark:border-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/40 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        aria-label="Gerenciar duplicados"
+                                    >
+                                        <GitMerge className="w-5 h-5" />
+                                    </button>
+                                </span>
+                            </Tooltip>
+                        )}
+                        <Tooltip {...CustomTooltipProps} title="Novo Contato">
+                            <span>
+                                <button
+                                    onClick={handleOpenContactModal}
+                                    className="shrink-0 w-10 h-10 flex items-center justify-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Novo Contato"
+                                >
+                                    <UserPlus className="w-6 h-6" />
+                                </button>
+                            </span>
+                        </Tooltip>
+                    </div>
+                </div>
 
     {/* Tabela de Contatos (Desktop) */}
     <div className="hidden min-[1200px]:block bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">

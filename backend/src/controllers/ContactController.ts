@@ -14,7 +14,7 @@ interface AuthenticatedRequest extends Request {
     companyId: number;
     profile: string;
     username?: string;
-    allowedContactTags?: number[]; // Adicionar a nova propriedade
+    allowedContactTags?: number[];
   };
   files?: any;
 }
@@ -44,6 +44,8 @@ import CreateOrUpdateContactServiceForImport from "../services/ContactServices/C
 import UpdateContactWalletsService from "../services/ContactServices/UpdateContactWalletsService";
 import BulkUpdateContactsService from "../services/ContactServices/BulkUpdateContactsService";
 import NormalizeContactNumbersService from "../services/ContactServices/NormalizeContactNumbersService";
+import ListDuplicateContactsService from "../services/ContactServices/ListDuplicateContactsService";
+import ProcessDuplicateContactsService from "../services/ContactServices/ProcessDuplicateContactsService";
 
 import FindContactTags from "../services/ContactServices/FindContactTags";
 import { log } from "console";
@@ -121,6 +123,60 @@ interface ContactData {
   dtUltCompra?: Date | string | null;
   vlUltCompra?: number | string | null;
 }
+
+export const listDuplicates = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { page = "1", limit = "20", canonicalNumber } = req.query as {
+    page?: string;
+    limit?: string;
+    canonicalNumber?: string;
+  };
+
+  const parsedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+  const parsedPage = Math.max(Number(page) || 1, 1);
+  const offset = (parsedPage - 1) * parsedLimit;
+
+  const data = await ListDuplicateContactsService({
+    companyId,
+    limit: parsedLimit,
+    offset,
+    canonicalNumber: canonicalNumber ? String(canonicalNumber).trim() : undefined
+  });
+
+  return res.json({
+    ...data,
+    page: parsedPage,
+    limit: parsedLimit
+  });
+};
+
+export const processDuplicates = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const {
+    canonicalNumber,
+    masterId,
+    targetIds,
+    mode = "selected",
+    operation = "merge"
+  }: {
+    canonicalNumber: string;
+    masterId: number;
+    targetIds?: number[];
+    mode?: "selected" | "all";
+    operation?: "merge" | "delete";
+  } = req.body;
+
+  const result = await ProcessDuplicateContactsService({
+    companyId,
+    canonicalNumber,
+    masterId,
+    targetIds,
+    mode,
+    operation
+  });
+
+  return res.json(result);
+};
 
 export const importXls = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;

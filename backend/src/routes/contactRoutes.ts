@@ -16,6 +16,7 @@ contactRoutes.post("/contacts/import", isAuth, ImportPhoneContactsController.sto
 contactRoutes.post("/contactsImport", isAuth, ContactController.importXls);
 contactRoutes.get("/contacts/import-progress", isAuth, ContactController.importProgress);
 contactRoutes.get("/contacts", isAuth, ContactController.index);
+contactRoutes.get("/contacts/duplicates", isAuth, ContactController.listDuplicates);
 contactRoutes.get("/contacts/list", isAuth, ContactController.list);
 contactRoutes.get("/contacts/segments", isAuth, ContactController.segments);
 contactRoutes.get("/contacts/empresas", isAuth, ContactController.empresas);
@@ -25,6 +26,7 @@ contactRoutes.post("/contacts", isAuth, ContactController.store);
 // Rota de atualização em massa DEVE vir antes de "/contacts/:contactId"
 contactRoutes.put("/contacts/batch-update", isAuth, ContactController.bulkUpdate);
 contactRoutes.put("/contacts/:contactId(\\d+)", isAuth, ContactController.update);
+contactRoutes.post("/contacts/duplicates/process", isAuth, ContactController.processDuplicates);
 
 // Mova a rota de deleção em massa ANTES da rota de deleção de ID único.
 contactRoutes.delete("/contacts/batch-delete", isAuth, ContactController.bulkRemove); // <-- MOVA ESTA LINHA PARA CIMA
