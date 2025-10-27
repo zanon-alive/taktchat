@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useReducer,
   useContext,
-  useRef,
 } from "react";
 import { toast } from "react-toastify";
 
@@ -34,18 +33,16 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import TagModal from "../../components/TagModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { Chip, Tooltip, Typography, Box, Divider, Accordion, AccordionSummary, AccordionDetails } from "@material-ui/core";
+import { Chip, Tooltip, Typography, Box, Divider } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { MoreHoriz, ExpandMore, Info } from "@material-ui/icons";
+import { MoreHoriz, Info } from "@material-ui/icons";
 import ContactTagListModal from "../../components/ContactTagListModal";
 
 const reducer = (state, action) => {
   switch (action.type) {
     case "LOAD_TAGS":
-      console.log("LOAD_TAGS", action.payload);
-      return [...state, ...action.payload];
+      return action.payload;
     case "UPDATE_TAGS":
-      console.log("UPDATE_TAGS", action.payload);
       const tag = action.payload;
       const tagIndex = state.findIndex((s) => s.id === tag.id);
 
@@ -69,8 +66,6 @@ const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
   },
   categoryHeader: {
     backgroundColor: theme.palette.grey[100],
@@ -100,8 +95,6 @@ const Tags = () => {
   const [selectedTagContacts, setSelectedTagContacts] = useState([]);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
   const [selectedTagName, setSelectedTagName] = useState("");
   const [selectedTag, setSelectedTag] = useState(null);
   const [deletingTag, setDeletingTag] = useState(null);
@@ -109,7 +102,6 @@ const Tags = () => {
   const [searchParam, setSearchParam] = useState("");
   const [tags, dispatch] = useReducer(reducer, []);
   const [tagModalOpen, setTagModalOpen] = useState(false);
-  const pageNumberRef = useRef(0);
 
   // Função para categorizar tags baseado na quantidade de #
   const categorizeTags = (tags) => {
@@ -135,30 +127,22 @@ const Tags = () => {
   };
 
   useEffect(() => {
-    const fetchMoreTags = async () => {
-      if (pageNumberRef.current === pageNumber) {
-        return;
-      }
-      pageNumberRef.current = pageNumber;
+    dispatch({ type: "RESET" });
+    setLoading(true);
+    const fetchTags = async () => {
       try {
         const { data } = await api.get("/tags/", {
-          params: { searchParam, pageNumber, kanban: 0 },
+          params: { searchParam, kanban: 0 },
         });
-        console.log("fetchMoreTags", data.tags);
         dispatch({ type: "LOAD_TAGS", payload: data.tags });
-        setHasMore(data.hasMore);
       } catch (err) {
         toastError(err);
       } finally {
         setLoading(false);
       }
     };
-
-    if (pageNumber > 0) {
-      setLoading(true);
-      fetchMoreTags();
-    }
-  }, [searchParam, pageNumber]);
+    fetchTags();
+  }, [searchParam]);
 
   useEffect(() => {
     const onCompanyTags = (data) => {
@@ -190,8 +174,6 @@ const Tags = () => {
   const handleSearch = (event) => {
     const newSearchParam = event.target.value.toLowerCase();
     setSearchParam(newSearchParam);
-    setPageNumber(1);
-    dispatch({ type: "RESET" });
   };
 
   const handleEditTag = (tag) => {
@@ -219,24 +201,10 @@ const Tags = () => {
       toastError(err);
     }
     setDeletingTag(null);
-    setSearchParam("");
-    setPageNumber(1);
-  };
-
-  const loadMore = () => {
-    setPageNumber((prevPageNumber) => prevPageNumber + 1);
-  };
-
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
-    }
   };
 
   return (
-    <MainContainer className={classes.mainContainer}>
+    <MainContainer className={classes.mainContainer} useWindowScroll>
       {contactModalOpen && (
         <ContactTagListModal
           open={contactModalOpen}
@@ -287,7 +255,6 @@ const Tags = () => {
       <Paper
         className={classes.mainPaper}
         variant="outlined"
-        onScroll={handleScroll}
       >
         {/* Caixa de Ajuda */}
         <Box className={classes.helpBox}>
@@ -312,7 +279,6 @@ const Tags = () => {
           const categorized = categorizeTags(tags);
           
           const renderTagTable = (categoryTags, title) => {
-            console.log("renderTagTable", categoryTags, title);
             if (categoryTags.length === 0) return null;
             
             return (

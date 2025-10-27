@@ -46,6 +46,8 @@ import BulkUpdateContactsService from "../services/ContactServices/BulkUpdateCon
 import NormalizeContactNumbersService from "../services/ContactServices/NormalizeContactNumbersService";
 import ListDuplicateContactsService from "../services/ContactServices/ListDuplicateContactsService";
 import ProcessDuplicateContactsService from "../services/ContactServices/ProcessDuplicateContactsService";
+import ListContactsPendingNormalizationService from "../services/ContactServices/ListContactsPendingNormalizationService";
+import ProcessContactsNormalizationService from "../services/ContactServices/ProcessContactsNormalizationService";
 
 import FindContactTags from "../services/ContactServices/FindContactTags";
 import { log } from "console";
@@ -173,6 +175,67 @@ export const processDuplicates = async (req: AuthenticatedRequest, res: Response
     targetIds,
     mode,
     operation
+  });
+
+  return res.json(result);
+};
+
+export const listPendingNormalization = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { page = "1", limit = "20" } = req.query as { page?: string; limit?: string };
+
+  const parsedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+  const parsedPage = Math.max(Number(page) || 1, 1);
+  const offset = (parsedPage - 1) * parsedLimit;
+
+  const data = await ListContactsPendingNormalizationService({
+    companyId,
+    limit: parsedLimit,
+    offset
+  });
+
+  return res.json({
+    ...data,
+    page: parsedPage,
+    limit: parsedLimit
+  });
+};
+
+export const processNormalization = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const {
+    contactIds,
+    action,
+    canonicalNumber,
+    tagId,
+    tagName,
+    tagColor
+  }: {
+    contactIds: Array<number | string>;
+    action: "normalize" | "tag" | "normalize_and_tag";
+    canonicalNumber?: string;
+    tagId?: number;
+    tagName?: string;
+    tagColor?: string;
+  } = req.body;
+
+  const normalizedIds = Array.isArray(contactIds)
+    ? contactIds
+        .map(id => Number(id))
+        .filter(id => Number.isInteger(id))
+    : [];
+
+  const trimmedCanonical = typeof canonicalNumber === "string" ? canonicalNumber.trim() : undefined;
+  const trimmedTagName = typeof tagName === "string" ? tagName.trim() : undefined;
+
+  const result = await ProcessContactsNormalizationService({
+    companyId,
+    contactIds: normalizedIds,
+    action,
+    canonicalNumber: trimmedCanonical,
+    tagId,
+    tagName: trimmedTagName,
+    tagColor
   });
 
   return res.json(result);

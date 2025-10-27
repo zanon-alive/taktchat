@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import logger from "../../utils/logger";
+import { safeNormalizePhoneNumber } from "../../utils/phone";
 
 interface Request {
   companyId: number;
@@ -19,31 +20,6 @@ interface Response {
     action: 'normalized' | 'kept' | 'error';
   }>;
 }
-
-const normalizePhoneNumber = (value: string | null | undefined): { normalized: string | null; shouldUpdate: boolean } => {
-  if (!value) return { normalized: null, shouldUpdate: false };
-  
-  const original = String(value).trim();
-  if (!original) return { normalized: null, shouldUpdate: false };
-  
-  // Remove todos os caracteres não numéricos
-  const digitsOnly = original.replace(/\D/g, "");
-  if (!digitsOnly) return { normalized: null, shouldUpdate: false };
-  
-  // Remove zeros à esquerda
-  let normalized = digitsOnly.replace(/^0+/, "");
-  if (!normalized) return { normalized: null, shouldUpdate: false };
-  
-  // Se tem 10 ou 11 dígitos e não começa com 55, adiciona DDI brasileiro
-  if (!normalized.startsWith("55") && normalized.length >= 10 && normalized.length <= 11) {
-    normalized = `55${normalized}`;
-  }
-  
-  // Só atualiza se realmente mudou
-  const shouldUpdate = normalized !== original;
-  
-  return { normalized, shouldUpdate };
-};
 
 const NormalizeContactNumbersService = async ({
   companyId,
@@ -73,7 +49,9 @@ const NormalizeContactNumbersService = async ({
       try {
         processed++;
         
-        const { normalized: newNumber, shouldUpdate } = normalizePhoneNumber(contact.number);
+        const { canonical: canonicalNumber } = safeNormalizePhoneNumber(contact.number);
+        const newNumber = canonicalNumber;
+        const shouldUpdate = Boolean(newNumber && newNumber !== contact.number);
         
         if (shouldUpdate && newNumber) {
           if (!dryRun) {

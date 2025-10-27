@@ -173,15 +173,18 @@ const UpdateContactService = async ({
   }
 
   const isGroupContact = contact.isGroup;
+  const fallbackOriginalNumber = (contact as any).originalNumber || contact.number;
   let targetNumber = contact.number;
-  let canonicalNumberValue = isGroupContact ? null : (contact.canonicalNumber ?? contact.number);
+  let canonicalNumberValue = isGroupContact ? null : (contact.canonicalNumber ?? fallbackOriginalNumber);
 
   if (number !== undefined) {
     if (isGroupContact) {
       targetNumber = typeof number === "string" ? number.trim() : String(number);
       canonicalNumberValue = null;
     } else {
-      const { canonical } = safeNormalizePhoneNumber(String(number));
+      // Remove formatação antes de normalizar
+      const cleanNumber = String(number).replace(/\D/g, "");
+      const { canonical } = safeNormalizePhoneNumber(cleanNumber);
 
       if (!canonical) {
         throw new AppError("ERR_INVALID_PHONE_NUMBER");
@@ -256,7 +259,7 @@ const UpdateContactService = async ({
   const currentIsNumber = currentName.replace(/\D/g, "") === String(contact.number);
   const hasValidExistingName = currentName !== "" && !currentIsNumber;
 
-  const fallbackNumber = targetNumber ?? contact.number;
+  const fallbackNumber = targetNumber ?? fallbackOriginalNumber;
   let resolvedName = contact.name;
   if (name === undefined) {
     resolvedName = contact.name; // sem alteração do campo name
@@ -306,6 +309,7 @@ const UpdateContactService = async ({
     dtUltCompra: dtUltCompra !== undefined ? lastPurchaseValue : (contact as any).dtUltCompra,
     florder: florder !== undefined ? !!florder : (contact as any).florder,
     bzEmpresa: bzEmpresa !== undefined ? emptyToNull(bzEmpresa) : (contact as any).bzEmpresa,
+    originalNumber: targetNumber || contact.number
   };
 
   // Apenas atualiza o userId se ele for fornecido
