@@ -97,6 +97,66 @@ const updateReferences = async (
   transaction: Transaction
 ): Promise<void> => {
   for (const ref of referencingTables) {
+    if (ref.table === "ContactTags") {
+      await sequelize.query(
+        `
+          DELETE FROM "ContactTags"
+          WHERE "contactId" = :duplicateId
+            AND EXISTS (
+              SELECT 1
+              FROM "ContactTags" ct
+              WHERE ct."contactId" = :masterId
+                AND ct."tagId" = "ContactTags"."tagId"
+            );
+        `,
+        {
+          replacements: { masterId, duplicateId },
+          transaction,
+          type: QueryTypes.DELETE
+        }
+      );
+    }
+
+    if (ref.table === "ContactWallets") {
+      await sequelize.query(
+        `
+          DELETE FROM "ContactWallets"
+          WHERE "contactId" = :duplicateId
+            AND EXISTS (
+              SELECT 1
+              FROM "ContactWallets" cw
+              WHERE cw."contactId" = :masterId
+                AND cw."walletId" = "ContactWallets"."walletId"
+            );
+        `,
+        {
+          replacements: { masterId, duplicateId },
+          transaction,
+          type: QueryTypes.DELETE
+        }
+      );
+    }
+
+    if (ref.table === "ContactWhatsappLabels") {
+      await sequelize.query(
+        `
+          DELETE FROM "ContactWhatsappLabels"
+          WHERE "contactId" = :duplicateId
+            AND EXISTS (
+              SELECT 1
+              FROM "ContactWhatsappLabels" cwl
+              WHERE cwl."contactId" = :masterId
+                AND cwl."labelId" = "ContactWhatsappLabels"."labelId"
+            );
+        `,
+        {
+          replacements: { masterId, duplicateId },
+          transaction,
+          type: QueryTypes.DELETE
+        }
+      );
+    }
+
     await sequelize.query(
       `UPDATE "${ref.table}" SET "${ref.column}" = :masterId WHERE "${ref.column}" = :duplicateId`,
       {

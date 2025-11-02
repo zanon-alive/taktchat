@@ -531,11 +531,14 @@ const CampaignModal = ({
         setWhatsapps(mappedWhatsapps);
 
         const formattedTagLists = (tagsRes.data || [])
-          .filter(tag => tag.contacts && tag.contacts.length > 0)
-          .map((tag) => ({
-            id: tag.id,
-            name: `${tag.name} (${tag.contacts.length})`,
-          }));
+          .map((tag) => {
+            const count = Array.isArray(tag.contacts) ? tag.contacts.length : 0;
+            const countLabel = ` (${count})`;
+            return {
+              id: tag.id,
+              name: `${tag.name}${countLabel}`,
+            };
+          });
         setTagLists(formattedTagLists);
 
         // Se tem campaignId, carregar dados da campanha
