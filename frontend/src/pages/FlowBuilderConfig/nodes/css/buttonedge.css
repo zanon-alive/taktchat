@@ -36,7 +36,7 @@
 
 
   .react-flow__edge.selected .react-flow__edge-path{
-    stroke: #0000FF
+    stroke: #2563EB
   }
 
   @keyframes dash {

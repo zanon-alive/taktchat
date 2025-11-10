@@ -31,7 +31,7 @@ export default memo(({ data, isConnectable, id }) => {
         type="target"
         position="left"
         style={{
-          background: "#0000FF",
+          background: "#2563EB",
           width: "18px",
           height: "18px",
           top: "20px",
@@ -80,7 +80,7 @@ export default memo(({ data, isConnectable, id }) => {
       </div>
       <div
         style={{
-          color: "#ededed",
+          color: "#F8FAFC",
           fontSize: "16px",
           flexDirection: "row",
           display: "flex"
@@ -255,7 +255,7 @@ export default memo(({ data, isConnectable, id }) => {
         position="right"
         id="a"
         style={{
-          background: "#0000FF",
+          background: "#2563EB",
           width: "18px",
           height: "18px",
           top: "90%",

@@ -44,6 +44,6 @@ jobs:
           build-args: |
             REACT_APP_FRONTEND_VERSION=${{ steps.vcalc.outputs.version_label }}
           tags: |
-            felipergrosa/whaticket-frontend:latest
-            felipergrosa/whaticket-frontend:${{ github.sha }}
-            felipergrosa/whaticket-frontend:v${{ steps.vcalc.outputs.version_label }}
+            felipergrosa/taktchat-frontend:latest
+            felipergrosa/taktchat-frontend:${{ github.sha }}
+            felipergrosa/taktchat-frontend:v${{ steps.vcalc.outputs.version_label }}

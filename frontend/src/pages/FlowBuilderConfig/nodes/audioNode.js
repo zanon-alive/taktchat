@@ -18,7 +18,7 @@ export default memo(({ data, isConnectable, id }) => {
       <Handle
         type="target"
         position="left"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         onConnect={params => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
@@ -50,7 +50,7 @@ export default memo(({ data, isConnectable, id }) => {
       </div>
       <div
         style={{
-          color: "#ededed",
+          color: "#F8FAFC",
           fontSize: "16px",
           flexDirection: "row",
           display: "flex"
@@ -64,9 +64,9 @@ export default memo(({ data, isConnectable, id }) => {
             marginTop: "4px"
           }}
         />
-        <div style={{ color: "#ededed", fontSize: "16px" }}>Audio</div>
+        <div style={{ color: "#F8FAFC", fontSize: "16px" }}>Audio</div>
       </div>
-      <div style={{ color: "#ededed", fontSize: "12px" }}>
+      <div style={{ color: "#F8FAFC", fontSize: "12px" }}>
         <div style={{ position: "absolute", right: "50px", top: "12px" }}>
           {data.record && data.record ? (
             <div>Gravado na hora</div>
@@ -83,7 +83,7 @@ export default memo(({ data, isConnectable, id }) => {
         type="source"
         position="right"
         id="a"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         isConnectable={isConnectable}
       />
     </div>

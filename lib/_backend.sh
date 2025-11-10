@@ -83,9 +83,9 @@ USER_LIMIT=${max_user}
 CONNECTIONS_LIMIT=${max_whats}
 CLOSED_SEND_BY_ME=true
 
-VERIFY_TOKEN=whaticket
+VERIFY_TOKEN=taktchat
 
-COMPANY_TOKEN=whaticket
+COMPANY_TOKEN=taktchat
 PERFEX_URL=
 PERFEX_MODULE=
 

@@ -267,7 +267,7 @@ export default function ChatPopover() {
                 <ListItem
                   key={key}
                   style={{
-                    background: key % 2 === 0 ? "#ededed" : "white",
+                    background: key % 2 === 0 ? "#F8FAFC" : "white",
                     border: "1px solid #eee",
                     cursor: "pointer",
                   }}

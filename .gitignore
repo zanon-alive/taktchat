@@ -110,7 +110,7 @@ public
 # Windows
 Thumbs.db
 
-# Custom: Whaticket logs, status, backups, stash, restore
+# Custom: Taktchat logs, status, backups, stash, restore
 # Evita commitar arquivos de status/logs/merge temporários
 # (ajuste conforme padrão dos seus scripts)
 # Ignora arquivos de status/logs do git wrapper
@@ -161,5 +161,8 @@ restore-list-vs-origin.txt
 !*.conf
 !*.env
 !*.md
+
+# Documentação local por branch (não versionar)
+.docs/branchs/
 
 backend/private/sessions/

@@ -301,7 +301,7 @@ const AITutorial = () => {
             Visão Geral e Arquitetura de IA
           </Typography>
           <Typography variant="body1" paragraph>
-            O Whaticket oferece uma camada unificada para usar IA em múltiplos pontos do sistema (Assistente no Ticket, WhatsApp, FlowBuilder e outros canais),
+            O Taktchat oferece uma camada unificada para usar IA em múltiplos pontos do sistema (Assistente no Ticket, WhatsApp, FlowBuilder e outros canais),
             resolvendo automaticamente qual <strong>projeto</strong> (OpenAI/Gemini) usar com base na <strong>Fila</strong>, na <strong>Conexão</strong> ou nas <strong>Configurações da Empresa</strong>.
           </Typography>
           <List dense>
@@ -703,7 +703,7 @@ Responda apenas:
           Outros Canais (Messenger, Instagram, Telegram, E-mail, Webchat)
         </Typography>
         <Typography variant="body1" paragraph>
-          Nos demais canais, a IA funciona da mesma forma: o Whaticket escolhe o projeto pelo contexto do atendimento. Se o canal cria <strong>Ticket</strong> com <strong>Fila</strong>, nada muda – a seleção acontece por Fila.
+          Nos demais canais, a IA funciona da mesma forma: o Taktchat escolhe o projeto pelo contexto do atendimento. Se o canal cria <strong>Ticket</strong> com <strong>Fila</strong>, nada muda – a seleção acontece por Fila.
         </Typography>
         <List dense>
           <ListItem><ListItemIcon><CheckIcon /></ListItemIcon><ListItemText primary="Messenger/Instagram/Telegram/Webchat" secondary="Se o ticket vier com queueId, a IA resolve por Fila. Caso contrário, configure a integração na Conexão do canal."/></ListItem>

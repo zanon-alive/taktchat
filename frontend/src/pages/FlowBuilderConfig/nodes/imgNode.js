@@ -15,7 +15,7 @@ export default memo(({ data, isConnectable, id }) => {
       <Handle
         type="target"
         position="left"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         onConnect={(params) => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
@@ -48,20 +48,20 @@ export default memo(({ data, isConnectable, id }) => {
       {/* <div style={{position: 'absolute', right: 5, top: 5, cursor: 'pointer'}}>
         <Delete sx={{width: '12px', height: '12px', color: '#ffff'}}/>
       </div> */}
-      <div style={{color: '#ededed', fontSize: '16px', flexDirection: 'row', display: 'flex'}}>
+      <div style={{color: '#F8FAFC', fontSize: '16px', flexDirection: 'row', display: 'flex'}}>
         <Image sx={{width: '16px', height: '16px', marginRight: '4px', marginTop: '4px'}}/>
-        <div style={{color: '#ededed', fontSize: '16px'}}>
+        <div style={{color: '#F8FAFC', fontSize: '16px'}}>
         Imagem
         </div>
       </div>
-      <div style={{color: '#ededed', fontSize: '12px', width: 180}}>
+      <div style={{color: '#F8FAFC', fontSize: '12px', width: 180}}>
         <img src={`${link}/public/${data.url}`} style={{width: '180px'}} />
       </div>
       <Handle
         type="source"
         position="right"
         id="a"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         isConnectable={isConnectable}
       />
     </div>

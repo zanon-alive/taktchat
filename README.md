@@ -1,49 +1,62 @@
 Copyright
 
-## Guia de Produção (Realtime e Integrações)
+## Taktchat
 
-Esta seção documenta os pontos críticos para o funcionamento do realtime (Socket.IO) e de mídias (ffmpeg) em produção.
+Plataforma de mensageria omnichannel voltada para operações de atendimento e campanhas no WhatsApp. Este repositório reúne backend (Node.js/TypeScript), frontend (React/CRACO) e automações de infraestrutura.
 
-### Realtime com Socket.IO
+### Stack principal
 
-- __Namespaces__: o backend expõe namespaces no formato `/workspace-<companyId>`.
-- __Salas__: cada ticket utiliza seu `ticket.uuid` como sala para eventos como `company-<companyId>-appMessage`.
-- __Adapter Redis__: habilitado via `REDIS_URI_ACK` (ou `SOCKET_REDIS_URL`). Ex.: `redis://redis:6379/0`.
-- __Fallback de broadcast__: em produção habilite `SOCKET_FALLBACK_NS_BROADCAST="true"` para mitigar race conditions entre `joinChatBox` e o primeiro `emit`.
-- __Debug opcional__: `SOCKET_DEBUG="true"` adiciona logs detalhados de emissão e salas.
+- **Backend**: Node.js 22, Express, Sequelize, Bull/Redis, Socket.IO.
+- **Frontend**: React 17, Material UI, CRACO.
+- **Infraestrutura**: PostgreSQL 15, Redis 6.2, Docker Compose.
 
-### Variáveis de ambiente essenciais
+### Início rápido
 
-- Backend:
-  - `FRONTEND_URL=https://chats.seu-dominio.com`
-  - `BACKEND_URL=https://api.seu-dominio.com`
-  - `REDIS_URI=redis://redis:6379/0`
-  - `REDIS_URI_ACK=redis://redis:6379/0`
-  - `SOCKET_FALLBACK_NS_BROADCAST=true`
-  - `SOCKET_DEBUG=false` (em produção, geralmente false)
+```bash
+git clone <repo>
+cd taktchat
 
-- Frontend:
-  - `REACT_APP_BACKEND_URL=https://api.seu-dominio.com`
+# Subir banco e cache (caso já exista Postgres local, use POSTGRES_HOST_PORT=5433)
+docker compose up -d postgres redis
 
-### ffmpeg (áudio/mídia)
+# Ajuste DB_PORT no backend/.env se usar porta alternativa
 
-Para processamento de áudios/imagens/vídeos, o binário `ffmpeg` deve estar instalado na imagem do backend.
+# Backend
+cd backend
+npm install
+npm run dev
 
-Exemplo (Debian/Ubuntu base):
-```
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# Frontend (outro terminal)
+cd frontend
+npm install
+npm start
 ```
 
-Exemplo (Alpine base):
-```
-RUN apk add --no-cache ffmpeg
-```
+Consulte `.docs/instalacao/` para requisitos e variações (Docker completo, produção, etc.).
 
-### Diagnóstico rápido
+### Documentação
 
-- __Socket conectado no front__: verificar no console do navegador o log `Socket conectado` e namespace `/workspace-<companyId>`.
-- __Recebimento de eventos__: `window.__SOCKET_IO__?.onAny((e,...a)=>console.log('[SOCKET EVENT]',e,a))`.
-- __Servidor emitindo__: no backend, com `SOCKET_DEBUG=true`, verificar `[SOCKET EMIT]` e `count` da sala.
+Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada:
 
----
-Última atualização: produção estabilizada com fallback de broadcast ativado.
+- Visão geral do produto: `.docs/visao-geral/produto.md`
+- Arquitetura e fluxos críticos: `.docs/visao-geral/arquitetura.md` e `.docs/visao-geral/fluxos-criticos.md`
+- Instalação e ambientes: `.docs/instalacao/`
+- Variáveis de ambiente e segurança: `.docs/configuracao/`
+- Operação, monitoramento e suporte: `.docs/operacao/`
+- Funcionalidades por módulo: `.docs/funcionalidades/`
+- Procedimentos de diagnóstico: `.docs/diagnosticos/`
+- Checklists e histórico: `.docs/anexos/`
+- Scripts SQL organizados: `.docs/sql/`
+
+Documentos anteriores permanecem disponíveis como referência em `.docs/legacy/`.
+
+### Contribuição
+
+- Utilize arquivos de análise em `.docs/branchs/<nome-da-branch>/` para descrever escopo antes de desenvolver.
+- Siga convenções de código (ESLint/Prettier) e mantenha testes atualizados.
+- Atualize a documentação ao entregar novas funcionalidades ou processos.
+
+### Contato e suporte
+
+- Em caso de incidentes, registre em `.docs/anexos/incidentes.md` e comunique os responsáveis pela operação.
+- Para dúvidas sobre arquitetura ou integrações externas, consulte `.docs/infraestrutura/`.

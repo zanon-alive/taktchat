@@ -25,7 +25,7 @@ export default memo(({ data, isConnectable, id }) => {
       <Handle
         type="target"
         position="left"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         onConnect={params => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
@@ -60,7 +60,7 @@ export default memo(({ data, isConnectable, id }) => {
       </div> */}
       <div
         style={{
-          color: "#ededed",
+          color: "#F8FAFC",
           fontSize: "16px",
           flexDirection: "row",
           display: "flex"
@@ -74,9 +74,9 @@ export default memo(({ data, isConnectable, id }) => {
             marginTop: "4px"
           }}
         />
-        <div style={{ color: "#ededed", fontSize: "16px" }}>Video</div>
+        <div style={{ color: "#F8FAFC", fontSize: "16px" }}>Video</div>
       </div>
-      <div style={{ color: "#ededed", fontSize: "12px", width: 180 }}>
+      <div style={{ color: "#F8FAFC", fontSize: "12px", width: 180 }}>
         <video controls="controls" width="180px">
           <source src={`${link}/public/${data.url}`} type="video/mp4" />
           seu navegador não suporta HTML5
@@ -86,7 +86,7 @@ export default memo(({ data, isConnectable, id }) => {
         type="source"
         position="right"
         id="a"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         isConnectable={isConnectable}
       />
     </div>

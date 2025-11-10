@@ -21,11 +21,11 @@ psql -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS vector;" || {
     exit 1
 }
 
-# Se existir um banco específico (whaticket), criar a extensão lá também
-if psql -U postgres -lqt | cut -d \| -f 1 | grep -qw whaticket; then
-    echo "📦 Criando extensão pgvector no banco whaticket..."
-    psql -U postgres -d whaticket -c "CREATE EXTENSION IF NOT EXISTS vector;" || {
-        echo "⚠️  Aviso: Não foi possível criar extensão no banco whaticket (pode não existir ainda)"
+# Se existir um banco específico (taktchat), criar a extensão lá também
+if psql -U postgres -lqt | cut -d \| -f 1 | grep -qw taktchat; then
+    echo "📦 Criando extensão pgvector no banco taktchat..."
+    psql -U postgres -d taktchat -c "CREATE EXTENSION IF NOT EXISTS vector;" || {
+        echo "⚠️  Aviso: Não foi possível criar extensão no banco taktchat (pode não existir ainda)"
     }
 fi
 

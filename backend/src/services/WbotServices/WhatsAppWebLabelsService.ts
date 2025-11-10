@@ -94,7 +94,7 @@ class WhatsAppWebLabelsService {
 
       const client = new Client({
         authStrategy: new LocalAuth({
-          clientId: `whaticket-labels-${whatsappId}`
+          clientId: `taktchat-labels-${whatsappId}`
         }),
         puppeteer: {
           headless: true,

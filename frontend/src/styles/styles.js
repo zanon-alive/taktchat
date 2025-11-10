@@ -1,46 +1,46 @@
 export const colorBack = () => {
 
-  return "#0000FF";
+  return "#2563EB";
 };
 
 export const colorPrimary = () => {
 
-  return "#0000FF";
+  return "#2563EB";
 };
 
 export const colorIconesMenu = () => {
 
-  return "#07074a";
+  return "#1E3A8A";
 };
 
 export const colorTitleTable = () => {
 
-  return "#e5e5e5";
+  return "#F1F5F9";
 };
 
 export const colorTopTable = () => {
 
-  return "#ededed";
+  return "#F8FAFC";
 };
 
 export const colorBackgroundTable = () => {
 
-  return "#2a273b";
+  return "#1E293B";
 };
 
 export const colorLineTable = () => {
 
-  return "#0000FF";
+  return "#2563EB";
 };
 
 export const colorLineTableHover = () => {
 
-  return '#07074a';
+  return '#1E3A8A';
 };
 
 export const colorTopbar = () => {
 
-  return "#141414";
+  return "#0B1120";
 };
 
 

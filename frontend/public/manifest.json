@@ -1,6 +1,6 @@
 {
-	"short_name": "Whaticket_Flow",
-	"name": "Whaticket_Flow",
+	"short_name": "Taktchat_Flow",
+	"name": "Taktchat_Flow",
 	"icons": [
 		{
 			"src": "favicon.ico",
@@ -21,8 +21,8 @@
 	],
 	"start_url": ".",
 	"display": "standalone",
-	"theme_color": "#000000",
-	"background_color": "#ffffff",
+	"theme_color": "#2563EB",
+	"background_color": "#FFFFFF",
 	"prefer_related_applications": false,
 	"categories": ["business", "productivity"],
 	"description": "Sistema de Multi-Atendimento para WhatsApp",

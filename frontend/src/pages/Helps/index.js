@@ -325,7 +325,7 @@ const Helps = () => {
           </Paper>
           <Paper className={classes.helpPaper}>
             <Typography variant="h6">API</Typography>
-            <Typography variant="body2">Integre o Whaticket com outros sistemas via API.</Typography>
+            <Typography variant="body2">Integre o Taktchat com outros sistemas via API.</Typography>
           </Paper>
           <Paper className={classes.helpPaper}>
             <Typography variant="h6">Arquivos & Chatbot</Typography>

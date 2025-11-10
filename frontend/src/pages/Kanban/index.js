@@ -420,7 +420,7 @@ const Kanban = () => {
               <div key={i} style={{ width: 320, borderRadius: 16, padding: 8, background: '#f5f5f5' }}>
                 <div style={{ height: 28, background: '#e9e9e9', borderRadius: 8, marginBottom: 8 }} />
                 {[1,2,3].map(j=> (
-                  <div key={j} style={{ height: 80, background: '#ededed', borderRadius: 12, margin: '8px 0' }} />
+                  <div key={j} style={{ height: 80, background: '#F8FAFC', borderRadius: 12, margin: '8px 0' }} />
                 ))}
               </div>
             ))}

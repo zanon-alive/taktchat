@@ -587,7 +587,7 @@ export const FlowBuilderConfig = () => {
         if (item.id === node.id) {
           return {
             ...item,
-            style: { backgroundColor: "#0000FF", padding: 1, borderRadius: 8 },
+            style: { backgroundColor: "#2563EB", padding: 1, borderRadius: 8 },
           };
         }
         return {

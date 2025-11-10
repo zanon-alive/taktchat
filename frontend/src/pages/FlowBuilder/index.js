@@ -382,7 +382,7 @@ const FlowBuilder = () => {
                   <Stack
                     justifyContent={"center"}
                     height={"100%"}
-                    style={{ color: "#ededed" }}
+                    style={{ color: "#F8FAFC" }}
                   >
                     <Stack direction={"row"}>
                       <DevicesFold />
@@ -392,7 +392,7 @@ const FlowBuilder = () => {
                     </Stack>
                   </Stack>
                 </Grid>
-                <Grid item xs={4} align="center" style={{ color: "#ededed" }}  onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
+                <Grid item xs={4} align="center" style={{ color: "#F8FAFC" }}  onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
                   <Stack justifyContent={"center"} height={"100%"}>
                     {contact.active ? "Ativo" : "Desativado"}
                   </Stack>
@@ -410,14 +410,14 @@ const FlowBuilder = () => {
                     sx={{ borderRadius: "36px", minWidth: "24px" }}
                   >
                     <MoreVert
-                      sx={{ color: "#ededed", width: "21px", height: "21px" }}
+                      sx={{ color: "#F8FAFC", width: "21px", height: "21px" }}
                     />
                   </Button>
                   {/* <IconButton
                     size="small"
                     onClick={() => hadleEditContact(contact.id, contact.name)}
                   >
-                    <EditIcon style={{ color: "#ededed" }} />
+                    <EditIcon style={{ color: "#F8FAFC" }} />
                   </IconButton>
                   <IconButton
                     size="small"
@@ -426,14 +426,14 @@ const FlowBuilder = () => {
                       setDeletingContact(contact);
                     }}
                   >
-                    <ContentCopy style={{ color: "#ededed" }} />
+                    <ContentCopy style={{ color: "#F8FAFC" }} />
                   </IconButton>
                   <IconButton
                     size="small"
                     onClick={() => history.push(`/flowbuilder/${contact.id}`)}
                   >
                     <Stack sx={{ width: 24 }}>
-                      <Build sx={{ width: 20, color: "#ededed" }} />
+                      <Build sx={{ width: 20, color: "#F8FAFC" }} />
                     </Stack>
                   </IconButton>
                   <Can
@@ -447,7 +447,7 @@ const FlowBuilder = () => {
                           setDeletingContact(contact);
                         }}
                       >
-                        <DeleteOutlineIcon style={{ color: "#ededed" }} />
+                        <DeleteOutlineIcon style={{ color: "#F8FAFC" }} />
                       </IconButton>
                     )}
                   /> */}

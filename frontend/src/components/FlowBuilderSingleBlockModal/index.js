@@ -562,7 +562,7 @@ const FlowBuilderSingleBlockModal = ({
     return (
       <Stack
         sx={{
-          border: "1px solid #0000FF",
+          border: "1px solid #2563EB",
           borderRadius: "7px",
           padding: "6px",
           position: "relative",
@@ -606,7 +606,7 @@ const FlowBuilderSingleBlockModal = ({
     return (
       <Stack
         sx={{
-          border: "1px solid #0000FF",
+          border: "1px solid #2563EB",
           borderRadius: "7px",
           padding: "6px",
           position: "relative",
@@ -674,7 +674,7 @@ const FlowBuilderSingleBlockModal = ({
     return (
       <Stack
         sx={{
-          border: "1px solid #0000FF",
+          border: "1px solid #2563EB",
           borderRadius: "7px",
           padding: "6px",
           position: "relative",
@@ -726,7 +726,7 @@ const FlowBuilderSingleBlockModal = ({
     return (
       <Stack
         sx={{
-          border: "1px solid #0000FF",
+          border: "1px solid #2563EB",
           borderRadius: "7px",
           padding: "6px",
           position: "relative",
@@ -757,7 +757,7 @@ const FlowBuilderSingleBlockModal = ({
     return (
       <Stack
         sx={{
-          border: "1px solid #0000FF",
+          border: "1px solid #2563EB",
           borderRadius: "7px",
           padding: "6px",
           position: "relative",

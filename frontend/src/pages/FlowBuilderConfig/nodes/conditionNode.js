@@ -26,31 +26,31 @@ export default memo(({ data, isConnectable }) => {
       <Handle
         type="target"
         position="left"
-        style={{ background: "#0000FF" }}
+        style={{ background: "#2563EB" }}
         onConnect={(params) => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
-      <div style={{color: '#ededed', fontSize: '16px', flexDirection: 'row', display: 'flex'}}>
+      <div style={{color: '#F8FAFC', fontSize: '16px', flexDirection: 'row', display: 'flex'}}>
         <ImportExport sx={{width: '16px', height: '16px', marginRight: '4px', marginTop: '4px'}}/>
-        <div style={{color: '#ededed', fontSize: '16px'}}>
+        <div style={{color: '#F8FAFC', fontSize: '16px'}}>
         Condição
         </div>
       </div>
-      <div style={{color: '#ededed', fontSize: '12px'}}>{data.key}</div>
-      <div style={{color: '#ededed', fontSize: '12px'}}>{typeCondition(data.condition)}</div>
-      <div style={{color: '#ededed', fontSize: '12px'}}>{data.value}</div>
+      <div style={{color: '#F8FAFC', fontSize: '12px'}}>{data.key}</div>
+      <div style={{color: '#F8FAFC', fontSize: '12px'}}>{typeCondition(data.condition)}</div>
+      <div style={{color: '#F8FAFC', fontSize: '12px'}}>{data.value}</div>
       <Handle
         type="source"
         position="right"
         id="a"
-        style={{ top: 10, background: "#0000FF" }}
+        style={{ top: 10, background: "#2563EB" }}
         isConnectable={isConnectable}
       />
       <Handle
         type="source"
         position="right"
         id="b"
-        style={{ bottom: 10, top: "auto", background: "#0000FF" }}
+        style={{ bottom: 10, top: "auto", background: "#2563EB" }}
         isConnectable={isConnectable}
       />
     </div>

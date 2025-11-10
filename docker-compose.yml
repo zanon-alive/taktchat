@@ -1,20 +1,35 @@
-version: "3.8"
 services:
+  postgres:
+    image: postgres:15
+    container_name: taktchat-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: taktchat_database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: efe487b6a861100fb704ad9f5c160cb8
+      TZ: America/Sao_Paulo
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    networks:
+      - nobreluminarias
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   backend:
     build:
       context: ./backend
       args:
-        BUILD_DATE: ${BUILD_DATE}
-        GIT_COMMIT: ${GIT_COMMIT}
-        BACKEND_VERSION: ${BACKEND_VERSION}
-    container_name: whaticket-backend
+        BUILD_DATE: ${BUILD_DATE:-}
+        GIT_COMMIT: ${GIT_COMMIT:-}
+        BACKEND_VERSION: ${BACKEND_VERSION:-}
+    container_name: taktchat-backend
     restart: always
     environment:
       NODE_ENV: production
       DB_DIALECT: postgres
       DB_HOST: postgres         # nome do serviço na rede Docker, ajuste se o nome do container do banco for diferente
       DB_PORT: 5432
-      DB_NAME: whaticket        # nome do banco, já criado
+      DB_NAME: taktchat_database        # nome do banco, já criado
       DB_USER: postgres         # usuário padrão, ajuste conforme sua configuração
       DB_PASS: efe487b6a861100fb704ad9f5c160cb8 # senha igual à do seu banco
       TZ: America/Sao_Paulo
@@ -46,7 +61,7 @@ services:
 
   frontend:
     build: ./frontend
-    container_name: whaticket-frontend
+    container_name: taktchat-frontend
     restart: always
     depends_on:
       - backend
@@ -59,7 +74,7 @@ services:
 
   redis:
     image: redis:6.2-alpine
-    container_name: whaticket-redis
+    container_name: taktchat-redis
     restart: always
     command: ["redis-server", "--appendonly", "yes"]
     ports:
@@ -71,9 +86,10 @@ services:
 
 networks:
   nobreluminarias:
-    external: true
+    name: nobreluminarias
 
 volumes:
+  postgres-data:
   redis-data:
   backend-public:
   backend-private:

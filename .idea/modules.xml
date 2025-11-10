@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/whaticket.iml" filepath="$PROJECT_DIR$/.idea/whaticket.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/taktchat.iml" filepath="$PROJECT_DIR$/.idea/taktchat.iml" />
     </modules>
   </component>
 </project>

@@ -69,7 +69,7 @@ const selectFieldStyles = {
     borderWidth: "thin"
   },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#0000FF",
+    borderColor: "#2563EB",
     borderWidth: "thin"
   }
 };

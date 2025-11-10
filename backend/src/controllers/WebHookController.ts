@@ -4,7 +4,7 @@ import { handleMessage } from "../services/FacebookServices/facebookMessageListe
 // import { handleMessage } from "../services/FacebookServices/facebookMessageListener";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "whaticket";
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "taktchat";
 
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];

@@ -74,7 +74,7 @@ export default memo(({ data, isConnectable, id }) => {
       </div>
       <div
         style={{
-          color: "#ededed",
+          color: "#F8FAFC",
           fontSize: "16px",
           flexDirection: "row",
           display: "flex"

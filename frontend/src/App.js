@@ -183,14 +183,14 @@ const App = () => {
     
     getPublicSetting("primaryColorLight")
       .then((color) => {
-        setPrimaryColorLight(color || "#0000FF");
+        setPrimaryColorLight(color || "#2563EB");
       })
       .catch((error) => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("primaryColorDark")
       .then((color) => {
-        setPrimaryColorDark(color || "#39ACE7");
+        setPrimaryColorDark(color || "#1E3A8A");
       })
       .catch((error) => {
         console.log("Error reading setting", error);
@@ -218,11 +218,11 @@ const App = () => {
       });
     getPublicSetting("appName")
       .then((name) => {
-        setAppName(name || "Whaticket_Flow");
+        setAppName(name || "Taktchat_Flow");
       })
       .catch((error) => {
         console.log("!==== Erro ao carregar temas: ====!", error);
-        setAppName("Whaticket_Flow");
+        setAppName("Taktchat_Flow");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
