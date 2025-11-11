@@ -169,17 +169,19 @@ class WhatsAppWebLabelsService {
         const GetDeviceTagsService = require("./GetDeviceTagsService").default;
         const fallback = await GetDeviceTagsService(companyId, wppId);
         if (Array.isArray(fallback) && fallback.length > 0) {
-          logger.info(`[WhatsAppWebLabels] Fallback Baileys retornou ${fallback.length} labels para whatsappId=${wppId}`);
+          logger.info(`[WhatsAppWebLabels] ✅ Fallback Baileys retornou ${fallback.length} labels para whatsappId=${wppId}`);
           return fallback;
         }
+        logger.warn(`[WhatsAppWebLabels] ⚠️ Fallback Baileys não encontrou labels para whatsappId=${wppId}`);
       } catch (fallbackErr: any) {
-        logger.warn(`[WhatsAppWebLabels] Fallback Baileys falhou: ${fallbackErr?.message}`);
+        logger.warn(`[WhatsAppWebLabels] ❌ Fallback Baileys falhou: ${fallbackErr?.message}`);
       }
       return [];
     };
 
     try {
       const defaultWhatsapp = await GetDefaultWhatsApp(whatsappId, companyId);
+      logger.info(`[WhatsAppWebLabels] ▶️ Iniciando busca de labels para company=${companyId}, requestedWhatsappId=${whatsappId}, resolvedWhatsappId=${defaultWhatsapp.id}, status=${defaultWhatsapp.status}`);
       this.setProgress(defaultWhatsapp.id, 5, 'iniciando');
       // logs reduzidos
       
@@ -188,6 +190,7 @@ class WhatsAppWebLabelsService {
       if (!client) {
         const fallback = await getFallbackLabels(defaultWhatsapp.id);
         if (fallback.length > 0) {
+          this.setProgress(defaultWhatsapp.id, 100, 'concluido_fallback');
           return fallback;
         }
         throw new Error("Cliente WhatsApp Web não disponível. Aguarde a conexão ou escaneie o QR Code.");
@@ -201,6 +204,7 @@ class WhatsAppWebLabelsService {
       
       // Verificar estado final
       const state = await client.getState();
+      logger.info(`[WhatsAppWebLabels] Estado do cliente ${defaultWhatsapp.id}: ${state}`);
 
       // logs reduzidos
       
@@ -212,10 +216,8 @@ class WhatsAppWebLabelsService {
       while (attempts < maxAttempts) {
         try {
           attempts++;
-          // logs reduzidos
-          
           labels = await client.getLabels();
-          // logs reduzidos
+          logger.info(`[WhatsAppWebLabels] Cliente ${defaultWhatsapp.id} retornou ${Array.isArray(labels) ? labels.length : 0} labels na tentativa ${attempts}`);
           break;
           
         } catch (err: any) {
@@ -230,6 +232,7 @@ class WhatsAppWebLabelsService {
         }
       }
       this.setProgress(defaultWhatsapp.id, 20, 'labels_recebidas');
+      logger.info(`[WhatsAppWebLabels] Processando ${deviceLabels.length} labels já contabilizadas de um total bruto ${labels.length}`);
       
       let deviceLabels: DeviceLabel[] = [];
 
@@ -269,8 +272,10 @@ class WhatsAppWebLabelsService {
       this.setProgress(defaultWhatsapp.id, 40, 'contagem_por_label');
 
       if (deviceLabels.length === 0) {
+        logger.warn(`[WhatsAppWebLabels] Nenhuma label retornou contagem pelo cliente web, acionando fallback.`);
         const fallback = await getFallbackLabels(defaultWhatsapp.id);
         if (fallback.length > 0) {
+          this.setProgress(defaultWhatsapp.id, 100, 'concluido_fallback');
           return fallback;
         }
       }
@@ -342,6 +347,7 @@ class WhatsAppWebLabelsService {
         }
 
         if (contactsWithoutLabels.length > 0) {
+          logger.info(`[WhatsAppWebLabels] Adicionando label sintética __unlabeled__ com ${contactsWithoutLabels.length} contatos.`);
           deviceLabels.unshift({
             id: "__unlabeled__",
             name: "Sem etiqueta",
@@ -367,6 +373,7 @@ class WhatsAppWebLabelsService {
         });
         if (savedPersonal.length > 0) {
           deviceLabels.unshift({ id: "__all__", name: "Todos os contatos", color: "#5E97D1", count: savedPersonal.length });
+          logger.info(`[WhatsAppWebLabels] Adicionando label sintética __all__ com ${savedPersonal.length} contatos.`);
         }
 
         // Broadcasts / Grupos (pelo conjunto de chats)
@@ -409,6 +416,7 @@ class WhatsAppWebLabelsService {
       }
 
       this.setProgress(defaultWhatsapp.id, 100, 'concluido');
+      logger.info(`[WhatsAppWebLabels] ✅ Finalizado com ${deviceLabels.length} labels retornadas pelo cliente web.`);
       return deviceLabels;
 
     } catch (error: any) {
@@ -417,6 +425,7 @@ class WhatsAppWebLabelsService {
         const defaultWhatsapp = await GetDefaultWhatsApp(whatsappId, companyId);
         const fallback = await getFallbackLabels(defaultWhatsapp.id);
         if (fallback.length > 0) {
+          this.setProgress(defaultWhatsapp.id, 100, 'concluido_fallback');
           return fallback;
         }
       } catch (fallbackErr: any) {
