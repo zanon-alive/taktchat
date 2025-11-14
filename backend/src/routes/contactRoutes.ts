@@ -60,6 +60,14 @@ contactRoutes.get("/contacts/debug-device-data", isAuth, ContactController.debug
 contactRoutes.post("/contacts/force-appstate-sync", isAuth, ContactController.forceAppStateSync);
 contactRoutes.post("/contacts/test-create-label", isAuth, ContactController.testCreateLabel);
 contactRoutes.post("/contacts/normalize-numbers", isAuth, ContactController.normalizeNumbers);
+
+// ========== ROTAS DE IMPORTAÇÃO ASSÍNCRONA ==========
+contactRoutes.post("/contacts/import-async", isAuth, upload.single("file"), ContactController.importContactsAsync);
+contactRoutes.get("/contacts/import-jobs/:jobId/status", isAuth, ContactController.getImportJobStatus);
+contactRoutes.post("/contacts/import-jobs/:jobId/cancel", isAuth, ContactController.cancelImport);
+contactRoutes.get("/contacts/import-logs", isAuth, ContactController.listImportLogs);
+contactRoutes.get("/contacts/import-logs/:id", isAuth, ContactController.showImportLog);
+
 // contactRoutes.get("/contacts/list-whatsapp", isAuth, ContactController.listWhatsapp);
 
 export default contactRoutes;

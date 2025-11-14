@@ -236,11 +236,55 @@ export async function ImportContactsService(
   }
 
 
+  // === DEDUPLICAÇÃO NO LOTE ===
+  // Agrupar contatos por número canônico para evitar duplicados no mesmo arquivo
+  const contactsByNumber = new Map<string, any>();
+  const duplicatesInFile: string[] = [];
+  
+  for (const c of contacts) {
+    const number = `${c.number}`.replace(/\D/g, '');
+    if (!number) continue;
+    
+    if (contactsByNumber.has(number)) {
+      // Duplicado encontrado - mesclar dados (priorizar mais completo)
+      const existing = contactsByNumber.get(number);
+      const merged = { ...existing, ...c };
+      // Manter nome mais completo
+      if (existing.name && existing.name.length > (c.name || '').length) {
+        merged.name = existing.name;
+      }
+      // Manter email se existente tiver
+      if (existing.email) merged.email = existing.email;
+      // Mesclar deviceTags se houver
+      if (existing.deviceTags && c.deviceTags) {
+        const tagMap = new Map();
+        [...existing.deviceTags, ...c.deviceTags].forEach(t => tagMap.set(t.id, t));
+        merged.deviceTags = Array.from(tagMap.values());
+      }
+      contactsByNumber.set(number, merged);
+      duplicatesInFile.push(number);
+    } else {
+      contactsByNumber.set(number, c);
+    }
+  }
+  
+  // Substituir array original pelos contatos deduplicados
+  contacts = Array.from(contactsByNumber.values());
+  logger.info(`[ImportContactsService] Deduplicados: ${duplicatesInFile.length}, Total final: ${contacts.length}`);
+
+  // === VALIDAÇÕES DE SEGURANÇA ===
+  const MAX_CONTACTS_PER_IMPORT = 10000;
+  if (contacts.length > MAX_CONTACTS_PER_IMPORT) {
+    throw new Error(`Limite de ${MAX_CONTACTS_PER_IMPORT} contatos por importação excedido. Total: ${contacts.length}`);
+  }
+
   const contactList: Contact[] = [];
   let createdCount = 0;
   let updatedCount = 0;
+  let skippedCount = 0;
   let taggedCount = 0;
   const perTagApplied: Record<string, number> = {};
+  const errors: Array<{ row: number; number: string; error: string }> = [];
 
   // Inicializa progresso
   if (progressId) {
@@ -253,185 +297,220 @@ export async function ImportContactsService(
     });
   }
 
-  for (const incoming of contacts) {
-    let number = `${incoming.number}`;
-    // Validação/normalização opcional do número
-    if (validateNumber) {
-      try {
-        const normalized = await CheckContactNumber(number, companyId);
-        if (normalized) number = `${normalized}`;
-      } catch (e) {
-        logger.warn(`[ImportContactsService] Número inválido/inesperado ao normalizar: ${number} — mantendo original`);
+  for (let rowIndex = 0; rowIndex < contacts.length; rowIndex++) {
+    const incoming = contacts[rowIndex];
+    
+    // === TRATAMENTO DE ERROS INDIVIDUAL ===
+    try {
+      let number = `${incoming.number}`.replace(/\D/g, '');
+      
+      // Validação básica de número
+      if (!number || number.length < 10) {
+        throw new Error(`Número inválido ou muito curto: ${incoming.number}`);
       }
-    }
-    const companyIdRow = incoming.companyId;
-
-    const existing = await Contact.findOne({ where: { number, companyId: companyIdRow } });
-    let contact: Contact;
-
-    if (!existing) {
-      // Criar novo contato
-      const payload: any = {
-        ...incoming,
-        email: typeof incoming.email === 'string' ? incoming.email : ''
-      };
-      // Remove deviceTags from payload as it's not a model field
-      delete payload.deviceTags;
-      // Se contato novo vier sem nome, define como o próprio número
-      if (!payload.name || String(payload.name).trim() === '') {
-        payload.name = number;
-      }
-      if (dryRun) {
-        // Simulação: não grava no banco, apenas incrementa contadores
-        createdCount++;
-        // Representação mínima para permitir uso posterior em dry-run (se necessário)
-        contact = ({ ...payload, id: null } as any) as Contact;
-      } else {
-        contact = await CreateOrUpdateContactServiceForImport({ ...payload, silentMode });
-        contactList.push(contact);
-        createdCount++;
-      }
-    } else {
-      // Update não destrutivo: só atualiza campos vazios/placeholder
-      const updatePayload: any = {};
-
-      // Nome: atualiza se vazio ou igual ao número; se já curado, apenas registra em contactName
-      const currentName = (existing.name || '').trim();
-      const isNumberName = currentName.replace(/\D/g, '') === number;
-      const incomingName = (incoming.name || '').trim();
-      if ((!currentName || isNumberName) && incomingName) {
-        updatePayload.name = incomingName;
-      } else if (incomingName) {
-        // preserva nome curado e salva referência
-        updatePayload.contactName = incomingName;
-      }
-
-      // Email: salva se atual vazio (""), e veio na planilha
-      const currentEmail = (existing.email || '').trim();
-      if (!currentEmail && incoming.email) {
-        updatePayload.email = String(incoming.email).trim();
-      }
-
-      // Campos adicionais: apenas se atuais forem nulos/vazios e houver valor na planilha
-      const keepIfEmpty = (key: string) => {
-        const val = (incoming as any)[key];
-        if (val === undefined || val === null || (typeof val === 'string' && val.toString().trim() === '')) return;
-        const current = (existing as any)[key];
-        if (current === null || current === undefined || (typeof current === 'string' && String(current).trim() === '')) {
-          (updatePayload as any)[key] = typeof val === 'string' ? val.toString().trim() : val;
+      
+      // Validação/normalização opcional do número
+      if (validateNumber) {
+        try {
+          const normalized = await CheckContactNumber(number, companyId);
+          if (normalized) number = `${normalized}`;
+        } catch (e: any) {
+          throw new Error(`Falha na validação do número: ${e?.message}`);
         }
-      };
+      }
+      const companyIdRow = incoming.companyId;
 
-      keepIfEmpty('cpfCnpj');
-      keepIfEmpty('representativeCode');
-      keepIfEmpty('city');
-      keepIfEmpty('instagram');
-      keepIfEmpty('situation');
-      keepIfEmpty('fantasyName');
-      keepIfEmpty('foundationDate');
-      keepIfEmpty('creditLimit');
-      keepIfEmpty('segment');
+      const existing = await Contact.findOne({ where: { number, companyId: companyIdRow } });
+      let contact: Contact;
 
-      if (Object.keys(updatePayload).length > 0) {
+      if (!existing) {
+        // Criar novo contato
+        const payload: any = {
+          ...incoming,
+          email: typeof incoming.email === 'string' ? incoming.email : ''
+        };
+        // Remove deviceTags from payload as it's not a model field
+        delete payload.deviceTags;
+        // Se contato novo vier sem nome, define como o próprio número
+        if (!payload.name || String(payload.name).trim() === '') {
+          payload.name = number;
+        }
         if (dryRun) {
-          // Simulação de atualização: não grava, apenas conta
-          updatedCount++;
-          contact = existing;
+          // Simulação: não grava no banco, apenas incrementa contadores
+          createdCount++;
+          // Representação mínima para permitir uso posterior em dry-run (se necessário)
+          contact = ({ ...payload, id: null } as any) as Contact;
         } else {
-          contact = await CreateOrUpdateContactServiceForImport({ ...updatePayload, id: existing.id, silentMode });
-          updatedCount++;
+          contact = await CreateOrUpdateContactServiceForImport({ ...payload, silentMode });
+          contactList.push(contact);
+          createdCount++;
         }
       } else {
-        contact = existing; // Se não houver atualização, mantém o contato existente
+        // Update não destrutivo: só atualiza campos vazios/placeholder
+        const updatePayload: any = {};
+
+        // Nome: atualiza se vazio ou igual ao número; se já curado, apenas registra em contactName
+        const currentName = (existing.name || '').trim();
+        const isNumberName = currentName.replace(/\D/g, '') === number;
+        const incomingName = (incoming.name || '').trim();
+        if ((!currentName || isNumberName) && incomingName) {
+          updatePayload.name = incomingName;
+        } else if (incomingName) {
+          // preserva nome curado e salva referência
+          updatePayload.contactName = incomingName;
+        }
+
+        // Email: salva se atual vazio (""), e veio na planilha
+        const currentEmail = (existing.email || '').trim();
+        if (!currentEmail && incoming.email) {
+          updatePayload.email = String(incoming.email).trim();
+        }
+
+        // Campos adicionais: apenas se atuais forem nulos/vazios e houver valor na planilha
+        const keepIfEmpty = (key: string) => {
+          const val = (incoming as any)[key];
+          if (val === undefined || val === null || (typeof val === 'string' && val.toString().trim() === '')) return;
+          const current = (existing as any)[key];
+          if (current === null || current === undefined || (typeof current === 'string' && String(current).trim() === '')) {
+            (updatePayload as any)[key] = typeof val === 'string' ? val.toString().trim() : val;
+          }
+        };
+
+        keepIfEmpty('cpfCnpj');
+        keepIfEmpty('representativeCode');
+        keepIfEmpty('city');
+        keepIfEmpty('instagram');
+        keepIfEmpty('situation');
+        keepIfEmpty('fantasyName');
+        keepIfEmpty('foundationDate');
+        keepIfEmpty('creditLimit');
+        keepIfEmpty('segment');
+
+        if (Object.keys(updatePayload).length > 0) {
+          if (dryRun) {
+            // Simulação de atualização: não grava, apenas conta
+            updatedCount++;
+            contact = existing;
+          } else {
+            contact = await CreateOrUpdateContactServiceForImport({ ...updatePayload, id: existing.id, silentMode });
+            updatedCount++;
+          }
+        } else {
+          contact = existing; // Se não houver atualização, mantém o contato existente
+          skippedCount++;
+        }
       }
-    }
 
-    // Handle tag associations for device contacts
-    if (tagMapping) {
-      // 1) Aplicar mapeamentos de labels reais presentes no contato
-      if (incoming.deviceTags) for (const deviceTag of incoming.deviceTags) {
-        const mapping = tagMapping[deviceTag.id];
+      // Handle tag associations for device contacts
+      if (tagMapping) {
+        // 1) Aplicar mapeamentos de labels reais presentes no contato
+        if (incoming.deviceTags) for (const deviceTag of incoming.deviceTags) {
+          const mapping = tagMapping[deviceTag.id];
+          if (mapping) {
+            let systemTagId = null;
+
+            if (mapping.systemTagId) {
+              // Use existing system tag
+              systemTagId = mapping.systemTagId;
+            } else if (mapping.newTagName && !dryRun) {
+              // Create new tag (apenas fora do dry-run)
+              const [newTag] = await Tag.findOrCreate({
+                where: { name: mapping.newTagName, companyId },
+                defaults: { color: "#A4CCCC", kanban: 0 }
+              });
+              systemTagId = newTag.id;
+            }
+
+            if (!dryRun && systemTagId) {
+              // Associate tag with contact
+              await ContactTag.findOrCreate({
+                where: { contactId: contact.id, tagId: systemTagId }
+              });
+              taggedCount++;
+            } else if (dryRun) {
+              // Apenas simulação: conta associação prevista
+              taggedCount++;
+            }
+
+            // Nome da etiqueta para o relatório (tanto para dry-run quanto real)
+            let tagNameForReport: string | null = null;
+            if (mapping.systemTagId && !dryRun) {
+              try {
+                const t = await Tag.findByPk(systemTagId as any);
+                tagNameForReport = t?.name || null;
+              } catch (_) { /* ignore */ }
+            } else if (mapping.newTagName) {
+              tagNameForReport = mapping.newTagName;
+            }
+            if (!tagNameForReport) {
+              tagNameForReport = deviceTag?.name || String(deviceTag?.id || '');
+            }
+            perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
+          }
+        }
+
+        // 2) Aplicar mapeamento especial de "Sem etiqueta" (mesmo sem deviceTags no contato)
+        const hasExplicitUnlabeled = !!tagMapping["__unlabeled__"];
+        const mapping = hasExplicitUnlabeled ? tagMapping["__unlabeled__"] : (defaultUnlabeledTagName ? { newTagName: defaultUnlabeledTagName } : null);
         if (mapping) {
-          let systemTagId = null;
-
+          let systemTagId = null as any;
           if (mapping.systemTagId) {
-            // Use existing system tag
             systemTagId = mapping.systemTagId;
           } else if (mapping.newTagName && !dryRun) {
-            // Create new tag (apenas fora do dry-run)
             const [newTag] = await Tag.findOrCreate({
               where: { name: mapping.newTagName, companyId },
               defaults: { color: "#A4CCCC", kanban: 0 }
             });
             systemTagId = newTag.id;
           }
-
           if (!dryRun && systemTagId) {
-            // Associate tag with contact
-            await ContactTag.findOrCreate({
-              where: { contactId: contact.id, tagId: systemTagId }
-            });
+            await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: systemTagId } });
             taggedCount++;
+            const tagNameForReport = mapping.newTagName || (await Tag.findByPk(systemTagId))?.name || "Sem etiqueta";
+            perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
           } else if (dryRun) {
-            // Apenas simulação: conta associação prevista
+            // Apenas simulação de associação "Sem etiqueta"
             taggedCount++;
+            const tagNameForReport = mapping.newTagName || "Sem etiqueta";
+            perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
           }
-
-          // Nome da etiqueta para o relatório (tanto para dry-run quanto real)
-          let tagNameForReport: string | null = null;
-          if (mapping.systemTagId && !dryRun) {
-            try {
-              const t = await Tag.findByPk(systemTagId as any);
-              tagNameForReport = t?.name || null;
-            } catch (_) { /* ignore */ }
-          } else if (mapping.newTagName) {
-            tagNameForReport = mapping.newTagName;
-          }
-          if (!tagNameForReport) {
-            tagNameForReport = deviceTag?.name || String(deviceTag?.id || '');
-          }
-          perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
         }
       }
 
-      // 2) Aplicar mapeamento especial de "Sem etiqueta" (mesmo sem deviceTags no contato)
-      const hasExplicitUnlabeled = !!tagMapping["__unlabeled__"];
-      const mapping = hasExplicitUnlabeled ? tagMapping["__unlabeled__"] : (defaultUnlabeledTagName ? { newTagName: defaultUnlabeledTagName } : null);
-      if (mapping) {
-        let systemTagId = null as any;
-        if (mapping.systemTagId) {
-          systemTagId = mapping.systemTagId;
-        } else if (mapping.newTagName && !dryRun) {
-          const [newTag] = await Tag.findOrCreate({
-            where: { name: mapping.newTagName, companyId },
-            defaults: { color: "#A4CCCC", kanban: 0 }
-          });
-          systemTagId = newTag.id;
-        }
-        if (!dryRun && systemTagId) {
-          await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: systemTagId } });
-          taggedCount++;
-          const tagNameForReport = mapping.newTagName || (await Tag.findByPk(systemTagId))?.name || "Sem etiqueta";
-          perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
-        } else if (dryRun) {
-          // Apenas simulação de associação "Sem etiqueta"
-          taggedCount++;
-          const tagNameForReport = mapping.newTagName || "Sem etiqueta";
-          perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
+      // Atualiza progresso por iteração
+      if (progressId) {
+        const p = importProgressMap.get(progressId);
+        if (p) {
+          p.processed += 1;
+          p.created = createdCount;
+          p.updated = updatedCount;
+          p.tagged = taggedCount;
+          importProgressMap.set(progressId, p);
         }
       }
-    }
-
-    // Atualiza progresso por iteração
-    if (progressId) {
-      const p = importProgressMap.get(progressId);
-      if (p) {
-        p.processed += 1;
-        p.created = createdCount;
-        p.updated = updatedCount;
-        p.tagged = taggedCount;
-        importProgressMap.set(progressId, p);
+      
+    } catch (error: any) {
+      // Registrar erro individual sem parar a importação
+      const errorMessage = error?.message || "Erro desconhecido";
+      logger.error(`[ImportContactsService] Erro no contato (linha ${rowIndex + 1}): ${errorMessage}`);
+      
+      errors.push({
+        row: rowIndex + 1,
+        number: incoming.number || "N/A",
+        error: errorMessage
+      });
+      
+      // Atualiza progresso mesmo com erro
+      if (progressId) {
+        const p = importProgressMap.get(progressId);
+        if (p) {
+          p.processed += 1;
+          importProgressMap.set(progressId, p);
+        }
       }
+      
+      // Continua para o próximo contato
+      continue;
     }
   }
 
@@ -451,12 +530,22 @@ export async function ImportContactsService(
   // }
 
   const result = {
-    total: contacts.length,
+    total: contacts.length + duplicatesInFile.length, // Total original antes da deduplicação
+    processed: contacts.length, // Total processado após deduplicação
     created: createdCount,
     updated: updatedCount,
+    skipped: skippedCount,
     tagged: taggedCount,
+    failed: errors,
+    duplicatesInFile: duplicatesInFile.length,
     perTagApplied,
-    contacts: contactList
+    contacts: contactList,
+    summary: {
+      success: createdCount + updatedCount,
+      errors: errors.length,
+      duplicates: duplicatesInFile.length,
+      executionTime: 0 // será calculado no job
+    }
   };
 
   // Se for importação real com mapeamento de tags e whatsappId definido, persiste preset
