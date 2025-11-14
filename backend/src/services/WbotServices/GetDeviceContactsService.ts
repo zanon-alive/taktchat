@@ -315,6 +315,76 @@ const GetDeviceContactsService = async (companyId: number, whatsappId?: number) 
       logger.info(`[GetDeviceContactsService] Criados ${deviceContacts.length} contatos de exemplo baseados no sistema`);
     }
 
+    // ========== ADICIONAR CONTATOS SEM ETIQUETA ==========
+    try {
+      logger.info(`[GetDeviceContactsService] Buscando contatos sem etiqueta...`);
+      const unlabeledJids = await getUnlabeledJids(companyId, whatsappId);
+      
+      if (unlabeledJids.size > 0) {
+        logger.info(`[GetDeviceContactsService] Encontrados ${unlabeledJids.size} JIDs sem etiqueta`);
+        
+        // Buscar dados do Baileys para enriquecer os contatos sem etiqueta
+        let baileysContacts: any[] = [];
+        let baileysChats: any[] = [];
+        try {
+          const baileysData = await ShowBaileysService(defaultWhatsapp.id);
+          const parseMaybeJSON = (val: any) => {
+            try { if (!val) return null; if (isString(val)) return JSON.parse(val as string); return val; } catch { return null; }
+          };
+          const contacts = parseMaybeJSON((baileysData as any).contacts);
+          const chats = parseMaybeJSON((baileysData as any).chats);
+          if (isArray(contacts)) baileysContacts = contacts;
+          if (isArray(chats)) baileysChats = chats;
+        } catch (err: any) {
+          logger.warn(`[GetDeviceContactsService] Erro ao buscar dados Baileys para contatos sem etiqueta: ${err?.message}`);
+        }
+        
+        // Criar mapas para busca rápida
+        const contactsMap = new Map();
+        const chatsMap = new Map();
+        
+        baileysContacts.forEach((c: any) => {
+          if (c?.id) contactsMap.set(String(c.id), c);
+        });
+        
+        baileysChats.forEach((c: any) => {
+          if (c?.id) chatsMap.set(String(c.id), c);
+        });
+        
+        // Verificar quais JIDs sem etiqueta já não estão na lista
+        const existingJids = new Set(deviceContacts.map((c: any) => String(c.id)));
+        
+        for (const jid of unlabeledJids) {
+          // Se já está na lista (tem outras etiquetas), pular
+          if (existingJids.has(String(jid))) continue;
+          
+          // Resolver nome do contato
+          const contact = contactsMap.get(jid);
+          const chat = chatsMap.get(jid);
+          
+          const name = contact?.name || chat?.name || '';
+          const notify = contact?.notify || chat?.notify || '';
+          const pushname = contact?.pushname || chat?.pushname || '';
+          
+          // Fallback: usar número limpo como nome
+          const cleanNumber = jid.split('@')[0] || '';
+          const displayName = name || notify || pushname || cleanNumber;
+          
+          deviceContacts.push({
+            id: jid,
+            name: displayName,
+            notify: notify,
+            pushname: pushname,
+            tags: [] // Sem etiquetas
+          });
+        }
+        
+        logger.info(`[GetDeviceContactsService] Total após incluir sem etiqueta: ${deviceContacts.length}`);
+      }
+    } catch (unlabeledErr) {
+      logger.warn(`[GetDeviceContactsService] Erro ao buscar contatos sem etiqueta: ${unlabeledErr}`);
+    }
+
     return deviceContacts;
   } catch (error) {
     logger.error(`[GetDeviceContactsService] Erro geral: ${error}`);

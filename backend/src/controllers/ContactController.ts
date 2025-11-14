@@ -1229,6 +1229,17 @@ export const upload = async (req: Request, res: Response) => {
   return res.status(200).json(response);
 };
 
+// Endpoint de compatibilidade para não quebrar frontend antigo
+export const importProgress = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const progress = getImportProgress();
+    return res.status(200).json(progress || { isImporting: false, progress: 0, total: 0 });
+  } catch (error: any) {
+    logger.error("Erro ao obter progresso de importação:", error);
+    return res.status(200).json({ isImporting: false, progress: 0, total: 0 });
+  }
+};
+
 export const getContactProfileURL = async (req: Request, res: Response) => {
   const { number } = req.params
   const { companyId } = req.user;
