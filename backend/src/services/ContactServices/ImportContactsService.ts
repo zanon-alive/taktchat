@@ -8,6 +8,7 @@ import logger from "../../utils/logger";
 import Contact from "../../models/Contact";
 import Tag from "../../models/Tag";
 import ContactTag from "../../models/ContactTag";
+import ContactTagImportPreset from "../../models/ContactTagImportPreset";
 // Removido: importações de cache/baileys
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import WhatsAppWebLabelsService from "../WbotServices/WhatsAppWebLabelsService";
@@ -41,13 +42,32 @@ export async function ImportContactsService(
   file: Express.Multer.File | undefined,
   tagMapping?: any,
   whatsappId?: number,
-  silentMode?: boolean // Adicionar a nova propriedade
+  silentMode?: boolean,
+  dryRunArg?: boolean
 ) {
   let contacts: any[] = [];
+  let effectiveTagMapping = tagMapping;
+
+  if (!effectiveTagMapping && whatsappId) {
+    try {
+      const preset = await ContactTagImportPreset.findOne({ where: { companyId, whatsappId } });
+      if (preset?.mappingJson) {
+        const parsed = JSON.parse(preset.mappingJson);
+        if (parsed && typeof parsed === "object") {
+          effectiveTagMapping = parsed;
+        }
+      }
+    } catch (error: any) {
+      logger.warn(`[ImportContactsService] Falha ao carregar preset de tags: ${error?.message}`);
+    }
+  }
+
+  tagMapping = effectiveTagMapping;
   const options = (tagMapping && tagMapping.__options) ? tagMapping.__options : {};
   const validateNumber = !!options.validateNumber;
   const defaultUnlabeledTagName = typeof options.defaultUnlabeledTagName === 'string' ? options.defaultUnlabeledTagName.trim() : '';
   const progressId: string = options.progressId ? String(options.progressId) : '';
+  const dryRun = typeof options.dryRun === 'boolean' ? !!options.dryRun : !!dryRunArg;
 
   if (tagMapping) {
     // Importação exclusivamente via WhatsApp-Web.js
@@ -261,9 +281,16 @@ export async function ImportContactsService(
       if (!payload.name || String(payload.name).trim() === '') {
         payload.name = number;
       }
-      contact = await CreateOrUpdateContactServiceForImport({ ...payload, silentMode });
-      contactList.push(contact);
-      createdCount++;
+      if (dryRun) {
+        // Simulação: não grava no banco, apenas incrementa contadores
+        createdCount++;
+        // Representação mínima para permitir uso posterior em dry-run (se necessário)
+        contact = ({ ...payload, id: null } as any) as Contact;
+      } else {
+        contact = await CreateOrUpdateContactServiceForImport({ ...payload, silentMode });
+        contactList.push(contact);
+        createdCount++;
+      }
     } else {
       // Update não destrutivo: só atualiza campos vazios/placeholder
       const updatePayload: any = {};
@@ -306,8 +333,14 @@ export async function ImportContactsService(
       keepIfEmpty('segment');
 
       if (Object.keys(updatePayload).length > 0) {
-        contact = await CreateOrUpdateContactServiceForImport({ ...updatePayload, id: existing.id, silentMode });
-        updatedCount++;
+        if (dryRun) {
+          // Simulação de atualização: não grava, apenas conta
+          updatedCount++;
+          contact = existing;
+        } else {
+          contact = await CreateOrUpdateContactServiceForImport({ ...updatePayload, id: existing.id, silentMode });
+          updatedCount++;
+        }
       } else {
         contact = existing; // Se não houver atualização, mantém o contato existente
       }
@@ -324,8 +357,8 @@ export async function ImportContactsService(
           if (mapping.systemTagId) {
             // Use existing system tag
             systemTagId = mapping.systemTagId;
-          } else if (mapping.newTagName) {
-            // Create new tag
+          } else if (mapping.newTagName && !dryRun) {
+            // Create new tag (apenas fora do dry-run)
             const [newTag] = await Tag.findOrCreate({
               where: { name: mapping.newTagName, companyId },
               defaults: { color: "#A4CCCC", kanban: 0 }
@@ -333,27 +366,31 @@ export async function ImportContactsService(
             systemTagId = newTag.id;
           }
 
-          if (systemTagId) {
+          if (!dryRun && systemTagId) {
             // Associate tag with contact
             await ContactTag.findOrCreate({
               where: { contactId: contact.id, tagId: systemTagId }
             });
             taggedCount++;
-            // Nome da etiqueta para o relatório
-            let tagNameForReport: string | null = null;
-            if (mapping.systemTagId) {
-              try {
-                const t = await Tag.findByPk(systemTagId as any);
-                tagNameForReport = t?.name || null;
-              } catch (_) { /* ignore */ }
-            } else if (mapping.newTagName) {
-              tagNameForReport = mapping.newTagName;
-            }
-            if (!tagNameForReport) {
-              tagNameForReport = deviceTag?.name || String(deviceTag?.id || '');
-            }
-            perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
+          } else if (dryRun) {
+            // Apenas simulação: conta associação prevista
+            taggedCount++;
           }
+
+          // Nome da etiqueta para o relatório (tanto para dry-run quanto real)
+          let tagNameForReport: string | null = null;
+          if (mapping.systemTagId && !dryRun) {
+            try {
+              const t = await Tag.findByPk(systemTagId as any);
+              tagNameForReport = t?.name || null;
+            } catch (_) { /* ignore */ }
+          } else if (mapping.newTagName) {
+            tagNameForReport = mapping.newTagName;
+          }
+          if (!tagNameForReport) {
+            tagNameForReport = deviceTag?.name || String(deviceTag?.id || '');
+          }
+          perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
         }
       }
 
@@ -364,17 +401,22 @@ export async function ImportContactsService(
         let systemTagId = null as any;
         if (mapping.systemTagId) {
           systemTagId = mapping.systemTagId;
-        } else if (mapping.newTagName) {
+        } else if (mapping.newTagName && !dryRun) {
           const [newTag] = await Tag.findOrCreate({
             where: { name: mapping.newTagName, companyId },
             defaults: { color: "#A4CCCC", kanban: 0 }
           });
           systemTagId = newTag.id;
         }
-        if (systemTagId) {
+        if (!dryRun && systemTagId) {
           await ContactTag.findOrCreate({ where: { contactId: contact.id, tagId: systemTagId } });
           taggedCount++;
           const tagNameForReport = mapping.newTagName || (await Tag.findByPk(systemTagId))?.name || "Sem etiqueta";
+          perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
+        } else if (dryRun) {
+          // Apenas simulação de associação "Sem etiqueta"
+          taggedCount++;
+          const tagNameForReport = mapping.newTagName || "Sem etiqueta";
           perTagApplied[tagNameForReport] = (perTagApplied[tagNameForReport] || 0) + 1;
         }
       }
@@ -416,6 +458,34 @@ export async function ImportContactsService(
     perTagApplied,
     contacts: contactList
   };
+
+  // Se for importação real com mapeamento de tags e whatsappId definido, persiste preset
+  try {
+    if (tagMapping && !dryRun && whatsappId) {
+      const payload = {
+        companyId,
+        whatsappId,
+        name: tagMapping.__options?.name || "default",
+        mappingJson: JSON.stringify(tagMapping),
+        lastUsedAt: new Date()
+      } as any;
+
+      const [preset] = await ContactTagImportPreset.findOrCreate({
+        where: { companyId, whatsappId },
+        defaults: payload
+      });
+
+      if (preset && !preset.isNewRecord) {
+        await preset.update({
+          name: payload.name,
+          mappingJson: payload.mappingJson,
+          lastUsedAt: payload.lastUsedAt
+        });
+      }
+    }
+  } catch (e) {
+    logger.warn(`[ImportContactsService] Falha ao salvar preset de mapeamento de tags: ${(e as any)?.message}`);
+  }
 
   // Limpa o progresso em memória para este progressId
   if (progressId) {

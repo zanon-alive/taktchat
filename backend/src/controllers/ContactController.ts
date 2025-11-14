@@ -56,6 +56,7 @@ import GetDefaultWhatsApp from "../helpers/GetDefaultWhatsApp";
 import Contact from "../models/Contact";
 import Tag from "../models/Tag";
 import ContactTag from "../models/ContactTag";
+import ContactTagImportPreset from "../models/ContactTagImportPreset";
 import logger from "../utils/logger";
 import ValidateContactService from "../services/ContactServices/ValidateContactService";
 import { isValidCPF, isValidCNPJ } from "../utils/validators";
@@ -1107,6 +1108,64 @@ export const bulkRemove = async (req: Request, res: Response): Promise<Response>
     return res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
+
+export const getTagImportPreset = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { whatsappId } = req.query as any;
+
+  if (!whatsappId) {
+    return res.status(400).json({ error: "whatsappId não informado" });
+  }
+
+  try {
+    const preset = await ContactTagImportPreset.findOne({ where: { companyId, whatsappId: Number(whatsappId) } });
+    if (!preset) {
+      return res.status(200).json({ hasPreset: false });
+    }
+    const mapping = preset.mappingJson ? JSON.parse(preset.mappingJson) : null;
+    return res.status(200).json({ hasPreset: true, preset: { name: preset.name, lastUsedAt: preset.lastUsedAt, mapping } });
+  } catch (error: any) {
+    logger.error("Erro ao obter preset de tags:", error);
+    return res.status(500).json({ error: error?.message || "Erro ao obter preset" });
+  }
+};
+
+export const saveTagImportPreset = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { whatsappId, name, mapping } = req.body as any;
+
+  if (!whatsappId || !mapping) {
+    return res.status(400).json({ error: "whatsappId e mapping são obrigatórios" });
+  }
+
+  try {
+    const payload = {
+      companyId,
+      whatsappId: Number(whatsappId),
+      name: name || "default",
+      mappingJson: JSON.stringify(mapping),
+      lastUsedAt: new Date()
+    };
+
+    const [preset] = await ContactTagImportPreset.findOrCreate({
+      where: { companyId, whatsappId: Number(whatsappId) },
+      defaults: payload
+    });
+
+    if (!preset.isNewRecord) {
+      await preset.update({
+        name: payload.name,
+        mappingJson: payload.mappingJson,
+        lastUsedAt: payload.lastUsedAt
+      });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (error: any) {
+    logger.error("Erro ao salvar preset de tags:", error);
+    return res.status(500).json({ error: error?.message || "Erro ao salvar preset" });
+  }
+};
 export const toggleAcceptAudio = async (req: Request, res: Response): Promise<Response> => {
   var { contactId } = req.params;
   const { companyId } = req.user;
@@ -1415,28 +1474,30 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
 
   export const importWithTags = async (req: Request, res: Response): Promise<Response> => {
     const { companyId } = req.user;
-    const { tagMapping, whatsappId, progressId, silentMode } = req.body as any; // Adicionar silentMode
+    const { tagMapping, whatsappId, progressId, silentMode, dryRun } = req.body as any;
 
     try {
-      // Importar contatos com mapeamento de tags
-      if (tagMapping && progressId) {
-        tagMapping.__options = { ...(tagMapping.__options || {}), progressId };
+      if (tagMapping) {
+        tagMapping.__options = {
+          ...(tagMapping.__options || {}),
+          progressId: progressId || tagMapping.__options?.progressId,
+          dryRun: typeof dryRun === "boolean" ? dryRun : Boolean(tagMapping.__options?.dryRun)
+        };
       }
-      const result = await ImportContactsService(companyId, undefined, tagMapping, whatsappId, silentMode); // Passar silentMode
-      return res.status(200).json(result);
-    } catch (error) {
-      logger.error("Erro ao importar contatos com tags:", error);
-      return res.status(500).json({ error: "Erro ao importar contatos com tags" });
-    }
-  };
 
-  export const importProgress = async (req: Request, res: Response): Promise<Response> => {
-    try {
-      const { progressId } = req.query as any;
-      const prog = getImportProgress(String(progressId || ''));
-      return res.status(200).json({ success: true, progress: prog });
+      const result = await ImportContactsService(
+        companyId,
+        undefined,
+        tagMapping,
+        whatsappId,
+        silentMode,
+        typeof dryRun === "boolean" ? dryRun : undefined
+      );
+
+      return res.status(200).json(result);
     } catch (error: any) {
-      return res.status(500).json({ success: false, error: error?.message || 'Erro ao obter progresso de importação' });
+      logger.error("Erro ao importar contatos com tags:", error);
+      return res.status(500).json({ error: error?.message || "Erro ao importar contatos com tags" });
     }
   };
 

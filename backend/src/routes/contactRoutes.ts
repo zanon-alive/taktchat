@@ -54,6 +54,8 @@ contactRoutes.get("/contacts/device-contacts", isAuth, ContactController.getDevi
 contactRoutes.post("/contacts/import-device-contacts", isAuth, ContactController.importDeviceContactsAuto);
 contactRoutes.post("/contacts/rebuild-device-tags", isAuth, ContactController.rebuildDeviceTags);
 contactRoutes.post("/contacts/import-with-tags", isAuth, ContactController.importWithTags);
+contactRoutes.get("/contacts/import-tags/preset", isAuth, ContactController.getTagImportPreset);
+contactRoutes.post("/contacts/import-tags/preset", isAuth, ContactController.saveTagImportPreset);
 contactRoutes.get("/contacts/debug-device-data", isAuth, ContactController.debugDeviceData);
 contactRoutes.post("/contacts/force-appstate-sync", isAuth, ContactController.forceAppStateSync);
 contactRoutes.post("/contacts/test-create-label", isAuth, ContactController.testCreateLabel);
