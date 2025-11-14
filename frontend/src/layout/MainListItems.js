@@ -202,7 +202,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MainListItems = ({ collapsed, drawerClose }) => {
+const MainListItems = ({ collapsed }) => {
   const theme = useTheme();
   const classes = useStyles();
   const { whatsApps } = useContext(WhatsAppsContext);
@@ -396,7 +396,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   };
 
   return (
-    <div onClick={drawerClose}>
+    <div>
       {/* BLOCO LEGADO - Apenas itens diretos (Dashboard antigo e Tempo Real) */}
       {((user.profile === "admin" || user.profile === "super") ||
         (user.profile === "user" && user.showDashboard === "enabled")) && (
@@ -477,7 +477,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
           to="/chats"
           primary={i18n.t("mainDrawer.listItems.chats")}
           icon={
-            <Badge color="secondary" variant="dot" invisible={invisible}>
+            <Badge color="secondary" variant="dot" invisible={invisible} overlap="rectangular">
               <ForumIcon />
             </Badge>
           }

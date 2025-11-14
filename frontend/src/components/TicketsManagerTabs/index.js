@@ -643,6 +643,7 @@ const TicketsManagerTabs = () => {
               perform="tickets-manager:showall"
               yes={() => (
                 <Badge
+                  overlap="rectangular"
                   color="primary"
                   invisible={
                     !isHoveredAll ||
@@ -700,6 +701,7 @@ const TicketsManagerTabs = () => {
               }
             />
             <Badge
+              overlap="rectangular"
               color="primary"
               invisible={
                 isHoveredAll ||
@@ -724,6 +726,7 @@ const TicketsManagerTabs = () => {
             </Badge>
             {user.profile === "admin" && (
               <Badge
+                overlap="rectangular"
                 color="primary"
                 invisible={
                   isHoveredAll ||
@@ -746,6 +749,7 @@ const TicketsManagerTabs = () => {
               </Badge>
             )}
             <Badge
+              overlap="rectangular"
               // color="primary"
               invisible={
                 !(
@@ -805,6 +809,7 @@ const TicketsManagerTabs = () => {
             </Badge>
 
             <Badge
+              overlap="rectangular"
               color="primary"
               invisible={
                 !(
@@ -864,6 +869,7 @@ const TicketsManagerTabs = () => {
             </Badge>
             {tab !== "closed" && tab !== "search" && (
               <Badge
+                overlap="rectangular"
                 color="primary"
                 invisible={
                   !isHoveredSort ||

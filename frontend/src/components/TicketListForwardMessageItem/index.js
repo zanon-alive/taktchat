@@ -153,6 +153,7 @@ const TicketListForwardMessageItem = ({ ticket, selectedTicket, sendData }) => {
                             </Typography>
                             {ticket.status === "closed" && (
                                 <Badge
+                                    overlap="rectangular"
                                     className={classes.closedBadge}
                                     badgeContent={"closed"}
                                     color="primary"
@@ -191,6 +192,7 @@ const TicketListForwardMessageItem = ({ ticket, selectedTicket, sendData }) => {
                             </Typography>
 
                             <Badge
+                                overlap="rectangular"
                                 className={classes.newMessagesCount}
                                 badgeContent={ticket.unreadMessages}
                                 classes={{

@@ -1,10 +1,20 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import api from "./services/api";
 import "react-toastify/dist/ReactToastify.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ptBR } from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { useMediaQuery } from "@material-ui/core";
+import {
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+} from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
 import { ActiveMenuProvider } from "./context/ActiveMenuContext";
 import Favicon from "react-favicon";
@@ -33,6 +43,47 @@ const App = () => {
   const { getPublicSetting } = useSettings();
   // Estado para controlar o prompt de instalação do PWA
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallDialog, setShowInstallDialog] = useState(false);
+
+  const SESSION_DISMISS_KEY = "taktchat:pwaPromptDismissedSession";
+  const DAILY_SNOOZE_KEY = "taktchat:pwaPromptSnoozeUntil";
+
+  const clearExpiredSnooze = useCallback(() => {
+    const snoozeUntil = localStorage.getItem(DAILY_SNOOZE_KEY);
+    if (snoozeUntil && Number(snoozeUntil) < Date.now()) {
+      localStorage.removeItem(DAILY_SNOOZE_KEY);
+    }
+  }, [DAILY_SNOOZE_KEY]);
+
+  useEffect(() => {
+    clearExpiredSnooze();
+  }, [clearExpiredSnooze]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      sessionStorage.removeItem(SESSION_DISMISS_KEY);
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  const shouldSkipInstallPrompt = useCallback(() => {
+    if (sessionStorage.getItem(SESSION_DISMISS_KEY) === "true") {
+      return true;
+    }
+    const snoozeUntil = localStorage.getItem(DAILY_SNOOZE_KEY);
+    if (snoozeUntil && Number(snoozeUntil) > Date.now()) {
+      return true;
+    }
+    return false;
+  }, [DAILY_SNOOZE_KEY, SESSION_DISMISS_KEY]);
+
+  const snoozeUntilMidnight = useCallback(() => {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(23, 59, 59, 999);
+    localStorage.setItem(DAILY_SNOOZE_KEY, midnight.getTime().toString());
+  }, [DAILY_SNOOZE_KEY]);
 
   const colorMode = useMemo(
     () => ({
@@ -122,15 +173,15 @@ const App = () => {
   // Detecta quando o navegador está pronto para mostrar o prompt de instalação do PWA
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
+      if (shouldSkipInstallPrompt()) {
+        return;
+      }
+
       // Previne o comportamento padrão do navegador
       e.preventDefault();
       // Armazena o evento para uso posterior
       setDeferredPrompt(e);
-      
-      // Mostra o prompt de instalação imediatamente
-      setTimeout(() => {
-        showInstallPrompt();
-      }, 2000); // Pequeno delay para garantir que a página já carregou
+      setShowInstallDialog(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -138,28 +189,47 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [shouldSkipInstallPrompt]);
 
   // Função para mostrar o prompt de instalação
-  const showInstallPrompt = () => {
-    if (deferredPrompt) {
-      // Verifica se o PWA já está instalado
-      if (!window.matchMedia('(display-mode: standalone)').matches) {
-        // Mostra o prompt de instalação
-        deferredPrompt.prompt();
-        
-        // Espera pela resposta do usuário
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Usuário aceitou instalar o app');
-          } else {
-            console.log('Usuário recusou instalar o app');
-          }
-          // Limpa o prompt armazenado, só pode ser usado uma vez
-          setDeferredPrompt(null);
-        });
+  const showInstallPrompt = useCallback(async () => {
+    if (!deferredPrompt) return;
+
+    try {
+      // Evita solicitar instalação se o app já estiver em modo standalone
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setDeferredPrompt(null);
+        setShowInstallDialog(false);
+        return;
       }
+
+      deferredPrompt.prompt();
+
+      const choiceResult = await deferredPrompt.userChoice;
+      if (choiceResult?.outcome === 'accepted') {
+        console.log('Usuário aceitou instalar o app');
+      } else {
+        console.log('Usuário recusou instalar o app');
+      }
+    } catch (err) {
+      console.warn('Falha ao exibir o prompt de instalação do PWA', err);
+    } finally {
+      // O evento só pode ser usado uma vez
+      setDeferredPrompt(null);
+      setShowInstallDialog(false);
     }
+  }, [deferredPrompt]);
+
+  const handleRemindLaterThisSession = () => {
+    sessionStorage.setItem(SESSION_DISMISS_KEY, "true");
+    setShowInstallDialog(false);
+    setDeferredPrompt(null);
+  };
+
+  const handleRemindTomorrow = () => {
+    snoozeUntilMidnight();
+    setShowInstallDialog(false);
+    setDeferredPrompt(null);
   };
 
   useEffect(() => {
@@ -252,9 +322,43 @@ const App = () => {
         <ThemeProvider theme={theme}>
           <QueryClientProvider client={queryClient}>
             <ActiveMenuProvider>
-  <div style={{ position: "relative", overflow: "visible", zIndex: 0, minHeight: "100vh" }}>
-    <Routes />
-  </div>
+              <div style={{ position: "relative", overflow: "visible", zIndex: 0, minHeight: "100vh" }}>
+                <Routes />
+
+                <Dialog
+                  open={showInstallDialog}
+                  onClose={handleRemindLaterThisSession}
+                  aria-labelledby="install-dialog-title"
+                >
+                  <DialogTitle id="install-dialog-title">Instalar o TaktChat?</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText component="div">
+                      <Typography gutterBottom>
+                        Instale o aplicativo para ter uma experiência mais rápida e estável:
+                      </Typography>
+                      <Box component="ul" pl={3} mb={0}>
+                        <li>Atalho direto na área de trabalho/dispositivo;</li>
+                        <li>Tela cheia, sem barra do navegador;</li>
+                        <li>Notificações mais confiáveis e discretas.</li>
+                      </Box>
+                      <Typography variant="body2" color="textSecondary" style={{ marginTop: 16 }}>
+                        Você pode instalar agora ou pedir para lembrar mais tarde. Esse lembrete expira às 00h se você adiar.
+                      </Typography>
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions style={{ padding: "0 24px 16px" }}>
+                    <Button onClick={handleRemindLaterThisSession} color="default">
+                      Perguntar depois
+                    </Button>
+                    <Button onClick={handleRemindTomorrow} color="secondary">
+                      Só amanhã
+                    </Button>
+                    <Button onClick={showInstallPrompt} color="primary" variant="contained">
+                      Instalar agora
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </div>
             </ActiveMenuProvider>
           </QueryClientProvider>
         </ThemeProvider>

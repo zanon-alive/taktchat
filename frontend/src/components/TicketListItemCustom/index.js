@@ -228,7 +228,7 @@ const useStyles = makeStyles((theme) => ({
             margin: 2,
             padding: 3
         },
-        "& .MuiBadge-anchorOriginTopRightRectangle": {
+        "& .MuiBadge-anchorOriginTopRightRectangular": {
             transform: "scale(1) translate(0%, -40%)",
         },
     },
@@ -740,9 +740,9 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                     <br />
                                 )}
                                 <span className={classes.secondaryContentSecond} >
-                                    {ticket?.whatsapp ? <Badge className={classes.connectionTag} style={{ backgroundColor: ticket.channel === "whatsapp" ? "#25D366" : ticket.channel === "facebook" ? "#4267B2" : "#E1306C" }}>{ticket.whatsapp?.name.toUpperCase()}</Badge> : <br></br>}
-                                    {<Badge style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queueId ? ticket.queue?.name.toUpperCase() : ticket.status === "lgpd" ? "LGPD" : "SEM FILA"}</Badge>}
-                                    {ticket?.user && (<Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
+                                    {ticket?.whatsapp ? <Badge overlap="rectangular" className={classes.connectionTag} style={{ backgroundColor: ticket.channel === "whatsapp" ? "#25D366" : ticket.channel === "facebook" ? "#4267B2" : "#E1306C" }}>{ticket.whatsapp?.name.toUpperCase()}</Badge> : <br></br>}
+                                    {<Badge overlap="rectangular" style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queueId ? ticket.queue?.name.toUpperCase() : ticket.status === "lgpd" ? "LGPD" : "SEM FILA"}</Badge>}
+                                    {ticket?.user && (<Badge overlap="rectangular" style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
                                 </span>
                                 <span className={classes.secondaryContentSecond} >
                                     {
@@ -756,6 +756,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                             </Typography>
 
                             <Badge
+                                overlap="rectangular"
                                 className={classes.newMessagesCount}
                                 badgeContent={ticket.unreadMessages}
                                 classes={{

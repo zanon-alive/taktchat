@@ -315,7 +315,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const mainListItems = useMemo(
-    () => <MainListItems drawerOpen={drawerOpen} collapsed={!drawerOpen} />,
+    () => <MainListItems collapsed={!drawerOpen} />,
     [user, drawerOpen]
   );
 
@@ -440,12 +440,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     handleLogout();
   };
 
-  const drawerClose = () => {
-    if (document.body.offsetWidth < 600 || user.defaultMenu === "closed") {
-      setDrawerOpen(false);
-    }
-  };
-
   const handleRefreshPage = () => {
     window.location.reload(false);
   };
@@ -489,7 +483,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         </div>
         <List className={classes.containerWithScroll}>
           {/* {mainListItems} */}
-          <MainListItems collapsed={!drawerOpen} drawerClose={drawerClose} />
+          <MainListItems collapsed={!drawerOpen} />
         </List>
         <Divider />
       </Drawer>

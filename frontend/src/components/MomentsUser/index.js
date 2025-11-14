@@ -239,8 +239,8 @@ const DashboardManage = () => {
                                 {`${ticket.lastMessage?.length > 30 ? String(ticket.lastMessage).substring(0, 27) + '...' : ticket.lastMessage}`}
                               </Typography>
                             </div>
-                            <Badge className={classes.connectionTag}>{ticket?.whatsapp?.name}</Badge>
-                            <Badge style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name.toUpperCase() || "SEM FILA"}</Badge>
+                            <Badge overlap="rectangular" className={classes.connectionTag}>{ticket?.whatsapp?.name}</Badge>
+                            <Badge overlap="rectangular" style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name.toUpperCase() || "SEM FILA"}</Badge>
                           </Fragment>
                         }
                       />
@@ -327,8 +327,8 @@ const DashboardManage = () => {
                                 {`${ticket.lastMessage?.length > 30 ? String(ticket.lastMessage).substring(0, 27) + '...' : ticket.lastMessage}`}
                               </Typography>
                             </div>
-                            <Badge className={classes.connectionTag}>{ticket?.whatsapp?.name}</Badge>
-                            <Badge style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name.toUpperCase() || "SEM FILA"}</Badge>
+                            <Badge overlap="rectangular" className={classes.connectionTag}>{ticket?.whatsapp?.name}</Badge>
+                            <Badge overlap="rectangular" style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name.toUpperCase() || "SEM FILA"}</Badge>
                           </Fragment>
                         }
                       />
