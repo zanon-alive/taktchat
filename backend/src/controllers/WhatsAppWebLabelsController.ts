@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import logger from "../utils/logger";
+import RebuildDeviceTagsService from "../services/WbotServices/RebuildDeviceTagsService";
+import LabelSyncService from "../services/WbotServices/LabelSyncService";
 
 export const getDeviceLabelsWWeb = async (req: Request, res: Response) => {
   try {
@@ -28,6 +30,24 @@ export const getDeviceLabelsWWeb = async (req: Request, res: Response) => {
       success: false,
       error: error?.message || "Erro ao buscar labels via WhatsApp-Web.js"
     });
+  }
+};
+
+export const fullLabelSync = async (req: Request, res: Response) => {
+  const { companyId } = req.user as any;
+  const whatsappId = req.query.whatsappId ? Number(req.query.whatsappId) : undefined;
+
+  if (!whatsappId) {
+    return res.status(400).json({ success: false, error: "whatsappId não informado" });
+  }
+
+  try {
+    const rebuild = await RebuildDeviceTagsService(companyId, whatsappId);
+    const syncResult = await LabelSyncService.sync({ companyId, whatsappId, force: true, useWebClient: true });
+    return res.status(200).json({ success: true, rebuild, sync: syncResult });
+  } catch (error: any) {
+    logger.error(`[fullLabelSync] Erro ao executar full sync: ${error?.message}`);
+    return res.status(500).json({ success: false, error: error?.message || "Erro ao sincronizar labels" });
   }
 };
 

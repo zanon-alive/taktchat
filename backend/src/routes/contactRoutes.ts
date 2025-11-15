@@ -14,7 +14,7 @@ const upload = multer(uploadConfig);
 contactRoutes.post("/contacts/import", isAuth, ImportPhoneContactsController.store);
 
 contactRoutes.post("/contactsImport", isAuth, ContactController.importXls);
-contactRoutes.get("/contacts/import-progress", isAuth, ContactController.importProgress);
+contactRoutes.get("/contacts/import-progress", isAuth, ContactController.importProgress); // Compatibilidade: retorna progresso da importação síncrona
 contactRoutes.get("/contacts", isAuth, ContactController.index);
 contactRoutes.get("/contacts/duplicates", isAuth, ContactController.listDuplicates);
 contactRoutes.get("/contacts/pending-normalization", isAuth, ContactController.listPendingNormalization);
@@ -54,10 +54,20 @@ contactRoutes.get("/contacts/device-contacts", isAuth, ContactController.getDevi
 contactRoutes.post("/contacts/import-device-contacts", isAuth, ContactController.importDeviceContactsAuto);
 contactRoutes.post("/contacts/rebuild-device-tags", isAuth, ContactController.rebuildDeviceTags);
 contactRoutes.post("/contacts/import-with-tags", isAuth, ContactController.importWithTags);
+contactRoutes.get("/contacts/import-tags/preset", isAuth, ContactController.getTagImportPreset);
+contactRoutes.post("/contacts/import-tags/preset", isAuth, ContactController.saveTagImportPreset);
 contactRoutes.get("/contacts/debug-device-data", isAuth, ContactController.debugDeviceData);
 contactRoutes.post("/contacts/force-appstate-sync", isAuth, ContactController.forceAppStateSync);
 contactRoutes.post("/contacts/test-create-label", isAuth, ContactController.testCreateLabel);
 contactRoutes.post("/contacts/normalize-numbers", isAuth, ContactController.normalizeNumbers);
+
+// ========== ROTAS DE IMPORTAÇÃO ASSÍNCRONA ==========
+contactRoutes.post("/contacts/import-async", isAuth, upload.single("file"), ContactController.importContactsAsync);
+contactRoutes.get("/contacts/import-jobs/:jobId/status", isAuth, ContactController.getImportJobStatus);
+contactRoutes.post("/contacts/import-jobs/:jobId/cancel", isAuth, ContactController.cancelImport);
+contactRoutes.get("/contacts/import-logs", isAuth, ContactController.listImportLogs);
+contactRoutes.get("/contacts/import-logs/:id", isAuth, ContactController.showImportLog);
+
 // contactRoutes.get("/contacts/list-whatsapp", isAuth, ContactController.listWhatsapp);
 
 export default contactRoutes;

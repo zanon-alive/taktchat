@@ -56,6 +56,7 @@ import GetDefaultWhatsApp from "../helpers/GetDefaultWhatsApp";
 import Contact from "../models/Contact";
 import Tag from "../models/Tag";
 import ContactTag from "../models/ContactTag";
+import ContactTagImportPreset from "../models/ContactTagImportPreset";
 import logger from "../utils/logger";
 import ValidateContactService from "../services/ContactServices/ValidateContactService";
 import { isValidCPF, isValidCNPJ } from "../utils/validators";
@@ -69,6 +70,12 @@ import GetDeviceContactsService from "../services/WbotServices/GetDeviceContacts
 import ImportDeviceContactsAutoService from "../services/ContactServices/ImportDeviceContactsAutoService";
 import RebuildDeviceTagsService from "../services/WbotServices/RebuildDeviceTagsService";
 import { safeNormalizePhoneNumber } from "../utils/phone";
+import { addImportContactsJob, cancelImportJob } from "../queues/ImportContactsQueue";
+import ListContactImportLogsService from "../services/ContactServices/ListContactImportLogsService";
+import ShowContactImportLogService from "../services/ContactServices/ShowContactImportLogService";
+import GetImportJobStatusService from "../services/ContactServices/GetImportJobStatusService";
+import { v4 as uuidv4 } from "uuid";
+import { createAuditLog, AuditActions, AuditEntities } from "../helpers/AuditLogger";
 
 type IndexQuery = {
   searchParam: string;
@@ -1107,6 +1114,64 @@ export const bulkRemove = async (req: Request, res: Response): Promise<Response>
     return res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
+
+export const getTagImportPreset = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { whatsappId } = req.query as any;
+
+  if (!whatsappId) {
+    return res.status(400).json({ error: "whatsappId não informado" });
+  }
+
+  try {
+    const preset = await ContactTagImportPreset.findOne({ where: { companyId, whatsappId: Number(whatsappId) } });
+    if (!preset) {
+      return res.status(200).json({ hasPreset: false });
+    }
+    const mapping = preset.mappingJson ? JSON.parse(preset.mappingJson) : null;
+    return res.status(200).json({ hasPreset: true, preset: { name: preset.name, lastUsedAt: preset.lastUsedAt, mapping } });
+  } catch (error: any) {
+    logger.error("Erro ao obter preset de tags:", error);
+    return res.status(500).json({ error: error?.message || "Erro ao obter preset" });
+  }
+};
+
+export const saveTagImportPreset = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+  const { whatsappId, name, mapping } = req.body as any;
+
+  if (!whatsappId || !mapping) {
+    return res.status(400).json({ error: "whatsappId e mapping são obrigatórios" });
+  }
+
+  try {
+    const payload = {
+      companyId,
+      whatsappId: Number(whatsappId),
+      name: name || "default",
+      mappingJson: JSON.stringify(mapping),
+      lastUsedAt: new Date()
+    };
+
+    const [preset] = await ContactTagImportPreset.findOrCreate({
+      where: { companyId, whatsappId: Number(whatsappId) },
+      defaults: payload
+    });
+
+    if (!preset.isNewRecord) {
+      await preset.update({
+        name: payload.name,
+        mappingJson: payload.mappingJson,
+        lastUsedAt: payload.lastUsedAt
+      });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (error: any) {
+    logger.error("Erro ao salvar preset de tags:", error);
+    return res.status(500).json({ error: error?.message || "Erro ao salvar preset" });
+  }
+};
 export const toggleAcceptAudio = async (req: Request, res: Response): Promise<Response> => {
   var { contactId } = req.params;
   const { companyId } = req.user;
@@ -1163,6 +1228,18 @@ export const upload = async (req: Request, res: Response) => {
 
   return res.status(200).json(response);
 };
+
+  // Endpoint de compatibilidade para não quebrar frontend antigo
+  export const importProgress = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      // progressId fixo apenas para compatibilidade com o fluxo antigo
+      const progress = getImportProgress("legacy");
+      return res.status(200).json(progress || { isImporting: false, progress: 0, total: 0 });
+    } catch (error: any) {
+      logger.error("Erro ao obter progresso de importação:", error);
+      return res.status(200).json({ isImporting: false, progress: 0, total: 0 });
+    }
+  };
 
 export const getContactProfileURL = async (req: Request, res: Response) => {
   const { number } = req.params
@@ -1415,28 +1492,30 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
 
   export const importWithTags = async (req: Request, res: Response): Promise<Response> => {
     const { companyId } = req.user;
-    const { tagMapping, whatsappId, progressId, silentMode } = req.body as any; // Adicionar silentMode
+    const { tagMapping, whatsappId, progressId, silentMode, dryRun } = req.body as any;
 
     try {
-      // Importar contatos com mapeamento de tags
-      if (tagMapping && progressId) {
-        tagMapping.__options = { ...(tagMapping.__options || {}), progressId };
+      if (tagMapping) {
+        tagMapping.__options = {
+          ...(tagMapping.__options || {}),
+          progressId: progressId || tagMapping.__options?.progressId,
+          dryRun: typeof dryRun === "boolean" ? dryRun : Boolean(tagMapping.__options?.dryRun)
+        };
       }
-      const result = await ImportContactsService(companyId, undefined, tagMapping, whatsappId, silentMode); // Passar silentMode
-      return res.status(200).json(result);
-    } catch (error) {
-      logger.error("Erro ao importar contatos com tags:", error);
-      return res.status(500).json({ error: "Erro ao importar contatos com tags" });
-    }
-  };
 
-  export const importProgress = async (req: Request, res: Response): Promise<Response> => {
-    try {
-      const { progressId } = req.query as any;
-      const prog = getImportProgress(String(progressId || ''));
-      return res.status(200).json({ success: true, progress: prog });
+      const result = await ImportContactsService(
+        companyId,
+        undefined,
+        tagMapping,
+        whatsappId,
+        silentMode,
+        typeof dryRun === "boolean" ? dryRun : undefined
+      );
+
+      return res.status(200).json(result);
     } catch (error: any) {
-      return res.status(500).json({ success: false, error: error?.message || 'Erro ao obter progresso de importação' });
+      logger.error("Erro ao importar contatos com tags:", error);
+      return res.status(500).json({ error: error?.message || "Erro ao importar contatos com tags" });
     }
   };
 
@@ -1547,6 +1626,199 @@ export const getContactProfileURL = async (req: Request, res: Response) => {
       return res.status(500).json({ 
         error: "Erro interno do servidor",
         message: error?.message || "Erro desconhecido"
+      });
+    }
+  };
+
+  // ========== NOVOS ENDPOINTS DE IMPORTAÇÃO ASSÍNCRONA ==========
+
+  export const importContactsAsync = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    const { companyId, id: userId, username } = req.user;
+    const { tagMapping, whatsappId, silentMode, dryRun } = req.body;
+    const file = req.file;
+
+    try {
+      // Validações
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (file && file.size > MAX_FILE_SIZE) {
+        return res.status(400).json({ error: "Arquivo muito grande. Máximo 10MB." });
+      }
+
+      const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+      if (file) {
+        const ext = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
+        if (!allowedExtensions.includes(ext)) {
+          return res.status(400).json({ error: "Formato de arquivo inválido. Use .xlsx, .xls ou .csv" });
+        }
+      }
+
+      // Gerar ID único para o job
+      const jobId = uuidv4();
+
+      // Preparar dados do job
+      const jobData: any = {
+        jobId,
+        companyId,
+        userId: Number(userId),
+        userName: username || "Usuário",
+        source: file ? "file" : "tags",
+        fileName: file?.originalname,
+        fileBuffer: file?.buffer,
+        tagMapping,
+        whatsappId: whatsappId ? Number(whatsappId) : undefined,
+        silentMode: Boolean(silentMode),
+        dryRun: Boolean(dryRun)
+      };
+
+      // Adicionar job à fila
+      const job = await addImportContactsJob(jobData);
+
+      // Log de auditoria
+      await createAuditLog({
+        userId: Number(userId),
+        userName: username || "Usuário",
+        companyId,
+        action: AuditActions.IMPORT_START,
+        entity: AuditEntities.CONTACT,
+        details: {
+          jobId,
+          source: jobData.source,
+          fileName: jobData.fileName,
+          hasMapping: !!tagMapping,
+          dryRun: Boolean(dryRun)
+        }
+      });
+
+      logger.info(`[importContactsAsync] Job ${jobId} criado e adicionado à fila`);
+
+      return res.status(202).json({
+        message: "Importação iniciada em background",
+        jobId,
+        status: "queued"
+      });
+
+    } catch (error: any) {
+      logger.error("Erro ao iniciar importação assíncrona:", error);
+      return res.status(500).json({ 
+        error: "Erro ao iniciar importação",
+        message: error?.message || "Erro desconhecido"
+      });
+    }
+  };
+
+  export const getImportJobStatus = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    const { companyId } = req.user;
+    const { jobId } = req.params;
+
+    try {
+      const status = await GetImportJobStatusService({
+        jobId,
+        companyId
+      });
+
+      return res.status(200).json(status);
+    } catch (error: any) {
+      logger.error(`Erro ao obter status do job ${jobId}:`, error);
+      return res.status(error?.statusCode || 500).json({ 
+        error: error?.message || "Erro ao obter status do job"
+      });
+    }
+  };
+
+  export const cancelImport = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    const { companyId, id: userId, username } = req.user;
+    const { jobId } = req.params;
+
+    try {
+      // Verificar se o job pertence à empresa
+      const status = await GetImportJobStatusService({
+        jobId,
+        companyId
+      });
+
+      if (status.status === "completed" || status.status === "failed" || status.status === "cancelled") {
+        return res.status(400).json({ 
+          error: "Job já foi concluído, falhou ou foi cancelado"
+        });
+      }
+
+      // Cancelar job
+      cancelImportJob(jobId);
+
+      // Log de auditoria
+      await createAuditLog({
+        userId: Number(userId),
+        userName: username || "Usuário",
+        companyId,
+        action: "Cancelamento",
+        entity: AuditEntities.CONTACT,
+        details: {
+          jobId,
+          action: "import_cancelled"
+        }
+      });
+
+      logger.info(`[cancelImport] Job ${jobId} marcado para cancelamento`);
+
+      return res.status(200).json({
+        message: "Job marcado para cancelamento",
+        jobId
+      });
+
+    } catch (error: any) {
+      logger.error(`Erro ao cancelar job ${jobId}:`, error);
+      return res.status(error?.statusCode || 500).json({ 
+        error: error?.message || "Erro ao cancelar job"
+      });
+    }
+  };
+
+  export const listImportLogs = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    const { companyId } = req.user;
+    const { userId, status, source, searchParam, pageNumber } = req.query as any;
+
+    try {
+      const result = await ListContactImportLogsService({
+        companyId,
+        userId: userId ? Number(userId) : undefined,
+        status,
+        source,
+        searchParam,
+        pageNumber: pageNumber || "1"
+      });
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      logger.error("Erro ao listar logs de importação:", error);
+      return res.status(500).json({ 
+        error: "Erro ao listar logs",
+        message: error?.message || "Erro desconhecido"
+      });
+    }
+  };
+
+  export const showImportLog = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    const { companyId } = req.user;
+    const { id } = req.params;
+
+    try {
+      const log = await ShowContactImportLogService({
+        id,
+        companyId
+      });
+
+      // Parse JSON fields
+      const result = {
+        ...log.toJSON(),
+        errors: log.errors ? JSON.parse(log.errors) : [],
+        options: log.options ? JSON.parse(log.options) : {}
+      };
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      logger.error(`Erro ao buscar log ${id}:`, error);
+      return res.status(error?.statusCode || 500).json({ 
+        error: error?.message || "Erro ao buscar log"
       });
     }
   };

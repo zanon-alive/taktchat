@@ -16,6 +16,7 @@ import AppError from "./errors/AppError";
 import routes from "./routes";
 import logger from "./utils/logger";
 import { messageQueue, sendScheduledMessages } from "./queues";
+import { importContactsQueue } from "./queues/ImportContactsQueue";
 import BullQueue from "./libs/queue"
 import BullBoard from 'bull-board';
 import basicAuth from 'basic-auth';
@@ -42,7 +43,8 @@ const app = express();
 // Configuração de filas
 app.set("queues", {
   messageQueue,
-  sendScheduledMessages
+  sendScheduledMessages,
+  importContactsQueue
 });
 
 const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")

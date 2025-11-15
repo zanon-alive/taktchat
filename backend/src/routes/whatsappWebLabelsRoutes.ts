@@ -7,7 +7,8 @@ import {
   getLabelsProgressWWeb,
   cancelLabelsOperationWWeb,
   initializeWhatsAppWebConnection,
-  getLabelsQrImageWWeb
+  getLabelsQrImageWWeb,
+  fullLabelSync
 } from "../controllers/WhatsAppWebLabelsController";
 
 const whatsappWebLabelsRoutes = express.Router();
@@ -32,5 +33,8 @@ whatsappWebLabelsRoutes.get("/whatsapp-web/labels/cancel", isAuth, cancelLabelsO
 
 // Inicializar conexão WhatsApp-Web.js
 whatsappWebLabelsRoutes.post("/whatsapp-web/initialize", isAuth, initializeWhatsAppWebConnection);
+
+// Full sync de labels (Baileys + WhatsApp Web)
+whatsappWebLabelsRoutes.post("/whatsapp-web/labels/full-sync", isAuth, fullLabelSync);
 
 export default whatsappWebLabelsRoutes;
