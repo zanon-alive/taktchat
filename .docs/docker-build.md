@@ -23,9 +23,14 @@ Cada Dockerfile já contém o fluxo de build específico (install + build + imag
 ```bash
 docker build \
   -f frontend/Dockerfile \
+  --build-arg REACT_APP_BACKEND_URL=https://taktchat-api.alivesolucoes.com.br \
+  --build-arg REACT_APP_SOCKET_URL=https://taktchat-api.alivesolucoes.com.br \
+  --build-arg PUBLIC_URL=https://taktchat.alivesolucoes.com.br \
   -t zanonalivesolucoes/taktchat-frontend:latest \
   frontend
 ```
+
+> **Observação**: os argumentos possuem default (ambiente local), mas em produção precisam ser definidos para refletir o domínio correto. Outros argumentos opcionais: `REACT_APP_PRIMARY_COLOR`, `REACT_APP_PRIMARY_DARK`, `REACT_APP_FRONTEND_VERSION`.
 
 ### Backend
 ```bash

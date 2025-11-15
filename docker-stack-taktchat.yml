@@ -1,5 +1,8 @@
 version: "3.8"
 
+# Stack utilizado para publicar as imagens `zanonalivesolucoes/taktchat-*`
+# Atualizado conforme ambientes fornecidos para a VPS (14/11/2025)
+
 services:
   taktchat-backend:
     image: zanonalivesolucoes/taktchat-backend:latest

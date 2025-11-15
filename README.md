@@ -10,6 +10,16 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - **Frontend**: React 17, Material UI, CRACO.
 - **Infraestrutura**: PostgreSQL 15, Redis 6.2, Docker Compose.
 
+### Funcionalidades em alto nível
+
+- Atendimento omnichannel com múltiplas filas, Kanban, tags e automações anti-ban.
+- Campanhas segmentadas, Flow Builder visual, integrações com bots/IA e controle de cadência.
+- Contatos, listas, arquivos inteligentes, dashboards e relatórios operacionais.
+- Multi-empresa nativa, perfis e permissões granulares, painel financeiro e billing.
+- Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
+
+> Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.
+
 ### Início rápido
 
 ```bash
