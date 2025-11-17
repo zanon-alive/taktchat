@@ -29,7 +29,7 @@ const Route = ({ component: Component, isPrivate = false, ...rest }) => {
 		<>
 			{loading && <BackdropLoading />}
 			<Suspense fallback={<BackdropLoading />}>
-				<RouterRoute {...rest} component={Component} />
+			<RouterRoute {...rest} component={Component} />
 			</Suspense>
 		</>
 	);

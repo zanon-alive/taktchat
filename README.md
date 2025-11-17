@@ -19,7 +19,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
 - **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).
 
-> Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.  
+> Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.
 > WhatsApp API Oficial: `.docs/funcionalidades/whatsapp-api-oficial/`
 
 ### Início rápido

@@ -95,10 +95,10 @@ const useAuth = () => {
       } catch (err) {
         // falha de refresh inicial: garantir estado limpo
         if (isMountedRef.current) {
-          localStorage.removeItem("token");
-          api.defaults.headers.Authorization = undefined;
+        localStorage.removeItem("token");
+        api.defaults.headers.Authorization = undefined;
           safeSetState(setIsAuth, false);
-          // não exibir toast aqui para não poluir ao simplesmente abrir o app sem sessão
+        // não exibir toast aqui para não poluir ao simplesmente abrir o app sem sessão
         }
       } finally {
         if (isMountedRef.current) {
@@ -231,7 +231,7 @@ Entre em contato com o Suporte para mais informações! `);
 
     } catch (err) {
       if (isMountedRef.current) {
-        toastError(err);
+      toastError(err);
         safeSetState(setLoading, false);
       }
     }
@@ -259,7 +259,7 @@ Entre em contato com o Suporte para mais informações! `);
       history.push("/login");
     } catch (err) {
       if (isMountedRef.current) {
-        toastError(err);
+      toastError(err);
         safeSetState(setLoading, false);
       }
     }
