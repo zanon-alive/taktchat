@@ -544,6 +544,28 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               // Se necessário sincronizar labels posteriormente, fazer com delay e apenas labels específicos
               logger.info(`[wbot] Conexão aberta para whatsappId=${whatsapp.id}. ResyncAppState completo desabilitado para evitar device_removed.`);
 
+              // Salvar credenciais periodicamente enquanto conectado (a cada 30 segundos)
+              // Isso garante que credenciais estejam sempre atualizadas
+              const saveCredsInterval = setInterval(async () => {
+                try {
+                  if (wsocket && (wsocket as any).user?.id) {
+                    await saveCreds();
+                    logger.debug(`[wbot] Credenciais salvas periodicamente para whatsappId=${whatsapp.id}`);
+                  } else {
+                    clearInterval(saveCredsInterval);
+                  }
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao salvar credenciais periodicamente: ${err?.message}`);
+                }
+              }, 30000); // Salvar a cada 30 segundos
+
+              // Limpar intervalo quando desconectar
+              wsocket.ev.on("connection.update", (update: any) => {
+                if (update.connection === "close") {
+                  clearInterval(saveCredsInterval);
+                }
+              });
+
               resolve(wsocket);
             }
 
