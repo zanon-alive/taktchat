@@ -51,6 +51,7 @@ import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
 import AISettings from "../components/AISettings";
 import OnboardingDocs from "../pages/OnboardingDocs";
+import AdminDocs from "../pages/AdminDocs";
 
 
 const Routes = () => {
@@ -69,6 +70,7 @@ const Routes = () => {
         <TicketsContextProvider>
             <Switch>
             <Route exact path="/docs" component={OnboardingDocs} />
+            <Route exact path="/docs_admin" component={AdminDocs} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
             <Route exact path="/forgot-password" component={ForgotPassword} />
