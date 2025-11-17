@@ -704,3 +704,4 @@ Esta documentação cobre as principais funcionalidades administrativas do TaktC
 
 **Última atualização:** 2025-01-27
 
+
