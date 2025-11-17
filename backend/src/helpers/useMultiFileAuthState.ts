@@ -94,8 +94,23 @@ export const useMultiFileAuthState = async (
     } catch {}
   };
 
-  const creds: AuthenticationCreds =
-    (await readData("creds")) || initAuthCreds();
+  const savedCreds = await readData("creds");
+  const creds: AuthenticationCreds = savedCreds || initAuthCreds();
+
+  // Log informativo sobre carregamento de credenciais
+  if (savedCreds) {
+    try {
+      console.log(
+        `[BaileysAuth] Credenciais carregadas do arquivo para whatsappId=${whatsapp.id}. MeId: ${savedCreds.me?.id || 'N/A'}`
+      );
+    } catch {}
+  } else {
+    try {
+      console.log(
+        `[BaileysAuth] Nenhuma credencial salva encontrada para whatsappId=${whatsapp.id}. Inicializando novas credenciais.`
+      );
+    } catch {}
+  }
 
   return {
     state: {
