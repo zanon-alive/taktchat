@@ -508,7 +508,7 @@ const Contacts = () => {
         // Executa após 2 segundos da página carregar
         const timer = setTimeout(refreshAvatars, 2000);
         return () => clearTimeout(timer);
-    }, [contacts.length > 0]); // Executa quando contatos são carregados
+    }, [contacts.length]); // Executa quando contatos são carregados
 
     useEffect(() => {
         const companyId = user.companyId;

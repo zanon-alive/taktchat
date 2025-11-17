@@ -9,6 +9,7 @@ declare global {
         companyId: number;
         profile: string;
         username?: string;
+        super?: boolean;
       };
       files?: any;
     }

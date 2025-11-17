@@ -60,6 +60,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     name,
     phone,
     profile,
+    super: isSuper,
     companyId: bodyCompanyId,
     queueIds,
     companyName,
@@ -86,8 +87,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { dateToClient } = useDate();
 
   if (req.user !== undefined) {
-    const { companyId: cId } = req.user;
+    const { companyId: cId, super: requestUserIsSuper } = req.user;
     userCompanyId = cId;
+
+    // Validação: Apenas Super Admins podem criar outros Super Admins
+    if (isSuper === true && requestUserIsSuper !== true) {
+      throw new AppError("ERR_NO_PERMISSION", 403);
+    }
   }
 
   if (
@@ -179,6 +185,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       password,
       name,
       profile,
+      super: isSuper,
       companyId: companyUser,
       queueIds,
       startWork,
@@ -235,13 +242,18 @@ export const update = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  const { id: requestUserId, companyId, profile } = req.user;
+  const { id: requestUserId, companyId, profile, super: requestUserIsSuper } = req.user;
   const { userId } = req.params;
   const userData = req.body;
 
   // LÓGICA DE PERMISSÃO CORRIGIDA
   // Se o usuário não for admin, ele só pode alterar o próprio perfil.
   if (profile !== "admin" && userId !== requestUserId) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  // Validação: Apenas Super Admins podem alterar o campo super de outros usuários
+  if (userData.super !== undefined && userData.super === true && requestUserIsSuper !== true) {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 

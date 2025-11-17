@@ -28,7 +28,7 @@ import useWhatsApps from "../../hooks/useWhatsApps";
 import useTags from "../../hooks/useTags";
 
 import { Can } from "../Can";
-import { Avatar, Grid, Input, Paper, Tab, Tabs, Chip, Typography, Divider } from "@material-ui/core";
+import { Avatar, Grid, Input, Paper, Tab, Tabs, Chip, Typography, Divider, FormControlLabel, Switch } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getBackendUrl } from "../../config";
 import TabPanel from "../TabPanel";
@@ -134,6 +134,7 @@ const UserModal = ({ open, onClose, userId }) => {
     email: "",
     password: "",
     profile: "user",
+    super: false,
     startWork: "00:00",
     endWork: "23:59",
     farewellMessage: "",
@@ -404,6 +405,25 @@ const UserModal = ({ open, onClose, userId }) => {
                         </FormControl>
                       </Grid>
                     </Grid>
+                    {loggedInUser?.super === true && (
+                      <Grid container spacing={1}>
+                        <Grid item xs={12} md={12} xl={12}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={values.super || false}
+                                onChange={(e) => setFieldValue("super", e.target.checked)}
+                                color="primary"
+                              />
+                            }
+                            label="Super Admin"
+                          />
+                          <Typography variant="caption" color="textSecondary" style={{ display: "block", marginTop: 4 }}>
+                            Apenas Super Admins podem criar ou editar outros Super Admins
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    )}
                     <Grid container spacing={1}>
                       <Grid item xs={12} md={12} xl={12}>
                         <Can

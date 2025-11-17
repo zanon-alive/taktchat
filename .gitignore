@@ -145,6 +145,11 @@ restore-list-staged.txt
 restore-list-unstaged.txt
 restore-list-vs-origin.txt
 
+# Ignora arquivos temporários de build e commit
+build_date.txt
+commit.txt
+commit-msg.txt
+
 # Não ignore arquivos importantes do código
 !backend/**/src/**
 !frontend/**/src/**

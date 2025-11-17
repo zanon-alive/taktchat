@@ -1,57 +1,57 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy } from "react";
 import { BrowserRouter, Switch } from "react-router-dom";
 
 import LoggedInLayout from "../layout";
-import Dashboard from "../pages/Dashboard";
-import TicketResponsiveContainer from "../pages/TicketResponsiveContainer";
-import Signup from "../pages/Signup";
-import Login from "../pages/Login";
-import Connections from "../pages/Connections";
-import SettingsCustom from "../pages/SettingsCustom";
-import Financeiro from "../pages/Financeiro";
-import Users from "../pages/Users";
-import Contacts from "../pages/Contacts";
-import ContactImportPage from "../pages/Contacts/import";
-import ChatMoments from "../pages/Moments"
-import Queues from "../pages/Queues";
-import Tags from "../pages/Tags";
-import MessagesAPI from "../pages/MessagesAPI";
-import Helps from "../pages/Helps";
-import AITutorial from "../pages/Helps/AITutorial";
-import ContactLists from "../pages/ContactLists";
-import ContactListItems from "../pages/ContactListItems";
-import Companies from "../pages/Companies";
-import QuickMessages from "../pages/QuickMessages";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { TicketsContextProvider } from "../context/Tickets/TicketsContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import Route from "./Route";
-import Schedules from "../pages/Schedules";
-import Campaigns from "../pages/Campaigns";
-import CampaignsConfig from "../pages/CampaignsConfig";
-import CampaignDetailedReport from "../pages/CampaignDetailedReport";
-import Annoucements from "../pages/Annoucements";
-import Chat from "../pages/Chat";
-import Prompts from "../pages/Prompts";
-import AllConnections from "../pages/AllConnections";
-import Reports from "../pages/Reports";
-import { FlowBuilderConfig } from "../pages/FlowBuilderConfig";
-// import Integrations from '../pages/Integrations';
-// import GoogleCalendarComponent from '../pages/Integrations/components/GoogleCalendarComponent';
-import FlowBuilder from "../pages/FlowBuilder";
-import FlowDefault from "../pages/FlowDefault"
-import CampaignsPhrase from "../pages/CampaignsPhrase";
-import Subscription from "../pages/Subscription";
-import QueueIntegration from "../pages/QueueIntegration";
-import Files from "../pages/Files";
-import ToDoList from "../pages/ToDoList";
-import Kanban from "../pages/Kanban";
-import TagsKanban from "../pages/TagsKanban";
+
+// Importações diretas apenas para componentes críticos de autenticação (menor bundle inicial)
+import Login from "../pages/Login";
+import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
-import AISettings from "../components/AISettings";
-import OnboardingDocs from "../pages/OnboardingDocs";
-import AdminDocs from "../pages/AdminDocs";
+
+// Lazy loading para todas as outras páginas (code splitting automático)
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const TicketResponsiveContainer = lazy(() => import("../pages/TicketResponsiveContainer"));
+const Connections = lazy(() => import("../pages/Connections"));
+const SettingsCustom = lazy(() => import("../pages/SettingsCustom"));
+const Financeiro = lazy(() => import("../pages/Financeiro"));
+const Users = lazy(() => import("../pages/Users"));
+const Contacts = lazy(() => import("../pages/Contacts"));
+const ContactImportPage = lazy(() => import("../pages/Contacts/import"));
+const ChatMoments = lazy(() => import("../pages/Moments"));
+const Queues = lazy(() => import("../pages/Queues"));
+const Tags = lazy(() => import("../pages/Tags"));
+const MessagesAPI = lazy(() => import("../pages/MessagesAPI"));
+const Helps = lazy(() => import("../pages/Helps"));
+const AITutorial = lazy(() => import("../pages/Helps/AITutorial"));
+const ContactLists = lazy(() => import("../pages/ContactLists"));
+const ContactListItems = lazy(() => import("../pages/ContactListItems"));
+const Companies = lazy(() => import("../pages/Companies"));
+const QuickMessages = lazy(() => import("../pages/QuickMessages"));
+const Schedules = lazy(() => import("../pages/Schedules"));
+const Campaigns = lazy(() => import("../pages/Campaigns"));
+const CampaignsConfig = lazy(() => import("../pages/CampaignsConfig"));
+const CampaignDetailedReport = lazy(() => import("../pages/CampaignDetailedReport"));
+const Annoucements = lazy(() => import("../pages/Annoucements"));
+const Chat = lazy(() => import("../pages/Chat"));
+const Prompts = lazy(() => import("../pages/Prompts"));
+const AllConnections = lazy(() => import("../pages/AllConnections"));
+const Reports = lazy(() => import("../pages/Reports"));
+const FlowBuilderConfig = lazy(() => import("../pages/FlowBuilderConfig").then(module => ({ default: module.FlowBuilderConfig })));
+const FlowBuilder = lazy(() => import("../pages/FlowBuilder"));
+const CampaignsPhrase = lazy(() => import("../pages/CampaignsPhrase"));
+const QueueIntegration = lazy(() => import("../pages/QueueIntegration"));
+const Files = lazy(() => import("../pages/Files"));
+const ToDoList = lazy(() => import("../pages/ToDoList"));
+const Kanban = lazy(() => import("../pages/Kanban"));
+const TagsKanban = lazy(() => import("../pages/TagsKanban"));
+const AISettings = lazy(() => import("../components/AISettings"));
+const OnboardingDocs = lazy(() => import("../pages/OnboardingDocs"));
+const AdminDocs = lazy(() => import("../pages/AdminDocs"));
 
 
 const Routes = () => {

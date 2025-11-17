@@ -119,7 +119,7 @@ const UpdateCompanyService = async (
   console.log("[DEBUG UpdateCompanyService] Usuário que será atualizado - ID:", user.id, "Email atual:", user.email);
   
   // Atualiza o email e senha do usuário apenas se foram fornecidos
-  const userUpdateData = {};
+  const userUpdateData: { email?: string; password?: string } = {};
   if (email && email !== "" && email !== user.email) {
     userUpdateData.email = email;
     console.log("[DEBUG UpdateCompanyService] Email do usuário será atualizado para:", email);

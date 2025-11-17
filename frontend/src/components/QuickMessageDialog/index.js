@@ -147,8 +147,6 @@ const QuickMessageDialog = ({ open, onClose, quickemessageId, reload }) => {
       }
       toast.success(i18n.t("quickMessages.toasts.success"));
       if (typeof reload == "function") {
-        console.log(reload);
-        console.log("0");
         reload();
       }
     } catch (err) {
@@ -171,8 +169,6 @@ const QuickMessageDialog = ({ open, onClose, quickemessageId, reload }) => {
       }));
       toast.success(i18n.t("quickMessages.toasts.deleted"));
       if (typeof reload == "function") {
-        console.log(reload);
-        console.log("1");
         reload();
       }
     }

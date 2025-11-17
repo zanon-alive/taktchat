@@ -103,7 +103,7 @@
   },
   "scripts": {
     "start": "node ./scripts/check_and_kill_port.js && node ./scripts/start-dev.js",
-    "build": "set NODE_OPTIONS=--max-old-space-size=6144&& craco build",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 craco build",
     "test": "craco test"
   },
   "eslintConfig": {

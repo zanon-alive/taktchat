@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { has, isArray } from "lodash";
 
@@ -8,6 +8,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { socketConnection } from "../../services/socket";
+import logger from "../../utils/logger";
 // import { useDate } from "../../hooks/useDate";
 import moment from "moment";
 
@@ -16,15 +17,31 @@ const useAuth = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({});
-  const [socket, setSocket] = useState({})
- 
+  const [socket, setSocket] = useState({});
+  
+  // Ref para rastrear se o componente está montado
+  const isMountedRef = useRef(true);
+
+  // Cleanup quando o componente desmonta
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Helper para atualizar estado apenas se montado
+  const safeSetState = (setter, value) => {
+    if (isMountedRef.current) {
+      setter(value);
+    }
+  };
 
   api.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem("token");
       if (token) {
         config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
-        setIsAuth(true);
+        safeSetState(setIsAuth, true);
       }
       return config;
     },
@@ -57,30 +74,36 @@ const useAuth = () => {
       if (status === 401) {
         localStorage.removeItem("token");
         api.defaults.headers.Authorization = undefined;
-        setIsAuth(false);
+        safeSetState(setIsAuth, false);
       }
       return Promise.reject(error);
     }
   );
 
   useEffect(() => {
+    isMountedRef.current = true;
+    
     (async () => {
       try {
         const { data } = await api.post("/auth/refresh_token");
-        if (data?.token) {
+        if (data?.token && isMountedRef.current) {
           localStorage.setItem("token", JSON.stringify(data.token));
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
-          setIsAuth(true);
-          setUser(data.user);
+          safeSetState(setIsAuth, true);
+          safeSetState(setUser, data.user);
         }
       } catch (err) {
         // falha de refresh inicial: garantir estado limpo
-        localStorage.removeItem("token");
-        api.defaults.headers.Authorization = undefined;
-        setIsAuth(false);
-        // não exibir toast aqui para não poluir ao simplesmente abrir o app sem sessão
+        if (isMountedRef.current) {
+          localStorage.removeItem("token");
+          api.defaults.headers.Authorization = undefined;
+          safeSetState(setIsAuth, false);
+          // não exibir toast aqui para não poluir ao simplesmente abrir o app sem sessão
+        }
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) {
+          safeSetState(setLoading, false);
+        }
       }
     })();
   }, []);
@@ -103,8 +126,8 @@ const useAuth = () => {
       
       if (io && typeof io.on === 'function') {
         io.on(`company-${user.companyId}-user`, (data) => {
-          if (data.action === "update" && data.user.id === user.id) {
-            setUser(data.user);
+          if (data.action === "update" && data.user.id === user.id && isMountedRef.current) {
+            safeSetState(setUser, data.user);
           }
         });
 
@@ -121,10 +144,16 @@ const useAuth = () => {
   }, [user]);
 
   const handleLogin = async (userData) => {
-    setLoading(true);
+    if (!isMountedRef.current) return;
+    
+    safeSetState(setLoading, true);
 
     try {
       const { data } = await api.post("/auth/login", userData);
+      
+      // Verificar se componente ainda está montado antes de continuar
+      if (!isMountedRef.current) return;
+      
       const {
         user: { company },
       } = data;
@@ -166,6 +195,9 @@ const useAuth = () => {
       var before = moment(moment().format()).isBefore(dueDate);
       var dias = moment.duration(diff).asDays();
 
+      // Verificar novamente antes de atualizar estado
+      if (!isMountedRef.current) return;
+
       if (before === true) {
         localStorage.setItem("token", JSON.stringify(data.token));
         // localStorage.setItem("public-token", JSON.stringify(data.user.token));
@@ -173,8 +205,8 @@ const useAuth = () => {
         // localStorage.setItem("userId", id);
         localStorage.setItem("companyDueDate", vencimento);
         api.defaults.headers.Authorization = `Bearer ${data.token}`;
-        setUser(data.user);
-        setIsAuth(true);
+        safeSetState(setUser, data.user);
+        safeSetState(setIsAuth, true);
         toast.success(i18n.t("auth.toasts.success"));
         if (Math.round(dias) < 5) {
           toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
@@ -186,47 +218,57 @@ const useAuth = () => {
         // }, 1000);
 
         history.push("/tickets");
-        setLoading(false);
+        safeSetState(setLoading, false);
       } else {
         // localStorage.setItem("companyId", companyId);
         api.defaults.headers.Authorization = `Bearer ${data.token}`;
-        setIsAuth(true);
+        safeSetState(setIsAuth, true);
         toastError(`Opss! Sua assinatura venceu ${vencimento}.
 Entre em contato com o Suporte para mais informações! `);
         history.push("/financeiro-aberto");
-        setLoading(false);
+        safeSetState(setLoading, false);
       }
 
     } catch (err) {
-      toastError(err);
-      setLoading(false);
+      if (isMountedRef.current) {
+        toastError(err);
+        safeSetState(setLoading, false);
+      }
     }
   };
 
   const handleLogout = async () => {
-    setLoading(true);
+    if (!isMountedRef.current) return;
+    
+    safeSetState(setLoading, true);
 
     try {
       // socket.disconnect();
       await api.delete("/auth/logout");
-      setIsAuth(false);
-      setUser({});
+      
+      // Verificar se componente ainda está montado
+      if (!isMountedRef.current) return;
+      
+      safeSetState(setIsAuth, false);
+      safeSetState(setUser, {});
       localStorage.removeItem("token");
       localStorage.removeItem("cshow");
       // localStorage.removeItem("public-token");
       api.defaults.headers.Authorization = undefined;
-      setLoading(false);
+      safeSetState(setLoading, false);
       history.push("/login");
     } catch (err) {
-      toastError(err);
-      setLoading(false);
+      if (isMountedRef.current) {
+        toastError(err);
+        safeSetState(setLoading, false);
+      }
     }
   };
 
   const getCurrentUserInfo = async () => {
     try {
       const { data } = await api.get("/auth/me");
-      console.log(data)
+      logger.debug(data);
       return data;
     } catch (_) {
       return null;

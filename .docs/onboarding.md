@@ -30,7 +30,9 @@ O Taktchat é uma plataforma omnichannel de mensageria focada em atendimento e c
 - **Banco de Dados:** PostgreSQL 15
 - **Cache/Filas:** Redis 6.2 + Bull
 - **WebSocket:** Socket.IO para comunicação em tempo real
-- **WhatsApp:** Baileys para conexão com WhatsApp
+- **WhatsApp:** Suporte dual channel:
+  - **Baileys** (não oficial, gratuito) - Via QR Code
+  - **WhatsApp Business API Oficial** (Meta, pago) - Via credenciais Meta
 
 ---
 
@@ -46,18 +48,78 @@ O Taktchat é uma plataforma omnichannel de mensageria focada em atendimento e c
 
 #### 2.1. Conectar WhatsApp
 
+O TaktChat suporta **dois tipos de conexão WhatsApp**:
+
+##### Opção A: Baileys (Gratuito, Recomendado para Início)
+
 1. Acesse **Conexões** no menu lateral
 2. Clique em **Nova Conexão**
-3. Preencha o nome da conexão
-4. Clique em **Iniciar Sessão**
-5. Escaneie o QR Code com seu WhatsApp
-6. Aguarde a conexão ser estabelecida (status mudará para "CONECTADO")
+3. Selecione **"Baileys"** como tipo de canal
+4. Preencha o nome da conexão
+5. Clique em **Iniciar Sessão**
+6. Escaneie o QR Code com seu WhatsApp
+7. Aguarde a conexão ser estabelecida (status mudará para "CONECTADO")
 
 **Como funciona:**
 - O sistema utiliza a biblioteca Baileys para criar uma sessão WhatsApp Web
 - O QR Code é gerado e atualizado a cada 45 segundos
 - Após escanear, a sessão é salva em `backend/private/sessions/`
 - A conexão é monitorada continuamente e reconecta automaticamente em caso de queda
+
+**Vantagens:**
+- ✅ Gratuito
+- ✅ Setup rápido (2 minutos)
+- ✅ Ideal para empresas pequenas (< 150 mensagens/dia)
+
+**Limitações:**
+- ⚠️ Risco moderado de banimento
+- ⚠️ Limite de mensagens por dia (~150-500 com anti-ban)
+- ⚠️ Multi-agente pode ser problemático
+
+##### Opção B: WhatsApp Business API Oficial (Pago, Profissional)
+
+1. Acesse **Conexões** no menu lateral
+2. Clique em **Nova Conexão**
+3. Selecione **"API Oficial"** como tipo de canal
+4. Preencha:
+   - **Nome da conexão**
+   - **Phone Number ID** (obtido na Meta Business)
+   - **Access Token** (obtido na Meta Business)
+   - **Business Account ID** (obtido na Meta Business)
+   - **Webhook Verify Token** (token secreto de sua escolha)
+5. Clique em **Salvar**
+6. Configure o webhook na Meta Business usando a URL exibida
+7. Aguarde a conexão ser estabelecida (status mudará para "CONECTADO")
+
+**Como funciona:**
+- Integração com WhatsApp Business API Oficial da Meta
+- Comunicação via REST API (envio de mensagens)
+- Recebimento de mensagens via Webhooks HTTP
+- Validação de webhook garantida pela Meta
+
+**Vantagens:**
+- ✅ Sem risco de banimento
+- ✅ Uptime 99.9% garantido pela Meta
+- ✅ Ilimitado (dentro dos limites de cobrança)
+- ✅ Multi-agente nativo
+- ✅ Templates aprovados para marketing
+- ✅ Botões e listas interativas completos
+- ✅ Webhooks nativos
+- ✅ Suporte oficial da Meta
+
+**Custos:**
+- R$ 0,17 por conversa de serviço
+- R$ 0,34 por conversa de marketing
+- **1.000 primeiras conversas/mês GRÁTIS**
+
+**Documentação Completa:**
+- 📘 [Guia Completo WhatsApp API Oficial](../funcionalidades/whatsapp-api-oficial/index.md)
+- ⚡ [Quick Start (30 min)](../funcionalidades/whatsapp-api-oficial/WHATSAPP_API_QUICKSTART.md)
+- 📚 [Tutorial de Integração Meta](../funcionalidades/whatsapp-api-oficial/tutorial-integracao-meta.md)
+
+**Quando usar cada opção:**
+- **Baileys:** Pequenas empresas, baixo volume, custo zero importante
+- **API Oficial:** Empresas médias/grandes, alto volume, necessidade de confiabilidade, marketing via templates
 
 #### 2.2. Criar Fila de Atendimento
 

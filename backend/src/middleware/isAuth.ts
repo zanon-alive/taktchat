@@ -12,14 +12,17 @@ interface ExtendedRequest extends Request {
     id: string;
     profile: string;
     companyId: number;
+    super?: boolean;
   };
 }
 
 interface TokenPayload {
   id: string;
-  username: string;
+  username?: string;
+  usarname?: string;
   profile: string;
   companyId: number;
+  super?: boolean;
   iat: number;
   exp: number;
 }
@@ -40,9 +43,9 @@ const isAuth = async (req: ExtendedRequest, res: Response, next: NextFunction): 
 
   try {
     const decoded = verify(token, authConfig.secret) as TokenPayload;
-    const { id, profile, companyId } = decoded;
+    const { id, profile, companyId, super: isSuper } = decoded;
 
-    console.log("[DEBUG isAuth] Token decodificado - userId:", id, "companyId:", companyId, "profile:", profile);
+    console.log("[DEBUG isAuth] Token decodificado - userId:", id, "companyId:", companyId, "profile:", profile, "super:", isSuper);
 
     // Atualização do usuário
     await updateUser(id, companyId);
@@ -51,7 +54,8 @@ const isAuth = async (req: ExtendedRequest, res: Response, next: NextFunction): 
     req.user = {
       id,
       profile,
-      companyId
+      companyId,
+      super: isSuper
     };
 
     console.log("[DEBUG isAuth] Autenticação bem-sucedida, chamando next()");

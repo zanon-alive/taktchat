@@ -12,6 +12,7 @@ interface UserData {
   password?: string;
   name?: string;
   profile?: string;
+  super?: boolean;
   companyId?: number;
   queueIds?: number[];
   startWork?: string;
@@ -78,6 +79,7 @@ const UpdateUserService = async ({
   if (userData.name) { dataToUpdate.name = userData.name; }
   if (userData.password) { dataToUpdate.password = userData.password; }
   if (userData.profile) { dataToUpdate.profile = userData.profile; }
+  if (userData.super !== undefined) { dataToUpdate.super = userData.super; }
   if (userData.startWork) { dataToUpdate.startWork = userData.startWork; }
   if (userData.endWork) { dataToUpdate.endWork = userData.endWork; }
   if (userData.farewellMessage) { dataToUpdate.farewellMessage = userData.farewellMessage; }
@@ -139,6 +141,7 @@ const UpdateUserService = async ({
     name: user.name,
     email: user.email,
     profile: user.profile,
+    super: user.super,
     companyId: user.companyId,
     company,
     queues: user.queues,

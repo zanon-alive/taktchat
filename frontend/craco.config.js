@@ -4,7 +4,7 @@ module.exports = {
   style: {
     postcss: {
       plugins: [
-        require('tailwindcss'),
+        require('tailwindcss')(require('./tailwind.config.js')),
         require('autoprefixer'),
       ],
     },
@@ -59,6 +59,114 @@ module.exports = {
           return msg.includes('Failed to parse source map') && /html2pdf\.js/.test(String(resource || ''));
         }
       ];
+
+      // Otimizações de code splitting (apenas em produção)
+      if (process.env.NODE_ENV === 'production') {
+        webpackConfig.optimization = {
+          ...webpackConfig.optimization,
+          splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+              default: false,
+              vendors: false,
+              // Bundle separado para vendor (node_modules)
+              vendor: {
+                name: 'vendor',
+                chunks: 'all',
+                test: /node_modules/,
+                priority: 20
+              },
+              // Bundle separado para Material-UI (biblioteca grande)
+              materialUI: {
+                name: 'material-ui',
+                test: /[\\/]node_modules[\\/](@material-ui|@mui)[\\/]/,
+                chunks: 'all',
+                priority: 30
+              },
+              // Bundle separado para React e React DOM
+              react: {
+                name: 'react',
+                test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+                chunks: 'all',
+                priority: 40
+              },
+              // Bundle separado para bibliotecas de gráficos (pesadas)
+              charts: {
+                name: 'charts',
+                test: /[\\/]node_modules[\\/](chart\.js|react-chartjs-2|recharts)[\\/]/,
+                chunks: 'all',
+                priority: 25
+              },
+              // Bundle separado para bibliotecas de PDF (pesadas)
+              pdf: {
+                name: 'pdf',
+                test: /[\\/]node_modules[\\/](react-pdf|html2pdf\.js)[\\/]/,
+                chunks: 'all',
+                priority: 25
+              },
+              // Bundle separado para Socket.IO
+              socket: {
+                name: 'socket',
+                test: /[\\/]node_modules[\\/]socket\.io-client[\\/]/,
+                chunks: 'all',
+                priority: 25
+              },
+              // Common chunks para código compartilhado entre páginas
+              common: {
+                name: 'common',
+                minChunks: 2,
+                chunks: 'all',
+                priority: 10,
+                reuseExistingChunk: true
+              }
+            }
+          },
+          // Otimizações adicionais
+          moduleIds: 'deterministic',
+          runtimeChunk: 'single',
+        };
+      }
+
+      // Configuração do TerserPlugin para remover console.logs em produção
+      // DEVE SER FEITO DEPOIS de configurar optimization
+      if (process.env.NODE_ENV === 'production') {
+        const TerserPlugin = require('terser-webpack-plugin');
+        
+        // Garantir que minimizer existe
+        if (!webpackConfig.optimization.minimizer) {
+          webpackConfig.optimization.minimizer = [];
+        }
+        
+        // Procurar TerserPlugin existente
+        const terserPluginIndex = webpackConfig.optimization.minimizer.findIndex(
+          (plugin) => plugin.constructor.name === 'TerserPlugin' || 
+                      (plugin.constructor && plugin.constructor.name && plugin.constructor.name.includes('Terser'))
+        );
+        
+        // Criar configuração do TerserPlugin para remover console.logs
+        const terserConfig = new TerserPlugin({
+          terserOptions: {
+            compress: {
+              drop_console: true, // Remove todos os console.* em produção
+              drop_debugger: true, // Remove debugger
+              pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'], // Remove funções específicas
+            },
+            output: {
+              comments: false, // Remove comentários
+            },
+          },
+          extractComments: false, // Não extrai comentários para arquivo separado
+        });
+        
+        if (terserPluginIndex >= 0) {
+          // Substituir configuração existente
+          webpackConfig.optimization.minimizer[terserPluginIndex] = terserConfig;
+        } else {
+          // Adicionar TerserPlugin se não existir (deve estar presente por padrão no CRA)
+          // Mas se não estiver, adicionamos
+          webpackConfig.optimization.minimizer.push(terserConfig);
+        }
+      }
 
       return webpackConfig;
     }

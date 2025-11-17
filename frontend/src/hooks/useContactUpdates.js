@@ -1,13 +1,11 @@
 import { useEffect, useContext } from "react";
-import { SocketContext } from "../context/Socket/SocketContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 
 const useContactUpdates = (onContactUpdate) => {
-  const socketManager = useContext(SocketContext);
-  const { user } = useContext(AuthContext);
+  const { socket, user } = useContext(AuthContext);
 
   useEffect(() => {
-    if (!socketManager || !user?.companyId) return;
+    if (!socket || typeof socket.on !== 'function' || !user?.companyId) return;
 
     const companyId = user.companyId;
     const eventName = `company-${companyId}-contact`;
@@ -18,12 +16,14 @@ const useContactUpdates = (onContactUpdate) => {
       }
     };
 
-    socketManager.on(eventName, handleContactUpdate);
+    socket.on(eventName, handleContactUpdate);
 
     return () => {
-      socketManager.off(eventName, handleContactUpdate);
+      if (socket && typeof socket.off === 'function') {
+        socket.off(eventName, handleContactUpdate);
+      }
     };
-  }, [socketManager, user?.companyId, onContactUpdate]);
+  }, [socket, user?.companyId, onContactUpdate]);
 };
 
 export default useContactUpdates;

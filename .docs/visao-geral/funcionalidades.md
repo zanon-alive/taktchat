@@ -10,8 +10,14 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 
 ### 2. Conexões e sessões WhatsApp
 - **Múltiplas conexões**: gerenciamento de dispositivos via páginas `Connections`, `WhatsAppModal`, `WhatsAppModalAdmin` e jobs `WbotServices`.
+- **Dual Channel Support**: suporte simultâneo a **Baileys** (não oficial, gratuito) e **WhatsApp Business API Oficial** (Meta, pago, profissional).
+  - Baileys: Conexão via QR Code, ideal para pequenas empresas (< 150 msg/dia)
+  - API Oficial: Conexão via credenciais Meta, ideal para empresas maiores, sem risco de banimento, uptime 99.9%, templates aprovados
+  - Arquitetura unificada com Adapter Pattern permite escolher o canal por conexão
+  - Documentação completa: `.docs/funcionalidades/whatsapp-api-oficial/`
 - **Monitoramento de status**: dashboards internos (Announcements, AuditLogs) e filas (`queueMonitor`) para acompanhar desconexões, reautenticações e métricas de envio.
 - **APIs de mensagens**: endpoints `MessagesAPI`, `External API` e `Webhooks` permitem integração com sistemas terceiros.
+- **Sistema de webhooks**: recebimento de eventos em tempo real da Meta via `/webhooks/whatsapp` para API Oficial.
 
 ### 3. Campanhas e fluxos automatizados
 - **Campanhas segmentadas**: módulos `Campaigns`, `CampaignReport`, `CampaignDetailedReport`, `CampaignsPhrase`, `CampaignsConfig`, `ContactLists`, `ContactListItems` e `Moments` controlam disparos, templates, throttling e agendamentos.

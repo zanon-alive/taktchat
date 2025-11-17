@@ -17,8 +17,10 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Contatos, listas, arquivos inteligentes, dashboards e relatórios operacionais.
 - Multi-empresa nativa, perfis e permissões granulares, painel financeiro e billing.
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
+- **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).
 
-> Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.
+> Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.  
+> WhatsApp API Oficial: `.docs/funcionalidades/whatsapp-api-oficial/`
 
 ### Início rápido
 
@@ -49,12 +51,14 @@ Consulte `.docs/instalacao/` para requisitos e variações (Docker completo, pro
 Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada:
 
 - **🚀 Guia de Onboarding:** `.docs/onboarding.md` - Documentação completa explicando todas as funcionalidades e como utilizá-las
+- **📚 Documentação Admin:** `.docs/docs_admin.md` - Guia completo para administradores (Super Admin)
 - Visão geral do produto: `.docs/visao-geral/produto.md`
 - Arquitetura e fluxos críticos: `.docs/visao-geral/arquitetura.md` e `.docs/visao-geral/fluxos-criticos.md`
 - Instalação e ambientes: `.docs/instalacao/`
 - Variáveis de ambiente e segurança: `.docs/configuracao/`
 - Operação, monitoramento e suporte: `.docs/operacao/`
 - Funcionalidades por módulo: `.docs/funcionalidades/`
+  - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
 - Procedimentos de diagnóstico: `.docs/diagnosticos/`
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`
 - Checklists e histórico: `.docs/anexos/`

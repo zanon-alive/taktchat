@@ -26,6 +26,7 @@ import defaultLogoLight from "./assets/logo.png";
 import defaultLogoDark from "./assets/logo-black.png";
 import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
+import logger from "./utils/logger";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,12 @@ const App = () => {
   // Estado para controlar o prompt de instalação do PWA
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
+  
+  // Verifica se está na rota de documentação
+  const isDocumentationRoute = () => {
+    const pathname = window.location.pathname;
+    return pathname === '/docs' || pathname === '/docs_admin';
+  };
 
   const SESSION_DISMISS_KEY = "taktchat:pwaPromptDismissedSession";
   const DAILY_SNOOZE_KEY = "taktchat:pwaPromptSnoozeUntil";
@@ -180,10 +187,17 @@ const App = () => {
     [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]
   );
 
+  // Fecha o diálogo de instalação se o usuário navegar para as rotas de documentação
+  useEffect(() => {
+    if (isDocumentationRoute() && showInstallDialog) {
+      setShowInstallDialog(false);
+    }
+  }, [showInstallDialog]);
+
   // Detecta quando o navegador está pronto para mostrar o prompt de instalação do PWA
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      if (shouldSkipInstallPrompt()) {
+      if (shouldSkipInstallPrompt() || isDocumentationRoute()) {
         return;
       }
 
@@ -217,12 +231,12 @@ const App = () => {
 
       const choiceResult = await deferredPrompt.userChoice;
       if (choiceResult?.outcome === 'accepted') {
-        console.log('Usuário aceitou instalar o app');
+        logger.log('Usuário aceitou instalar o app');
       } else {
-        console.log('Usuário recusou instalar o app');
+        logger.log('Usuário recusou instalar o app');
       }
     } catch (err) {
-      console.warn('Falha ao exibir o prompt de instalação do PWA', err);
+      logger.warn('Falha ao exibir o prompt de instalação do PWA', err);
     } finally {
       // O evento só pode ser usado uma vez
       setDeferredPrompt(null);
@@ -328,51 +342,51 @@ const App = () => {
       return;
     }
 
-    console.log("|=========== handleSaveSetting ==========|");
-    console.log("APP START");
-    console.log("|========================================|");
+    logger.log("|=========== handleSaveSetting ==========|");
+    logger.log("APP START");
+    logger.log("|========================================|");
 
     getPublicSetting("primaryColorLight")
       .then((color) => {
         setPrimaryColorLight(color || "#2563EB");
       })
       .catch((error) => {
-        console.log("Error reading setting", error);
+        logger.error("Error reading setting", error);
       });
     getPublicSetting("primaryColorDark")
       .then((color) => {
         setPrimaryColorDark(color || "#1E3A8A");
       })
       .catch((error) => {
-        console.log("Error reading setting", error);
+        logger.error("Error reading setting", error);
       });
     getPublicSetting("appLogoLight")
       .then((file) => {
         setAppLogoLight(file ? backendUrl + "/public/" + file : defaultLogoLight);
       })
       .catch((error) => {
-        console.log("Error reading setting", error);
+        logger.error("Error reading setting", error);
       });
     getPublicSetting("appLogoDark")
       .then((file) => {
         setAppLogoDark(file ? backendUrl + "/public/" + file : defaultLogoDark);
       })
       .catch((error) => {
-        console.log("Error reading setting", error);
+        logger.error("Error reading setting", error);
       });
     getPublicSetting("appLogoFavicon")
       .then((file) => {
         setAppLogoFavicon(file ? backendUrl + "/public/" + file : defaultLogoFavicon);
       })
       .catch((error) => {
-        console.log("Error reading setting", error);
+        logger.error("Error reading setting", error);
       });
     getPublicSetting("appName")
       .then((name) => {
         setAppName(name || "Taktchat_Flow");
       })
       .catch((error) => {
-        console.log("!==== Erro ao carregar temas: ====!", error);
+        logger.error("!==== Erro ao carregar temas: ====!", error);
         setAppName("Taktchat_Flow");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -393,7 +407,7 @@ const App = () => {
         const { data } = response;
         window.localStorage.setItem("frontendVersion", data.version);
       } catch (error) {
-        console.log("Error fetching data", error);
+        logger.error("Error fetching data", error);
       }
     }
     fetchVersionData();
@@ -471,7 +485,7 @@ const App = () => {
                 </Dialog>
 
                 <Dialog
-                  open={showInstallDialog && apiStatus === "online"}
+                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute()}
                   onClose={(event, reason) => {
                     if (reason === "backdropClick") {
                       return;
