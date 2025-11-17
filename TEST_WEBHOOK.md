@@ -10,13 +10,13 @@
 
 ### URL Incorreta (O que você usou):
 ```
-https://chats.nobreluminarias.com.br/webhooks/whatsapp
+https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 ❌ **ERRADO** - Este é o frontend (porta 80, React)
 
 ### URL Correta (O que deve usar):
 ```
-https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
+https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 ✅ **CORRETO** - Este é o backend (porta 8080, Node.js)
 
@@ -27,7 +27,7 @@ https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
 ### Teste 1: Backend Está Respondendo?
 
 ```bash
-curl -I https://chatsapi.nobreluminarias.com.br
+curl -I https://taktchat-api.alivesolucoes.com.br
 ```
 
 **Esperado:**
@@ -43,7 +43,7 @@ server: nginx
 ### Teste 2: Endpoint Webhook Existe?
 
 ```bash
-curl https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
+curl https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 
 **Esperado:**
@@ -62,7 +62,7 @@ Method Not Allowed
 ### Teste 3: Verificação do Webhook (Simular Meta)
 
 ```bash
-curl -X GET "https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=test123"
+curl -X GET "https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=test123"
 ```
 
 **Esperado:**
@@ -105,10 +105,10 @@ WABA_API_VERSION=v18.0
 
 ```bash
 # Teste simples
-curl https://chatsapi.nobreluminarias.com.br
+curl https://taktchat-api.alivesolucoes.com.br
 
 # Teste webhook
-curl https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
+curl https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 
 ---
@@ -150,7 +150,7 @@ docker service logs nobreluminarias_whaticketback -f
 Use este comando para simular o que a Meta faz:
 
 ```bash
-curl -v -X GET "https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=TESTE123"
+curl -v -X GET "https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=TESTE123"
 ```
 
 **Resposta esperada:**
@@ -176,7 +176,7 @@ https://business.facebook.com
 
 **Callback URL:** (COPIE EXATAMENTE)
 ```
-https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
+https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 
 **Verify Token:** (COPIE EXATAMENTE)
@@ -252,7 +252,7 @@ Se não aparecer, a variável não está configurada!
 
 **Solução:**
 - Verificar certificado SSL
-- Testar: `curl -I https://chatsapi.nobreluminarias.com.br`
+- Testar: `curl -I https://taktchat-api.alivesolucoes.com.br`
 - Renovar certificado se expirado
 
 ---
@@ -261,8 +261,8 @@ Se não aparecer, a variável não está configurada!
 
 Execute na ordem:
 
-- [ ] **Teste 1:** `curl https://chatsapi.nobreluminarias.com.br` → Retorna 200?
-- [ ] **Teste 2:** `curl https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp` → Não retorna 404?
+- [ ] **Teste 1:** `curl https://taktchat-api.alivesolucoes.com.br` → Retorna 200?
+- [ ] **Teste 2:** `curl https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp` → Não retorna 404?
 - [ ] **Teste 3:** Teste com hub.challenge → Retorna o challenge?
 - [ ] **Teste 4:** Variável WABA_WEBHOOK_VERIFY_TOKEN existe?
 - [ ] **Teste 5:** Container backend está rodando?
@@ -276,15 +276,15 @@ Execute na ordem:
 
 ```bash
 echo "=== TESTE 1: Backend acessível? ==="
-curl -I https://chatsapi.nobreluminarias.com.br
+curl -I https://taktchat-api.alivesolucoes.com.br
 
 echo ""
 echo "=== TESTE 2: Endpoint webhook existe? ==="
-curl https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
+curl https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 
 echo ""
 echo "=== TESTE 3: Verificação funciona? ==="
-curl "https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=FUNCIONOU"
+curl "https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=FUNCIONOU"
 
 echo ""
 echo "Se retornar FUNCIONOU, está OK!"
@@ -303,7 +303,7 @@ echo "Se retornar FUNCIONOU, está OK!"
 
 **URL Correta:**
 ```
-https://chatsapi.nobreluminarias.com.br/webhooks/whatsapp
+https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 
 ---

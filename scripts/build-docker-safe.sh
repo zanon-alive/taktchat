@@ -5,9 +5,9 @@
 set -e
 
 # Configurar variáveis (ajuste conforme necessário)
-export FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://chats.nobreluminarias.com.br}"
+export FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://taktchat-api.alivesolucoes.com.br}"
 export FRONT_SOCKET_URL="${FRONT_SOCKET_URL:-$FRONT_BACKEND_URL}"
-export FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://chats.nobreluminarias.com.br}"
+export FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.alivesolucoes.com.br}"
 export IMAGE_TAG="${IMAGE_TAG:-latest}"
 
 echo "=========================================="

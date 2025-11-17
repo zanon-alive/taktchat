@@ -15,8 +15,8 @@
 ```yaml
 environment:
   # URLs de Produção (em vez de localhost)
-  FRONTEND_URL: ${FRONTEND_URL:-https://chats.nobreluminarias.com.br}
-  BACKEND_URL: ${BACKEND_URL:-https://chats.nobreluminarias.com.br}
+  FRONTEND_URL: ${FRONTEND_URL:-https://taktchat.alivesolucoes.com.br}
+  BACKEND_URL: ${BACKEND_URL:-https://taktchat-api.alivesolucoes.com.br}
   
   # WhatsApp Business API (Meta) - NOVO!
   WABA_WEBHOOK_VERIFY_TOKEN: ${WABA_WEBHOOK_VERIFY_TOKEN:-602536nblumi2025}
@@ -47,8 +47,8 @@ environment:
      # ... suas variáveis existentes ...
      
      # ADICIONAR ESTAS LINHAS:
-     FRONTEND_URL: https://chats.nobreluminarias.com.br
-     BACKEND_URL: https://chats.nobreluminarias.com.br
+     FRONTEND_URL: https://taktchat.alivesolucoes.com.br
+     BACKEND_URL: https://taktchat-api.alivesolucoes.com.br
      WABA_WEBHOOK_VERIFY_TOKEN: 602536nblumi2025
      WABA_API_VERSION: v18.0
    ```
@@ -86,8 +86,8 @@ services:
       TZ: America/Sao_Paulo
       
       # URLs de Produção
-      FRONTEND_URL: https://chats.nobreluminarias.com.br
-      BACKEND_URL: https://chats.nobreluminarias.com.br
+      FRONTEND_URL: https://taktchat.alivesolucoes.com.br
+      BACKEND_URL: https://taktchat-api.alivesolucoes.com.br
       
       # Redis
       REDIS_URI: redis://redis:6379/0
@@ -179,7 +179,7 @@ docker logs -f whaticket-backend
 
 ```bash
 # No seu computador ou SSH
-curl https://chats.nobreluminarias.com.br/webhooks/whatsapp
+curl https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 
 **Esperado:** Alguma resposta (não erro 404)
@@ -211,7 +211,7 @@ https://business.facebook.com
 
 **Callback URL:**
 ```
-https://chats.nobreluminarias.com.br/webhooks/whatsapp
+https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp
 ```
 
 **Verify Token:**
@@ -239,7 +239,7 @@ https://chats.nobreluminarias.com.br/webhooks/whatsapp
 1. **Backend está rodando?**
    ```bash
    docker ps | grep backend
-   curl https://chats.nobreluminarias.com.br/health
+   curl https://taktchat-api.alivesolucoes.com.br/health
    ```
 
 2. **Variável está configurada?**
@@ -249,7 +249,7 @@ https://chats.nobreluminarias.com.br/webhooks/whatsapp
 
 3. **HTTPS funcionando?**
    ```bash
-   curl -I https://chats.nobreluminarias.com.br
+   curl -I https://taktchat.alivesolucoes.com.br
    # Deve retornar 200 ou 302
    ```
 
@@ -316,7 +316,7 @@ Estas são configuradas no `docker-compose.yml` e aplicam-se a TODAS as conexõe
 ```yaml
 WABA_WEBHOOK_VERIFY_TOKEN: 602536nblumi2025  # Token para verificação do webhook
 WABA_API_VERSION: v18.0                       # Versão da API Meta
-BACKEND_URL: https://chats.nobreluminarias.com.br  # URL pública do backend
+BACKEND_URL: https://taktchat-api.alivesolucoes.com.br  # URL pública do backend
 ```
 
 ### Variáveis Por Conexão (Banco de Dados)
@@ -367,10 +367,10 @@ docker exec -it whaticket-backend npm run migrate
 
 ```bash
 # Testar backend
-curl https://chats.nobreluminarias.com.br/health
+curl https://taktchat-api.alivesolucoes.com.br/health
 
 # Testar webhook
-curl -X GET "https://chats.nobreluminarias.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=test123"
+curl -X GET "https://taktchat-api.alivesolucoes.com.br/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=602536nblumi2025&hub.challenge=test123"
 
 # Deve retornar: test123
 ```

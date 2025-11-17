@@ -148,9 +148,9 @@ environment:
 Verifique se estas variáveis estão com seus domínios reais:
 
 ```yaml
-FRONTEND_URL: https://chats.nobreluminarias.com.br
-BACKEND_URL: https://chatsapi.nobreluminarias.com.br
-REACT_APP_BACKEND_URL: https://chatsapi.nobreluminarias.com.br
+FRONTEND_URL: https://taktchat.alivesolucoes.com.br
+BACKEND_URL: https://taktchat-api.alivesolucoes.com.br
+REACT_APP_BACKEND_URL: https://taktchat-api.alivesolucoes.com.br
 ```
 
 ### Traefik Labels
