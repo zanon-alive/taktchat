@@ -1,4 +1,4 @@
-import { initWASocket } from "../../libs/wbot";
+import { initWASocket, removeWbot } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
 import { wbotMessageListener } from "./wbotMessageListener";
 import { getIO } from "../../libs/socket";
@@ -10,6 +10,15 @@ export const StartWhatsAppSession = async (
   whatsapp: Whatsapp,
   companyId: number
 ): Promise<void> => {
+  // Remover sessão existente antes de iniciar nova (evita conflitos)
+  try {
+    await removeWbot(whatsapp.id, false);
+    logger.info(`[StartSession] Sessão anterior removida (se existia) para whatsappId=${whatsapp.id}`);
+  } catch (err) {
+    // Ignorar erros se não houver sessão anterior
+    logger.debug(`[StartSession] Nenhuma sessão anterior para remover: ${err?.message}`);
+  }
+
   await whatsapp.update({ status: "OPENING" });
 
   const io = getIO();
