@@ -144,18 +144,29 @@ module.exports = {
         );
         
         // Criar configuração do TerserPlugin para remover console.logs
+        // Configuração mais conservadora para evitar corrupção de código
         const terserConfig = new TerserPlugin({
           terserOptions: {
             compress: {
-              drop_console: true, // Remove todos os console.* em produção
+              drop_console: false, // Desabilitado temporariamente para evitar problemas
               drop_debugger: true, // Remove debugger
               pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'], // Remove funções específicas
+              passes: 1, // Limita passes de compressão para evitar problemas
+              unsafe: false, // Não usa otimizações "unsafe"
+              unsafe_comps: false,
+              unsafe_math: false,
+              unsafe_proto: false,
             },
-            output: {
+            format: {
               comments: false, // Remove comentários
+              preserve_annotations: false,
+            },
+            mangle: {
+              reserved: ['$', 'jQuery'], // Preserva variáveis globais importantes
             },
           },
           extractComments: false, // Não extrai comentários para arquivo separado
+          parallel: true, // Usa múltiplos processos (pode ajudar com estabilidade)
         });
         
         if (terserPluginIndex >= 0) {
