@@ -33,30 +33,40 @@ const useUserMoments = () => {
   }, [update]);
 
   useEffect(() => {
-    if (user.id && socket) { // Verifica se user.id e socket estão definidos
-      const companyId = user.companyId;
-      
-      const onTicketEvent = (data) => {
-        if (isUpdate !== data) {
-          setIsUpdate(data)
-          setUpdate(prevUpdate => !prevUpdate); // Usar o valor anterior de update
+    if (!user.id || !socket || typeof socket.on !== 'function' || !user?.companyId) {
+      return;
+    }
+
+    const companyId = user.companyId;
+    
+    const onTicketEvent = (data) => {
+      if (isUpdate !== data) {
+        setIsUpdate(data)
+        setUpdate(prevUpdate => !prevUpdate); // Usar o valor anterior de update
+      }
+    }
+    const onAppMessage = (data) => {
+      if (isUpdate !== data) {
+        setIsUpdate(data)
+        setUpdate(prevUpdate => !prevUpdate); // Usar o valor anterior de update
+      }
+    };
+  
+    socket.on(`company-${companyId}-ticket`, onTicketEvent);
+    socket.on(`company-${companyId}-appMessage`, onAppMessage);
+    
+    return () => {
+      if (socket && typeof socket.off === 'function') {
+        try {
+          socket.off(`company-${companyId}-ticket`, onTicketEvent);
+          socket.off(`company-${companyId}-appMessage`, onAppMessage);
+        } catch (e) {
+          console.debug("[useUserMoments] error in cleanup", e);
         }
       }
-      const onAppMessage = (data) => {
-        if (isUpdate !== data) {
-          setIsUpdate(data)
-          setUpdate(prevUpdate => !prevUpdate); // Usar o valor anterior de update
-        }
-      };
-  
-      socket.on(`company-${companyId}-ticket`, onTicketEvent);
-      socket.on(`company-${companyId}-appMessage`, onAppMessage);
-      return () => {
-        socket.off(`company-${companyId}-ticket`, onTicketEvent);
-        socket.off(`company-${companyId}-appMessage`, onAppMessage);
-      };
-    }
-  }, [user.id, socket]); // Dependências especificadas aqui  
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, user.companyId]); // Dependências especificadas aqui  
 
   return { users };
 };

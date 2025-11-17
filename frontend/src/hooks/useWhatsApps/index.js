@@ -85,7 +85,7 @@ const useWhatsApps = () => {
   }, [isAuth]);
 
   useEffect(() => {
-    if (!isAuth || !user.companyId || !socket) {
+    if (!isAuth || !user.companyId || !socket || typeof socket.on !== 'function') {
       return undefined;
     }
 
@@ -111,8 +111,10 @@ const useWhatsApps = () => {
       socket.on(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
 
       return () => {
-        socket.off(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
-        socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
+        if (socket && typeof socket.off === 'function') {
+          socket.off(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
+          socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
+        }
       };
     }, [socket, user.companyId, isAuth]);
 

@@ -140,7 +140,7 @@ const Announcements = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    if (user.companyId) {
+    if (user.companyId && socket && typeof socket.on === 'function') {
 //    const socket = socketManager.GetSocket();
 
       const onCompanyAnnouncement = (data) => {
@@ -154,7 +154,9 @@ const Announcements = () => {
 
       socket.on(`company-announcement`, onCompanyAnnouncement);
       return () => {
-        socket.off(`company-announcement`, onCompanyAnnouncement);
+        if (socket && typeof socket.off === 'function') {
+          socket.off(`company-announcement`, onCompanyAnnouncement);
+        }
       }
     }
   }, [user]);

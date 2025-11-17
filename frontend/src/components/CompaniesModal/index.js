@@ -83,6 +83,9 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 		name: "",
 		email: "",
 		passwordDefault: "",
+		password: "",
+		document: "",
+		planId: null,
 		numberAttendants: 1,
 		numberConections: 1,
 		status: false
@@ -97,14 +100,21 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 			try {
 				const { data } = await api.get(`/companies/listPlan/${companyId}`);
 				setCompany(prevState => {
+					// Normaliza os dados do backend, convertendo null/undefined para valores padrão
 					// Quando editar uma empresa, a senha não deve vir preenchida
 					// do backend por segurança. Definimos como string vazia para
 					// que o usuário possa preencher apenas se quiser alterar.
-					// Se o backend espera um campo de senha mesmo na edição,
-					// e você não quer que seja obrigatório, a validação no backend
-					// precisa ser ajustada, ou você precisa enviar 'null' ou 'undefined'
-					// se o campo não foi preenchido.
-					return { ...prevState, ...data, passwordDefault: "" }; //
+					const normalizedData = {
+						name: data.name ?? "",
+						email: data.email ?? "",
+						document: data.document ?? "",
+						planId: data.planId ?? (data.plan?.id ?? null),
+						passwordDefault: "", // Sempre vazio na edição por segurança
+						numberAttendants: data.numberAttendants ?? 1,
+						numberConections: data.numberConections ?? 1,
+						status: data.status ?? false,
+					};
+					return { ...prevState, ...normalizedData };
 				});
 			} catch (err) {
 				toastError(err);
@@ -123,14 +133,67 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 		const companyData = { ...values };
 		try {
 			if (companyId) {
-				// Se for edição, e a senha não foi alterada (continua vazia),
-				// não a envie para o backend. Se o backend exige sempre a senha,
-				// ele precisaria de lógica para ignorar senhas vazias na atualização.
-				if (companyData.passwordDefault === "") { //
-					delete companyData.passwordDefault; //
+				console.log("[DEBUG Frontend] Iniciando atualização de empresa");
+				console.log("[DEBUG Frontend] companyId:", companyId);
+				console.log("[DEBUG Frontend] values recebidos:", values);
+				console.log("[DEBUG Frontend] company state:", company);
+				
+				// Converte passwordDefault para password (nome esperado pelo backend)
+				if (companyData.passwordDefault && companyData.passwordDefault !== "") {
+					companyData.password = companyData.passwordDefault;
 				}
-				await api.put(`/companies/${companyId}`, companyData);
+				// Remove passwordDefault pois o backend espera 'password'
+				delete companyData.passwordDefault;
+				// Remove campos que não são esperados pelo backend
+				delete companyData.numberAttendants;
+				delete companyData.numberConections;
+				// Garante que planId seja um número e está presente
+				if (companyData.planId) {
+					companyData.planId = Number(companyData.planId);
+				}
+				// Garante que document esteja presente (obrigatório pelo backend)
+				if (!companyData.document) {
+					companyData.document = "";
+				}
+				// Garante que email esteja presente (necessário para atualização)
+				if (!companyData.email || companyData.email === "") {
+					// Se email não foi fornecido, usa o email atual da empresa
+					companyData.email = company.email || "";
+				}
+				// Inclui o id da empresa no body (pode ser necessário para validação)
+				companyData.id = Number(companyId);
+				
+				console.log("[DEBUG Frontend] Dados finais a serem enviados:", companyData);
+				console.log("[DEBUG Frontend] URL da requisição:", `/companies/${companyId}`);
+				console.log("[DEBUG Frontend] Base URL da API:", process.env.REACT_APP_BACKEND_URL);
+				
+				try {
+					const response = await api.put(`/companies/${companyId}`, companyData);
+					console.log("[DEBUG Frontend] Resposta recebida:", response);
+				} catch (error) {
+					console.error("[DEBUG Frontend] Erro na requisição:", error);
+					console.error("[DEBUG Frontend] Erro response:", error.response);
+					console.error("[DEBUG Frontend] Erro status:", error.response?.status);
+					console.error("[DEBUG Frontend] Erro data:", error.response?.data);
+					throw error;
+				}
 			} else {
+				// Para criação, converte passwordDefault para password
+				if (companyData.passwordDefault) {
+					companyData.password = companyData.passwordDefault;
+					delete companyData.passwordDefault;
+				}
+				// Remove campos que não são esperados pelo backend
+				delete companyData.numberAttendants;
+				delete companyData.numberConections;
+				// Garante que planId seja um número e está presente
+				if (companyData.planId) {
+					companyData.planId = Number(companyData.planId);
+				}
+				// Garante que document esteja presente (obrigatório pelo backend)
+				if (!companyData.document) {
+					companyData.document = "";
+				}
 				await api.post("/companies", companyData);
 			}
 			toast.success(i18n.t("companyModal.success"));
@@ -155,7 +218,16 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 						: `${i18n.t("companyModal.title.add")}`}
 				</DialogTitle>
 				<Formik
-					initialValues={company}
+					initialValues={{
+						name: company.name ?? "",
+						email: company.email ?? "",
+						document: company.document ?? "",
+						planId: company.planId ?? null,
+						passwordDefault: company.passwordDefault ?? "",
+						numberAttendants: company.numberAttendants ?? 1,
+						numberConections: company.numberConections ?? 1,
+						status: company.status ?? false,
+					}}
 					enableReinitialize={true}
 					validationSchema={CompanySchema}
 					onSubmit={(values, actions) => {
@@ -188,7 +260,7 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 												as={Switch}
 												color="primary"
 												name="status"
-												checked={values.status}
+												checked={Boolean(values.status)}
 											/>
 										}
 										label={"Ativo"}
@@ -213,8 +285,7 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 										variant="outlined"
 										margin="dense"
 										label={i18n.t("companyModal.form.passwordDefault")}
-										// Adicionado 'required' para indicar que o campo é obrigatório visualmente (embora a validação Yup seja a principal)
-										required //
+										required
 										error={touched.passwordDefault && Boolean(errors.passwordDefault)}
 										helperText={touched.passwordDefault && errors.passwordDefault}
 										type={showPassword ? 'text' : 'password'}

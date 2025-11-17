@@ -50,6 +50,7 @@ import TagsKanban from "../pages/TagsKanban";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
 import AISettings from "../components/AISettings";
+import OnboardingDocs from "../pages/OnboardingDocs";
 
 
 const Routes = () => {
@@ -66,7 +67,8 @@ const Routes = () => {
     <BrowserRouter>
       <AuthProvider>
         <TicketsContextProvider>
-          <Switch>
+            <Switch>
+            <Route exact path="/docs" component={OnboardingDocs} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
             <Route exact path="/forgot-password" component={ForgotPassword} />

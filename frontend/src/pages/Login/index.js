@@ -7,6 +7,7 @@ import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import EmailIcon from "@material-ui/icons/Email";
 import LockIcon from "@material-ui/icons/Lock";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
@@ -151,6 +152,34 @@ const useStyles = makeStyles((theme) => ({
       transform: "translateY(-5px)",
     },
   },
+  docsLink: {
+    position: "absolute",
+    top: "20px",
+    right: "20px",
+    zIndex: 10,
+    textDecoration: "none",
+    color: "rgba(255, 255, 255, 0.8)",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    fontSize: "14px",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      color: "rgba(255, 255, 255, 1)",
+      textDecoration: "underline",
+    },
+    [theme.breakpoints.down("sm")]: {
+      top: "10px",
+      right: "10px",
+      fontSize: "12px",
+    },
+  },
+  docsIcon: {
+    fontSize: "18px",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "16px",
+    },
+  },
 }));
 
 const Login = () => {
@@ -203,6 +232,16 @@ const Login = () => {
       </Helmet>
 
       <div className={classes.root}>
+        <a
+          href="/docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={classes.docsLink}
+          title="Documentação"
+        >
+          <HelpOutlineIcon className={classes.docsIcon} />
+          <span>Documentação</span>
+        </a>
         <form className={classes.formContainer} onSubmit={handleSubmit}>
           <img src="/logo.png" alt="Logo" className={classes.logoImg} />
           {error && <Typography color="error">{error}</Typography>}
@@ -298,7 +337,7 @@ const Login = () => {
         </form>
         <div
           className={classes.whatsappButton}
-          onClick={() => window.open("https://wa.me/5511916130562")}
+          onClick={() => window.open("https://wa.me/5514981252988")}
         >
           <img
             src="https://clickscertos.com.br/wp-content/uploads/2025/05/iconzapzap.png"

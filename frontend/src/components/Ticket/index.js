@@ -261,15 +261,23 @@ const Ticket = () => {
           if (!candidate || candidate === "undefined") {
             console.debug("[Ticket] skip joinChatBoxLeave - invalid id", { uuid: ticket?.uuid, ticketId });
           } else {
-            socket.emit("joinChatBoxLeave", candidate, (err) => {
-              if (err) console.debug("[Ticket] joinChatBoxLeave ack error", err);
-              else console.debug("[Ticket] joinChatBoxLeave ok", { room: candidate });
-            });
+            if (socket && typeof socket.emit === 'function') {
+              socket.emit("joinChatBoxLeave", candidate, (err) => {
+                if (err) console.debug("[Ticket] joinChatBoxLeave ack error", err);
+                else console.debug("[Ticket] joinChatBoxLeave ok", { room: candidate });
+              });
+            }
           }
         } catch {}
-        socket.off("connect", onConnectTicket);
-        socket.off(`company-${companyId}-ticket`, onCompanyTicket);
-        socket.off(`company-${companyId}-contact`, onCompanyContactTicket);
+        if (socket && typeof socket.off === 'function') {
+          try {
+            socket.off("connect", onConnectTicket);
+            socket.off(`company-${companyId}-ticket`, onCompanyTicket);
+            socket.off(`company-${companyId}-contact`, onCompanyContactTicket);
+          } catch (e) {
+            console.debug("[Ticket] error in cleanup", e);
+          }
+        }
       };
     }
   }, [ticketId, ticket, history, socket, user?.companyId]);

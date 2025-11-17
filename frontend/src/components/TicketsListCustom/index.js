@@ -268,6 +268,11 @@ const TicketsListCustom = (props) => {
     }, [tickets]);
 
     useEffect(() => {
+        if (!socket || typeof socket.on !== 'function' || !user?.companyId) {
+            return;
+        }
+
+        const companyId = user.companyId;
         const shouldUpdateTicket = ticket => {
             return (!ticket?.userId || ticket?.userId === user?.id || showAll) &&
                 ((!ticket?.queueId && showTicketWithoutQueue) || selectedQueueIds.indexOf(ticket?.queueId) > -1)
@@ -352,10 +357,12 @@ const TicketsListCustom = (props) => {
         };
 
         const onConnectTicketsList = () => {
-            if (status) {
-                socket.emit("joinTickets", status);
-            } else {
-                socket.emit("joinNotification");
+            if (socket && typeof socket.emit === 'function') {
+                if (status) {
+                    socket.emit("joinTickets", status);
+                } else {
+                    socket.emit("joinNotification");
+                }
             }
         }
 
@@ -365,18 +372,30 @@ const TicketsListCustom = (props) => {
         socket.on(`company-${companyId}-contact`, onCompanyContactTicketsList);
 
         return () => {
-            if (status) {
-                socket.emit("leaveTickets", status);
-            } else {
-                socket.emit("leaveNotification");
+            if (socket && typeof socket.emit === 'function') {
+                try {
+                    if (status) {
+                        socket.emit("leaveTickets", status);
+                    } else {
+                        socket.emit("leaveNotification");
+                    }
+                } catch (e) {
+                    console.debug("[TicketsListCustom] error emitting leave", e);
+                }
             }
-            socket.off("connect", onConnectTicketsList);
-            socket.off(`company-${companyId}-ticket`, onCompanyTicketTicketsList);
-            socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageTicketsList);
-            socket.off(`company-${companyId}-contact`, onCompanyContactTicketsList);
+            if (socket && typeof socket.off === 'function') {
+                try {
+                    socket.off("connect", onConnectTicketsList);
+                    socket.off(`company-${companyId}-ticket`, onCompanyTicketTicketsList);
+                    socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageTicketsList);
+                    socket.off(`company-${companyId}-contact`, onCompanyContactTicketsList);
+                } catch (e) {
+                    console.debug("[TicketsListCustom] error in cleanup", e);
+                }
+            }
         };
 
-    }, [status, showAll, user, selectedQueueIds, tags, users, profile, queues, sortTickets, showTicketWithoutQueue]);
+    }, [status, showAll, user?.companyId, selectedQueueIds, tags, users, profile, queues, sortTickets, showTicketWithoutQueue]);
 
     useEffect(() => {
         if (typeof updateCount === "function") {

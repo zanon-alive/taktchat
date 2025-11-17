@@ -149,6 +149,12 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  console.log("[DEBUG Backend Controller] Recebida requisição PUT /companies/:id");
+  console.log("[DEBUG Backend Controller] req.params:", req.params);
+  console.log("[DEBUG Backend Controller] req.body:", req.body);
+  console.log("[DEBUG Backend Controller] req.method:", req.method);
+  console.log("[DEBUG Backend Controller] req.path:", req.path);
+  console.log("[DEBUG Backend Controller] req.url:", req.url);
 
   const companyData: CompanyData = req.body;
 
@@ -158,11 +164,14 @@ export const update = async (
 
   try {
     await schema.validate(companyData);
+    console.log("[DEBUG Backend Controller] Validação do schema passou");
   } catch (err: any) {
+    console.log("[DEBUG Backend Controller] Erro na validação do schema:", err.message);
     throw new AppError(err.message);
   }
 
   const { id } = req.params;
+  console.log("[DEBUG Backend Controller] ID do parâmetro:", id);
 
   const authHeader = req.headers.authorization;
   const [, token] = authHeader.split(" ");
@@ -170,12 +179,22 @@ export const update = async (
   const { id: requestUserId, profile, companyId } = decoded as TokenPayload;
   const requestUser = await User.findByPk(requestUserId);
 
+  console.log("[DEBUG Backend Controller] requestUser.super:", requestUser?.super);
+  console.log("[DEBUG Backend Controller] companyData.id:", companyData?.id);
+  console.log("[DEBUG Backend Controller] id (params):", id);
+  console.log("[DEBUG Backend Controller] companyId (token):", companyId);
+
   if (requestUser.super === true) {
+    console.log("[DEBUG Backend Controller] Usuário é super, atualizando empresa");
     const company = await UpdateCompanyService({ id, ...companyData });
     return res.status(200).json(company);
   } else if (String(companyData?.id) !== id || String(companyId) !== id) {
+    console.log("[DEBUG Backend Controller] Erro de permissão - IDs não correspondem");
+    console.log("[DEBUG Backend Controller] companyData.id:", companyData?.id, "!== id:", id);
+    console.log("[DEBUG Backend Controller] companyId:", companyId, "!== id:", id);
     return res.status(400).json({ error: "Você não possui permissão para acessar este recurso!" });
   } else {
+    console.log("[DEBUG Backend Controller] Usuário não é super, mas tem permissão, atualizando empresa");
     const company = await UpdateCompanyService({ id, ...companyData });
     return res.status(200).json(company);
   }

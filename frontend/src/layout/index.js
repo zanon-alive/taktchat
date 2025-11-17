@@ -402,7 +402,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
     const companyId = user.companyId;
     const userId = user.id;
-    if (companyId) {
+    if (companyId && socket && typeof socket.on === 'function') {
       //    const socket = socketManager.GetSocket();
 
       const ImageUrl = user.profileImage;
@@ -422,18 +422,24 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
       socket.on(`company-${companyId}-auth`, onCompanyAuthLayout);
 
-      socket.emit("userStatus");
-      const interval = setInterval(() => {
+      if (typeof socket.emit === 'function') {
         socket.emit("userStatus");
-      }, 1000 * 60 * 5);
+        const interval = setInterval(() => {
+          if (socket && typeof socket.emit === 'function') {
+            socket.emit("userStatus");
+          }
+        }, 1000 * 60 * 5);
 
-      return () => {
-        socket.off(`company-${companyId}-auth`, onCompanyAuthLayout);
-        clearInterval(interval);
-      };
+        return () => {
+          if (socket && typeof socket.off === 'function') {
+            socket.off(`company-${companyId}-auth`, onCompanyAuthLayout);
+          }
+          clearInterval(interval);
+        };
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
+  }, [user?.companyId, user?.id]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);

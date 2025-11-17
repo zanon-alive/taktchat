@@ -261,7 +261,8 @@ const MainListItems = ({ collapsed }) => {
     return () => {
       isMounted = false;
     };
-  }, [isAuth, list]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuth]);
 
   const isManagementActive =
     location.pathname === "/" || location.pathname.startsWith("/reports") || location.pathname.startsWith("/moments");
@@ -322,7 +323,8 @@ const MainListItems = ({ collapsed }) => {
     return () => {
       isMounted = false;
     };
-  }, [isAuth, getVersion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuth]);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -365,7 +367,7 @@ const MainListItems = ({ collapsed }) => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    if (user.id) {
+    if (user.id && socket && typeof socket.on === 'function') {
       const companyId = user.companyId;
       //    const socket = socketManager.GetSocket();
       // console.log('socket nListItems')
@@ -380,10 +382,12 @@ const MainListItems = ({ collapsed }) => {
 
       socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
       return () => {
-        socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
+        if (socket && typeof socket.off === 'function') {
+          socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
+        }
       };
     }
-  }, [socket]);
+  }, [socket, user]);
 
   useEffect(() => {
     let unreadsCount = 0;

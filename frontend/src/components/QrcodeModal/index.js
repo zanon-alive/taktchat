@@ -35,7 +35,10 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
   }, [whatsAppId]);
 
   useEffect(() => {
-    if (!whatsAppId) return;
+    if (!whatsAppId || !socket || typeof socket.on !== 'function' || !user?.companyId) {
+      return;
+    }
+
     const companyId = user.companyId;
     // const socket = socketConnection({ companyId, userId: user.id });
 
@@ -51,9 +54,16 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
     socket.on(`company-${companyId}-whatsappSession`, onWhatsappData);
 
     return () => {
-      socket.off(`company-${companyId}-whatsappSession`, onWhatsappData);
+      if (socket && typeof socket.off === 'function') {
+        try {
+          socket.off(`company-${companyId}-whatsappSession`, onWhatsappData);
+        } catch (e) {
+          console.debug("[QrcodeModal] error in cleanup", e);
+        }
+      }
     };
-  }, [whatsAppId, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whatsAppId, onClose, user?.companyId]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">

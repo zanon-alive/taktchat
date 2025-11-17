@@ -112,6 +112,24 @@ export default function ChatPopover() {
   const { datetimeToClient } = useDate();
   const [play] = useSound(notifySound);
   const soundAlertRef = useRef();
+  const isMountedRef = useRef(true);
+  const socketCleanupRef = useRef(null);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      // Executa cleanup do socket imediatamente ao desmontar
+      if (socketCleanupRef.current) {
+        try {
+          socketCleanupRef.current();
+        } catch (e) {
+          // Ignora erros
+        }
+        socketCleanupRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     soundAlertRef.current = play;
@@ -124,60 +142,96 @@ export default function ChatPopover() {
   }, [play]);
 
   useEffect(() => {
+    if (!isMountedRef.current) return;
     if (!isAuth) {
-      dispatch({ type: "RESET" });
-      setPageNumber(1);
+      if (isMountedRef.current) {
+        dispatch({ type: "RESET" });
+        setPageNumber(1);
+      }
       return;
     }
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
+    if (isMountedRef.current) {
+      dispatch({ type: "RESET" });
+      setPageNumber(1);
+    }
   }, [searchParam, isAuth]);
 
   useEffect(() => {
     if (!isAuth) {
       return;
     }
+    if (!isMountedRef.current) return;
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
-      fetchChats();
+      if (isMountedRef.current) {
+        fetchChats();
+      }
     }, 500);
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParam, pageNumber, isAuth]);
 
   useEffect(() => {
-    if (!isAuth || !user?.companyId || !socket) {
+    if (!isAuth || !user?.companyId || !socket || typeof socket.on !== 'function') {
       return undefined;
     }
 
-      const companyId = user.companyId;
+    // Marca como não montado imediatamente se isAuth mudar para false
+    if (!isMountedRef.current) {
+      return undefined;
+    }
+
+    const companyId = user.companyId;
 //    const socket = socketManager.GetSocket();
 
-      const onCompanyChatPopover = (data) => {
-        if (data.action === "new-message") {
+    const onCompanyChatPopover = (data) => {
+      // Verificação dupla para garantir que o componente ainda está montado
+      if (!isMountedRef.current) return;
+      if (data.action === "new-message") {
+        if (isMountedRef.current) {
           dispatch({ type: "CHANGE_CHAT", payload: data });
-          if (data.newMessage.senderId !== user.id) {
-
+        }
+        if (data.newMessage.senderId !== user.id && isMountedRef.current) {
+          if (soundAlertRef.current) {
             soundAlertRef.current();
           }
         }
-        if (data.action === "update") {
-          dispatch({ type: "CHANGE_CHAT", payload: data });
+      }
+      if (data.action === "update" && isMountedRef.current) {
+        dispatch({ type: "CHANGE_CHAT", payload: data });
+      }
+    }
+
+    socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
+
+    // Armazena função de cleanup para execução imediata no unmount
+    const cleanup = () => {
+      if (socket && typeof socket.off === 'function') {
+        try {
+          socket.off(`company-${companyId}-chat`, onCompanyChatPopover);
+        } catch (e) {
+          // Ignora erros no cleanup
         }
       }
+    };
+    
+    socketCleanupRef.current = cleanup;
 
-      socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
-
-      return () => {
-        socket.off(`company-${companyId}-chat`, onCompanyChatPopover);
-      };
+    return () => {
+      cleanup();
+      socketCleanupRef.current = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isAuth, socket]);
 
 
   useEffect(() => {
-    if (!isAuth) {
-      setInvisible(true);
+    if (!isAuth || !isMountedRef.current) {
+      if (isMountedRef.current) {
+        setInvisible(true);
+      }
       return;
     }
     let unreadsCount = 0;
@@ -190,27 +244,36 @@ export default function ChatPopover() {
         }
       }
     }
-    if (unreadsCount > 0) {
-      setInvisible(false);
-    } else {
-      setInvisible(true);
+    if (isMountedRef.current) {
+      if (unreadsCount > 0) {
+        setInvisible(false);
+      } else {
+        setInvisible(true);
+      }
     }
   }, [chats, user.id, isAuth]);
 
   const fetchChats = async () => {
-    if (!isAuth) {
-      setLoading(false);
+    if (!isAuth || !isMountedRef.current) {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
       return;
     }
     try {
       const { data } = await api.get("/chats/", {
         params: { searchParam, pageNumber },
       });
-      dispatch({ type: "LOAD_CHATS", payload: data.records });
-      setHasMore(data.hasMore);
-      setLoading(false);
+      if (isMountedRef.current) {
+        dispatch({ type: "LOAD_CHATS", payload: data.records });
+        setHasMore(data.hasMore);
+        setLoading(false);
+      }
     } catch (err) {
-      toastError(err);
+      if (isMountedRef.current) {
+        toastError(err);
+        setLoading(false);
+      }
     }
   };
 

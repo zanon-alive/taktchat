@@ -25,9 +25,14 @@ interface TokenPayload {
 }
 
 const isAuth = async (req: ExtendedRequest, res: Response, next: NextFunction): Promise<void> => {
+  console.log("[DEBUG isAuth] Requisição recebida:", req.method, req.path);
+  console.log("[DEBUG isAuth] req.url:", req.url);
+  console.log("[DEBUG isAuth] req.originalUrl:", req.originalUrl);
+  
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
+    console.log("[DEBUG isAuth] ERRO: Sem header de autorização");
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }
 
@@ -36,6 +41,8 @@ const isAuth = async (req: ExtendedRequest, res: Response, next: NextFunction): 
   try {
     const decoded = verify(token, authConfig.secret) as TokenPayload;
     const { id, profile, companyId } = decoded;
+
+    console.log("[DEBUG isAuth] Token decodificado - userId:", id, "companyId:", companyId, "profile:", profile);
 
     // Atualização do usuário
     await updateUser(id, companyId);
@@ -47,8 +54,10 @@ const isAuth = async (req: ExtendedRequest, res: Response, next: NextFunction): 
       companyId
     };
 
+    console.log("[DEBUG isAuth] Autenticação bem-sucedida, chamando next()");
     return next();
   } catch (err: any) {
+    console.log("[DEBUG isAuth] Erro na autenticação:", err.name, err.message);
     if (err.name === 'TokenExpiredError') {
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     } else if (err.name === 'JsonWebTokenError') {

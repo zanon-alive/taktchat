@@ -147,6 +147,10 @@ const DashboardManage = () => {
   }, []);
 
   useEffect(() => {
+    if (!socket || typeof socket.on !== 'function' || !user?.companyId) {
+      return;
+    }
+
     const companyId = user.companyId;
     console.log("socket painel")
     // const socket = socketManager.GetSocket();
@@ -177,11 +181,18 @@ const DashboardManage = () => {
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
   
     return () => {
-      // socket.off("connect", onConnect);
-      socket.off(`company-${companyId}-ticket`, onAppMessage)
-      socket.off(`company-${companyId}-appMessage`, onAppMessage);
+      if (socket && typeof socket.off === 'function') {
+        try {
+          // socket.off("connect", onConnect);
+          socket.off(`company-${companyId}-ticket`, onAppMessage)
+          socket.off(`company-${companyId}-appMessage`, onAppMessage);
+        } catch (e) {
+          console.debug("[MomentsUser] error in cleanup", e);
+        }
+      }
     };
-  }, [socket]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.companyId, user?.id]);
 
   const Moments = useMemo(() => {
     // console.log(tickets)

@@ -332,44 +332,48 @@ const Companies = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        <>
-                            {companies.map((company) => (
-                                <TableRow style={rowStyle(company)} key={company.id}>
-                                    <TableCell align="center">{company.id}</TableCell>
-                                    <TableCell align="center">{renderStatus(company.status)}</TableCell>
-                                    <TableCell align="center">{company.name}</TableCell>
-                                    <TableCell align="center">{company.email}</TableCell>
-                                    <TableCell align="center">{company?.plan?.name}</TableCell> {/* Acesso seguro a plan.name */}
-                                    <TableCell align="center">R$ {renderPlanValue(company)}</TableCell>
-                                    <TableCell align="center">{dateToClient(company.createdAt)}</TableCell>
-                                    <TableCell align="center">{dateToClient(company.dueDate)}<br /><span>{company.recurrence}</span></TableCell>
-                                    <TableCell align="center">{datetimeToClient(company.lastLogin)}</TableCell>
-                                    <TableCell align="center">{company.folderSize}</TableCell>
-                                    <TableCell align="center">{company.numberFileFolder}</TableCell>
-                                    <TableCell align="center">{datetimeToClient(company.updatedAtFolder)}</TableCell>
-                                    {/* Descomentado os botões de ação */}
-                                    <TableCell align="center">
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleEditCompany(company)} //
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => { // Modificado para não passar o evento 'e' se não for usado
-                                                setConfirmModalOpen(true); //
-                                                setDeletingCompany(company); //
-                                            }}
-                                        >
-                                            <DeleteOutlineIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {loading && <TableRowSkeleton columns={4} />}
-                        </>
+                        {companies.map((company) => (
+                            <TableRow style={rowStyle(company)} key={company.id}>
+                                <TableCell align="center">{company.id}</TableCell>
+                                <TableCell align="center">{renderStatus(company.status)}</TableCell>
+                                <TableCell align="center">{company.name}</TableCell>
+                                <TableCell align="center">{company.email}</TableCell>
+                                <TableCell align="center">{company?.plan?.name}</TableCell>
+                                <TableCell align="center">R$ {renderPlanValue(company)}</TableCell>
+                                <TableCell align="center">{dateToClient(company.createdAt)}</TableCell>
+                                <TableCell align="center">
+                                    {dateToClient(company.dueDate)}
+                                    {company.recurrence && (
+                                        <>
+                                            <br />
+                                            <span>{company.recurrence}</span>
+                                        </>
+                                    )}
+                                </TableCell>
+                                <TableCell align="center">{datetimeToClient(company.lastLogin)}</TableCell>
+                                <TableCell align="center">{company.folderSize}</TableCell>
+                                <TableCell align="center">{company.numberFileFolder}</TableCell>
+                                <TableCell align="center">{datetimeToClient(company.updatedAtFolder)}</TableCell>
+                                <TableCell align="center">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => handleEditCompany(company)}
+                                    >
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                            setConfirmModalOpen(true);
+                                            setDeletingCompany(company);
+                                        }}
+                                    >
+                                        <DeleteOutlineIcon />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        {loading && <TableRowSkeleton columns={4} />}
                     </TableBody>
                 </Table>
             </Paper>

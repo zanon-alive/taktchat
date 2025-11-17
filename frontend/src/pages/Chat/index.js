@@ -201,6 +201,10 @@ function Chat(props) {
   }, [currentChat]);
 
   useEffect(() => {
+    if (!socket || typeof socket.on !== 'function' || !user?.companyId) {
+      return;
+    }
+
     const companyId = user.companyId;
     // const socket = socketConnection({ companyId, userId: user.id });
 
@@ -271,14 +275,20 @@ function Chat(props) {
     }
 
     return () => {
-      socket.off(`company-${companyId}-chat-user-${user.id}`, onChatUser);
-      socket.off(`company-${companyId}-chat`, onChat);
-      if (isObject(currentChat) && has(currentChat, "id")) {
-        socket.off(`company-${companyId}-chat-${currentChat.id}`, onCurrentChat);
+      if (socket && typeof socket.off === 'function') {
+        try {
+          socket.off(`company-${companyId}-chat-user-${user.id}`, onChatUser);
+          socket.off(`company-${companyId}-chat`, onChat);
+          if (isObject(currentChat) && has(currentChat, "id")) {
+            socket.off(`company-${companyId}-chat-${currentChat.id}`, onCurrentChat);
+          }
+        } catch (e) {
+          console.debug("[Chat] error in cleanup", e);
+        }
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat]);
+  }, [currentChat, user?.companyId, user?.id]);
 
   const selectChat = (chat) => {
     try {

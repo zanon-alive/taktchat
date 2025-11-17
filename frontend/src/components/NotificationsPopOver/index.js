@@ -141,14 +141,19 @@ const NotificationsPopOver = (volume) => {
 	}, [ticketIdUrl]);
 
 	useEffect(() => {
+		if (!socket || typeof socket.on !== 'function' || !user?.companyId || !user.id) {
+			return;
+		}
+
 		const companyId = user.companyId;
 		// const socket = socketManager.GetSocket();
-		if (user.id) {
-			const queueIds = queues.map((q) => q.id);
+		const queueIds = queues.map((q) => q.id);
 
-			const onConnectNotificationsPopover = () => {
+		const onConnectNotificationsPopover = () => {
+			if (socket && typeof socket.emit === 'function') {
 				socket.emit("joinNotification");
 			}
+		}
 
 			const onCompanyTicketNotificationsPopover = (data) => {
 				if (data.action === "updateUnread" || data.action === "delete") {
@@ -220,17 +225,23 @@ const NotificationsPopOver = (volume) => {
 				}
 			}
 
-			socket.on("connect", onConnectNotificationsPopover);
-			socket.on(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
-			socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
+		socket.on("connect", onConnectNotificationsPopover);
+		socket.on(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
+		socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
 
-			return () => {
-				socket.off("connect", onConnectNotificationsPopover);
-				socket.off(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
-				socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
-			};
-		}
-	}, [user, profile, queues, showTicketWithoutQueue, socket, showNotificationPending, showGroupNotification]);
+		return () => {
+			if (socket && typeof socket.off === 'function') {
+				try {
+					socket.off("connect", onConnectNotificationsPopover);
+					socket.off(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
+					socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
+				} catch (e) {
+					console.debug("[NotificationsPopOver] error in cleanup", e);
+				}
+			}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user?.companyId, user?.id, profile, queues, showTicketWithoutQueue, showNotificationPending, showGroupNotification]);
 
 	const handleNotifications = data => {
 		const { message, contact, ticket } = data;

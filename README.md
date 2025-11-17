@@ -48,6 +48,7 @@ Consulte `.docs/instalacao/` para requisitos e variações (Docker completo, pro
 
 Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada:
 
+- **🚀 Guia de Onboarding:** `.docs/onboarding.md` - Documentação completa explicando todas as funcionalidades e como utilizá-las
 - Visão geral do produto: `.docs/visao-geral/produto.md`
 - Arquitetura e fluxos críticos: `.docs/visao-geral/arquitetura.md` e `.docs/visao-geral/fluxos-criticos.md`
 - Instalação e ambientes: `.docs/instalacao/`
