@@ -45,25 +45,42 @@ export class BaileysAdapter implements IWhatsAppAdapter {
   /**
    * Inicializa conexão Baileys
    * Usa o código existente do initWASocket
+   * IMPORTANTE: Não cria nova conexão, apenas reutiliza a existente
    */
   async initialize(): Promise<void> {
     try {
+      // Verificar se já está inicializado
+      if (this.socket && this.status === "connected") {
+        logger.debug(`[BaileysAdapter] Já inicializado para whatsappId=${this.whatsappId}`);
+        return;
+      }
+      
       logger.info(`[BaileysAdapter] Inicializando para whatsappId=${this.whatsappId}`);
       
       // Usa o socket já inicializado pelo sistema existente
+      // NÃO cria nova conexão, apenas reutiliza a existente
       this.socket = getWbot(this.whatsappId);
       
       if (!this.socket) {
+        // Se não existe socket, não deve tentar criar aqui
+        // O socket deve ser criado pelo StartWhatsAppSession
         throw new WhatsAppAdapterError(
-          "Socket Baileys não inicializado",
+          "Socket Baileys não inicializado. Inicie a sessão primeiro via StartWhatsAppSession.",
           "SOCKET_NOT_INITIALIZED"
         );
       }
 
-      // Extrair número de telefone
-      if (this.socket.user?.id) {
-        this.phoneNumber = this.socket.user.id.split("@")[0];
+      // Verificar se socket está realmente conectado
+      if (!this.socket.user?.id) {
+        this.status = "disconnected";
+        throw new WhatsAppAdapterError(
+          "Socket Baileys não está conectado",
+          "SOCKET_NOT_CONNECTED"
+        );
       }
+
+      // Extrair número de telefone
+      this.phoneNumber = this.socket.user.id.split("@")[0];
 
       this.status = "connected";
       logger.info(`[BaileysAdapter] Inicializado com sucesso: ${this.phoneNumber}`);

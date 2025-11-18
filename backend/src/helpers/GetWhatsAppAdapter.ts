@@ -20,16 +20,38 @@ const GetWhatsAppAdapter = async (
     // Verificar se está conectado
     const status = adapter.getConnectionStatus();
     if (status !== "connected") {
-      logger.warn(`[GetWhatsAppAdapter] Adapter não conectado: ${status}. Tentando inicializar...`);
-      
-      try {
-        await adapter.initialize();
-      } catch (initError: any) {
-        logger.error(`[GetWhatsAppAdapter] Erro ao inicializar adapter: ${initError.message}`);
-        throw new AppError(
-          `WhatsApp não está conectado. Status: ${status}. Erro: ${initError.message}`,
-          404
-        );
+      // Para Baileys, apenas tenta inicializar se não estiver conectado
+      // Não deve criar nova conexão, apenas reutilizar a existente
+      if (whatsapp.channelType === "baileys") {
+        try {
+          // initialize() apenas reutiliza o socket existente, não cria novo
+          await adapter.initialize();
+        } catch (initError: any) {
+          // Se erro é SOCKET_NOT_INITIALIZED, significa que a sessão não foi iniciada
+          if (initError.code === "SOCKET_NOT_INITIALIZED" || initError.message?.includes("não inicializado")) {
+            logger.error(`[GetWhatsAppAdapter] Sessão WhatsApp não iniciada para whatsappId=${whatsapp.id}. Inicie a sessão primeiro.`);
+            throw new AppError(
+              `WhatsApp não está conectado. Inicie a sessão primeiro via interface ou API.`,
+              404
+            );
+          }
+          logger.error(`[GetWhatsAppAdapter] Erro ao inicializar adapter: ${initError.message}`);
+          throw new AppError(
+            `WhatsApp não está conectado. Status: ${status}. Erro: ${initError.message}`,
+            404
+          );
+        }
+      } else {
+        // Para Official API, tenta inicializar normalmente
+        try {
+          await adapter.initialize();
+        } catch (initError: any) {
+          logger.error(`[GetWhatsAppAdapter] Erro ao inicializar adapter: ${initError.message}`);
+          throw new AppError(
+            `WhatsApp não está conectado. Status: ${status}. Erro: ${initError.message}`,
+            404
+          );
+        }
       }
     }
     
