@@ -113,7 +113,26 @@ export class BaileysAdapter implements IWhatsAppAdapter {
     }
 
     try {
-      const { to, body, mediaType, mediaPath, mediaUrl, caption, quotedMsgId, buttons, listSections, vcard } = options;
+      let { to, body, mediaType, mediaPath, mediaUrl, caption, quotedMsgId, buttons, listSections, vcard } = options;
+      
+      // Normalizar JID: Baileys precisa do JID completo (com @s.whatsapp.net ou @g.us)
+      // Se receber apenas número, adicionar sufixo apropriado
+      if (to && !to.includes("@")) {
+        // Se não tem @, assumir que é número individual
+        to = `${to}@s.whatsapp.net`;
+      } else if (to && to.includes("@") && !to.endsWith("@s.whatsapp.net") && !to.endsWith("@g.us") && !to.endsWith("@lid")) {
+        // Se tem @ mas não termina com sufixo válido, adicionar @s.whatsapp.net
+        const number = to.split("@")[0];
+        to = `${number}@s.whatsapp.net`;
+      }
+      
+      // Validar JID antes de usar
+      if (!to || typeof to !== 'string' || !to.includes('@')) {
+        throw new WhatsAppAdapterError(
+          `JID inválido: ${to}. Deve estar no formato número@s.whatsapp.net ou número@g.us`,
+          "INVALID_JID"
+        );
+      }
       
       let content: any;
       let sentMsg: any;
