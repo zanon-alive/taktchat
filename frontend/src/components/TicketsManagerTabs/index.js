@@ -45,6 +45,7 @@ import { Button, Snackbar } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { QueueSelectedContext } from "../../context/QueuesSelected/QueuesSelectedContext";
+import useQueues from "../../hooks/useQueues";
 
 import api from "../../services/api";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
@@ -317,10 +318,12 @@ const TicketsManagerTabs = () => {
   const { profile } = user;
   const { setSelectedQueuesMessage } = useContext(QueueSelectedContext);
   const { tabOpen, setTabOpen } = useContext(TicketsContext);
+  const { findAll: findAllQueues } = useQueues();
 
   const [openCount, setOpenCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [groupingCount, setGroupingCount] = useState(0);
+  const [allQueues, setAllQueues] = useState([]);
 
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
@@ -340,6 +343,19 @@ const TicketsManagerTabs = () => {
   const [isHoveredSort, setIsHoveredSort] = useState(false);
 
   const [isFilterActive, setIsFilterActive] = useState(false);
+
+  // Carregar todas as filas disponíveis
+  useEffect(() => {
+    const loadQueues = async () => {
+      try {
+        const list = await findAllQueues();
+        setAllQueues(list || []);
+      } catch (err) {
+        console.error("[TicketsManagerTabs] Erro ao carregar filas:", err);
+      }
+    };
+    loadQueues();
+  }, [findAllQueues]);
 
   useEffect(() => {
     setSelectedQueuesMessage(selectedQueueIds);
@@ -916,7 +932,7 @@ const TicketsManagerTabs = () => {
           <Grid item>
             <TicketsQueueSelect
               selectedQueueIds={selectedQueueIds}
-              userQueues={user?.queues}
+              userQueues={allQueues.length > 0 ? allQueues : (user?.queues || [])}
               onChange={(values) => setSelectedQueueIds(values)}
             />
           </Grid>
