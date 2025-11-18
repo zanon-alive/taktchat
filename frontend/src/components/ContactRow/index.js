@@ -39,24 +39,40 @@ const ContactRow = memo(({
       <td className="w-[48px] p-4">
         <input type="checkbox"
           checked={isSelected}
-          onClick={(e) => onToggleSelect(contact.id, rowIndex, e)}
+          onChange={(e) => onToggleSelect(contact.id, rowIndex, e)}
           className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" 
         />
       </td>
       <td className="pl-0 pr-3 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white flex items-center gap-3 w-[360px] lg:w-[360px] max-w-[360px] lg:max-w-[360px] overflow-hidden text-ellipsis">
-        <Tooltip {...CustomTooltipProps} title={contact.name}>
-          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 flex-shrink-0 overflow-hidden">
-            <LazyContactAvatar 
-              contact={contact}
-              style={{ width: "40px", height: "40px" }}
-            />
-          </div>
-        </Tooltip>
-        <Tooltip {...CustomTooltipProps} title={contact.name}>
-          <span className="truncate">
-            {contact.name}
-          </span>
-        </Tooltip>
+        {contact.name ? (
+          <>
+            <Tooltip {...CustomTooltipProps} title={contact.name}>
+              <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 flex-shrink-0 overflow-hidden">
+                <LazyContactAvatar 
+                  contact={contact}
+                  style={{ width: "40px", height: "40px" }}
+                />
+              </div>
+            </Tooltip>
+            <Tooltip {...CustomTooltipProps} title={contact.name}>
+              <span className="truncate">
+                {contact.name}
+              </span>
+            </Tooltip>
+          </>
+        ) : (
+          <>
+            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300 flex-shrink-0 overflow-hidden">
+              <LazyContactAvatar 
+                contact={contact}
+                style={{ width: "40px", height: "40px" }}
+              />
+            </div>
+            <span className="truncate">
+              {contact.name || "Sem nome"}
+            </span>
+          </>
+        )}
       </td>
       <td className="pl-3 pr-3 py-3 whitespace-nowrap w-[120px]">
         <div className="flex items-center gap-2 text-[16px] leading-tight">
