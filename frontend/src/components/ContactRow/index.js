@@ -89,14 +89,22 @@ const ContactRow = memo(({
         </div>
       </td>
       <td className="hidden lg:table-cell pl-1 pr-1 py-3 w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
-        <Tooltip {...CustomTooltipProps} title={contact.email}>
-          <span className="truncate block max-w-full text-xs">{contact.email}</span>
-        </Tooltip>
+        {contact.email ? (
+          <Tooltip {...CustomTooltipProps} title={contact.email}>
+            <span className="truncate block max-w-full text-xs">{contact.email}</span>
+          </Tooltip>
+        ) : (
+          <span className="truncate block max-w-full text-xs text-gray-400">-</span>
+        )}
       </td>
       <td className="pl-3 pr-3 py-3 max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
-        <Tooltip {...CustomTooltipProps} title={contact.city}>
-          <span className="truncate">{contact.city}</span>
-        </Tooltip>
+        {contact.city ? (
+          <Tooltip {...CustomTooltipProps} title={contact.city}>
+            <span className="truncate">{contact.city}</span>
+          </Tooltip>
+        ) : (
+          <span className="truncate text-gray-400">-</span>
+        )}
       </td>
       <td className="text-center pl-1 pr-1 py-1 max-w-[50px]">
         <div className="flex justify-center gap-1">
