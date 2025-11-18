@@ -134,12 +134,13 @@ export class BaileysAdapter implements IWhatsAppAdapter {
     }
 
     // Verificar se socket está realmente conectado
-    if (!this.socket.user?.id || this.socket.ws?.readyState !== 1) {
+    // Verifica se tem user.id (indica que está autenticado)
+    if (!this.socket.user?.id) {
       // Socket desconectado, atualizar status e tentar obter novo socket
       this.status = "disconnected";
       this.socket = getWbot(this.whatsappId);
       
-      if (!this.socket || !this.socket.user?.id || this.socket.ws?.readyState !== 1) {
+      if (!this.socket || !this.socket.user?.id) {
         throw new WhatsAppAdapterError(
           "Socket não está conectado. Reconecte a sessão WhatsApp.",
           "NOT_CONNECTED"
@@ -147,6 +148,10 @@ export class BaileysAdapter implements IWhatsAppAdapter {
       }
       
       this.status = "connected";
+      // Atualizar phoneNumber se necessário
+      if (this.socket.user.id && !this.phoneNumber) {
+        this.phoneNumber = this.socket.user.id.split("@")[0];
+      }
     }
 
     try {
