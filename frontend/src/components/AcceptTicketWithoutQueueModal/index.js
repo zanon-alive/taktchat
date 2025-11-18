@@ -100,6 +100,11 @@ const handleCloseAlert = () => {
 };
 
 const handleSendMessage = async (id) => {
+	// Verificar se o ticket existe e é válido
+	if (!id || !ticket || !ticket.id) {
+		console.warn("[AcceptTicketWithoutQueueModal] Ticket inválido para enviar mensagem", { id, ticket });
+		return;
+	}
 
 	let isGreetingMessage = false;
 
@@ -121,52 +126,69 @@ const handleSendMessage = async (id) => {
 		toastError(err);
 	}
 	
-	// console.log(ticket)
+	// Verificar se deve enviar mensagem de saudação
 	if (isGreetingMessage && (!ticket.isGroup || ticket.whatsapp?.groupAsTicket === "enabled") && ticket.status === "pending") {
-		const msg = `${settingMessage.greetingAcceptedMessage}`;
-		// const msg = `{{ms}} *{{name}}*, ${i18n.t("mainDrawer.appBar.user.myName")} *${user?.name}* ${i18n.t("mainDrawer.appBar.user.continuity")}.`;
+		const msg = settingMessage?.greetingAcceptedMessage || "";
+		
+		// Verificar se a mensagem não está vazia
+		if (!msg || !msg.trim()) {
+			console.warn("[AcceptTicketWithoutQueueModal] Mensagem de saudação vazia");
+			return;
+		}
+
 		const message = {
 			read: 1,
 			fromMe: true,
 			mediaUrl: "",
-			body: `${msg.trim()}`,
+			body: msg.trim(),
 		};
 		try {
 			await api.post(`/messages/${id}`, message);
 		} catch (err) {
+			console.error("[AcceptTicketWithoutQueueModal] Erro ao enviar mensagem de saudação:", err);
 			toastError(err);
 		}
 	}
 };
 
 const handleUpdateTicketStatus = async (queueId) => {
+	// Verificar se o ticketId é válido
+	if (!ticketId) {
+		toastError("ID do ticket inválido");
+		setLoading(false);
+		return;
+	}
+
 	setLoading(true);
 	try {
 		const otherTicket = await api.put(`/tickets/${ticketId}`, {
-			status: ticket.isGroup && ticket.channel === 'whatsapp' ? "group" : "open",
+			status: ticket?.isGroup && ticket?.channel === 'whatsapp' ? "group" : "open",
 			userId: user?.id || null,
 			queueId: queueId
 		});
 
-		if (otherTicket.data.id !== ticket.id) {
+		if (otherTicket.data.id !== ticket?.id) {
 			if (otherTicket.data.userId !== user?.id) {
 				setOpenAlert(true)
 				setUserTicketOpen(otherTicket.data.user.name)
 				setQueueTicketOpen(otherTicket.data.queue.name)
 			} else {
 				setLoading(false);
-				setTabOpen(otherTicket.isGroup ? "group" : "open");
+				setTabOpen(otherTicket.data.isGroup ? "group" : "open");
 				history.push(`/tickets/${otherTicket.data.uuid}`);
 			}
 		} else {
-			handleSendMessage(ticket.id)
+			// Enviar mensagem de saudação se necessário (usar ticketId atualizado)
+			const updatedTicketId = otherTicket.data.id || ticketId;
+			await handleSendMessage(updatedTicketId);
 			setLoading(false);
-			setTabOpen(ticket.isGroup ? "group" : "open");
-			history.push(`/tickets/${ticket.uuid}`);
+			setTabOpen(otherTicket.data.isGroup ? "group" : "open");
+			history.push(`/tickets/${otherTicket.data.uuid}`);
 			handleClose();
 		}
 	} catch (err) {
 		setLoading(false);
+		console.error("[AcceptTicketWithoutQueueModal] Erro ao atualizar status do ticket:", err);
 		toastError(err);
 	}
 };
