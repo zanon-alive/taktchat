@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,6 +21,7 @@ import { Grid, ListItemText, MenuItem, Select } from "@material-ui/core";
 import { toast } from "react-toastify";
 import { Facebook, Instagram, WhatsApp } from "@material-ui/icons";
 import ShowTicketOpen from "../ShowTicketOpenModal";
+import useQueues from "../../hooks/useQueues";
 
 const useStyles = makeStyles((theme) => ({
   online: {
