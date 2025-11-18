@@ -24,6 +24,7 @@ import {
   Add as AddIcon,
   TextRotateUp,
   TextRotationDown,
+  Android as BotIcon,
 } from "@material-ui/icons";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
@@ -324,6 +325,7 @@ const TicketsManagerTabs = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [groupingCount, setGroupingCount] = useState(0);
   const [allQueues, setAllQueues] = useState([]);
+  const [botCount, setBotCount] = useState(0);
 
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
@@ -1072,6 +1074,42 @@ const TicketsManagerTabs = () => {
               classes={{ root: classes.tabPanelItem }}
             />
           )}
+
+          {/* BOT */}
+          <Tab
+            label={
+              <Grid container alignItems="center" justifyContent="center">
+                <Grid item>
+                  <Badge
+                    overlap="rectangular"
+                    classes={{ badge: classes.customBadge }}
+                    badgeContent={botCount}
+                    color="primary"
+                  >
+                    <BotIcon
+                      style={{
+                        fontSize: 18,
+                      }}
+                    />
+                  </Badge>
+                </Grid>
+                <Grid item>
+                  <Typography
+                    style={{
+                      marginLeft: 8,
+                      fontSize: 10,
+                      fontWeight: 600,
+                    }}
+                  >
+                    BOT
+                  </Typography>
+                </Grid>
+              </Grid>
+            }
+            value={"bot"}
+            name="bot"
+            classes={{ root: classes.tabPanelItem }}
+          />
         </Tabs>
 
         <Paper className={classes.ticketsWrapper}>
@@ -1104,6 +1142,15 @@ const TicketsManagerTabs = () => {
               setTabOpen={setTabOpen}
             />
           )}
+          <TicketsList
+            status="bot"
+            showAll={showAllTickets}
+            sortTickets={sortTickets ? "ASC" : "DESC"}
+            selectedQueueIds={selectedQueueIds}
+            updateCount={(val) => setBotCount(val)}
+            style={applyPanelStyle("bot")}
+            setTabOpen={setTabOpen}
+          />
         </Paper>
       </TabPanel>
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
