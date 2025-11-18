@@ -527,26 +527,24 @@ const TicketActionButtonsCustom = ({ ticket
                     open={menuOpen}
                     onClose={handleCloseMenu}
                 >
-                    {(ticket.status === "open" || ticket.status === "group") && (
-                        <>
-                            <MenuItem onClick={() => { handleCloseMenu(); handleClickOpen(); }}>
-                                <HighlightOffIcon style={{ color: '#e53935', marginRight: 10 }} />
-                                {i18n.t("messagesList.header.buttons.resolve")}
-                            </MenuItem>
-                            <MenuItem onClick={() => { handleCloseMenu(); handleUpdateTicketStatus(null, "pending", null); }}>
-                                <UndoIcon style={{ color: '#fb8c00', marginRight: 10 }} />
-                                {i18n.t("tickets.buttons.returnQueue")}
-                            </MenuItem>
-                            <MenuItem onClick={() => { handleCloseMenu(); handleOpenTransferModal(); }}>
-                                <SwapHorizOutlined style={{ color: '#1e88e5', marginRight: 10 }} />
-                                {i18n.t("ticketsList.buttons.transfer") || "Transferir ticket"}
-                            </MenuItem>
-                            <MenuItem onClick={() => { handleCloseMenu(); handleContactToggleDisableBot(); }}>
-                                <DeviceHubOutlined style={{ color: '#8e24aa', marginRight: 10 }} />
-                                {i18n.t("contactModal.form.chatBotContact")} {disableBot ? "(desligado)" : "(ligado)"}
-                            </MenuItem>
-                        </>
-                    )}
+                    {(ticket.status === "open" || ticket.status === "group") && [
+                        <MenuItem key="resolve" onClick={() => { handleCloseMenu(); handleClickOpen(); }}>
+                            <HighlightOffIcon style={{ color: '#e53935', marginRight: 10 }} />
+                            {i18n.t("messagesList.header.buttons.resolve")}
+                        </MenuItem>,
+                        <MenuItem key="return" onClick={() => { handleCloseMenu(); handleUpdateTicketStatus(null, "pending", null); }}>
+                            <UndoIcon style={{ color: '#fb8c00', marginRight: 10 }} />
+                            {i18n.t("tickets.buttons.returnQueue")}
+                        </MenuItem>,
+                        <MenuItem key="transfer" onClick={() => { handleCloseMenu(); handleOpenTransferModal(); }}>
+                            <SwapHorizOutlined style={{ color: '#1e88e5', marginRight: 10 }} />
+                            {i18n.t("ticketsList.buttons.transfer") || "Transferir ticket"}
+                        </MenuItem>,
+                        <MenuItem key="bot" onClick={() => { handleCloseMenu(); handleContactToggleDisableBot(); }}>
+                            <DeviceHubOutlined style={{ color: '#8e24aa', marginRight: 10 }} />
+                            {i18n.t("contactModal.form.chatBotContact")} {disableBot ? "(desligado)" : "(ligado)"}
+                        </MenuItem>
+                    ]}
                     {(user.profile === "admin" || user.profile === "super") && (
                         <MenuItem onClick={handleOpenConfirmationModal}>
                             <DeleteForeverIcon style={{ color: '#d32f2f', marginRight: 10 }} />
