@@ -787,6 +787,11 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
           wsocket.ev.on("messaging-history.set", async (messageSet: any) => {
             try {
+              const eventTime = Date.now();
+              const connectionOpenTime = (wsocket as any)?._connectionOpenTime;
+              const timeSinceOpen = connectionOpenTime ? ((eventTime - connectionOpenTime) / 1000).toFixed(2) : 'N/A';
+              logger.info(`[wbot][TIMING] messaging-history.set recebido ${timeSinceOpen}s após conexão para whatsappId=${whatsapp.id}`);
+              
               const wppId = whatsapp.id;
               const labels = Array.isArray(messageSet?.labels) ? messageSet.labels : [];
               const chats = Array.isArray(messageSet?.chats) ? messageSet.chats : [];
