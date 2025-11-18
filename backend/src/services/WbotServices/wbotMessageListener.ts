@@ -916,14 +916,31 @@ const verifyContact = async (
     
     // Tentar buscar contato existente como fallback
     try {
-      const existingContact = await Contact.findOne({
-        where: contactData.isGroup 
-          ? { number: contactData.number, companyId }
-          : [
-              { companyId, canonicalNumber: contactData.number },
-              { companyId, number: contactData.number }
+      let existingContact: Contact | null = null;
+      if (contactData.isGroup) {
+        existingContact = await Contact.findOne({
+          where: { number: contactData.number, companyId }
+        });
+      } else {
+        // Buscar por canonicalNumber ou number usando Op.or
+        const { Op } = require("sequelize");
+        existingContact = await Contact.findOne({
+          where: {
+            companyId,
+            [Op.or]: [
+              { canonicalNumber: contactData.number },
+              { number: contactData.number }
             ]
-      });
+          }
+        });
+        
+        // Fallback: buscar apenas por number se ainda não encontrou
+        if (!existingContact) {
+          existingContact = await Contact.findOne({
+            where: { companyId, number: contactData.number }
+          });
+        }
+      }
       
       if (existingContact) {
         logger.info("[verifyContact] Contato encontrado no fallback após erro", {
