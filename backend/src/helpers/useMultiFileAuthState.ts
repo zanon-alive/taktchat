@@ -97,22 +97,72 @@ export const useMultiFileAuthState = async (
   // Tentar carregar credenciais salvas
   const savedCreds = await readData("creds");
   
-  // Log detalhado sobre carregamento
+  // Função para validar integridade das credenciais
+  const validateCredsIntegrity = (creds: any): { valid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (!creds || typeof creds !== 'object') {
+      errors.push('Credenciais não são um objeto válido');
+      return { valid: false, errors };
+    }
+    
+    // Verificar campos essenciais para credenciais válidas (após escanear QR)
+    if (creds.me?.id) {
+      // Se tem MeId, deve ter outros campos essenciais
+      if (!creds.signedIdentityKey || !creds.signedPreKey) {
+        errors.push('Credenciais com MeId mas sem signedIdentityKey ou signedPreKey');
+      }
+      if (!creds.registrationId || typeof creds.registrationId !== 'number') {
+        errors.push('Credenciais com MeId mas registrationId inválido');
+      }
+      if (!creds.signalIdentities || !Array.isArray(creds.signalIdentities) || creds.signalIdentities.length === 0) {
+        errors.push('Credenciais com MeId mas signalIdentities ausente ou inválido');
+      }
+    }
+    
+    return { valid: errors.length === 0, errors };
+  };
+  
+  // Log detalhado sobre carregamento e validação de integridade
   try {
     const credsPath = fsPathFor("creds");
-    const credsExists = await fs.promises.access(credsPath).then(() => true).catch(() => false);
+    const credsExists = driver === "fs" ? await fs.promises.access(credsPath).then(() => true).catch(() => false) : false;
     
     if (savedCreds) {
       const meId = savedCreds.me?.id || 'N/A';
       const registered = savedCreds.registered || false;
-      console.log(
-        `[BaileysAuth] ✅ Credenciais carregadas do arquivo para whatsappId=${whatsapp.id} | MeId: ${meId} | Registrado: ${registered} | Arquivo: ${credsPath}`
-      );
-    } else {
-      if (credsExists) {
+      
+      // Validar integridade das credenciais
+      const integrity = validateCredsIntegrity(savedCreds);
+      
+      if (integrity.valid) {
         console.log(
-          `[BaileysAuth] ⚠️  Arquivo creds.json existe mas não foi possível carregar para whatsappId=${whatsapp.id} | Arquivo: ${credsPath}`
+          `[BaileysAuth] ✅ Credenciais carregadas e validadas para whatsappId=${whatsapp.id} | MeId: ${meId} | Registrado: ${registered} | Arquivo: ${credsPath}`
         );
+      } else {
+        console.log(
+          `[BaileysAuth] ⚠️  Credenciais carregadas mas COM PROBLEMAS DE INTEGRIDADE para whatsappId=${whatsapp.id} | MeId: ${meId} | Erros: ${integrity.errors.join(', ')}`
+        );
+        console.log(
+          `[BaileysAuth] ⚠️  Recomendado: Limpar sessão e escanear QR code novamente para whatsappId=${whatsapp.id}`
+        );
+        // Não invalidar automaticamente, mas alertar - pode ser um caso legítimo (ex: credenciais iniciais)
+      }
+    } else {
+      if (credsExists && driver === "fs") {
+        console.log(
+          `[BaileysAuth] ⚠️  Arquivo creds.json existe mas não foi possível carregar (possivelmente corrompido) para whatsappId=${whatsapp.id} | Arquivo: ${credsPath}`
+        );
+        console.log(
+          `[BaileysAuth] ⚠️  Tentando remover arquivo corrompido e inicializar novas credenciais para whatsappId=${whatsapp.id}`
+        );
+        // Tentar remover arquivo corrompido
+        try {
+          await removeData("creds");
+          console.log(`[BaileysAuth] ✅ Arquivo corrompido removido para whatsappId=${whatsapp.id}`);
+        } catch (err: any) {
+          console.log(`[BaileysAuth] ⚠️  Erro ao remover arquivo corrompido: ${err?.message}`);
+        }
       } else {
         console.log(
           `[BaileysAuth] ❌ Nenhuma credencial salva encontrada para whatsappId=${whatsapp.id} | Arquivo não existe: ${credsPath} | Inicializando novas credenciais.`

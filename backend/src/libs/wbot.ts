@@ -172,18 +172,55 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
 
+        // Verificar se já existe socket para este whatsappId ANTES de criar novo
+        const existingSockets = sessions.filter(s => s.id === whatsapp.id);
+        if (existingSockets.length > 0) {
+          logger.warn(`[wbot][DEBUG] ⚠️ JÁ EXISTEM ${existingSockets.length} socket(s) ativo(s) para whatsappId=${whatsapp.id}`);
+          logger.warn(`[wbot][DEBUG] Limpando sockets anteriores para evitar múltiplas conexões...`);
+          
+          // Limpar todos os sockets anteriores
+          for (const existingSocket of existingSockets) {
+            try {
+              const socketId = existingSocket.id;
+              logger.info(`[wbot][DEBUG] Removendo socket existente com id=${socketId}`);
+              await removeWbot(socketId!, false);
+              logger.info(`[wbot][DEBUG] ✅ Socket ${socketId} removido`);
+            } catch (err: any) {
+              logger.error(`[wbot][DEBUG] ❌ Erro ao remover socket existente: ${err?.message}`);
+            }
+          }
+          
+          // Aguardar um pouco para garantir limpeza
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          logger.info(`[wbot][DEBUG] ✅ Todos os sockets anteriores foram removidos`);
+        }
+        
         let wsocket: Session = null;
         const { state, saveCreds } = await useMultiFileAuthState(whatsapp);
 
-        // Log sobre estado das credenciais antes de criar socket
+        // Log detalhado sobre estado das credenciais antes de criar socket
         try {
           const hasMeId = !!state.creds.me?.id;
           const isRegistered = state.creds.registered || false;
-          logger.info(
-            `[wbot] Criando socket para whatsappId=${whatsapp.id} | Tem MeId: ${hasMeId} | Registrado: ${isRegistered} | Vai gerar QR: ${!hasMeId}`
-          );
+          const meId = state.creds.me?.id || 'N/A';
+          
+          logger.info(`[wbot] ============================================`);
+          logger.info(`[wbot] Estado das Credenciais para whatsappId=${whatsapp.id}:`);
+          logger.info(`[wbot] ============================================`);
+          logger.info(`[wbot] - Tem MeId: ${hasMeId} ${hasMeId ? '(✅ Credenciais válidas)' : '(❌ Sem credenciais)'}`);
+          logger.info(`[wbot] - MeId: ${meId}`);
+          logger.info(`[wbot] - Registrado: ${isRegistered} ${isRegistered ? '(✅)' : '(❌)'}`);
+          logger.info(`[wbot] - Vai gerar QR: ${!hasMeId} ${!hasMeId ? '(⚠️ QR code será necessário)' : '(✅ Usando credenciais salvas)'}`);
+          logger.info(`[wbot] ============================================`);
+          
+          // Se não tem credenciais, avisar que QR code será necessário
+          if (!hasMeId) {
+            logger.warn(`[wbot] ⚠️ ATENÇÃO: Sem credenciais válidas. QR code será gerado.`);
+            logger.warn(`[wbot] ⚠️ AÇÃO NECESSÁRIA: Escanear QR code quando aparecer.`);
+          }
         } catch (err: any) {
-          logger.debug(`[wbot] Erro ao logar estado das credenciais: ${err?.message}`);
+          logger.error(`[wbot] ❌ Erro ao verificar estado das credenciais: ${err?.message}`);
+          logger.error(`[wbot] Stack: ${err?.stack}`);
         }
 
         wsocket = makeWASocket({
@@ -205,16 +242,26 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             return isJidBroadcast(jid) || (!allowGroup && isJidGroup(jid)) //|| jid.includes('newsletter')
           },
           browser: Browsers.appropriate("Desktop"),
+          // Browser config padrão do Baileys para evitar fingerprints suspeitos
+          // Usar "Desktop" garante compatibilidade com Multi-Device
           defaultQueryTimeoutMs: undefined,
           msgRetryCounterCache,
-          markOnlineOnConnect: false,
+          // Habilitado: marcar como online ao conectar pode ajudar a manter conexão estável
+          // Evolution API e outras implementações bem-sucedidas usam isso
+          markOnlineOnConnect: true,
           retryRequestDelayMs: 500,
           maxMsgRetryCount: 5,
           emitOwnEvents: true,
-          fireInitQueries: true,
+          // DESABILITADO: fireInitQueries pode causar device_removed ao fazer muitas queries iniciais
+          // O WhatsApp pode detectar isso como atividade suspeita e desconectar após ~60 segundos
+          // Deixar que o Baileys sincronize naturalmente através dos eventos
+          fireInitQueries: false,
           transactionOpts: { maxCommitRetries: 10, delayBetweenTriesMs: 3000 },
           connectTimeoutMs: 25_000,
-          // keepAliveIntervalMs: 60_000,
+          // HABILITADO: Keepalive nativo do Baileys a cada 45 segundos (antes do timeout de 60s)
+          // Isso complementa o keepalive manual que implementamos
+          // Valor menor que 60 segundos evita desconexão por inatividade
+          keepAliveIntervalMs: 45_000,
           getMessage: msgDB.get,
         });
 
@@ -373,18 +420,43 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         wsocket.ev.on(
           "connection.update",
           async ({ connection, lastDisconnect, qr }) => {
+            const elapsed = (wsocket as any)?._connectionOpenTime 
+              ? ((Date.now() - (wsocket as any)._connectionOpenTime) / 1000).toFixed(2)
+              : 'N/A';
+            
             logger.info(
-              `Socket  ${name} Connection Update ${connection || ""} ${lastDisconnect ? lastDisconnect.error.message : ""
-              }`
+              `Socket  ${name} Connection Update ${connection || ""} ${lastDisconnect ? lastDisconnect.error.message : ""} [${elapsed}s]`
             );
+            
+            // Logar TODOS os eventos de connection.update nos primeiros 60 segundos
+            if ((wsocket as any)?._connectionOpenTime) {
+              const timeSinceOpen = Date.now() - (wsocket as any)._connectionOpenTime;
+              if (timeSinceOpen < 70000) { // Primeiros 70 segundos
+                logger.debug(`[wbot][EVENT] ${(timeSinceOpen / 1000).toFixed(2)}s - connection.update: ${connection || 'undefined'}`);
+                logger.debug(`[wbot][EVENT] - lastDisconnect: ${lastDisconnect ? 'present' : 'null'}`);
+                if (lastDisconnect) {
+                  logger.debug(`[wbot][EVENT] - error: ${lastDisconnect.error?.message || 'no message'}`);
+                }
+              }
+            }
 
             if (connection === "close") {
+              // Limpar connectingMap imediatamente ao detectar desconexão
+              // Isso evita bloqueios caso erro ocorra durante fase de QR code ou conexão
+              try {
+                const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                clearConnectingMap(whatsapp.id);
+                logger.debug(`[wbot] Mapa de conexões limpo imediatamente após desconexão para whatsappId=${whatsapp.id}`);
+              } catch (err: any) {
+                logger.warn(`[wbot] Erro ao limpar mapa de conexões após desconexão: ${err?.message}`);
+              }
+              
               // Log completo do erro de desconexão para diagnóstico
               const error = lastDisconnect?.error as Boom;
               const statusCode = error?.output?.statusCode;
               const errorData = error?.data;
               const errorMessage = error?.message || error?.output?.payload?.message || "Unknown error";
-              
+
               // Log temporal: calcular tempo desde conexão aberta
               const disconnectTime = Date.now();
               const connectionOpenTime = (wsocket as any)?._connectionOpenTime;
@@ -467,6 +539,124 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 }
               }
               
+              // Verificar estado das credenciais antes de tratar erro
+              const hasValidCreds = !!state?.creds?.me?.id;
+              const credsRegistered = state?.creds?.registered || false;
+              
+              // Verificar se é erro 428 (Connection Terminated / Precondition Required)
+              // Este erro geralmente indica credenciais inválidas ou ausentes
+              if (statusCode === 428) {
+                logger.warn(`[wbot] ============================================`);
+                logger.warn(`[wbot] Erro 428 (Connection Terminated) para whatsappId=${whatsapp.id}`);
+                logger.warn(`[wbot] ============================================`);
+                logger.warn(`[wbot] Status Code: 428`);
+                logger.warn(`[wbot] Mensagem: ${errorMessage}`);
+                logger.warn(`[wbot] Tem credenciais válidas (MeId): ${hasValidCreds}`);
+                logger.warn(`[wbot] Credenciais registradas: ${credsRegistered}`);
+                logger.warn(`[wbot] ============================================`);
+                
+                // Se não tem credenciais válidas, limpar sessão completamente e iniciar nova para gerar QR code
+                if (!hasValidCreds) {
+                  logger.warn(`[wbot] ⚠️ Sem credenciais válidas. Limpando sessão e iniciando nova para gerar QR code.`);
+                  logger.warn(`[wbot] ⚠️ Isso garantirá que um novo QR code seja gerado.`);
+                  
+                  // Limpar sessão completamente (incluindo credenciais do filesystem)
+                  await whatsapp.update({ status: "PENDING", session: "" });
+                  await DeleteBaileysService(whatsapp.id);
+                  await cacheLayer.delFromPattern(`sessions:${whatsapp.id}:*`);
+                  
+                  // Remover adapter do cache do WhatsAppFactory
+                  try {
+                    const { WhatsAppFactory } = require("./whatsapp/WhatsAppFactory");
+                    WhatsAppFactory.removeAdapter(whatsapp.id);
+                  } catch (err: any) {
+                    logger.warn(`[wbot] Erro ao remover adapter do cache: ${err?.message}`);
+                  }
+                  
+                  // Remover sessão em filesystem se existir
+                  try {
+                    const baseDir = path.resolve(
+                      process.cwd(),
+                      process.env.SESSIONS_DIR || "private/sessions",
+                      String(whatsapp.companyId || "0"),
+                      String(whatsapp.id)
+                    );
+                    await fs.promises.rm(baseDir, { recursive: true, force: true });
+                    logger.info(`[wbot] Diretório de sessão removido: ${baseDir}`);
+                  } catch (err: any) {
+                    logger.warn(`[wbot] Erro ao remover diretório de sessão: ${err?.message}`);
+                  }
+                  
+                  removeWbot(id, false);
+                  
+                  // Resetar contador de tentativas de QR code
+                  retriesQrCodeMap.delete(id);
+                  
+                  // Limpar connectingMap antes de agendar reconexão para evitar bloqueio
+                  try {
+                    const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                    clearConnectingMap(whatsapp.id);
+                    logger.info(`[wbot] Mapa de conexões limpo antes de agendar nova sessão após erro 428 (sem credenciais) para whatsappId=${whatsapp.id}`);
+                  } catch (err: any) {
+                    logger.warn(`[wbot] Erro ao limpar mapa de conexões: ${err?.message}`);
+                  }
+                  
+                  // Notificar frontend
+                  io.of(`/workspace-${companyId}`)
+                    .emit(`company-${whatsapp.companyId}-whatsappSession`, {
+                      action: "update",
+                      session: whatsapp
+                    });
+                  
+                  // Iniciar nova sessão automaticamente após delay (para gerar QR code)
+                  logger.info(`[wbot] Iniciando nova sessão em 3 segundos para gerar QR code para whatsappId=${whatsapp.id}...`);
+                  setTimeout(() => {
+                    const { StartWhatsAppSession } = require("../services/WbotServices/StartWhatsAppSession");
+                    StartWhatsAppSession(whatsapp, whatsapp.companyId).catch((err: any) => {
+                      logger.error(`[wbot] Erro ao iniciar nova sessão para gerar QR code: ${err?.message}`);
+                    });
+                  }, 3000); // Aguardar 3 segundos antes de iniciar nova sessão
+                  
+                  return; // Não continuar para outros tratamentos
+                }
+                
+                // Se tem credenciais mas ainda recebeu 428, pode ser problema temporário
+                // Tentar reconectar com delay maior (30 segundos)
+                logger.warn(`[wbot] Tem credenciais válidas, mas recebeu 428. Reconectando em 30 segundos...`);
+                
+                try {
+                  await saveCreds();
+                  logger.info(`[wbot] Credenciais salvas antes de reconectar após erro 428 para whatsappId=${whatsapp.id}`);
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao salvar credenciais antes de reconectar: ${err?.message}`);
+                }
+                
+                await whatsapp.update({ status: "OPENING", session: "" });
+                io.of(`/workspace-${companyId}`)
+                  .emit(`company-${whatsapp.companyId}-whatsappSession`, {
+                    action: "update",
+                    session: whatsapp
+                  });
+                removeWbot(id, false);
+                
+                // Limpar connectingMap antes de agendar reconexão para evitar bloqueio
+                try {
+                  const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                  clearConnectingMap(whatsapp.id);
+                  logger.info(`[wbot] Mapa de conexões limpo antes de agendar reconexão após erro 428 para whatsappId=${whatsapp.id}`);
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao limpar mapa de conexões: ${err?.message}`);
+                }
+                
+                // Delay maior para erro 428 (30 segundos) - evitar reconexões muito rápidas
+                setTimeout(
+                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
+                  30000
+                );
+                
+                return; // Não continuar para outros tratamentos
+              }
+              
               // Verificar se é erro 515 (restart required)
               const isRestartRequired = statusCode === 515;
               
@@ -490,6 +680,15 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                     session: whatsapp
                   });
                 removeWbot(id, false);
+                
+                // Limpar connectingMap antes de agendar reconexão para evitar bloqueio
+                try {
+                  const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                  clearConnectingMap(whatsapp.id);
+                  logger.info(`[wbot] Mapa de conexões limpo antes de agendar reconexão após erro 515 para whatsappId=${whatsapp.id}`);
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao limpar mapa de conexões: ${err?.message}`);
+                }
                 
                 // Delay maior para erro 515 (15 segundos) para evitar conflito
                 setTimeout(
@@ -532,13 +731,36 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 } catch (err: any) {
                   logger.warn(`[wbot] Erro ao remover adapter do cache: ${err?.message}`);
                 }
+                // Resetar contador de tentativas de QR code
+                retriesQrCodeMap.delete(id);
+                
+                // Limpar connectingMap antes de agendar reconexão para evitar bloqueio
+                try {
+                  const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                  clearConnectingMap(whatsapp.id);
+                  logger.info(`[wbot] Mapa de conexões limpo antes de agendar nova sessão após device_removed para whatsappId=${whatsapp.id}`);
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao limpar mapa de conexões: ${err?.message}`);
+                }
+                
                 io.of(`/workspace-${companyId}`)
                   .emit(`company-${whatsapp.companyId}-whatsappSession`, {
                     action: "update",
                     session: whatsapp
                   });
                 removeWbot(id, false);
-                return; // Não continuar para reconexão automática após device_removed
+                
+                // Iniciar nova sessão automaticamente após delay para gerar QR code
+                // Como credenciais foram removidas, o Baileys gerará QR code automaticamente
+                logger.info(`[wbot] Iniciando nova sessão em 3 segundos para gerar QR code após device_removed para whatsappId=${whatsapp.id}...`);
+                setTimeout(() => {
+                  const { StartWhatsAppSession } = require("../services/WbotServices/StartWhatsAppSession");
+                  StartWhatsAppSession(whatsapp, whatsapp.companyId).catch((err: any) => {
+                    logger.error(`[wbot] Erro ao iniciar nova sessão para gerar QR code após device_removed: ${err?.message}`);
+                  });
+                }, 3000); // Aguardar 3 segundos antes de iniciar nova sessão
+                
+                return; // Não continuar para outros tratamentos
               }
               
               if (
@@ -554,6 +776,16 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 }
                 
                 removeWbot(id, false);
+                
+                // Limpar connectingMap antes de agendar reconexão para evitar bloqueio
+                try {
+                  const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                  clearConnectingMap(whatsapp.id);
+                  logger.debug(`[wbot] Mapa de conexões limpo antes de agendar reconexão após desconexão para whatsappId=${whatsapp.id}`);
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao limpar mapa de conexões: ${err?.message}`);
+                }
+                
                 // Delay maior para evitar reconexões muito rápidas (5 segundos)
                 setTimeout(
                   () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
@@ -579,6 +811,16 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                     session: whatsapp
                   });
                 removeWbot(id, false);
+                
+                // Limpar connectingMap antes de agendar reconexão para evitar bloqueio
+                try {
+                  const { clearConnectingMap } = require("../services/WbotServices/StartWhatsAppSession");
+                  clearConnectingMap(whatsapp.id);
+                  logger.debug(`[wbot] Mapa de conexões limpo antes de agendar reconexão após logout para whatsappId=${whatsapp.id}`);
+                } catch (err: any) {
+                  logger.warn(`[wbot] Erro ao limpar mapa de conexões: ${err?.message}`);
+                }
+                
                 // Delay maior após logout (10 segundos)
                 setTimeout(
                   () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
@@ -590,7 +832,64 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             if (connection === "open") {
               // Log temporal de quando conexão abriu
               const connectionOpenTime = Date.now();
+              
+              // Verificar estado das credenciais quando conexão abre
+              const hasMeId = !!state?.creds?.me?.id;
+              const credsRegistered = state?.creds?.registered || false;
+              
               logger.info(`[wbot][TIMING] Conexão aberta para whatsappId=${whatsapp.id} em ${new Date(connectionOpenTime).toISOString()}`);
+              logger.info(`[wbot][TIMING] Estado das credenciais: MeId=${hasMeId ? '✅' : '❌'}, Registered=${credsRegistered ? '✅' : '❌'}`);
+              
+              // Log detalhado sobre registro do dispositivo
+              try {
+                const userJid = (wsocket as WASocket).user?.id;
+                const socketType = (wsocket as any).type || "unknown";
+                const platform = (wsocket as any).platform || "unknown";
+                const isRegistered = (wsocket as any).user?.registered !== undefined ? (wsocket as any).user?.registered : null;
+                const userObject = (wsocket as any).user || {};
+                
+                logger.info(`[wbot] ============================================`);
+                logger.info(`[wbot] REGISTRO DO DISPOSITIVO para whatsappId=${whatsapp.id}:`);
+                logger.info(`[wbot] ============================================`);
+                logger.info(`[wbot] - User JID: ${userJid || 'NULL/UNDEFINED'}`);
+                logger.info(`[wbot] - Tipo de socket: ${socketType} (md = Multi-Device, legacy = antigo)`);
+                logger.info(`[wbot] - Plataforma: ${platform}`);
+                logger.info(`[wbot] - Registrado (user.registered): ${isRegistered} ${isRegistered === null ? '(não definido)' : isRegistered ? '(✅ SIM)' : '(❌ NÃO)'}`);
+                // Log detalhado do browser config
+                const browserConfig = (wsocket as any).browser || Browsers.appropriate("Desktop");
+                logger.info(`[wbot] - Browser config: ${JSON.stringify(browserConfig, null, 2)}`);
+                logger.info(`[wbot] - Browser config type: ${typeof browserConfig}`);
+                logger.info(`[wbot] - User object completo: ${JSON.stringify(userObject, null, 2)}`);
+                
+                // Verificar versão do Baileys
+                try {
+                  // eslint-disable-next-line @typescript-eslint/no-var-requires
+                  const baileysPkg = require("@whiskeysockets/baileys/package.json");
+                  logger.info(`[wbot] - Baileys version: ${baileysPkg?.version || 'unknown'}`);
+                } catch (e) {
+                  logger.warn(`[wbot] - Não foi possível ler versão do Baileys: ${(e as Error).message}`);
+                }
+                
+                // Verificar se é tipo MD (Multi-Device) - necessário para aparecer como dispositivo vinculado
+                if (socketType === "md") {
+                  logger.info(`[wbot] ✅ Tipo MD detectado - dispositivo DEVE aparecer na lista de dispositivos vinculados`);
+                  if (isRegistered === false) {
+                    logger.warn(`[wbot] ⚠️ ATENÇÃO: Tipo MD mas registered=false - WhatsApp pode não ter vinculado o dispositivo`);
+                    logger.warn(`[wbot] ⚠️ O dispositivo pode não aparecer na lista de dispositivos vinculados`);
+                  } else if (isRegistered === true) {
+                    logger.info(`[wbot] ✅ Tipo MD e registered=true - dispositivo deve aparecer na lista`);
+                  }
+                } else if (socketType === "legacy") {
+                  logger.warn(`[wbot] ⚠️ Tipo LEGACY detectado - dispositivo pode NÃO aparecer na lista de dispositivos vinculados`);
+                  logger.warn(`[wbot] ⚠️ Recomendado: reconectar para obter tipo MD`);
+                } else {
+                  logger.warn(`[wbot] ⚠️ Tipo desconhecido: ${socketType}`);
+                }
+                logger.info(`[wbot] ============================================`);
+              } catch (err: any) {
+                logger.error(`[wbot] ❌ Erro ao logar informações do dispositivo: ${err?.message}`);
+                logger.error(`[wbot] Stack: ${err?.stack}`);
+              }
               
               // Salvar credenciais imediatamente após conexão abrir
               try {
@@ -633,6 +932,14 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               
               // Armazenar timestamp de abertura para rastreamento
               (wsocket as any)._connectionOpenTime = connectionOpenTime;
+              
+              // Marcar que conexão está "aquecendo" (primeiros 5 segundos após abrir)
+              // Durante esse período, evitar operações pesadas que possam causar device_removed
+              (wsocket as any)._connectionWarmingUp = true;
+              setTimeout(() => {
+                (wsocket as any)._connectionWarmingUp = false;
+                logger.debug(`[wbot] Conexão finalizou período de aquecimento para whatsappId=${whatsapp.id}`);
+              }, 5000); // 5 segundos de aquecimento
 
               // Salvar credenciais periodicamente enquanto conectado (a cada 30 segundos)
               // Isso garante que credenciais estejam sempre atualizadas
@@ -649,10 +956,284 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 }
               }, 30000); // Salvar a cada 30 segundos
 
-              // Limpar intervalo quando desconectar
+              // Keepalive: Enviar presença periódica para manter conexão ativa
+              // O WhatsApp desconecta após ~60 segundos se não houver atividade
+              // Enviar presença a cada 30 segundos mantém a conexão viva (mais seguro)
+              // IMPORTANTE: Primeiro keepalive após 25 segundos (antes dos 60s)
+              
+              // Verificar se timers foram criados corretamente
+              let keepaliveCount = 0;
+              let keepaliveInterval: NodeJS.Timeout | null = null;
+              let firstKeepaliveTimeout: NodeJS.Timeout | null = null;
+              let safetyKeepaliveTimeout: NodeJS.Timeout | null = null;
+
+              // Monitorar eficácia do keepalive
+              const keepaliveStats = {
+                sent: 0,
+                failed: 0,
+                lastSent: null as number | null,
+                lastFailed: null as number | null
+              };
+
+              // Armazenar referências para limpeza
+              const timersRef = {
+                interval: null as NodeJS.Timeout | null,
+                timeout: null as NodeJS.Timeout | null,
+                cleaned: false
+              };
+              
+              // Primeiro keepalive após 25 segundos (antes do timeout de 60s)
+              const elapsedMs = Date.now() - connectionOpenTime;
+              logger.info(`[wbot][KEEPALIVE] Criando primeiro keepalive timer (executará em ${25000 - elapsedMs}ms para whatsappId=${whatsapp.id}`);
+              
+              firstKeepaliveTimeout = setTimeout(async () => {
+                try {
+                  const elapsed = (Date.now() - connectionOpenTime) / 1000;
+                  logger.info(`[wbot][KEEPALIVE] ⏰ PRIMEIRO KEEPALIVE DISPARADO após ${elapsed.toFixed(2)}s para whatsappId=${whatsapp.id}`);
+                  
+                  // Verificar se socket ainda está disponível ANTES de tentar
+                  if (!wsocket) {
+                    logger.error(`[wbot][KEEPALIVE] ❌ Socket não existe para whatsappId=${whatsapp.id}`);
+                    return;
+                  }
+                  
+                  if (!(wsocket as any).user?.id) {
+                    logger.error(`[wbot][KEEPALIVE] ❌ User ID não disponível para whatsappId=${whatsapp.id}`);
+                    logger.error(`[wbot][KEEPALIVE] Socket type: ${(wsocket as any).type || 'unknown'}`);
+                    logger.error(`[wbot][KEEPALIVE] User object: ${JSON.stringify((wsocket as any).user || {}, null, 2)}`);
+                    return;
+                  }
+                  
+                  const userJid = (wsocket as WASocket).user.id;
+                  logger.info(`[wbot][KEEPALIVE] ✅ Precondições OK: Socket=✅, UserJID=${userJid}`);
+                  logger.info(`[wbot][KEEPALIVE] Tentando enviar sendPresenceUpdate("available", "${userJid}")...`);
+                  
+                  // Verificar se sendPresenceUpdate existe
+                  if (typeof wsocket.sendPresenceUpdate !== 'function') {
+                    logger.error(`[wbot][KEEPALIVE] ❌ sendPresenceUpdate não é uma função!`);
+                    logger.error(`[wbot][KEEPALIVE] wsocket type: ${typeof wsocket}`);
+                    logger.error(`[wbot][KEEPALIVE] wsocket methods: ${Object.keys(wsocket).join(', ')}`);
+                    return;
+                  }
+                  
+                  // Tentar enviar presença
+                  await wsocket.sendPresenceUpdate("available", userJid);
+                  keepaliveCount++;
+                  logger.info(`[wbot][KEEPALIVE] ✅ Primeiro keepalive #${keepaliveCount} enviado COM SUCESSO para whatsappId=${whatsapp.id} às ${new Date().toISOString()}`);
+                  logger.info(`[wbot][KEEPALIVE] Tempo desde conexão: ${((Date.now() - connectionOpenTime) / 1000).toFixed(2)}s`);
+                } catch (err: any) {
+                  keepaliveStats.failed++;
+                  keepaliveStats.lastFailed = Date.now();
+                  logger.error(`[wbot][KEEPALIVE] ❌ ERRO ao enviar primeiro keepalive para whatsappId=${whatsapp.id}:`);
+                  logger.error(`[wbot][KEEPALIVE] - Mensagem: ${err?.message || 'Unknown error'}`);
+                  logger.error(`[wbot][KEEPALIVE] - Stack: ${err?.stack || 'No stack trace'}`);
+                  logger.error(`[wbot][KEEPALIVE] - Error type: ${err?.constructor?.name || typeof err}`);
+                  logger.error(`[wbot][KEEPALIVE] - Error completo: ${JSON.stringify(err, Object.getOwnPropertyNames(err), 2)}`);
+                  logger.error(`[wbot][KEEPALIVE] - Estatísticas: Enviados=${keepaliveStats.sent}, Falhados=${keepaliveStats.failed}`);
+                }
+              }, 25000); // Primeiro keepalive após 25 segundos
+              
+              timersRef.timeout = firstKeepaliveTimeout;
+              logger.info(`[wbot][KEEPALIVE] ✅ Primeiro keepalive timer criado com ID: ${firstKeepaliveTimeout?.[Symbol.toPrimitive]?.() || 'unknown'}`);
+              
+              // Keepalive periódico a cada 20 segundos (reduzido de 30s para garantir atividade antes dos 60s)
+              logger.info(`[wbot][KEEPALIVE] Criando keepalive interval (a cada 20s) para whatsappId=${whatsapp.id}`);
+              
+              keepaliveInterval = setInterval(async () => {
+                try {
+                  const elapsed = (Date.now() - connectionOpenTime) / 1000;
+                  logger.info(`[wbot][KEEPALIVE] ⏰ KEEPALIVE INTERVAL DISPARADO após ${elapsed.toFixed(2)}s para whatsappId=${whatsapp.id}`);
+                  
+                  // Verificar se socket ainda está disponível ANTES de tentar
+                  if (!wsocket) {
+                    logger.error(`[wbot][KEEPALIVE] ❌ Socket não existe no intervalo para whatsappId=${whatsapp.id}`);
+                    clearInterval(keepaliveInterval!);
+                    return;
+                  }
+                  
+                  if (!(wsocket as any).user?.id) {
+                    logger.error(`[wbot][KEEPALIVE] ❌ User ID não disponível no intervalo para whatsappId=${whatsapp.id}`);
+                    logger.error(`[wbot][KEEPALIVE] Socket type: ${(wsocket as any).type || 'unknown'}`);
+                    clearInterval(keepaliveInterval!);
+                    return;
+                  }
+                  
+                  keepaliveCount++;
+                  const userJid = (wsocket as WASocket).user.id;
+                  logger.info(`[wbot][KEEPALIVE] ✅ Precondições OK: Socket=✅, UserJID=${userJid}, Count=#${keepaliveCount}`);
+                  logger.info(`[wbot][KEEPALIVE] Tentando enviar sendPresenceUpdate("available", "${userJid}")...`);
+                  
+                  // Verificar se sendPresenceUpdate existe
+                  if (typeof wsocket.sendPresenceUpdate !== 'function') {
+                    logger.error(`[wbot][KEEPALIVE] ❌ sendPresenceUpdate não é uma função no intervalo!`);
+                    clearInterval(keepaliveInterval!);
+                    return;
+                  }
+                  
+                  // Tentar enviar presença
+                  await wsocket.sendPresenceUpdate("available", userJid);
+                  keepaliveStats.sent++;
+                  keepaliveStats.lastSent = Date.now();
+                  logger.info(`[wbot][KEEPALIVE] ✅ Keepalive #${keepaliveCount} enviado COM SUCESSO para whatsappId=${whatsapp.id} às ${new Date().toISOString()}`);
+                  logger.info(`[wbot][KEEPALIVE] Tempo desde conexão: ${elapsed.toFixed(2)}s`);
+                } catch (err: any) {
+                  keepaliveStats.failed++;
+                  keepaliveStats.lastFailed = Date.now();
+                  logger.error(`[wbot][KEEPALIVE] ❌ ERRO ao enviar keepalive #${keepaliveCount} para whatsappId=${whatsapp.id}:`);
+                  logger.error(`[wbot][KEEPALIVE] - Mensagem: ${err?.message || 'Unknown error'}`);
+                  logger.error(`[wbot][KEEPALIVE] - Stack: ${err?.stack || 'No stack trace'}`);
+                  logger.error(`[wbot][KEEPALIVE] - Error type: ${err?.constructor?.name || typeof err}`);
+                  logger.error(`[wbot][KEEPALIVE] - Error completo: ${JSON.stringify(err, Object.getOwnPropertyNames(err), 2)}`);
+                  logger.error(`[wbot][KEEPALIVE] - Estatísticas: Enviados=${keepaliveStats.sent}, Falhados=${keepaliveStats.failed}, Taxa de falha=${((keepaliveStats.failed / (keepaliveStats.sent + keepaliveStats.failed)) * 100).toFixed(1)}%`);
+                  
+                  // Alerta se taxa de falha está alta
+                  const totalAttempts = keepaliveStats.sent + keepaliveStats.failed;
+                  if (totalAttempts >= 3 && (keepaliveStats.failed / totalAttempts) > 0.5) {
+                    logger.error(`[wbot][KEEPALIVE] 🚨 ALERTA: Taxa de falha do keepalive está alta (>50%) para whatsappId=${whatsapp.id}`);
+                    logger.error(`[wbot][KEEPALIVE] 🚨 Isso pode indicar problema grave de conexão - verificar imediatamente!`);
+                  }
+                  
+                  // NÃO limpar intervalo em caso de erro - tentar novamente no próximo ciclo
+                  // O erro pode ser temporário (ex: socket em reconexão)
+                }
+              }, 20000); // A cada 20 segundos (mais seguro, garante atividade antes dos 60s)
+              
+              timersRef.interval = keepaliveInterval;
+              logger.info(`[wbot][KEEPALIVE] ✅ Keepalive interval criado com ID: ${keepaliveInterval?.[Symbol.toPrimitive]?.() || 'unknown'}`);
+              
+              // Keepalive de segurança adicional aos 50 segundos (antes dos 60s)
+              // Isso garante que sempre há atividade antes do timeout
+              safetyKeepaliveTimeout = setTimeout(async () => {
+                try {
+                  const elapsed = (Date.now() - connectionOpenTime) / 1000;
+                  logger.info(`[wbot][KEEPALIVE] ⏰ KEEPALIVE DE SEGURANÇA DISPARADO após ${elapsed.toFixed(2)}s para whatsappId=${whatsapp.id}`);
+                  
+                  if (!wsocket || !(wsocket as any).user?.id) {
+                    logger.warn(`[wbot][KEEPALIVE] ⚠️ Keepalive de segurança cancelado: socket não disponível`);
+                    return;
+                  }
+                  
+                  keepaliveCount++;
+                  const userJid = (wsocket as WASocket).user.id;
+                  await wsocket.sendPresenceUpdate("available", userJid);
+                  keepaliveStats.sent++;
+                  keepaliveStats.lastSent = Date.now();
+                  logger.info(`[wbot][KEEPALIVE] ✅ Keepalive de segurança #${keepaliveCount} enviado COM SUCESSO aos ${elapsed.toFixed(2)}s`);
+                } catch (err: any) {
+                  keepaliveStats.failed++;
+                  keepaliveStats.lastFailed = Date.now();
+                  logger.error(`[wbot][KEEPALIVE] ❌ ERRO no keepalive de segurança: ${err?.message}`);
+                  logger.error(`[wbot][KEEPALIVE] - Estatísticas: Enviados=${keepaliveStats.sent}, Falhados=${keepaliveStats.failed}`);
+                }
+              }, 50000); // Aos 50 segundos (antes dos 60s)
+              
+              timersRef.timeout = safetyKeepaliveTimeout;
+              logger.info(`[wbot][KEEPALIVE] ✅ Keepalive de segurança agendado para 50s`);
+              
+              // Health check da conexão a cada 10 segundos (primeiros 70 segundos)
+              let activityCount = 0;
+              const trackActivity = (activityName: string) => {
+                activityCount++;
+                const elapsed = (Date.now() - connectionOpenTime) / 1000;
+                logger.info(`[wbot][ACTIVITY] #${activityCount} - ${activityName} aos ${elapsed.toFixed(2)}s para whatsappId=${whatsapp.id}`);
+              };
+
+              const healthCheckInterval = setInterval(async () => {
+                const elapsed = (Date.now() - connectionOpenTime) / 1000;
+                if (elapsed > 70) {
+                  clearInterval(healthCheckInterval);
+                  
+                  // Log final de estatísticas do keepalive
+                  const successRate = keepaliveStats.sent + keepaliveStats.failed > 0
+                    ? ((keepaliveStats.sent / (keepaliveStats.sent + keepaliveStats.failed)) * 100).toFixed(1)
+                    : '0';
+                  logger.info(`[wbot][HEALTH] ⏱️ Resumo após 70s para whatsappId=${whatsapp.id}:`);
+                  logger.info(`[wbot][HEALTH] - Keepalives enviados: ${keepaliveStats.sent}`);
+                  logger.info(`[wbot][HEALTH] - Keepalives falhados: ${keepaliveStats.failed}`);
+                  logger.info(`[wbot][HEALTH] - Taxa de sucesso: ${successRate}%`);
+                  if (keepaliveStats.failed > 0) {
+                    logger.warn(`[wbot][HEALTH] ⚠️ ${keepaliveStats.failed} keepalive(s) falharam - pode indicar problema de conexão`);
+                  }
+                  return;
+                }
+
+                const hasUser = !!wsocket?.user?.id;
+                const isConnected = wsocket && hasUser;
+                const socketType = (wsocket as any)?.type || 'unknown';
+                const isRegistered = (wsocket as any)?.user?.registered;
+                const timeSinceLastKeepalive = keepaliveStats.lastSent 
+                  ? ((Date.now() - keepaliveStats.lastSent) / 1000).toFixed(1)
+                  : 'N/A';
+
+                logger.info(`[wbot][HEALTH] ${elapsed.toFixed(1)}s - Socket: ${!!wsocket}, User: ${hasUser}, Type: ${socketType}, Registered: ${isRegistered}`);
+                logger.info(`[wbot][HEALTH] - Keepalives enviados: ${keepaliveStats.sent}, Falhados: ${keepaliveStats.failed}, Último há: ${timeSinceLastKeepalive}s`);
+
+                // Alerta se último keepalive foi há mais de 30 segundos e ainda não chegou aos 60s
+                if (keepaliveStats.lastSent && elapsed < 60) {
+                  const timeSinceLast = (Date.now() - keepaliveStats.lastSent) / 1000;
+                  if (timeSinceLast > 30) {
+                    logger.warn(`[wbot][HEALTH] ⚠️ Último keepalive foi há ${timeSinceLast.toFixed(1)}s - pode indicar problema!`);
+                  }
+                }
+
+                if (!isConnected && elapsed < 60) {
+                  logger.error(`[wbot][HEALTH] ⚠️ Conexão perdeu antes dos 60s! Tempo: ${elapsed.toFixed(2)}s`);
+                }
+              }, 10000); // A cada 10 segundos
+              
+              // Atualizar estatísticas quando keepalive é enviado com sucesso
+              const originalSendPresenceUpdate = wsocket.sendPresenceUpdate.bind(wsocket);
+              wsocket.sendPresenceUpdate = async (...args: any[]) => {
+                try {
+                  await originalSendPresenceUpdate(...args);
+                  keepaliveStats.sent++;
+                  keepaliveStats.lastSent = Date.now();
+                } catch (err: any) {
+                  keepaliveStats.failed++;
+                  keepaliveStats.lastFailed = Date.now();
+                  throw err;
+                }
+              };
+              
+              // Limpar health check quando desconectar
               wsocket.ev.on("connection.update", (update: any) => {
                 if (update.connection === "close") {
+                  clearInterval(healthCheckInterval);
+                  if (safetyKeepaliveTimeout) {
+                    clearTimeout(safetyKeepaliveTimeout);
+                    logger.info(`[wbot][KEEPALIVE] ✅ Keepalive de segurança cancelado`);
+                  }
+                }
+              });
+
+              // Limpar intervalos e timeouts quando desconectar
+              wsocket.ev.on("connection.update", (update: any) => {
+                if (update.connection === "close") {
+                  logger.info(`[wbot][KEEPALIVE] 🧹 Limpando keepalive timers para whatsappId=${whatsapp.id}`);
+                  
+                  // Limpar timers
+                  if (keepaliveInterval) {
+                    clearInterval(keepaliveInterval);
+                    logger.info(`[wbot][KEEPALIVE] ✅ Keepalive interval limpo`);
+                    keepaliveInterval = null;
+                  }
+                  
+                  if (firstKeepaliveTimeout) {
+                    clearTimeout(firstKeepaliveTimeout);
+                    logger.info(`[wbot][KEEPALIVE] ✅ Primeiro keepalive timeout limpo`);
+                    firstKeepaliveTimeout = null;
+                  }
+                  
+                  if (safetyKeepaliveTimeout) {
+                    clearTimeout(safetyKeepaliveTimeout);
+                    logger.info(`[wbot][KEEPALIVE] ✅ Keepalive de segurança timeout limpo`);
+                  }
+                  
                   clearInterval(saveCredsInterval);
+                  timersRef.cleaned = true;
+                  
+                  logger.info(`[wbot][KEEPALIVE] 🧹 Todos os timers foram limpos para whatsappId=${whatsapp.id}`);
+                  logger.info(`[wbot][KEEPALIVE] Total de keepalives enviados: ${keepaliveCount}`);
                 }
               });
 
@@ -660,11 +1241,58 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
 
             if (qr !== undefined) {
-              logger.info(
-                `[wbot] QR Code gerado para whatsappId=${whatsapp.id} | Tentativa: ${retriesQrCodeMap.get(id) || 0} | Isso indica que não há credenciais válidas salvas.`
-              );
+              const hasMeId = !!state?.creds?.me?.id;
+              const isRegistered = state?.creds?.registered || false;
+              const retryCount = retriesQrCodeMap.get(id) || 0;
+              const qrTimestamp = Date.now();
+              
+              logger.info(`[wbot] ============================================`);
+              logger.info(`[wbot] QR CODE GERADO para whatsappId=${whatsapp.id}:`);
+              logger.info(`[wbot] ============================================`);
+              logger.info(`[wbot] - Tentativa: ${retryCount + 1}`);
+              logger.info(`[wbot] - Tem MeId: ${hasMeId} ${hasMeId ? '(✅)' : '(❌ - PRECISA ESCANEAR QR)'}`);
+              logger.info(`[wbot] - Registrado: ${isRegistered} ${isRegistered ? '(✅)' : '(❌)'}`);
+              logger.info(`[wbot] - Isso indica que NÃO há credenciais válidas salvas`);
+              logger.info(`[wbot] - AÇÃO NECESSÁRIA: Escanear QR code com WhatsApp Mobile`);
+              logger.info(`[wbot] - Timestamp: ${new Date(qrTimestamp).toISOString()}`);
+              logger.info(`[wbot] - QR Code expira em ~60 segundos`);
+              logger.info(`[wbot] ============================================`);
+              
+              // Armazenar timestamp do QR code para monitoramento
+              (wsocket as any)._qrCodeTimestamp = qrTimestamp;
+              (wsocket as any)._qrCodeScanned = false;
+              
+              // Monitorar se QR code foi escaneado (verificar após 5 segundos se credenciais mudaram)
+              const qrMonitorInterval = setInterval(() => {
+                const elapsed = (Date.now() - qrTimestamp) / 1000;
+                const currentHasMeId = !!state?.creds?.me?.id;
+                const currentRegistered = state?.creds?.registered || false;
+                
+                // Se credenciais apareceram, QR foi escaneado
+                if (currentHasMeId && !(wsocket as any)._qrCodeScanned) {
+                  (wsocket as any)._qrCodeScanned = true;
+                  clearInterval(qrMonitorInterval);
+                  logger.info(`[wbot] ✅ QR CODE ESCANEADO! Credenciais apareceram aos ${elapsed.toFixed(2)}s para whatsappId=${whatsapp.id}`);
+                  logger.info(`[wbot] - MeId: ${state?.creds?.me?.id}`);
+                  logger.info(`[wbot] - Registered: ${currentRegistered}`);
+                } else if (elapsed > 90 && !(wsocket as any)._qrCodeScanned) {
+                  // Se passou 90 segundos e QR não foi escaneado, alertar
+                  logger.warn(`[wbot] ⚠️ QR CODE NÃO ESCANEADO após ${elapsed.toFixed(0)}s para whatsappId=${whatsapp.id}`);
+                  logger.warn(`[wbot] ⚠️ QR code pode ter expirado. Um novo será gerado automaticamente.`);
+                  clearInterval(qrMonitorInterval);
+                }
+              }, 5000); // Verificar a cada 5 segundos
+              
+              // Limpar monitor quando desconectar
+              wsocket.ev.on("connection.update", (update: any) => {
+                if (update.connection === "close" || update.connection === "open") {
+                  clearInterval(qrMonitorInterval);
+                }
+              });
               
               if (retriesQrCodeMap.get(id) && retriesQrCodeMap.get(id) >= 3) {
+                logger.warn(`[wbot] ⚠️ Máximo de tentativas de QR code excedido (3) para whatsappId=${whatsapp.id}`);
+                logger.warn(`[wbot] ⚠️ Parando tentativas. Verifique credenciais manualmente.`);
                 await whatsappUpdate.update({
                   status: "DISCONNECTED",
                   qrcode: ""
@@ -708,7 +1336,43 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
           }
         );
-        wsocket.ev.on("creds.update", saveCreds);
+        wsocket.ev.on("creds.update", async (update: any) => {
+          // Log quando credenciais são atualizadas (incluindo registered)
+          if (update && typeof update === 'object') {
+            const registered = update.registered;
+            const meId = update.me?.id;
+            const elapsed = (wsocket as any)?._connectionOpenTime 
+              ? ((Date.now() - (wsocket as any)._connectionOpenTime) / 1000).toFixed(2)
+              : 'N/A';
+            
+            if (registered !== undefined) {
+              logger.info(`[wbot][CREDS] ============================================`);
+              logger.info(`[wbot][CREDS] ✅ REGISTERED MUDOU para whatsappId=${whatsapp.id}:`);
+              logger.info(`[wbot][CREDS] - Registered: ${registered} ${registered ? '(✅ SIM - DISPOSITIVO REGISTRADO!)' : '(❌ NÃO)'}`);
+              logger.info(`[wbot][CREDS] - Tempo desde conexão: ${elapsed}s`);
+              logger.info(`[wbot][CREDS] - Me ID: ${meId || 'N/A'}`);
+              logger.info(`[wbot][CREDS] - Update completo: ${JSON.stringify(update, null, 2)}`);
+              logger.info(`[wbot][CREDS] ============================================`);
+              
+              // Atualizar health check para refletir novo valor de registered
+              if ((wsocket as any).user) {
+                (wsocket as any).user.registered = registered;
+              }
+              
+              // Se registered mudou para true, marcar que não está mais aguardando
+              if (registered === true) {
+                (wsocket as any)._waitingForRegistration = false;
+                logger.info(`[wbot][CREDS] ✅ Registro completo! _waitingForRegistration=false para whatsappId=${whatsapp.id}`);
+              }
+            } else if (meId) {
+              const elapsed = (wsocket as any)?._connectionOpenTime 
+                ? ((Date.now() - (wsocket as any)._connectionOpenTime) / 1000).toFixed(2)
+                : 'N/A';
+              logger.debug(`[wbot][CREDS] Credenciais atualizadas (registered ainda undefined) para whatsappId=${whatsapp.id} aos ${elapsed}s`);
+            }
+          }
+          await saveCreds();
+        });
 
         // Diagnóstico temporário (até estabilizar labels): logar eventos relevantes por 5 minutos
         try {

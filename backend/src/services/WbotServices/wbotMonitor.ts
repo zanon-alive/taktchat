@@ -40,6 +40,44 @@ const wbotMonitor = async (
   companyId: number
 ): Promise<void> => {
   logger.info(`[wbotMonitor] Iniciando monitor para whatsappId=${whatsapp.id}, companyId=${companyId}`);
+  
+  // Armazenar timestamp de quando monitor foi iniciado (aproximadamente quando conexão abriu)
+  const monitorStartTime = Date.now();
+  const QUIET_PERIOD_SECONDS = 120; // 2 minutos de período silencioso para evitar interferir no registro
+  
+  // Verificar se estamos no período silencioso (primeiros 2 minutos)
+  const isInQuietPeriod = () => {
+    const elapsed = (Date.now() - monitorStartTime) / 1000;
+    return elapsed < QUIET_PERIOD_SECONDS;
+  };
+  
+  const trackActivity = (activityName: string) => {
+    const elapsed = (Date.now() - monitorStartTime) / 1000;
+    if (elapsed < 70) { // Primeiros 70 segundos
+      logger.info(`[wbotMonitor][ACTIVITY] ${elapsed.toFixed(2)}s - ${activityName} para whatsappId=${whatsapp.id}`);
+    }
+  };
+  
+  // Função para atrasar operações pesadas durante período silencioso
+  const delayIfInQuietPeriod = async (operationName: string) => {
+    if (isInQuietPeriod()) {
+      const elapsed = (Date.now() - monitorStartTime) / 1000;
+      const remaining = QUIET_PERIOD_SECONDS - elapsed;
+      logger.info(`[wbotMonitor][QUIET] ⏸️ Atrasando ${operationName} - período silencioso (${elapsed.toFixed(1)}s/${QUIET_PERIOD_SECONDS}s)`);
+      
+      // Atrasar em batches: aguardar até 2 minutos, mas processar em lotes menores
+      // Processar imediatamente se já passou 1 minuto (prioridade)
+      if (remaining > 60) {
+        // Ainda faltam mais de 1 minuto, aguardar até 1 minuto passou
+        await new Promise(resolve => setTimeout(resolve, 60000 - elapsed * 1000));
+        logger.info(`[wbotMonitor][QUIET] ✅ 1 minuto passou, processando ${operationName}`);
+      } else if (remaining > 0) {
+        // Falta menos de 1 minuto, processar imediatamente mas logar
+        logger.info(`[wbotMonitor][QUIET] ⚠️ Processando ${operationName} antes do fim do período silencioso (${remaining.toFixed(1)}s restantes)`);
+      }
+    }
+  };
+  
   try {
     wbot.ws.on("CB:call", async (node: BinaryNode) => {
       const content = node.content[0] as any;
@@ -126,6 +164,11 @@ const wbotMonitor = async (
     }
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
+      trackActivity(`contacts.upsert recebido (${contacts?.length || 0} contatos)`);
+      
+      // Atrasar processamento pesado durante período silencioso (primeiros 2 minutos)
+      await delayIfInQuietPeriod(`contacts.upsert (${contacts?.length || 0} contatos)`);
+      
       const filteredContacts: BContact[] = [];
 
       try {
@@ -196,11 +239,17 @@ const wbotMonitor = async (
 
     // Persistência de CHATS (com labels) no Baileys para extração de etiquetas
     wbot.ev.on("chats.upsert", async (chats: Chat[]) => {
+      trackActivity(`chats.upsert recebido (${chats?.length || 0} chats)`);
+      
+      // Atrasar processamento pesado durante período silencioso (primeiros 2 minutos)
+      await delayIfInQuietPeriod(`chats.upsert (${chats?.length || 0} chats)`);
+      
       try {
         await createOrUpdateBaileysService({
           whatsappId: whatsapp.id,
           chats
         });
+        trackActivity(`chats.upsert processado (${chats?.length || 0} chats)`);
       } catch (err: any) {
         logger.error(`Error persisting chats.upsert: ${err?.message}`);
         Sentry.captureException(err);
@@ -208,12 +257,21 @@ const wbotMonitor = async (
     });
 
     wbot.ev.on("chats.update", async (chats: Partial<Chat>[]) => {
+      trackActivity(`chats.update recebido (${chats?.length || 0} chats)`);
+      
+      // Atrasar processamento pesado durante período silencioso (primeiros 2 minutos)
+      // Mas permitir atualizações pequenas (< 10 chats) para não perder dados
+      if (chats && chats.length > 10) {
+        await delayIfInQuietPeriod(`chats.update (${chats.length} chats)`);
+      }
+      
       try {
         // Mesmo fluxo de merge no serviço; envia as atualizações parciais
         await createOrUpdateBaileysService({
           whatsappId: whatsapp.id,
           chats: chats as any
         });
+        trackActivity(`chats.update processado (${chats?.length || 0} chats)`);
       } catch (err: any) {
         logger.error(`Error persisting chats.update: ${err?.message}`);
         Sentry.captureException(err);
@@ -223,10 +281,12 @@ const wbotMonitor = async (
     // Captura eventos de edição de labels (criar/editar/remover) vindos do App State
     wbot.ev.on("labels.edit", (payload: any) => {
       try {
-        logger.info(`[wbotMonitor] Evento labels.edit recebido:`, JSON.stringify(payload));
         const items: any[] = Array.isArray(payload)
           ? payload
           : (Array.isArray(payload?.labels) ? payload.labels : [payload]);
+        trackActivity(`labels.edit recebido (${items?.length || 0} labels)`);
+        
+        logger.info(`[wbotMonitor] Evento labels.edit recebido:`, JSON.stringify(payload));
         let count = 0;
         for (const it of items) {
           const rid = it?.id ?? it?.labelId ?? it?.lid ?? it?.value;
@@ -242,6 +302,7 @@ const wbotMonitor = async (
         if (count === 0) {
           logger.warn(`[wbotMonitor] labels.edit sem itens válidos para upsert.`);
         } else {
+          trackActivity(`labels.edit processado (${count} labels)`);
           logger.info(`[wbotMonitor] labels.edit processou ${count} label(s) para whatsappId=${whatsapp.id}`);
         }
       } catch (err: any) {

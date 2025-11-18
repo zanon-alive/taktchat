@@ -153,6 +153,20 @@ export class BaileysAdapter implements IWhatsAppAdapter {
         this.phoneNumber = this.socket.user.id.split("@")[0];
       }
     }
+    
+    // Verificar se conexão está "aquecendo" (primeiros segundos após abrir)
+    // Durante esse período, evitar envio de mensagens para reduzir risco de device_removed
+    if ((this.socket as any)?._connectionWarmingUp) {
+      const connectionOpenTime = (this.socket as any)?._connectionOpenTime || 0;
+      const elapsedMs = Date.now() - connectionOpenTime;
+      
+      if (elapsedMs < 5000) {
+        // Aguardar até completar período de aquecimento (máximo 5 segundos)
+        const waitMs = 5000 - elapsedMs;
+        logger.debug(`[BaileysAdapter] Conexão ainda aquecendo (${elapsedMs}ms). Aguardando ${waitMs}ms antes de enviar mensagem.`);
+        await new Promise(resolve => setTimeout(resolve, waitMs));
+      }
+    }
 
     try {
       let { to, body, mediaType, mediaPath, mediaUrl, caption, quotedMsgId, buttons, listSections, vcard } = options;

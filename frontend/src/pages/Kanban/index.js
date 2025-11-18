@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -14,6 +14,8 @@ import KanbanLaneHeader from "./KanbanLaneHeader";
 import { format, isSameDay, parseISO, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import { Can } from "../../components/Can";
 import KanbanFiltersModal from "./KanbanFiltersModal";
+import useQueues from "../../hooks/useQueues";
+import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -92,6 +94,7 @@ const Kanban = () => {
   const theme = useTheme(); // Obter o tema atual
   const history = useHistory();
   const { user, socket } = useContext(AuthContext);
+  const { findAll: findAllQueues } = useQueues();
   const [tags, setTags] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [ticketNot, setTicketNot] = useState(0);
@@ -107,10 +110,85 @@ const Kanban = () => {
   const [rangeAnchor, setRangeAnchor] = useState(null);
   const [range, setRange] = useState({ startDate: parseISO(format(startOfMonth(new Date()), "yyyy-MM-dd")), endDate: parseISO(format(endOfMonth(new Date()), "yyyy-MM-dd")) });
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
+  
+  // Estado para armazenar todas as filas e usuários disponíveis
+  const [allQueues, setAllQueues] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const queuesLoadedRef = useRef(false);
+  const usersLoadedRef = useRef(false);
+  const loadingQueuesRef = useRef(false);
+  const loadingUsersRef = useRef(false);
 
   const jsonString = user.queues.map(queue => queue.UserQueue.queueId);
 
+  // Carregar todas as filas disponíveis (apenas uma vez)
+  useEffect(() => {
+    if (queuesLoadedRef.current || loadingQueuesRef.current || allQueues.length > 0) {
+      return;
+    }
+
+    const loadQueues = async () => {
+      loadingQueuesRef.current = true;
+      try {
+        const list = await findAllQueues();
+        if (list && list.length > 0) {
+          const queueList = list.map(q => ({ 
+            id: String(q.id), 
+            name: q.name || `Fila ${q.id}` 
+          }));
+          setAllQueues(queueList);
+          queuesLoadedRef.current = true;
+        }
+      } catch (err) {
+        // Não logar erro se backend estiver desligado - é esperado em desenvolvimento
+        if (err.message && !err.message.includes('Connection refused')) {
+          console.error("[Kanban] Erro ao carregar filas:", err);
+        }
+      } finally {
+        loadingQueuesRef.current = false;
+      }
+    };
+    loadQueues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Executar apenas uma vez ao montar
+
+  // Carregar todos os usuários disponíveis (apenas uma vez)
+  useEffect(() => {
+    if (usersLoadedRef.current || loadingUsersRef.current || allUsers.length > 0) {
+      return;
+    }
+
+    const loadUsers = async () => {
+      loadingUsersRef.current = true;
+      try {
+        const { data } = await api.get("/users/list");
+        if (data && Array.isArray(data) && data.length > 0) {
+          const userList = data.map(u => ({ 
+            id: String(u.id), 
+            name: u.name || `Usuário ${u.id}` 
+          }));
+          setAllUsers(userList);
+          usersLoadedRef.current = true;
+        }
+      } catch (err) {
+        // Não logar erro se backend estiver desligado - é esperado em desenvolvimento
+        if (err.message && !err.message.includes('Connection refused')) {
+          console.error("[Kanban] Erro ao carregar usuários:", err);
+          toastError(err);
+        }
+      } finally {
+        loadingUsersRef.current = false;
+      }
+    };
+    loadUsers();
+  }, []); // Executar apenas uma vez ao montar
+
+  // Usar todas as filas disponíveis para os filtros (não apenas as dos tickets)
   const queueOptions = useMemo(() => {
+    if (allQueues.length > 0) {
+      return allQueues;
+    }
+    // Fallback: usar filas dos tickets se ainda não carregou todas
     const map = new Map();
     tickets.forEach(t => {
       const id = String(t.queue?.id || t.whatsappId || t.queueId || '');
@@ -118,9 +196,14 @@ const Kanban = () => {
       if (id) map.set(id, name);
     });
     return Array.from(map, ([id, name]) => ({ id, name }));
-  }, [tickets]);
+  }, [allQueues, tickets]);
 
+  // Usar todos os usuários disponíveis para os filtros (não apenas os dos tickets)
   const userOptions = useMemo(() => {
+    if (allUsers.length > 0) {
+      return allUsers;
+    }
+    // Fallback: usar usuários dos tickets se ainda não carregou todos
     const map = new Map();
     tickets.forEach(t => {
       const id = String(t.user?.id || t.userId || '');
@@ -128,7 +211,7 @@ const Kanban = () => {
       if (id) map.set(id, name);
     });
     return Array.from(map, ([id, name]) => ({ id, name }));
-  }, [tickets]);
+  }, [allUsers, tickets]);
 
   const tagOptions = useMemo(() => (tags || []).map(t => ({ id: String(t.id), name: t.name })), [tags]);
 
