@@ -170,34 +170,45 @@ const RefreshContactAvatarService = async ({ contactId, companyId, whatsappId }:
           const soNumero = nomeAtual.replace(/\D/g, "");
           if (soNumero === contact.number) {
             let nomeNovo = nomeAtual;
-            try {
-              const contatoMeta = await wbot.onWhatsApp(jid) as Array<{ jid: string; exists: unknown; lid?: unknown; notify?: string }>;
-              if (Array.isArray(contatoMeta) && contatoMeta[0] && typeof contatoMeta[0].notify === 'string' && contatoMeta[0].notify.trim() !== "") {
-                nomeNovo = contatoMeta[0].notify;
-              } else {
-                // Fallback: tenta buscar perfil business se notify não veio
-                try {
-                  const businessProfile = await wbot.getBusinessProfile(jid);
-                  // Tente os campos conhecidos do WABusinessProfile
-                  let nomeBusiness = '';
-                  if (businessProfile) {
-                    // Alguns campos possíveis: description, businessDescription, address, category
-                    if (typeof businessProfile.description === 'string' && businessProfile.description.trim() !== '') {
-                      nomeBusiness = businessProfile.description;
+            // Validar JID antes de usar
+            if (!jid || typeof jid !== 'string' || !jid.includes('@')) {
+              logger.warn(`[RefreshContactAvatarService] JID inválido para contato ${contact.id}: ${jid}`);
+            } else {
+              try {
+                const contatoMeta = await wbot.onWhatsApp(jid) as Array<{ jid: string; exists: unknown; lid?: unknown; notify?: string }>;
+                if (Array.isArray(contatoMeta) && contatoMeta[0] && typeof contatoMeta[0].notify === 'string' && contatoMeta[0].notify.trim() !== "") {
+                  nomeNovo = contatoMeta[0].notify;
+                } else {
+                  // Fallback: tenta buscar perfil business se notify não veio
+                  try {
+                    const businessProfile = await wbot.getBusinessProfile(jid);
+                    // Tente os campos conhecidos do WABusinessProfile
+                    let nomeBusiness = '';
+                    if (businessProfile) {
+                      // Alguns campos possíveis: description, businessDescription, address, category
+                      if (typeof businessProfile.description === 'string' && businessProfile.description.trim() !== '') {
+                        nomeBusiness = businessProfile.description;
+                      }
+                    }
+                    if (
+                      nomeBusiness &&
+                      nomeBusiness.replace(/\D/g, '') !== contact.number
+                    ) {
+                      nomeNovo = nomeBusiness;
+                    }
+                  } catch (err: any) {
+                    // Log apenas se não for erro esperado de JID inválido
+                    if (err?.message && !err.message.includes('jidDecode') && !err.message.includes('Cannot destructure')) {
+                      logger.debug(`[RefreshContactAvatarService] Erro ao buscar perfil business: ${err.message}`);
                     }
                   }
-                  if (
-                    nomeBusiness &&
-                    nomeBusiness.replace(/\D/g, '') !== contact.number
-                  ) {
-                    nomeNovo = nomeBusiness;
-                  }
-                } catch (err) {
-                  // silencioso
+                }
+              } catch (e: any) {
+                // Log apenas se não for erro esperado de JID inválido
+                if (e?.message && !e.message.includes('jidDecode') && !e.message.includes('Cannot destructure')) {
+                  logger.debug(`[RefreshContactAvatarService] Erro ao buscar onWhatsApp: ${e.message}`);
                 }
               }
-            } catch (e) {
-              // silencioso
             }
             if (nomeNovo !== nomeAtual && nomeNovo && nomeNovo.replace(/\D/g, "") !== contact.number) {
               await contact.update({ name: nomeNovo });
