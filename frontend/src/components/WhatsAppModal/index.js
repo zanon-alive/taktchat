@@ -42,6 +42,8 @@ import SchedulesForm from "../SchedulesForm";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import OfficialAPIFields from "./OfficialAPIFields";
+import { BugReport } from "@material-ui/icons";
+import ConnectionDiagnosticPanel from "../ConnectionDiagnosticPanel";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -180,6 +182,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [importOldMessages, setImportOldMessages] = useState(moment().add(-1, "days").format("YYYY-MM-DDTHH:mm"));
   const [importRecentMessages, setImportRecentMessages] = useState(moment().add(-1, "minutes").format("YYYY-MM-DDTHH:mm"));
   const [copied, setCopied] = useState(false);
+  const [diagnosticOpen, setDiagnosticOpen] = useState(false);
 
   const [schedulesEnabled, setSchedulesEnabled] = useState(false);
   const [NPSEnabled, setNPSEnabled] = useState(false);
@@ -687,7 +690,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     {values.channelType === "official" && (
                       <>
                         <Divider style={{ margin: "20px 0" }} />
-                        <OfficialAPIFields 
+                        <OfficialAPIFields
                           values={values}
                           errors={errors}
                           touched={touched}
@@ -1439,6 +1442,17 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                 </TabPanel>
               </Paper>
               <DialogActions>
+                {whatsAppId && (
+                  <Button
+                    onClick={() => setDiagnosticOpen(true)}
+                    color="primary"
+                    variant="outlined"
+                    startIcon={<BugReport />}
+                    style={{ marginRight: 'auto' }}
+                  >
+                    Diagnóstico
+                  </Button>
+                )}
                 <Button
                   onClick={handleClose}
                   color="secondary"
@@ -1469,6 +1483,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
           )}
         </Formik>
       </Dialog>
+      <ConnectionDiagnosticPanel
+        whatsappId={whatsAppId}
+        open={diagnosticOpen}
+        onClose={() => setDiagnosticOpen(false)}
+      />
     </div>
   );
 };

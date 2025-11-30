@@ -36,6 +36,10 @@ const store = async (req: Request, res: Response): Promise<Response> => {
 
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
+  // Desbloquear reconexão automática (ação manual do usuário - Novo QR)
+  const { clearAutoReconnectBlock } = require("../libs/wbot");
+  clearAutoReconnectBlock(whatsapp.id);
+
   // Criar promise para a sessão e adicionar ao map
   const sessionPromise = StartWhatsAppSession(whatsapp, companyId)
     .finally(() => {
@@ -65,7 +69,11 @@ const update = async (req: Request, res: Response): Promise<Response> => {
   const whatsapp = await Whatsapp.findOne({ where: { id: whatsappId, companyId } });
 
   await whatsapp.update({ session: "" });
-  
+
+  // Desbloquear reconexão automática (ação manual do usuário - Tentar Novamente)
+  const { clearAutoReconnectBlock } = require("../libs/wbot");
+  clearAutoReconnectBlock(whatsapp.id);
+
   if (whatsapp.channel === "whatsapp") {
     await StartWhatsAppSession(whatsapp, companyId);
   }

@@ -19,6 +19,14 @@ export const StartWhatsAppSessionUnified = async (
   
   logger.info(`[StartSession] Iniciando ${channelType} para whatsappId=${whatsapp.id}`);
 
+  // Verificar se reconexão automática está bloqueada
+  const { isAutoReconnectBlocked } = require("../../libs/wbot");
+  if (isAutoReconnectBlocked(whatsapp.id)) {
+    logger.warn(`[StartSession] ⛔ Reconexão automática bloqueada para whatsappId=${whatsapp.id}`);
+    logger.warn(`[StartSession] ⛔ Aguardando ação manual do usuário (Novo QR ou Tentar Novamente)`);
+    return; // NÃO iniciar sessão
+  }
+
   await whatsapp.update({ status: "OPENING" });
 
   const io = getIO();

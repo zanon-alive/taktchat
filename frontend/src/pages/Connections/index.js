@@ -32,6 +32,7 @@ import {
   Facebook,
   Instagram,
   WhatsApp,
+  BugReport,
 } from "@material-ui/icons";
 
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
@@ -55,6 +56,7 @@ import usePlans from "../../hooks/usePlans";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ForbiddenPage from "../../components/ForbiddenPage";
 import { Can } from "../../components/Can";
+import ConnectionDiagnosticPanel from "../../components/ConnectionDiagnosticPanel";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -225,6 +227,8 @@ const Connections = () => {
   };
   const [confirmModalInfo, setConfirmModalInfo] = useState(confirmationModalInitialState);
   const [planConfig, setPlanConfig] = useState(false);
+  const [diagnosticOpen, setDiagnosticOpen] = useState(false);
+  const [diagnosticWhatsappId, setDiagnosticWhatsappId] = useState(null);
 
   //   const socketManager = useContext(SocketContext);
   const { user, socket } = useContext(AuthContext);
@@ -583,216 +587,221 @@ const Connections = () => {
     <Box className={classes.root}>
       <MainContainer useWindowScroll>
         <Box className={classes.container}>
-      <ConfirmationModal
-        title={confirmModalInfo.title}
-        open={confirmModalOpen}
-        onClose={setConfirmModalOpen}
-        onConfirm={handleSubmitConfirmationModal}
-      >
-        {confirmModalInfo.message}
-      </ConfirmationModal>
-      {qrModalOpen && (
-        <QrcodeModal
-          open={qrModalOpen}
-          onClose={handleCloseQrModal}
-          whatsAppId={!whatsAppModalOpen && selectedWhatsApp?.id}
-        />
-      )}
-      <WhatsAppModal
-        open={whatsAppModalOpen}
-        onClose={handleCloseWhatsAppModal}
-        whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
-      />
-      {user.profile === "user" && user.allowConnections === "disabled" ?
-        <ForbiddenPage />
-        :
-        <>
-          <MainHeader>
+          <ConfirmationModal
+            title={confirmModalInfo.title}
+            open={confirmModalOpen}
+            onClose={setConfirmModalOpen}
+            onConfirm={handleSubmitConfirmationModal}
+          >
+            {confirmModalInfo.message}
+          </ConfirmationModal>
+          {qrModalOpen && (
+            <QrcodeModal
+              open={qrModalOpen}
+              onClose={handleCloseQrModal}
+              whatsAppId={!whatsAppModalOpen && selectedWhatsApp?.id}
+            />
+          )}
+          <WhatsAppModal
+            open={whatsAppModalOpen}
+            onClose={handleCloseWhatsAppModal}
+            whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
+          />
+          <ConnectionDiagnosticPanel
+            whatsappId={diagnosticWhatsappId}
+            open={diagnosticOpen}
+            onClose={() => setDiagnosticOpen(false)}
+          />
+          {user.profile === "user" && user.allowConnections === "disabled" ?
+            <ForbiddenPage />
+            :
+            <>
+              <MainHeader>
                 <Grid style={{ width: "99.6%" }} container>
                   <Grid xs={12} sm={5} item>
-            <Title>{i18n.t("connections.title")} ({whatsApps.length})</Title>
+                    <Title>{i18n.t("connections.title")} ({whatsApps.length})</Title>
                   </Grid>
                   <Grid xs={12} sm={7} item>
                     <Grid container alignItems="center" spacing={2} justifyContent="flex-end">
                       <Grid item>
-              <Button
-                variant="contained"
+                        <Button
+                          variant="contained"
                           size="small"
-                onClick={restartWhatsapps}
-                          style={{ 
+                          onClick={restartWhatsapps}
+                          style={{
                             backgroundColor: "#6366f1",
                             color: "#ffffff",
                             textTransform: "uppercase",
                             fontWeight: 600,
                             borderRadius: "8px"
                           }}
-              >
-                {i18n.t("connections.restartConnections")}
-              </Button>
+                        >
+                          {i18n.t("connections.restartConnections")}
+                        </Button>
                       </Grid>
                       <Grid item>
-              <Button
-                variant="contained"
+                        <Button
+                          variant="contained"
                           size="small"
-                onClick={() => openInNewTab(`https://wa.me/${process.env.REACT_APP_NUMBER_SUPPORT}`)}
-                          style={{ 
+                          onClick={() => openInNewTab(`https://wa.me/${process.env.REACT_APP_NUMBER_SUPPORT}`)}
+                          style={{
                             backgroundColor: "#6366f1",
                             color: "#ffffff",
                             textTransform: "uppercase",
                             fontWeight: 600,
                             borderRadius: "8px"
                           }}
-              >
-                {i18n.t("connections.callSupport")}
-              </Button>
+                        >
+                          {i18n.t("connections.callSupport")}
+                        </Button>
                       </Grid>
                       <Grid item>
-              <PopupState variant="popover" popupId="demo-popup-menu">
-                {(popupState) => (
-                  <React.Fragment>
-                    <Can
-                      role={user.profile}
-                      perform="connections-page:addConnection"
-                      yes={() => (
-                        <>
-                          <Button
-                            variant="contained"
+                        <PopupState variant="popover" popupId="demo-popup-menu">
+                          {(popupState) => (
+                            <React.Fragment>
+                              <Can
+                                role={user.profile}
+                                perform="connections-page:addConnection"
+                                yes={() => (
+                                  <>
+                                    <Button
+                                      variant="contained"
                                       size="small"
-                            {...bindTrigger(popupState)}
-                                      style={{ 
+                                      {...bindTrigger(popupState)}
+                                      style={{
                                         backgroundColor: "#4ade80",
                                         color: "#ffffff",
                                         textTransform: "uppercase",
                                         fontWeight: 600,
                                         borderRadius: "8px"
                                       }}
-                          >
-                            {i18n.t("connections.newConnection")}
-                          </Button>
-                          <Menu {...bindMenu(popupState)}>
-                            {/* WHATSAPP */}
-                            <MenuItem
-                              disabled={planConfig?.plan?.useWhatsapp ? false : true}
-                              onClick={() => {
-                                handleOpenWhatsAppModal();
-                                popupState.close();
-                              }}
-                            >
-                              <WhatsApp
-                                fontSize="small"
-                                style={{
-                                  marginRight: "10px",
-                                  color: "#25D366",
-                                }}
+                                    >
+                                      {i18n.t("connections.newConnection")}
+                                    </Button>
+                                    <Menu {...bindMenu(popupState)}>
+                                      {/* WHATSAPP */}
+                                      <MenuItem
+                                        disabled={planConfig?.plan?.useWhatsapp ? false : true}
+                                        onClick={() => {
+                                          handleOpenWhatsAppModal();
+                                          popupState.close();
+                                        }}
+                                      >
+                                        <WhatsApp
+                                          fontSize="small"
+                                          style={{
+                                            marginRight: "10px",
+                                            color: "#25D366",
+                                          }}
+                                        />
+                                        WhatsApp
+                                      </MenuItem>
+                                      {/* FACEBOOK */}
+                                      <FacebookLogin
+                                        appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                                        autoLoad={false}
+                                        fields="name,email,picture"
+                                        version="9.0"
+                                        scope={process.env.REACT_APP_REQUIRE_BUSINESS_MANAGEMENT?.toUpperCase() === "TRUE" ?
+                                          "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
+                                          : "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
+                                        callback={responseFacebook}
+                                        render={(renderProps) => (
+                                          <MenuItem
+                                            disabled={planConfig?.plan?.useFacebook ? false : true}
+                                            onClick={renderProps.onClick}
+                                          >
+                                            <Facebook
+                                              fontSize="small"
+                                              style={{
+                                                marginRight: "10px",
+                                                color: "#3b5998",
+                                              }}
+                                            />
+                                            Facebook
+                                          </MenuItem>
+                                        )}
+                                      />
+                                      {/* INSTAGRAM */}
+                                      <FacebookLogin
+                                        appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                                        autoLoad={false}
+                                        fields="name,email,picture"
+                                        version="9.0"
+                                        scope={process.env.REACT_APP_REQUIRE_BUSINESS_MANAGEMENT?.toUpperCase() === "TRUE" ?
+                                          "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
+                                          : "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
+                                        callback={responseInstagram}
+                                        render={(renderProps) => (
+                                          <MenuItem
+                                            disabled={planConfig?.plan?.useInstagram ? false : true}
+                                            onClick={renderProps.onClick}
+                                          >
+                                            <Instagram
+                                              fontSize="small"
+                                              style={{
+                                                marginRight: "10px",
+                                                color: "#e1306c",
+                                              }}
+                                            />
+                                            Instagram
+                                          </MenuItem>
+                                        )}
+                                      />
+                                    </Menu>
+                                  </>
+                                )}
                               />
-                              WhatsApp
-                            </MenuItem>
-                            {/* FACEBOOK */}
-                            <FacebookLogin
-                              appId={process.env.REACT_APP_FACEBOOK_APP_ID}
-                              autoLoad={false}
-                              fields="name,email,picture"
-                              version="9.0"
-                              scope={process.env.REACT_APP_REQUIRE_BUSINESS_MANAGEMENT?.toUpperCase() === "TRUE" ?
-                                "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
-                                : "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
-                              callback={responseFacebook}
-                              render={(renderProps) => (
-                                <MenuItem
-                                  disabled={planConfig?.plan?.useFacebook ? false : true}
-                                  onClick={renderProps.onClick}
-                                >
-                                  <Facebook
-                                    fontSize="small"
-                                    style={{
-                                      marginRight: "10px",
-                                      color: "#3b5998",
-                                    }}
-                                  />
-                                  Facebook
-                                </MenuItem>
-                              )}
-                            />
-                            {/* INSTAGRAM */}
-                            <FacebookLogin
-                              appId={process.env.REACT_APP_FACEBOOK_APP_ID}
-                              autoLoad={false}
-                              fields="name,email,picture"
-                              version="9.0"
-                              scope={process.env.REACT_APP_REQUIRE_BUSINESS_MANAGEMENT?.toUpperCase() === "TRUE" ?
-                                "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
-                                : "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
-                              callback={responseInstagram}
-                              render={(renderProps) => (
-                                <MenuItem
-                                  disabled={planConfig?.plan?.useInstagram ? false : true}
-                                  onClick={renderProps.onClick}
-                                >
-                                  <Instagram
-                                    fontSize="small"
-                                    style={{
-                                      marginRight: "10px",
-                                      color: "#e1306c",
-                                    }}
-                                  />
-                                  Instagram
-                                </MenuItem>
-                              )}
-                            />
-                          </Menu>
-                        </>
-                      )}
-                    />
-                  </React.Fragment>
-                )}
-              </PopupState>
+                            </React.Fragment>
+                          )}
+                        </PopupState>
                       </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-          </MainHeader>
+              </MainHeader>
 
-          {
-            statusImport?.all ? (
-              <>
-                <div style={{ margin: "auto", marginBottom: 12 }}>
-                  <Card className={classes.root}>
-                    <CardContent className={classes.content}>
-                      <Typography component="h5" variant="h5">
+              {
+                statusImport?.all ? (
+                  <>
+                    <div style={{ margin: "auto", marginBottom: 12 }}>
+                      <Card className={classes.root}>
+                        <CardContent className={classes.content}>
+                          <Typography component="h5" variant="h5">
 
-                        {statusImport?.this === -1 ? i18n.t("connections.buttons.preparing") : i18n.t("connections.buttons.importing")}
+                            {statusImport?.this === -1 ? i18n.t("connections.buttons.preparing") : i18n.t("connections.buttons.importing")}
 
-                      </Typography>
-                      {statusImport?.this === -1 ?
-                        <Typography component="h6" variant="h6" align="center">
-
-                          <CircularProgress
-                            size={24}
-                          />
-
-                        </Typography>
-                        :
-                        <>
-                          <Typography component="h6" variant="h6" align="center">
-                            {`${i18n.t(`connections.typography.processed`)} ${statusImport?.this} ${i18n.t(`connections.typography.in`)} ${statusImport?.all}  ${i18n.t(`connections.typography.date`)}: ${statusImport?.date} `}
                           </Typography>
-                          <Typography align="center">
-                            <CircularProgressWithLabel
-                              style={{ margin: "auto" }}
-                              value={(statusImport?.this / statusImport?.all) * 100}
-                            />
-                          </Typography>
-                        </>
-                      }
-                    </CardContent>
-                  </Card>
-                </div>
-              </>
-            ) : null
-          }
+                          {statusImport?.this === -1 ?
+                            <Typography component="h6" variant="h6" align="center">
+
+                              <CircularProgress
+                                size={24}
+                              />
+
+                            </Typography>
+                            :
+                            <>
+                              <Typography component="h6" variant="h6" align="center">
+                                {`${i18n.t(`connections.typography.processed`)} ${statusImport?.this} ${i18n.t(`connections.typography.in`)} ${statusImport?.all}  ${i18n.t(`connections.typography.date`)}: ${statusImport?.date} `}
+                              </Typography>
+                              <Typography align="center">
+                                <CircularProgressWithLabel
+                                  style={{ margin: "auto" }}
+                                  value={(statusImport?.this / statusImport?.all) * 100}
+                                />
+                              </Typography>
+                            </>
+                          }
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </>
+                ) : null
+              }
 
               {isDesktop ? (
-          <Paper className={classes.mainPaper} variant="outlined">
+                <Paper className={classes.mainPaper} variant="outlined">
                   <Box style={{ overflowX: "auto" }}>
                     <table className={classes.table}>
                       <thead className={classes.tableHead}>
@@ -804,24 +813,24 @@ const Connections = () => {
                           <th scope="col" style={{ textAlign: "center" }}>{i18n.t("connections.table.session").toUpperCase()}</th>
                           <th scope="col" style={{ textAlign: "center" }}>{i18n.t("connections.table.lastUpdate").toUpperCase()}</th>
                           <th scope="col" style={{ textAlign: "center" }}>{i18n.t("connections.table.default").toUpperCase()}</th>
-                  <Can
-                    role={user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
-                    perform="connections-page:addConnection"
-                    yes={() => (
+                          <Can
+                            role={user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
+                            perform="connections-page:addConnection"
+                            yes={() => (
                               <th scope="col" style={{ textAlign: "center" }}>{i18n.t("connections.table.actions").toUpperCase()}</th>
-                    )}
-                  />
+                            )}
+                          />
                         </tr>
                       </thead>
                       <tbody className={classes.tableBody}>
-                {loading ? (
+                        {loading ? (
                           <tr>
                             <td colSpan={8}>
-                  <TableRowSkeleton />
+                              <TableRowSkeleton />
                             </td>
                           </tr>
-                ) : (
-                  <>
+                        ) : (
+                          <>
                             {!loading && whatsApps?.length === 0 && (
                               <tr>
                                 <td colSpan={8} className={classes.emptyState}>
@@ -829,51 +838,51 @@ const Connections = () => {
                                 </td>
                               </tr>
                             )}
-                    {whatsApps?.length > 0 &&
-                      whatsApps.map((whatsApp) => (
+                            {whatsApps?.length > 0 &&
+                              whatsApps.map((whatsApp) => (
                                 <tr key={whatsApp.id}>
                                   <td style={{ textAlign: "center" }}>{IconChannel(whatsApp.channel)}</td>
                                   <td style={{ textAlign: "center" }}>
-                            <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                              <span>{whatsApp.name}</span>
-                              {whatsApp.channel === 'whatsapp' && whatsApp.channelType === "official" && (
-                                <Chip 
-                                  label="API Oficial" 
-                                  color="primary" 
-                                  size="small"
-                                  style={{ fontSize: '0.7rem', height: '20px' }}
-                                />
-                              )}
-                              {whatsApp.channel === 'whatsapp' && whatsApp.channelType === "baileys" && (
-                                <Chip 
-                                  label="Baileys" 
-                                  size="small"
-                                  variant="outlined"
-                                  style={{ fontSize: '0.7rem', height: '20px' }}
-                                />
-                              )}
-                            </Box>
+                                    <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+                                      <span>{whatsApp.name}</span>
+                                      {whatsApp.channel === 'whatsapp' && whatsApp.channelType === "official" && (
+                                        <Chip
+                                          label="API Oficial"
+                                          color="primary"
+                                          size="small"
+                                          style={{ fontSize: '0.7rem', height: '20px' }}
+                                        />
+                                      )}
+                                      {whatsApp.channel === 'whatsapp' && whatsApp.channelType === "baileys" && (
+                                        <Chip
+                                          label="Baileys"
+                                          size="small"
+                                          variant="outlined"
+                                          style={{ fontSize: '0.7rem', height: '20px' }}
+                                        />
+                                      )}
+                                    </Box>
                                   </td>
                                   <td style={{ textAlign: "center" }}>{whatsApp.number && whatsApp.channel === 'whatsapp' ? (<>{formatSerializedId(whatsApp.number)}</>) : whatsApp.number}</td>
                                   <td style={{ textAlign: "center" }}>{renderStatusToolTips(whatsApp)}</td>
                                   <td style={{ textAlign: "center" }}>{renderActionButtons(whatsApp)}</td>
                                   <td style={{ textAlign: "center" }}>{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}</td>
                                   <td style={{ textAlign: "center" }}>
-                            {whatsApp.isDefault && (
-                              <div className={classes.customTableCell}>
-                                <CheckCircle style={{ color: green[500] }} />
-                              </div>
-                            )}
+                                    {whatsApp.isDefault && (
+                                      <div className={classes.customTableCell}>
+                                        <CheckCircle style={{ color: green[500] }} />
+                                      </div>
+                                    )}
                                   </td>
-                          <Can
-                            role={user.profile}
-                            perform="connections-page:addConnection"
-                            yes={() => (
+                                  <Can
+                                    role={user.profile}
+                                    perform="connections-page:addConnection"
+                                    yes={() => (
                                       <td style={{ textAlign: "center" }}>
                                         <Tooltip {...CustomTooltipProps} title="Editar">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleEditWhatsApp(whatsApp)}
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => handleEditWhatsApp(whatsApp)}
                                             style={{
                                               color: "#374151",
                                               backgroundColor: "#ffffff",
@@ -881,37 +890,55 @@ const Connections = () => {
                                               borderRadius: "8px",
                                               marginRight: 4
                                             }}
-                                >
+                                          >
                                             <Edit fontSize="small" />
-                                </IconButton>
+                                          </IconButton>
+                                        </Tooltip>
+                                        <Tooltip {...CustomTooltipProps} title="Diagnóstico">
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => {
+                                              setDiagnosticWhatsappId(whatsApp.id);
+                                              setDiagnosticOpen(true);
+                                            }}
+                                            style={{
+                                              color: "#6366f1",
+                                              backgroundColor: "#ffffff",
+                                              border: "1px solid #d1d5db",
+                                              borderRadius: "8px",
+                                              marginRight: 4
+                                            }}
+                                          >
+                                            <BugReport fontSize="small" />
+                                          </IconButton>
                                         </Tooltip>
                                         <Tooltip {...CustomTooltipProps} title="Deletar">
-                                <IconButton
-                                  size="small"
-                                  onClick={(e) => {
-                                    handleOpenConfirmationModal("delete", whatsApp.id);
-                                  }}
+                                          <IconButton
+                                            size="small"
+                                            onClick={(e) => {
+                                              handleOpenConfirmationModal("delete", whatsApp.id);
+                                            }}
                                             style={{
                                               color: "#dc2626",
                                               backgroundColor: "#ffffff",
                                               border: "1px solid #d1d5db",
                                               borderRadius: "8px"
                                             }}
-                                >
+                                          >
                                             <DeleteOutline fontSize="small" />
-                                </IconButton>
+                                          </IconButton>
                                         </Tooltip>
                                       </td>
-                            )}
-                          />
+                                    )}
+                                  />
                                 </tr>
-                      ))}
-                  </>
-                )}
+                              ))}
+                          </>
+                        )}
                       </tbody>
                     </table>
                   </Box>
-          </Paper>
+                </Paper>
               ) : (
                 /* Mobile View */
                 <>
@@ -929,16 +956,16 @@ const Connections = () => {
                             <div>
                               <span className="font-semibold text-sm">{whatsApp.name}</span>
                               {whatsApp.channel === 'whatsapp' && whatsApp.channelType === "official" && (
-                                <Chip 
-                                  label="API Oficial" 
-                                  color="primary" 
+                                <Chip
+                                  label="API Oficial"
+                                  color="primary"
                                   size="small"
                                   style={{ fontSize: '0.6rem', height: '18px', marginLeft: 4 }}
                                 />
                               )}
                               {whatsApp.channel === 'whatsapp' && whatsApp.channelType === "baileys" && (
-                                <Chip 
-                                  label="Baileys" 
+                                <Chip
+                                  label="Baileys"
                                   size="small"
                                   variant="outlined"
                                   style={{ fontSize: '0.6rem', height: '18px', marginLeft: 4 }}

@@ -225,9 +225,60 @@ const NotificationsPopOver = (volume) => {
 				}
 			}
 
+		const onConnectionCritical = (data) => {
+			// Verificar se notificações desktop estão permitidas
+			if (!("Notification" in window)) {
+				return;
+			}
+
+			if (Notification.permission === "granted") {
+				const options = {
+					body: `${data.message}\n\n${data.suggestions?.slice(0, 2).join("\n") || ""}`,
+					icon: `${getBackendUrl()}/nopicture.png`,
+					tag: `connection-critical-${data.whatsappId}`,
+					renotify: true,
+					requireInteraction: data.severity === "critical",
+				};
+
+				const notification = new Notification(
+					`⚠️ Problema de Conexão: ${data.whatsappName || `WhatsApp #${data.whatsappId}`}`,
+					options
+				);
+
+				notification.onclick = (e) => {
+					e.preventDefault();
+					window.focus();
+					// Redirecionar para página de conexões
+					historyRef.current.push("/connections");
+					notification.close();
+				};
+
+				// Tocar som de alerta
+				if (soundAlertRef.current) {
+					soundAlertRef.current();
+				}
+
+				// Fechar notificação após 10 segundos (se não for critical)
+				if (data.severity !== "critical") {
+					setTimeout(() => {
+						notification.close();
+					}, 10000);
+				}
+			} else if (Notification.permission !== "denied") {
+				// Solicitar permissão se ainda não foi solicitada
+				Notification.requestPermission().then((permission) => {
+					if (permission === "granted") {
+						// Tentar novamente após permissão concedida
+						onConnectionCritical(data);
+					}
+				});
+			}
+		};
+
 		socket.on("connect", onConnectNotificationsPopover);
 		socket.on(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
 		socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
+		socket.on(`company-${companyId}-connectionCritical`, onConnectionCritical);
 
 		return () => {
 			if (socket && typeof socket.off === 'function') {
@@ -235,6 +286,7 @@ const NotificationsPopOver = (volume) => {
 					socket.off("connect", onConnectNotificationsPopover);
 					socket.off(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
 					socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
+					socket.off(`company-${companyId}-connectionCritical`, onConnectionCritical);
 				} catch (e) {
 					console.debug("[NotificationsPopOver] error in cleanup", e);
 				}
