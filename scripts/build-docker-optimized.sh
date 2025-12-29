@@ -16,6 +16,9 @@ DOCKER_USER="${DOCKER_USER:-zanonalivesolucoes}"
 FRONT_IMAGE="${FRONT_IMAGE:-${DOCKER_USER}/taktchat-frontend}"
 BACK_IMAGE="${BACK_IMAGE:-${DOCKER_USER}/taktchat-backend}"
 
+# Plataforma Docker (default: linux/arm64 para compatibilidade com servidor de produção)
+DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/arm64}"
+
 # Variáveis de ambiente do frontend (ajuste conforme necessário)
 FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://taktchat-api.alivesolucoes.com.br}"
 FRONT_SOCKET_URL="${FRONT_SOCKET_URL:-$FRONT_BACKEND_URL}"
@@ -36,7 +39,7 @@ error() {
   printf '\n[%s][ERRO] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >&2
 }
 
-# Verificar limites de recursos do Docker
+# Verificar limites de recursos do Docker e configurar buildx
 setup_docker_limits() {
   log "Configurando limites de recursos do Docker..."
   
@@ -44,11 +47,18 @@ setup_docker_limits() {
   export DOCKER_BUILDKIT=1
   export COMPOSE_DOCKER_CLI_BUILD=1
   
-  # Criar/atualizar daemon.json se necessário
+  # Verificar se buildx está disponível para suporte multi-platform
   if command -v docker >/dev/null 2>&1; then
-    log "Verificando configuração do Docker daemon..."
-    # Nota: mudanças no daemon.json requerem restart do Docker
+    if docker buildx version >/dev/null 2>&1; then
+      log "✓ Docker Buildx detectado - suporte a multi-platform disponível"
+    else
+      warn "Docker Buildx não encontrado. Builds cross-platform podem não funcionar."
+      warn "Para instalar: docker buildx install"
+      warn "Nota: O builder padrão será usado, mas --platform pode não funcionar sem buildx."
+    fi
   fi
+  
+  log "Plataforma alvo: ${DOCKER_PLATFORM}"
 }
 
 # Build otimizado com cache e limitação de recursos
@@ -59,12 +69,28 @@ build_image_optimized() {
   shift 3
   local extra_build_args=("$@")
   
-  log "Construindo ${image_name}:${IMAGE_TAG} (com otimizações para hardware limitado)..."
+  log "Construindo ${image_name}:${IMAGE_TAG} para plataforma ${DOCKER_PLATFORM} (com otimizações para hardware limitado)..."
+  
+  # Verificar se buildx está disponível para usar --platform
+  local build_cmd
+  local platform_flag=()
+  if docker buildx version >/dev/null 2>&1; then
+    # Usar buildx para suporte a multi-platform
+    build_cmd=(docker buildx build --load)
+    platform_flag=(--platform="${DOCKER_PLATFORM}")
+  else
+    # Fallback para docker build padrão
+    build_cmd=(docker build)
+    warn "Usando docker build padrão (sem buildx)."
+    warn "A plataforma ${DOCKER_PLATFORM} não será aplicada - usando plataforma nativa do host."
+    warn "Para builds cross-platform, instale buildx: docker buildx install"
+  fi
   
   # Usar buildkit para melhor cache e performance
   # Limitação de recursos é feita via nice/ionice no processo pai
   # BuildKit usa cache agressivo automaticamente
-  DOCKER_BUILDKIT=1 docker build \
+  DOCKER_BUILDKIT=1 "${build_cmd[@]}" \
+    "${platform_flag[@]}" \
     --progress=plain \
     --build-arg BUILDKIT_INLINE_CACHE=1 \
     -f "${dockerfile}" \
@@ -75,7 +101,7 @@ build_image_optimized() {
       return 1
     }
   
-  log "Build de ${image_name} concluído com sucesso"
+  log "Build de ${image_name} concluído com sucesso para ${DOCKER_PLATFORM}"
 }
 
 # Push com retry
@@ -127,6 +153,7 @@ main() {
   log "=========================================="
   log "Tag: ${IMAGE_TAG}"
   log "Build: ${BUILD_TYPE}"
+  log "Plataforma: ${DOCKER_PLATFORM}"
   log ""
   log "Configurações Frontend:"
   log "  Backend URL: ${FRONT_BACKEND_URL}"

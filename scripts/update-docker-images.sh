@@ -16,6 +16,8 @@ FRONT_IMAGE="${FRONT_IMAGE:-${DOCKER_USER}/taktchat-frontend}"
 BACK_IMAGE="${BACK_IMAGE:-${DOCKER_USER}/taktchat-backend}"
 BUILDX_AVAILABLE=false
 BUILD_CMD=(docker build)
+# Plataforma Docker (default: linux/arm64 para compatibilidade com servidor de produção)
+DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/arm64}"
 FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-http://localhost:8080}"
 FRONT_SOCKET_URL="${FRONT_SOCKET_URL:-$FRONT_BACKEND_URL}"
 FRONT_PRIMARY_COLOR="${FRONT_PRIMARY_COLOR:-#2563EB}"
@@ -53,9 +55,15 @@ build_and_push() {
   shift 3
   local extra_build_args=("$@")
 
-  run_with_feedback "Construindo ${image_name}:${IMAGE_TAG}" \
+  local platform_flag=()
+  if [ "${BUILDX_AVAILABLE}" = "true" ]; then
+    platform_flag=(--platform="${DOCKER_PLATFORM}")
+  fi
+
+  run_with_feedback "Construindo ${image_name}:${IMAGE_TAG} para plataforma ${DOCKER_PLATFORM}" \
     "${BUILD_CMD[@]}" \
       "${COMMON_BUILD_ARGS[@]}" \
+      "${platform_flag[@]}" \
       -f "${dockerfile}" \
       -t "${image_name}:${IMAGE_TAG}" \
       "${context_dir}" \
@@ -81,6 +89,7 @@ setup_build_command() {
 }
 
 log "Iniciando atualização das imagens Docker (tag: ${IMAGE_TAG})"
+log "Plataforma alvo: ${DOCKER_PLATFORM}"
 setup_build_command
 
 build_and_push "${FRONT_IMAGE}" "${REPO_ROOT}/frontend/Dockerfile" "${REPO_ROOT}/frontend" \
