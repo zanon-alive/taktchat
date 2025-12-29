@@ -98,6 +98,7 @@ build_image_optimized() {
     "${extra_build_args[@]}" \
     "${context_dir}" || {
       error "Build de ${image_name} falhou"
+      error "Se o erro for '401 Unauthorized' ou 'token expired', execute: docker login"
       return 1
     }
   
