@@ -1,10 +1,14 @@
 # Etapa de build
-FROM node:20-alpine AS build
+# Usando node:20 (Debian) ao invés de Alpine para builds mais rápidos,
+# especialmente em cross-compilation (AMD64 -> ARM64)
+FROM node:20 AS build
 WORKDIR /app
 
 # Copia o package.json e instala as dependências
+# Usando cache do BuildKit para acelerar builds subsequentes
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --legacy-peer-deps
 
 # Copia o restante dos arquivos
 COPY . .
@@ -26,7 +30,15 @@ ENV PUBLIC_URL=${PUBLIC_URL}
 ENV REACT_APP_FRONTEND_VERSION=${REACT_APP_FRONTEND_VERSION}
 
 # Build da aplicação React
-RUN NODE_OPTIONS=--max-old-space-size=6144 npm run build
+# Otimizações para cross-compilation (ARM64 emulação):
+# - GENERATE_SOURCEMAP=false: desabilita source maps (reduz tempo significativamente)
+# - CI=true: desabilita verificações desnecessárias
+# - NODE_OPTIONS: aumenta memória disponível (alinhado com package.json)
+# - SKIP_PREFLIGHT_CHECK: pula verificações pré-build
+ENV GENERATE_SOURCEMAP=false
+ENV CI=true
+ENV SKIP_PREFLIGHT_CHECK=true
+RUN NODE_OPTIONS=--max-old-space-size=8192 npm run build
 
 # Etapa de deploy
 FROM nginx:alpine
