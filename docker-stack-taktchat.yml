@@ -14,8 +14,8 @@ services:
       - taktchat_media:/usr/src/app/public
     environment:
       - NODE_ENV=production
-      - BACKEND_URL=https://taktchat-api.alivesolucoes.com.br
-      - FRONTEND_URL=https://taktchat.alivesolucoes.com.br
+      - BACKEND_URL=https://api.taktchat.com.br
+      - FRONTEND_URL=https://taktchat.com.br,https://taktchat.alivesolucoes.com.br
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=taktchat_database
@@ -41,7 +41,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.swarm.network=traefik_public"
-        - "traefik.http.routers.taktchat-api.rule=Host(`taktchat-api.alivesolucoes.com.br`)"
+        - "traefik.http.routers.taktchat-api.rule=Host(`api.taktchat.com.br`) || Host(`taktchat-api.alivesolucoes.com.br`)"
         - "traefik.http.routers.taktchat-api.entrypoints=websecure"
         - "traefik.http.routers.taktchat-api.tls.certresolver=letsencrypt"
         - "traefik.http.services.taktchat-api.loadbalancer.server.port=8080"
@@ -52,11 +52,11 @@ services:
     networks:
       - traefik_public
     environment:
-      - REACT_APP_BACKEND_URL=https://taktchat-api.alivesolucoes.com.br
-      - REACT_APP_SOCKET_URL=https://taktchat-api.alivesolucoes.com.br
+      - REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+      - REACT_APP_SOCKET_URL=https://api.taktchat.com.br
       - REACT_APP_PRIMARY_COLOR=#2563EB
       - REACT_APP_PRIMARY_DARK=#1E3A8A
-      - PUBLIC_URL=https://taktchat.alivesolucoes.com.br
+      - PUBLIC_URL=https://taktchat.com.br
     deploy:
       mode: replicated
       replicas: 1
@@ -70,7 +70,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.swarm.network=traefik_public"
-        - "traefik.http.routers.taktchat-app.rule=Host(`taktchat.alivesolucoes.com.br`)"
+        - "traefik.http.routers.taktchat-app.rule=Host(`taktchat.com.br`) || Host(`taktchat.alivesolucoes.com.br`)"
         - "traefik.http.routers.taktchat-app.entrypoints=websecure"
         - "traefik.http.routers.taktchat-app.tls.certresolver=letsencrypt"
         - "traefik.http.services.taktchat-app.loadbalancer.server.port=80"

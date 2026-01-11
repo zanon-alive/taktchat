@@ -11,7 +11,7 @@ import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { getNumberSupport } from "../../config";
+import { getNumberSupport, getBackendUrl } from "../../config";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -195,10 +195,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [userCreationEnabled, setUserCreationEnabled] = useState(true);
 
-  const backendUrl =
-    process.env.REACT_APP_BACKEND_URL === "https://localhost:8090"
-      ? "https://localhost:8090"
-      : process.env.REACT_APP_BACKEND_URL;
+  const backendUrl = getBackendUrl() || process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
   useEffect(() => {
     const fetchUserCreationStatus = async () => {

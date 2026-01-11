@@ -20,9 +20,9 @@ IMAGE_TAG="${1:-latest}"
 BUILD_TYPE="${2:-all}"  # all, frontend-only, backend-only
 
 # URLs de produção (ajuste conforme necessário)
-FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://taktchat-api.alivesolucoes.com.br}"
+FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://api.taktchat.com.br}"
 FRONT_SOCKET_URL="${FRONT_SOCKET_URL:-$FRONT_BACKEND_URL}"
-FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.alivesolucoes.com.br}"
+FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.com.br}"
 
 # Funções auxiliares
 log() {
