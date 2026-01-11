@@ -21,9 +21,9 @@ FRONT_IMAGE="${FRONT_IMAGE:-${DOCKER_USER}/taktchat-frontend}"
 BACK_IMAGE="${BACK_IMAGE:-${DOCKER_USER}/taktchat-backend}"
 
 # Variáveis de ambiente do frontend (produção)
-export FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://taktchat-api.alivesolucoes.com.br}"
+export FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://api.taktchat.com.br}"
 export FRONT_SOCKET_URL="${FRONT_SOCKET_URL:-$FRONT_BACKEND_URL}"
-export FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.alivesolucoes.com.br}"
+export FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.com.br}"
 export FRONT_PRIMARY_COLOR="${FRONT_PRIMARY_COLOR:-#2563EB}"
 export FRONT_PRIMARY_DARK="${FRONT_PRIMARY_DARK:-#1E3A8A}"
 export FRONT_VERSION="${FRONT_VERSION:-${IMAGE_TAG}}"

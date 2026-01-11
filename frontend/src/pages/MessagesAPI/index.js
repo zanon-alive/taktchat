@@ -106,7 +106,11 @@ const MessagesAPI = () => {
     fetchData();
   }, [user, getPlanCompany, history]);
 
-  const getEndpoint = (path) => process.env.REACT_APP_BACKEND_URL + path;
+  const getEndpoint = (path) => {
+    const { getBackendUrl } = require("../../config");
+    const backendUrl = getBackendUrl() || process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+    return backendUrl + path;
+  };
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);

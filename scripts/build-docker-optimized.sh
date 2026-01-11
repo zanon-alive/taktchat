@@ -30,9 +30,9 @@ USE_REGISTRY_CACHE="${USE_REGISTRY_CACHE:-true}" # true, false
 DOCKER_PROGRESS="${DOCKER_PROGRESS:-auto}" # auto, plain
 
 # Variáveis de ambiente do frontend (ajuste conforme necessário)
-FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://taktchat-api.alivesolucoes.com.br}"
+FRONT_BACKEND_URL="${FRONT_BACKEND_URL:-https://api.taktchat.com.br}"
 FRONT_SOCKET_URL="${FRONT_SOCKET_URL:-$FRONT_BACKEND_URL}"
-FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.alivesolucoes.com.br}"
+FRONT_PUBLIC_URL="${FRONT_PUBLIC_URL:-https://taktchat.com.br}"
 FRONT_PRIMARY_COLOR="${FRONT_PRIMARY_COLOR:-#2563EB}"
 FRONT_PRIMARY_DARK="${FRONT_PRIMARY_DARK:-#1E3A8A}"
 FRONT_VERSION="${FRONT_VERSION:-${IMAGE_TAG}}"

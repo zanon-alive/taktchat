@@ -22,9 +22,9 @@ git checkout main
 git pull --ff-only origin main
 
 info "Exportando variáveis de ambiente para build de produção"
-export FRONT_PUBLIC_URL="https://taktchat.alivesolucoes.com.br"
-export FRONT_BACKEND_URL="https://taktchat-api.alivesolucoes.com.br"
-export FRONT_SOCKET_URL="https://taktchat-api.alivesolucoes.com.br"
+export FRONT_PUBLIC_URL="https://taktchat.com.br"
+export FRONT_BACKEND_URL="https://api.taktchat.com.br"
+export FRONT_SOCKET_URL="https://api.taktchat.com.br"
 export FORCE_REBUILD=true
 export DOCKER_BUILDKIT=0
 
