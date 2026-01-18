@@ -9,4 +9,7 @@ app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.listen(3001);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Frontend servindo na porta ${PORT}`);
+});
