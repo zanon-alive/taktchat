@@ -1,49 +1,9 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
-import { Link as RouterLink, useLocation } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import useHelps from "../hooks/useHelps";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListSubheader from "@material-ui/core/ListSubheader";
-import Divider from "@material-ui/core/Divider";
-import Avatar from "@material-ui/core/Avatar";
-import Badge from "@material-ui/core/Badge";
-import Collapse from "@material-ui/core/Collapse";
-import List from "@material-ui/core/List";
-import Tooltip from "@material-ui/core/Tooltip";
-import Typography from "@material-ui/core/Typography";
-
-import DashboardOutlinedIcon from "@material-ui/icons/DashboardOutlined";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
-import SyncAltIcon from "@material-ui/icons/SyncAlt";
-import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
-import PeopleAltOutlinedIcon from "@material-ui/icons/PeopleAltOutlined";
-import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
-import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
-import FlashOnIcon from "@material-ui/icons/FlashOn";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import CodeRoundedIcon from "@material-ui/icons/CodeRounded";
-import ViewKanban from "@mui/icons-material/ViewKanban";
-import Schedule from "@material-ui/icons/Schedule";
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import EventAvailableIcon from "@material-ui/icons/EventAvailable";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import PeopleIcon from "@material-ui/icons/People";
-import ListIcon from "@material-ui/icons/ListAlt";
-import AnnouncementIcon from "@material-ui/icons/Announcement";
-import ForumIcon from "@material-ui/icons/Forum";
-import LocalAtmIcon from "@material-ui/icons/LocalAtm";
-import BusinessIcon from "@material-ui/icons/Business";
 import {
   AllInclusive,
   AttachFile,
-  Dashboard,
-  Description,
   DeviceHubOutlined,
   GridOn,
-  ListAlt,
   PhonelinkSetup,
   Memory,
 } from "@material-ui/icons";
@@ -52,7 +12,6 @@ import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { useActiveMenu } from "../context/ActiveMenuContext";
 
-import { Can } from "../components/Can";
 import usePermissions from "../hooks/usePermissions";
 
 import { isArray } from "lodash";
@@ -61,7 +20,7 @@ import toastError from "../errors/toastError";
 import usePlans from "../hooks/usePlans";
 import useVersion from "../hooks/useVersion";
 import { i18n } from "../translate/i18n";
-import { Campaign, ShapeLine, Webhook } from "@mui/icons-material";
+import { ShapeLine, Webhook } from "@mui/icons-material";
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
@@ -215,12 +174,12 @@ const MainListItems = ({ collapsed, onItemClick }) => {
   const { user, socket, isAuth } = useContext(AuthContext);
   const { setActiveMenu } = useActiveMenu();
   const location = useLocation();
-  const { hasPermission, hasAnyPermission, isAdmin } = usePermissions();
+  const { hasPermission } = usePermissions();
 
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
   const [openFlowSubmenu, setOpenFlowSubmenu] = useState(false);
-  const [openDashboardSubmenu, setOpenDashboardSubmenu] = useState(false);
+
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showKanban, setShowKanban] = useState(false);
   const [showOpenAi, setShowOpenAi] = useState(false);
@@ -236,41 +195,10 @@ const MainListItems = ({ collapsed, onItemClick }) => {
   const [searchParam] = useState("");
   const [chats, dispatch] = useReducer(reducer, []);
   const [versionInfo, setVersionInfo] = useState({ frontend: "", backend: "", commit: "", commitShort: "", buildDate: "" });
-  const [managementHover, setManagementHover] = useState(false);
+
   const [campaignHover, setCampaignHover] = useState(false);
   const [flowHover, setFlowHover] = useState(false)
-  const { list } = useHelps();
-  const [hasHelps, setHasHelps] = useState(false);
-
-
-  useEffect(() => {
-    let isMounted = true;
-    if (!isAuth) {
-      setHasHelps(false);
-      return undefined;
-    }
-
-    async function checkHelps() {
-      try {
-        const helps = await list();
-        if (isMounted) {
-          setHasHelps(Array.isArray(helps) && helps.length > 0);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setHasHelps(false);
-        }
-      }
-    }
-    checkHelps();
-
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuth]);
-
-  const isManagementActive =
+  const isCampaignRouteActive =
     location.pathname === "/" || location.pathname.startsWith("/reports") || location.pathname.startsWith("/moments");
 
   const isCampaignRouteActive =

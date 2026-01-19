@@ -50,11 +50,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 export const showOne = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { settingKey: key } = req.params;
-
-  console.log("|======== GetPublicSettingService ========|")
-  console.log("key", key)
-  console.log("|=========================================|")
-
   
   const settingsTransfTicket = await ListSettingsServiceOne({ companyId: companyId, key: key });
 
@@ -134,8 +129,6 @@ export const updateOne = async (
 };
 
 export const publicShow = async (req: Request, res: Response): Promise<Response> => {
-  console.log("|=============== publicShow  ==============|")
-  
   const { settingKey: key } = req.params;
   
   const settingValue = await GetPublicSettingService({ key });
@@ -149,8 +142,6 @@ export const storeLogo = async (req: Request, res: Response): Promise<Response> 
   const { mode }: LogoRequest = req.body;
   const { companyId } = req.user;
   const validModes = [ "Light", "Dark", "Favicon" ];
-
-  console.log("|=============== storeLogo  ==============|", storeLogo)
 
   if ( validModes.indexOf(mode) === -1 ) {
     return res.status(406);
@@ -174,9 +165,6 @@ export const storePrivateFile = async (req: Request, res: Response): Promise<Res
   const file = req.file as Express.Multer.File;
   const { settingKey }: PrivateFileRequest = req.body;
   const { companyId } = req.user;
-
-
-  console.log("|=============== storePrivateFile  ==============|", storeLogo)
 
   const setting = await UpdateSettingService({
     key: `_${settingKey}`,
