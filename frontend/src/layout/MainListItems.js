@@ -104,7 +104,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ListItemLink(props) {
-  const { icon, primary, to, tooltip, showBadge } = props;
+  const { icon, primary, to, tooltip, showBadge, onClick } = props;
   const classes = useStyles();
   const { activeMenu } = useActiveMenu();
   const location = useLocation();
@@ -114,6 +114,12 @@ function ListItemLink(props) {
     () => React.forwardRef((itemProps, ref) => <RouterLink to={to} ref={ref} {...itemProps} />),
     [to]
   );
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
 
   const ConditionalTooltip = ({ children, tooltipEnabled }) =>
     tooltipEnabled ? (
@@ -127,7 +133,7 @@ function ListItemLink(props) {
   return (
     <ConditionalTooltip tooltipEnabled={!!tooltip}>
       <li>
-        <ListItem button component={renderLink} className={classes.listItem}>
+        <ListItem button component={renderLink} className={classes.listItem} onClick={handleClick}>
           {icon ? (
             <ListItemIcon>
               {showBadge ? (
@@ -202,7 +208,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MainListItems = ({ collapsed }) => {
+const MainListItems = ({ collapsed, onItemClick }) => {
   const theme = useTheme();
   const classes = useStyles();
   const { whatsApps } = useContext(WhatsAppsContext);
@@ -455,6 +461,7 @@ const MainListItems = ({ collapsed }) => {
           primary="Dashboard"
           icon={<DashboardOutlinedIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
       {((user.profile === "admin" || user.profile === "super") ||
@@ -464,6 +471,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.chatsTempoReal")}
           icon={<GridOn />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -474,6 +482,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.tickets")}
           icon={<WhatsAppIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -483,6 +492,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.quickMessages")}
           icon={<FlashOnIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -492,6 +502,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.kanban")}
           icon={<ViewKanban />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -501,6 +512,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.contacts")}
           icon={<ContactPhoneOutlinedIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -510,6 +522,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.schedules")}
           icon={<Schedule />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -519,6 +532,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.tags")}
           icon={<LocalOfferIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -532,6 +546,7 @@ const MainListItems = ({ collapsed }) => {
             </Badge>
           }
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -547,6 +562,7 @@ const MainListItems = ({ collapsed }) => {
             primary={i18n.t("mainDrawer.listItems.helps")}
             icon={<HelpOutlineIcon />}
             tooltip={collapsed}
+            onClick={onItemClick}
           />
         )}
       
@@ -597,18 +613,21 @@ const MainListItems = ({ collapsed }) => {
                           primary={i18n.t("campaigns.subMenus.list")}
                           icon={<ListIcon />}
                           tooltip={collapsed}
+                          onClick={onItemClick}
                         />
                         <ListItemLink
                           to="/contact-lists"
                           primary={i18n.t("campaigns.subMenus.listContacts")}
                           icon={<PeopleIcon />}
                           tooltip={collapsed}
+                          onClick={onItemClick}
                         />
                         <ListItemLink
                           to="/campaigns-config"
                           primary={i18n.t("campaigns.subMenus.settings")}
                           icon={<SettingsOutlinedIcon />}
                           tooltip={collapsed}
+                          onClick={onItemClick}
                         />
                       </List>
                     </Collapse>
@@ -659,6 +678,7 @@ const MainListItems = ({ collapsed }) => {
                         primary={i18n.t("flowbuilder.subMenus.campaign")}
                         icon={<EventAvailableIcon />}
                         tooltip={collapsed}
+                        onClick={onItemClick}
                       />
 
                       <ListItemLink
@@ -666,6 +686,7 @@ const MainListItems = ({ collapsed }) => {
                         primary={i18n.t("flowbuilder.subMenus.conversation")}
                         icon={<ShapeLine />}
                         tooltip={collapsed}
+                        onClick={onItemClick}
                       />
                     </List>
                   </Collapse>
@@ -679,6 +700,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.annoucements")}
           icon={<AnnouncementIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -689,6 +711,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.messagesAPI")}
           icon={<CodeRoundedIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -699,6 +722,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.users")}
           icon={<PeopleAltOutlinedIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -709,6 +733,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.queues")}
           icon={<AccountTreeOutlinedIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -719,6 +744,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.prompts")}
           icon={<AllInclusive />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -729,6 +755,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.queueIntegration")}
           icon={<DeviceHubOutlined />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -741,6 +768,7 @@ const MainListItems = ({ collapsed }) => {
           icon={<SyncAltIcon />}
           showBadge={connectionWarning}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -751,6 +779,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.allConnections")}
           icon={<PhonelinkSetup />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -761,6 +790,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.files")}
           icon={<AttachFile />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -771,6 +801,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.financeiro")}
           icon={<LocalAtmIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -781,6 +812,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.settings")}
           icon={<SettingsOutlinedIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -791,6 +823,7 @@ const MainListItems = ({ collapsed }) => {
           primary="Configurações IA"
           icon={<Memory />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
 
@@ -801,6 +834,7 @@ const MainListItems = ({ collapsed }) => {
           primary={i18n.t("mainDrawer.listItems.companies")}
           icon={<BusinessIcon />}
           tooltip={collapsed}
+          onClick={onItemClick}
         />
       )}
       {!collapsed && (

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from "react";
+import React, { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import clsx from "clsx";
 // import moment from "moment";
@@ -305,6 +305,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   // const [dueDate, setDueDate] = useState("");
   //   const socketManager = useContext(SocketContext);
   const { user, socket } = useContext(AuthContext);
+  const appBarRef = useRef(null);
 
   const theme = useTheme();
   const { colorMode } = useContext(ColorModeContext);
@@ -481,6 +482,49 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     }
   };
 
+  const handleMenuClose = () => {
+    setDrawerOpen(false);
+  };
+
+  // Fechar menu ao clicar fora dele
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Só fecha se o menu estiver aberto
+      if (!drawerOpen) return;
+
+      // Verifica se o clique foi no AppBar (botão de menu)
+      const clickedAppBar = appBarRef.current?.contains(event.target);
+      if (clickedAppBar) return;
+
+      // Verifica se o clique foi dentro do drawer
+      // Usa o data attribute para identificar o drawer do menu principal
+      const mainDrawer = document.querySelector('[data-drawer="main-menu"]');
+      const clickedDrawer = mainDrawer?.contains(event.target);
+      
+      // Se clicou fora do drawer, fecha o menu
+      if (!clickedDrawer) {
+        setDrawerOpen(false);
+      }
+    };
+
+    // Adiciona listener apenas quando o menu está aberto
+    if (drawerOpen) {
+      // Usa um pequeno delay para garantir que o DOM está atualizado após a abertura
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [drawerOpen]);
+
   if (loading) {
     return <BackdropLoading />;
   }
@@ -502,6 +546,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           ),
         }}
         open={drawerOpen}
+        PaperProps={{
+          'data-drawer': 'main-menu'
+        }}
       >
         <div className={classes.toolbarIcon}>
           <img className={drawerOpen ? classes.logo : classes.hideLogo}
@@ -518,12 +565,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         </div>
         <List className={classes.containerWithScroll}>
           {/* {mainListItems} */}
-          <MainListItems collapsed={!drawerOpen} />
+          <MainListItems collapsed={!drawerOpen} onItemClick={handleMenuClose} />
         </List>
         <Divider />
       </Drawer>
 
       <AppBar
+        ref={appBarRef}
         position="fixed"
         className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
         color="primary"
