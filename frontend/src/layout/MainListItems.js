@@ -198,7 +198,8 @@ const MainListItems = ({ collapsed, onItemClick }) => {
 
   const [campaignHover, setCampaignHover] = useState(false);
   const [flowHover, setFlowHover] = useState(false)
-  const isCampaignRouteActive =
+  
+  const isManagementActive =
     location.pathname === "/" || location.pathname.startsWith("/reports") || location.pathname.startsWith("/moments");
 
   const isCampaignRouteActive =
