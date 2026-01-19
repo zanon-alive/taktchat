@@ -122,8 +122,9 @@ O build do React dentro do container pode falhar por falta de memória. A soluç
 # 1. Navegar para o diretório do frontend
 cd /root/taktchat/frontend
 
-# 2. Instalar dependências (se necessário)
-npm install --legacy-peer-deps
+# 2. Instalar dependências (incluindo devDependencies)
+# IMPORTANTE: @craco/craco está em devDependencies, então precisamos de --include=dev
+npm install --legacy-peer-deps --include=dev
 
 # 3. Definir variáveis de ambiente
 export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
@@ -136,10 +137,13 @@ export GENERATE_SOURCEMAP=false
 export TSC_COMPILE_ON_ERROR=true
 export NODE_OPTIONS=--max-old-space-size=4096
 
-# 4. Fazer o build
+# 4. Verificar se craco está disponível
+which craco || node_modules/.bin/craco --version || echo "⚠️  craco não encontrado"
+
+# 5. Fazer o build
 npm run build
 
-# 5. Verificar se o build foi criado corretamente
+# 6. Verificar se o build foi criado corretamente
 test -f build/index.html && echo "✅ Build completo" || echo "❌ Build incompleto"
 test -d build/static && echo "✅ static/ existe" || echo "❌ static/ não existe"
 du -sh build/  # Ver tamanho do build
@@ -153,8 +157,9 @@ Se o servidor não tiver recursos suficientes, faça o build localmente:
 # Na sua máquina local
 cd ~/projetos/taktchat/frontend
 
-# Instalar dependências
-npm install --legacy-peer-deps
+# Instalar dependências (incluindo devDependencies)
+# IMPORTANTE: @craco/craco está em devDependencies
+npm install --legacy-peer-deps --include=dev
 
 # Definir variáveis de ambiente
 export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
@@ -257,7 +262,7 @@ cd /root/stacks
 
 # 4. Build do frontend (fora do container)
 cd /root/taktchat/frontend
-npm install --legacy-peer-deps
+npm install --legacy-peer-deps --include=dev
 export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
 export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
 export REACT_APP_PRIMARY_COLOR=#2563EB
@@ -294,7 +299,7 @@ cd /root/stacks
 cd /root/taktchat
 git pull origin main
 cd /root/taktchat/frontend
-npm install --legacy-peer-deps
+npm install --legacy-peer-deps --include=dev
 # ... (definir variáveis de ambiente e fazer build - ver ETAPA 3.2.1)
 npm run build
 cd /root/stacks
@@ -305,13 +310,30 @@ docker service update --force taktchat_taktchat-frontend
 
 ## ⚠️ Problemas Comuns e Soluções
 
-### Problema 1: Build do frontend falha dentro do container
+### Problema 1: Build do frontend falha - "craco: not found"
+
+**Sintoma:** Erro `sh: 1: craco: not found` ao executar `npm run build`
+
+**Causa:** O `@craco/craco` está em `devDependencies` e não é instalado quando `NODE_ENV=production` sem o flag `--include=dev`
+
+**Solução:**
+```bash
+cd /root/taktchat/frontend
+# Reinstalar dependências incluindo devDependencies
+npm install --legacy-peer-deps --include=dev
+# Verificar se craco está disponível
+which craco || node_modules/.bin/craco --version
+# Tentar build novamente
+npm run build
+```
+
+### Problema 2: Build do frontend falha dentro do container
 
 **Sintoma:** Logs mostram "out of memory" ou "process exited too early"
 
 **Solução:** Fazer build fora do container (ver ETAPA 3.2)
 
-### Problema 2: Serviço não inicia após atualização
+### Problema 3: Serviço não inicia após atualização
 
 **Sintoma:** `docker service ps` mostra status "Rejected" ou "Failed"
 
@@ -329,7 +351,7 @@ npm install --legacy-peer-deps
 docker service update --force taktchat_taktchat-backend
 ```
 
-### Problema 3: Migrations não executam
+### Problema 4: Migrations não executam
 
 **Sintoma:** Mudanças no banco de dados não são aplicadas
 
@@ -343,7 +365,7 @@ docker service update --force taktchat_taktchat-migrate
 docker service logs --tail 100 taktchat_taktchat-migrate
 ```
 
-### Problema 4: Frontend não atualiza após build
+### Problema 5: Frontend não atualiza após build
 
 **Sintoma:** Mudanças não aparecem no navegador
 
@@ -388,6 +410,9 @@ Use este checklist para garantir que nada foi esquecido:
 
 ## 📚 Documentação Relacionada
 
+- **Build do Frontend Fora do Container:** `.docs/branchs/master/22_build_frontend_fora_container.md`
+- **Como Atualizar TaktChat:** `14_taktchat_como_atualizar.md`
+- **Script de Atualização:** `update-taktchat.sh`
 - **Stack de Produção:** `.docs/infraestrutura/stack-producao.md` - Configuração completa da stack Docker Swarm
 - **Scripts de Startup:** `.docs/SCRIPTS_STARTUP_EXEMPLO.md` - Exemplos de scripts de inicialização
 - **Melhorias da Stack Rápida:** `.docs/MELHORIAS_FRONTEND_STACK_RAPIDA.md` - Detalhes das melhorias implementadas
