@@ -7,8 +7,6 @@ import ApplyTagRulesService from '../services/TagServices/ApplyTagRulesService';
 // Executa a cada 5 minutos para processar contatos criados/atualizados recentemente
 const tagRulesRecentContactsCron = () => {
   cron.schedule('*/5 * * * *', async () => {
-    console.log('[TagRules Recent] Verificando contatos recentes...');
-    
     try {
       // Busca todas as companies ativas
       const companies = await Company.findAll({
@@ -18,6 +16,9 @@ const tagRulesRecentContactsCron = () => {
 
       // Define janela de tempo: últimos 10 minutos
       const timeWindow = new Date(Date.now() - 10 * 60 * 1000);
+
+      let totalCompaniesProcessed = 0;
+      let totalContactsProcessed = 0;
 
       for (const company of companies) {
         try {
@@ -37,35 +38,37 @@ const tagRulesRecentContactsCron = () => {
             continue;
           }
 
-          console.log(`[TagRules Recent] Company ${company.id}: ${recentContacts.length} contatos recentes encontrados`);
-
           // Aplica regras para cada contato recente
-          let totalProcessed = 0;
+          let companyContactsProcessed = 0;
           for (const contact of recentContacts) {
             try {
               await ApplyTagRulesService({
                 companyId: company.id,
                 contactId: contact.id
               });
-              totalProcessed++;
+              companyContactsProcessed++;
+              totalContactsProcessed++;
             } catch (err) {
-              console.error(`[TagRules Recent] Erro ao processar contato ${contact.id}:`, err);
+              console.error(`[TagRules Recent] Erro ao processar contato ${contact.id} (company ${company.id}):`, err);
             }
           }
 
-          console.log(`[TagRules Recent] Company ${company.id}: ${totalProcessed} contatos processados`);
+          if (companyContactsProcessed > 0) {
+            totalCompaniesProcessed++;
+          }
         } catch (err) {
           console.error(`[TagRules Recent] Erro ao processar company ${company.id}:`, err);
         }
       }
 
-      console.log('[TagRules Recent] Verificação concluída!');
+      // Log apenas se houver processamento
+      if (totalContactsProcessed > 0) {
+        console.log(`[TagRules Recent] Processados ${totalContactsProcessed} contatos em ${totalCompaniesProcessed} companies`);
+      }
     } catch (err) {
       console.error('[TagRules Recent] Erro geral:', err);
     }
   });
-
-  console.log('[TagRules Recent] Agendamento configurado: a cada 5 minutos para contatos recentes');
 };
 
 export default tagRulesRecentContactsCron;

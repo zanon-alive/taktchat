@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo, useRef } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import clsx from "clsx";
 // import moment from "moment";
@@ -44,8 +44,6 @@ import { i18n } from "../translate/i18n";
 import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
-import logo from "../assets/logo.png";
-import logoDark from "../assets/logo-black.png";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
 import { useDate } from "../hooks/useDate";
@@ -283,19 +281,10 @@ const StyledBadge = withStyles((theme) => ({
   },
 }))(Badge);
 
-const SmallAvatar = withStyles((theme) => ({
-  root: {
-    width: 22,
-    height: 22,
-    border: `2px solid ${theme.palette.background.paper}`,
-  },
-}))(Avatar);
-
 const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
   const location = useLocation();
   const [userToken, setUserToken] = useState("disabled");
-  const [loadingUserToken, setLoadingUserToken] = useState(false);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -322,12 +311,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const { dateToClient } = useDate();
   const [profileUrl, setProfileUrl] = useState(null);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mainListItems = useMemo(
-    () => <MainListItems collapsed={!drawerOpen} />,
-    [user, drawerOpen]
-  );
 
   const settings = useSettings();
   const { setVersion } = useVersion();
@@ -398,7 +381,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     if (user.defaultTheme === "dark" && theme.mode === "light") {
       colorMode.toggleColorMode();
     }
-  }, [isAuth, user.defaultMenu, document.body.offsetWidth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuth, user.defaultMenu]);
 
   useEffect(() => {
     if (document.body.offsetWidth < 600) {
@@ -473,13 +457,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const handleRefreshPage = () => {
     window.location.reload(false);
-  };
-
-  const handleMenuItemClick = () => {
-    const { innerWidth: width } = window;
-    if (width <= 600) {
-      setDrawerOpen(false);
-    }
   };
 
   const handleMenuClose = () => {
@@ -564,7 +541,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           </IconButton>
         </div>
         <List className={classes.containerWithScroll}>
-          {/* {mainListItems} */}
           <MainListItems collapsed={!drawerOpen} onItemClick={handleMenuClose} />
         </List>
         <Divider />
