@@ -1,364 +1,449 @@
-# Atualização do Código TaktChat no Servidor
+# Guia Completo: Atualização do TaktChat no Servidor
 
-Este documento descreve o processo completo para atualizar o código TaktChat no servidor VPS ARM64 usando build nativo.
+## Data: 2026-01-18
+
+## Visão Geral
+
+Este documento descreve o processo para atualizar o TaktChat no servidor de produção após o código ter sido commitado, enviado ao repositório e feito merge na branch `main`. 
+
+A stack utilizada em produção usa **volumes montados** para permitir atualizações rápidas sem necessidade de rebuild das imagens Docker. O código é montado diretamente do repositório clonado no servidor, permitindo atualizações em segundos com apenas `git pull` + restart dos serviços.
+
+> **Nota:** Este guia é específico para a stack com volumes montados. Se você estiver usando a stack com build de imagens Docker, consulte a seção "Método Alternativo: Atualização com Build de Imagens" ao final deste documento.
+
+O processo inclui:
+
+1. Atualização do código no servidor
+2. Atualização do backend
+3. Build e atualização do frontend
+4. Verificação e monitoramento dos serviços
+
+---
 
 ## 📋 Pré-requisitos
 
-1. **Acesso SSH ao servidor VPS**
-2. **Docker instalado e funcionando**
-3. **Autenticação no Docker Hub configurada** (`docker login`)
-4. **Repositório Git clonado no servidor** (ex: `/root/taktchat` ou `/home/zanonr/desenvolvimento/taktchat`)
+- Acesso SSH ao servidor de produção
+- Código já commitado e mergeado na branch `main` do repositório `zanon-alive/taktchat`
+- Node.js e npm instalados no servidor (para build do frontend, se necessário)
+- Repositório clonado em `/root/taktchat`
+- Stack Docker Swarm configurada e rodando
 
 ---
 
-## 🚀 Método 1: Script Automatizado (RECOMENDADO)
+## 🔄 Fluxo de Atualização no Servidor
 
-O script `deploy-vps-server.sh` automatiza todo o processo:
+### **ETAPA 1: Atualização no Servidor**
 
-### Passo a passo:
+#### 1.1. Conectar ao servidor
 
 ```bash
-# 1. Conectar ao servidor via SSH
-ssh root@seu-servidor.com
-
-# 2. Navegar para o diretório do repositório
-cd /root/taktchat  # ou o caminho onde está o repositório
-
-# 3. Verificar que está na branch correta (opcional)
-git branch --show-current
-
-# 4. Executar o script de deploy
-./scripts/deploy-vps-server.sh latest main
+ssh root@seu-servidor
 ```
 
-### O que o script faz automaticamente:
+#### 1.2. Atualizar o código do repositório
 
-1. ✅ **Atualiza o código do Git** (`git pull`)
-2. ✅ **Faz build NATIVO das imagens Docker** (ARM64 - rápido!)
-3. ✅ **Faz push para Docker Hub**
-4. ✅ **Atualiza a stack Docker Swarm**
+```bash
+cd /root/taktchat
+git pull origin main
+```
 
-**Tempo estimado:** 8-15 minutos (build nativo é muito mais rápido que cross-compilation)
+**Verificar se atualizou:**
+```bash
+git log --oneline -5  # Ver últimos 5 commits
+```
+
+#### 1.3. Verificar se há mudanças em dependências
+
+```bash
+# Verificar se package.json mudou
+cd /root/taktchat/backend
+git diff HEAD@{1} HEAD --name-only | grep package.json
+```
+
+Se `package.json` ou `package-lock.json` foram modificados, será necessário reinstalar dependências.
 
 ---
 
-## 🔧 Método 2: Processo Manual (Passo a Passo)
+### **ETAPA 2: Atualizar Backend**
 
-Se preferir fazer manualmente ou entender cada etapa:
-
-### Etapa 1: Conectar ao Servidor
+#### 2.1. Usar script automatizado (Recomendado)
 
 ```bash
-ssh root@seu-servidor.com
+cd /root/stacks
+./update-taktchat.sh
 ```
 
-### Etapa 2: Navegar para o Repositório
+Este script faz automaticamente:
+- ✅ Git pull do repositório
+- ✅ Verifica mudanças em `package.json`
+- ✅ Instala dependências se necessário
+- ✅ Compila TypeScript
+- ✅ Executa migrations do banco de dados
+- ✅ Pergunta se deseja reiniciar os serviços
+
+#### 2.2. Atualização manual (Alternativa)
+
+Se preferir fazer manualmente:
 
 ```bash
-cd /root/taktchat  # Ajuste o caminho conforme sua configuração
-# ou
-cd /home/zanonr/desenvolvimento/taktchat
-```
-
-### Etapa 3: Atualizar Código do Git
-
-```bash
-# Verificar branch atual
-git branch --show-current
-
-# Atualizar código (branch main)
-git fetch origin main
+# 1. Atualizar código
+cd /root/taktchat
 git pull origin main
 
-# Verificar commit atual
-git rev-parse --short HEAD
-```
+# 2. Instalar dependências do backend (se necessário)
+cd /root/taktchat/backend
+npm install --legacy-peer-deps
 
-### Etapa 4: Configurar Variáveis de Ambiente (Opcional)
+# 3. Compilar TypeScript (se necessário)
+npm run build
 
-```bash
-# Variáveis padrão (já estão no script, mas podem ser customizadas)
-export FRONT_BACKEND_URL="https://api.taktchat.com.br"
-export FRONT_PUBLIC_URL="https://taktchat.com.br"
-export DOCKER_PLATFORM="linux/arm64"
-export BUILD_MODE="load"  # nativo, não precisa push durante build
-export USE_REGISTRY_CACHE="true"
-```
-
-### Etapa 5: Verificar Autenticação Docker Hub
-
-```bash
-# Verificar se está autenticado
-docker info | grep Username
-
-# Se não estiver autenticado:
-docker login
-# Username: zanonalivesolucoes
-# Password: [seu token/password do Docker Hub]
-```
-
-### Etapa 6: Build Nativo das Imagens Docker
-
-```bash
-# Build de ambas as imagens (frontend + backend)
-./scripts/build-docker-optimized.sh latest all
-
-# Ou apenas frontend:
-./scripts/build-docker-optimized.sh latest frontend-only
-
-# Ou apenas backend:
-./scripts/build-docker-optimized.sh latest backend-only
-```
-
-**Tempo estimado:**
-- Frontend: 5-8 minutos (build nativo)
-- Backend: 3-5 minutos (build nativo)
-- **Total: 8-15 minutos** (vs 30-60 minutos em cross-compilation)
-
-### Etapa 7: Push das Imagens para Docker Hub
-
-```bash
-# Push do frontend
-docker push zanonalivesolucoes/taktchat-frontend:latest
-
-# Push do backend
-docker push zanonalivesolucoes/taktchat-backend:latest
-```
-
-### Etapa 8: Atualizar Stack Docker Swarm
-
-```bash
-# Atualizar a stack (pull das novas imagens)
-docker stack deploy -c 14_taktchat.yml --with-registry-auth taktchat
-```
-
-### Etapa 9: Verificar Status dos Serviços
-
-```bash
-# Listar serviços da stack
-docker stack services taktchat
-
-# Ver logs do backend
-docker service logs taktchat_taktchat-backend --tail 50 -f
-
-# Ver logs do frontend
-docker service logs taktchat_taktchat-frontend --tail 50 -f
-
-# Verificar status dos serviços
-docker stack ps taktchat
+# 4. Reiniciar serviço do backend
+cd /root/stacks
+docker service update --force taktchat_taktchat-backend
 ```
 
 ---
 
-## 📊 Fluxo Completo (Resumo)
+### **ETAPA 3: Atualizar Frontend**
 
+#### 3.1. Verificar se houve mudanças no frontend
+
+```bash
+cd /root/taktchat
+git diff HEAD@{1} HEAD --name-only | grep frontend
 ```
-┌─────────────────────────────────────────┐
-│ 1. SSH no servidor                      │
-│    ssh root@seu-servidor.com            │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 2. cd /root/taktchat                    │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 3. git pull origin main                 │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 4. ./scripts/deploy-vps-server.sh       │
-│    latest main                           │
-│    (ou processo manual)                 │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 5. Build nativo (8-15 min)              │
-│    - Frontend: 5-8 min                  │
-│    - Backend: 3-5 min                   │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 6. Push para Docker Hub                 │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 7. docker stack deploy (atualiza stack) │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│ 8. Verificar status dos serviços        │
-└─────────────────────────────────────────┘
+
+#### 3.2. Opção A: Build Fora do Container (Recomendado)
+
+O build do React dentro do container pode falhar por falta de memória. A solução recomendada é fazer o build fora do container.
+
+**3.2.1. Build no servidor (fora do container):**
+
+```bash
+# 1. Navegar para o diretório do frontend
+cd /root/taktchat/frontend
+
+# 2. Instalar dependências (se necessário)
+npm install --legacy-peer-deps
+
+# 3. Definir variáveis de ambiente
+export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
+export REACT_APP_PRIMARY_COLOR=#2563EB
+export REACT_APP_PRIMARY_DARK=#1E3A8A
+export PUBLIC_URL=https://taktchat.com.br
+export NODE_ENV=production
+export GENERATE_SOURCEMAP=false
+export TSC_COMPILE_ON_ERROR=true
+export NODE_OPTIONS=--max-old-space-size=4096
+
+# 4. Fazer o build
+npm run build
+
+# 5. Verificar se o build foi criado corretamente
+test -f build/index.html && echo "✅ Build completo" || echo "❌ Build incompleto"
+test -d build/static && echo "✅ static/ existe" || echo "❌ static/ não existe"
+du -sh build/  # Ver tamanho do build
+```
+
+**3.2.2. Build na máquina local (alternativa):**
+
+Se o servidor não tiver recursos suficientes, faça o build localmente:
+
+```bash
+# Na sua máquina local
+cd ~/projetos/taktchat/frontend
+
+# Instalar dependências
+npm install --legacy-peer-deps
+
+# Definir variáveis de ambiente
+export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
+export REACT_APP_PRIMARY_COLOR=#2563EB
+export REACT_APP_PRIMARY_DARK=#1E3A8A
+export PUBLIC_URL=https://taktchat.com.br
+export NODE_ENV=production
+export GENERATE_SOURCEMAP=false
+export TSC_COMPILE_ON_ERROR=true
+
+# Fazer o build
+npm run build
+
+# Copiar build para o servidor
+scp -r build/* root@seu-servidor:/root/taktchat/frontend/build/
+```
+
+#### 3.3. Opção B: Build Dentro do Container (Não Recomendado)
+
+⚠️ **Atenção:** Esta opção pode falhar por falta de memória.
+
+```bash
+cd /root/stacks
+docker service update --force taktchat_taktchat-frontend
+```
+
+O script `taktchat-frontend-startup.sh` tentará fazer o build automaticamente, mas pode falhar.
+
+#### 3.4. Atualizar serviço do frontend
+
+Após fazer o build (fora ou dentro do container):
+
+```bash
+cd /root/stacks
+docker service update --force taktchat_taktchat-frontend
 ```
 
 ---
 
-## 🔍 Verificação Pós-Atualização
+### **ETAPA 4: Verificação e Monitoramento**
 
-Após atualizar, verifique se tudo está funcionando:
-
-### 1. Verificar Status dos Serviços
+#### 4.1. Verificar status dos serviços
 
 ```bash
-docker stack services taktchat
+# Listar serviços do TaktChat
+docker service ls | grep taktchat
+
+# Verificar status detalhado
+docker service ps taktchat_taktchat-backend
+docker service ps taktchat_taktchat-frontend
+docker service ps taktchat_taktchat-migrate
 ```
 
-Todos os serviços devem estar com status `Running` e replicas `1/1`.
-
-### 2. Verificar Logs
+#### 4.2. Verificar logs
 
 ```bash
-# Backend
-docker service logs taktchat_taktchat-backend --tail 100
+# Logs do backend
+docker service logs --tail 100 taktchat_taktchat-backend
 
-# Frontend
-docker service logs taktchat_taktchat-frontend --tail 100
+# Logs do frontend
+docker service logs --tail 100 taktchat_taktchat-frontend
 
-# Migrate (se executou)
-docker service logs taktchat_taktchat-migrate --tail 100
+# Logs em tempo real
+docker service logs -f taktchat_taktchat-backend
 ```
 
-### 3. Verificar Healthcheck
+#### 4.3. Testar endpoints
 
 ```bash
-# Backend healthcheck
-docker service inspect taktchat_taktchat-backend --format '{{json .UpdateStatus}}' | jq
+# Healthcheck da API
+curl -k https://api.taktchat.com.br/health
+
+# Verificar resposta (deve retornar JSON com status: "ok")
 ```
 
-### 4. Testar Endpoints (Opcional)
+#### 4.4. Verificar frontend no navegador
+
+1. Acesse: `https://taktchat.com.br`
+2. Verifique se a aplicação carrega corretamente
+3. Teste funcionalidades principais
+
+---
+
+## 📝 Resumo Rápido (Comandos para Colar)
+
+### Atualização Completa (Backend + Frontend)
 
 ```bash
-# Healthcheck do backend
-curl https://api.taktchat.com.br/health
+# 1. Conectar ao servidor
+ssh root@seu-servidor
 
-# Frontend
-curl -I https://taktchat.com.br
+# 2. Atualizar código
+cd /root/taktchat
+git pull origin main
+
+# 3. Atualizar backend (script automatizado)
+cd /root/stacks
+./update-taktchat.sh
+
+# 4. Build do frontend (fora do container)
+cd /root/taktchat/frontend
+npm install --legacy-peer-deps
+export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
+export REACT_APP_PRIMARY_COLOR=#2563EB
+export REACT_APP_PRIMARY_DARK=#1E3A8A
+export PUBLIC_URL=https://taktchat.com.br
+export NODE_ENV=production
+export GENERATE_SOURCEMAP=false
+export TSC_COMPILE_ON_ERROR=true
+export NODE_OPTIONS=--max-old-space-size=4096
+npm run build
+
+# 5. Atualizar serviços
+cd /root/stacks
+docker service update --force taktchat_taktchat-frontend
+
+# 6. Verificar
+docker service ls | grep taktchat
+docker service logs --tail 50 taktchat_taktchat-backend
+curl -k https://api.taktchat.com.br/health
+```
+
+### Atualização Apenas Backend
+
+```bash
+cd /root/taktchat
+git pull origin main
+cd /root/stacks
+./update-taktchat.sh
+```
+
+### Atualização Apenas Frontend
+
+```bash
+cd /root/taktchat
+git pull origin main
+cd /root/taktchat/frontend
+npm install --legacy-peer-deps
+# ... (definir variáveis de ambiente e fazer build - ver ETAPA 3.2.1)
+npm run build
+cd /root/stacks
+docker service update --force taktchat_taktchat-frontend
 ```
 
 ---
 
-## 🐛 Solução de Problemas
+## ⚠️ Problemas Comuns e Soluções
 
-### Problema: "Image not found" ou "pull access denied"
+### Problema 1: Build do frontend falha dentro do container
 
-**Solução:**
-```bash
-# Re-autenticar no Docker Hub
-docker login
+**Sintoma:** Logs mostram "out of memory" ou "process exited too early"
 
-# Verificar se as imagens foram publicadas
-docker pull zanonalivesolucoes/taktchat-frontend:latest
-docker pull zanonalivesolucoes/taktchat-backend:latest
-```
+**Solução:** Fazer build fora do container (ver ETAPA 3.2)
 
-### Problema: Serviço não inicia após atualização
+### Problema 2: Serviço não inicia após atualização
+
+**Sintoma:** `docker service ps` mostra status "Rejected" ou "Failed"
 
 **Solução:**
 ```bash
 # Ver logs detalhados
-docker service logs taktchat_taktchat-backend --tail 200
+docker service logs --tail 200 taktchat_taktchat-backend
 
-# Verificar se há problemas de recursos
-docker stack ps taktchat --no-trunc
+# Verificar se dependências estão instaladas
+docker exec $(docker ps -q -f name=taktchat-backend) ls -la /usr/src/app/node_modules
 
-# Tentar forçar atualização do serviço
+# Reinstalar dependências se necessário
+cd /root/taktchat/backend
+npm install --legacy-peer-deps
 docker service update --force taktchat_taktchat-backend
 ```
 
-### Problema: Build falha no servidor
+### Problema 3: Migrations não executam
+
+**Sintoma:** Mudanças no banco de dados não são aplicadas
 
 **Solução:**
 ```bash
-# Verificar espaço em disco
-df -h
+# Executar migrations manualmente
+cd /root/stacks
+docker service update --force taktchat_taktchat-migrate
 
-# Limpar cache do Docker (cuidado: remove cache)
-docker builder prune -a
-
-# Verificar logs do build
-./scripts/build-docker-optimized.sh latest all 2>&1 | tee build.log
+# Ver logs da migration
+docker service logs --tail 100 taktchat_taktchat-migrate
 ```
 
-### Problema: Git pull falha (conflitos)
+### Problema 4: Frontend não atualiza após build
+
+**Sintoma:** Mudanças não aparecem no navegador
 
 **Solução:**
 ```bash
-# Ver status do Git
-git status
+# Verificar se build existe e está completo
+ls -la /root/taktchat/frontend/build/
+test -f /root/taktchat/frontend/build/index.html && echo "OK" || echo "FALTA"
 
-# Se houver mudanças locais, fazer stash
-git stash
-
-# Tentar pull novamente
-git pull origin main
-
-# Se necessário, restaurar mudanças
-git stash pop
+# Limpar cache do navegador (Ctrl+Shift+R ou Ctrl+F5)
+# Verificar se container está usando o build correto
+docker exec $(docker ps -q -f name=taktchat-frontend) ls -la /usr/src/app/build/
 ```
 
 ---
 
-## ⏱️ Tempo Estimado
+## 🔍 Checklist de Atualização
 
-| Etapa | Tempo Estimado |
-|-------|---------------|
-| Git pull | 10-30 segundos |
-| Build frontend (nativo) | 5-8 minutos |
-| Build backend (nativo) | 3-5 minutos |
-| Push para Docker Hub | 1-3 minutos |
-| Deploy stack | 30-60 segundos |
-| **TOTAL** | **8-15 minutos** |
+Use este checklist para garantir que nada foi esquecido:
 
-*Nota: Build nativo é 5-10x mais rápido que cross-compilation (que levaria 30-60 minutos)*
+- [ ] Código atualizado no servidor (`git pull`)
+- [ ] Dependências do backend atualizadas (se necessário)
+- [ ] Build do frontend realizado (fora do container)
+- [ ] Build verificado (index.html e static/ existem)
+- [ ] Serviços Docker atualizados
+- [ ] Logs verificados (sem erros)
+- [ ] Healthcheck da API funcionando
+- [ ] Frontend acessível no navegador
+- [ ] Funcionalidades principais testadas
 
 ---
 
-## 🔄 Atualizações Parciais
+## 💡 Dicas Importantes
 
-Se precisar atualizar apenas uma parte:
+1. **Faça build do frontend fora do container** para evitar problemas de memória
+2. **Verifique os logs após cada atualização**
+3. **Mantenha backups antes de atualizações críticas**
+4. **Comunique a equipe sobre atualizações em produção**
+5. **Sempre verifique o healthcheck da API após atualizações**
 
-### Atualizar apenas Frontend:
+---
 
+## 📚 Documentação Relacionada
+
+- **Stack de Produção:** `.docs/infraestrutura/stack-producao.md` - Configuração completa da stack Docker Swarm
+- **Scripts de Startup:** `.docs/SCRIPTS_STARTUP_EXEMPLO.md` - Exemplos de scripts de inicialização
+- **Melhorias da Stack Rápida:** `.docs/MELHORIAS_FRONTEND_STACK_RAPIDA.md` - Detalhes das melhorias implementadas
+- **Comparação de Stacks:** `.docs/COMPARACAO_STACKS.md` - Comparação entre stack com imagens e stack com volumes
+
+---
+
+## 🔄 Método Alternativo: Atualização com Build de Imagens Docker
+
+Se você estiver usando uma stack que faz build de imagens Docker (não usa volumes montados), siga o processo abaixo:
+
+### Processo com Build de Imagens
+
+1. **Atualizar código:**
 ```bash
 cd /root/taktchat
 git pull origin main
-./scripts/build-docker-optimized.sh latest frontend-only
+```
+
+2. **Build nativo das imagens Docker (ARM64):**
+```bash
+./scripts/build-docker-optimized.sh latest all
+```
+
+**Tempo estimado:** 8-15 minutos (build nativo é muito mais rápido que cross-compilation)
+
+3. **Push para Docker Hub:**
+```bash
 docker push zanonalivesolucoes/taktchat-frontend:latest
-docker service update --image zanonalivesolucoes/taktchat-frontend:latest taktchat_taktchat-frontend
-```
-
-### Atualizar apenas Backend:
-
-```bash
-cd /root/taktchat
-git pull origin main
-./scripts/build-docker-optimized.sh latest backend-only
 docker push zanonalivesolucoes/taktchat-backend:latest
-docker service update --image zanonalivesolucoes/taktchat-backend:latest taktchat_taktchat-backend
 ```
 
+4. **Atualizar stack Docker Swarm:**
+```bash
+cd /root/stacks
+docker stack deploy -c 14_taktchat.yml --with-registry-auth taktchat
+```
+
+5. **Verificar serviços:**
+```bash
+docker service ls | grep taktchat
+docker service logs --tail 50 taktchat_taktchat-backend
+```
+
+> **Nota:** Para mais detalhes sobre o método com build de imagens, consulte `.docs/DOCKER_BUILD_E_DEPLOY.md`
+
 ---
 
-## 📝 Notas Importantes
+## 📞 Suporte
 
-1. **Build Nativo**: O servidor VPS deve ser ARM64 para builds nativos rápidos
-2. **Docker Hub**: Certifique-se de que as imagens são públicas ou que você tem autenticação configurada
-3. **Stack Name**: A stack deve se chamar `taktchat` (ou ajuste o nome no comando)
-4. **Rede Externa**: As redes `app_network` e `traefik_public` devem existir antes de fazer deploy
-5. **Volume**: O volume `taktchat_media` será criado automaticamente se não existir
+Em caso de problemas:
+1. Verifique os logs dos serviços
+2. Consulte a documentação relacionada
+3. Verifique o status dos serviços Docker
+4. Entre em contato com a equipe de infraestrutura
 
 ---
 
-## 🔗 Referências
-
-- [Build e Deploy Docker](.docs/DOCKER_BUILD_E_DEPLOY.md)
-- Script de deploy: `scripts/deploy-vps-server.sh`
-- Script de build: `scripts/build-docker-optimized.sh`
-- Stack: `14_taktchat.yml`
+**Última atualização:** 2026-01-18
