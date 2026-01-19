@@ -122,11 +122,13 @@ O build do React dentro do container pode falhar por falta de memória. A soluç
 # 1. Navegar para o diretório do frontend
 cd /root/taktchat/frontend
 
-# 2. Instalar dependências (incluindo devDependencies)
-# IMPORTANTE: @craco/craco está em devDependencies, então precisamos de --include=dev
+# 2. Reinstalar dependências incluindo devDependencies
 npm install --legacy-peer-deps --include=dev
 
-# 3. Definir variáveis de ambiente
+# 3. Verificar se craco está disponível
+which craco || node_modules/.bin/craco --version
+
+# 4. Definir variáveis de ambiente
 export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
 export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
 export REACT_APP_PRIMARY_COLOR=#2563EB
@@ -137,16 +139,16 @@ export GENERATE_SOURCEMAP=false
 export TSC_COMPILE_ON_ERROR=true
 export NODE_OPTIONS=--max-old-space-size=4096
 
-# 4. Verificar se craco está disponível
-which craco || node_modules/.bin/craco --version || echo "⚠️  craco não encontrado"
-
 # 5. Fazer o build
 npm run build
 
-# 6. Verificar se o build foi criado corretamente
+# 6. Verificar se o build foi criado
 test -f build/index.html && echo "✅ Build completo" || echo "❌ Build incompleto"
 test -d build/static && echo "✅ static/ existe" || echo "❌ static/ não existe"
-du -sh build/  # Ver tamanho do build
+
+# 7. Atualizar o serviço
+cd /root/stacks
+docker service update --force taktchat_taktchat-frontend
 ```
 
 **3.2.2. Build na máquina local (alternativa):**
@@ -191,7 +193,7 @@ O script `taktchat-frontend-startup.sh` tentará fazer o build automaticamente, 
 
 #### 3.4. Atualizar serviço do frontend
 
-Após fazer o build (fora ou dentro do container):
+**Nota:** Se você seguiu o processo completo da ETAPA 3.2.1, o serviço já foi atualizado no passo 7. Se você fez o build dentro do container (ETAPA 3.3), atualize o serviço:
 
 ```bash
 cd /root/stacks
@@ -263,6 +265,7 @@ cd /root/stacks
 # 4. Build do frontend (fora do container)
 cd /root/taktchat/frontend
 npm install --legacy-peer-deps --include=dev
+which craco || node_modules/.bin/craco --version
 export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
 export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
 export REACT_APP_PRIMARY_COLOR=#2563EB
@@ -273,12 +276,12 @@ export GENERATE_SOURCEMAP=false
 export TSC_COMPILE_ON_ERROR=true
 export NODE_OPTIONS=--max-old-space-size=4096
 npm run build
-
-# 5. Atualizar serviços
+test -f build/index.html && echo "✅ Build completo" || echo "❌ Build incompleto"
+test -d build/static && echo "✅ static/ existe" || echo "❌ static/ não existe"
 cd /root/stacks
 docker service update --force taktchat_taktchat-frontend
 
-# 6. Verificar
+# 5. Verificar
 docker service ls | grep taktchat
 docker service logs --tail 50 taktchat_taktchat-backend
 curl -k https://api.taktchat.com.br/health
@@ -300,8 +303,19 @@ cd /root/taktchat
 git pull origin main
 cd /root/taktchat/frontend
 npm install --legacy-peer-deps --include=dev
-# ... (definir variáveis de ambiente e fazer build - ver ETAPA 3.2.1)
+which craco || node_modules/.bin/craco --version
+export REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+export REACT_APP_SOCKET_URL=https://api.taktchat.com.br
+export REACT_APP_PRIMARY_COLOR=#2563EB
+export REACT_APP_PRIMARY_DARK=#1E3A8A
+export PUBLIC_URL=https://taktchat.com.br
+export NODE_ENV=production
+export GENERATE_SOURCEMAP=false
+export TSC_COMPILE_ON_ERROR=true
+export NODE_OPTIONS=--max-old-space-size=4096
 npm run build
+test -f build/index.html && echo "✅ Build completo" || echo "❌ Build incompleto"
+test -d build/static && echo "✅ static/ existe" || echo "❌ static/ não existe"
 cd /root/stacks
 docker service update --force taktchat_taktchat-frontend
 ```
