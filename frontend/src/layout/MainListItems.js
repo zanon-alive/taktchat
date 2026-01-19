@@ -24,7 +24,7 @@ import {
   DashboardOutlined as DashboardOutlinedIcon,
   WhatsApp as WhatsAppIcon,
   FlashOn as FlashOnIcon,
-  ViewKanban,
+  ViewModule as ViewKanban,
   ContactPhoneOutlined as ContactPhoneOutlinedIcon,
   Schedule,
   LocalOffer as LocalOfferIcon,
