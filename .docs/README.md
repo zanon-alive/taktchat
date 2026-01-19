@@ -9,7 +9,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.
 - `configuracao/`: variáveis de ambiente, parâmetros sensíveis e políticas de segurança.
 - `operacao/`: rotinas diárias, monitoramento, backup/restore e troubleshooting.
-- `infraestrutura/`: detalhes de banco de dados, cache/filas e integrações externas.
+- `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
 - `diagnosticos/`: procedimentos de investigação e correção para cenários recorrentes.
 - `anexos/`: checklists, templates, roteiros e notas complementares.
@@ -24,9 +24,23 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - Scripts, comandos e env vars devem aparecer dentro de blocos de código e, quando possível, com sistemas operacionais indicados.
 - Sempre que atualizar um processo, registre o racional e o histórico em `anexos/notas-de-versao.md`.
 
+## Guias essenciais
+
+### Para desenvolvedores
+
+- **🔄 Atualização do servidor:** `ATUALIZACAO_SERVIDOR.md` - **SEMPRE consulte este guia após fazer PR e merge na branch `main`**
+- **📦 Build e deploy Docker:** `DOCKER_BUILD_E_DEPLOY.md` - Guia completo para build e publicação de imagens
+- **🏗️ Stack de produção:** `infraestrutura/stack-producao.md` - Configuração completa da stack Docker Swarm
+
+### Para operação
+
+- **🔧 Operação e monitoramento:** `operacao/` - Rotinas diárias, monitoramento, backup/restore e troubleshooting
+- **🔍 Diagnósticos:** `diagnosticos/` - Procedimentos para investigação e correção de problemas
+
 ## Próximos passos sugeridos
 
 - Mantenha o `README.md` da raiz alinhado a esta estrutura, destacando as entradas principais.
 - Antes de implementar novas funcionalidades, atualize o arquivo de análise em `.docs/branchs/<branch>/`.
+- **Após fazer merge do PR na branch `main`, sempre consulte `ATUALIZACAO_SERVIDOR.md` para atualizar o servidor de produção.**
 - Consulte `diagnosticos/` para reproduzir e solucionar incidentes reportados anteriormente.
 

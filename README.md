@@ -77,6 +77,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Arquitetura e fluxos críticos: `.docs/visao-geral/arquitetura.md` e `.docs/visao-geral/fluxos-criticos.md`
 - Instalação e ambientes: `.docs/instalacao/`
 - Variáveis de ambiente e segurança: `.docs/configuracao/`
+- Infraestrutura e stack de produção: `.docs/infraestrutura/` (inclui stack Docker Swarm em produção)
 - Operação, monitoramento e suporte: `.docs/operacao/`
 - Funcionalidades por módulo: `.docs/funcionalidades/`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
@@ -84,8 +85,11 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`
 - Checklists e histórico: `.docs/anexos/`
 - Scripts SQL organizados: `.docs/sql/`
-- Build/publicação de imagens Docker: `.docs/docker-build.md`
-- Script rápido para publicar imagens na VPS (forçando rebuild e `PUBLIC_URL` correto): `scripts/publish-vps.sh` (detalhes em `.docs/docker-build.md`).
+- Build/publicação de imagens Docker: `.docs/DOCKER_BUILD_E_DEPLOY.md` (guia completo passo a passo)
+- **🔄 Atualização do servidor de produção:** `.docs/ATUALIZACAO_SERVIDOR.md` - **GUIA OBRIGATÓRIO para atualizar o servidor após PR/merge na branch `main`**
+- Stack de produção: `.docs/infraestrutura/stack-producao.md` (configuração da stack Docker Swarm em produção)
+- Script rápido para publicar imagens na VPS: `scripts/publish-vps.sh` (detalhes em `.docs/DOCKER_BUILD_E_DEPLOY.md`)
+- Documentação legada: `.docs/docker-build.md` (referência)
 
 Documentos anteriores permanecem disponíveis como referência em `.docs/legacy/`.
 
@@ -94,6 +98,24 @@ Documentos anteriores permanecem disponíveis como referência em `.docs/legacy/
 - Utilize arquivos de análise em `.docs/branchs/<nome-da-branch>/` para descrever escopo antes de desenvolver.
 - Siga convenções de código (ESLint/Prettier) e mantenha testes atualizados.
 - Atualize a documentação ao entregar novas funcionalidades ou processos.
+
+#### 🔄 Processo de Deploy após Pull Request
+
+**Após fazer merge do PR na branch `main`, siga o guia de atualização do servidor:**
+
+1. ✅ **PR aprovado e mergeado na branch `main`**
+2. ✅ **Código commitado e enviado ao repositório**
+3. 📖 **Seguir o guia completo:** `.docs/ATUALIZACAO_SERVIDOR.md` - **Guia Completo de Atualização do TaktChat no Servidor**
+
+O guia inclui:
+- Atualização do código no servidor (`git pull`)
+- Atualização do backend (com dependências e compilação TypeScript)
+- Build e atualização do frontend (recomendado: build fora do container)
+- Verificação e monitoramento dos serviços
+- Troubleshooting de problemas comuns
+- Checklist de atualização
+
+> **📌 Importante:** Sempre consulte o guia `.docs/ATUALIZACAO_SERVIDOR.md` antes de atualizar o servidor de produção. Este processo garante que as atualizações sejam feitas corretamente e de forma segura.
 
 ### Contato e suporte
 
