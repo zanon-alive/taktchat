@@ -10,7 +10,7 @@ import { Facebook, Instagram, WhatsApp, FilterList, Add, Refresh } from "@materi
 import SearchIcon from "@material-ui/icons/Search";
 import { Badge, Tooltip, Typography, Button, TextField, Box, Select, MenuItem, Paper, FormControl, InputLabel, Checkbox, ListItemText, Popover, Grid, useMediaQuery, InputAdornment, IconButton } from "@material-ui/core";
 import { DateRangePicker } from 'materialui-daterange-picker';
-import KanbanCard from "./KanbanCard";
+import KanbanBoardCard from "./KanbanBoardCard";
 import KanbanLaneHeader from "./KanbanLaneHeader";
 import { format, isSameDay, parseISO, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import { Can } from "../../components/Can";
@@ -355,9 +355,13 @@ const Kanban = () => {
         cards: filteredTickets.map(ticket => ({
           id: ticket.id.toString(),
           label: "",
-          description: (
-            <KanbanCard ticket={ticket} allTags={tags} onMoveRequest={(tagId)=>quickMove(ticket, tagId)} onClick={() => handleCardClick(ticket.uuid)} />
-          ),
+          description: "",
+          metadata: {
+            ticket,
+            tags,
+            onMoveRequest: (tagId) => quickMove(ticket, tagId),
+            onClick: () => handleCardClick(ticket.uuid),
+          },
           title: "",
           draggable: true,
           href: "/tickets/" + ticket.uuid,
@@ -381,9 +385,13 @@ const Kanban = () => {
           cards: filteredTickets.map(ticket => ({
             id: ticket.id.toString(),
             label: "",
-            description: (
-              <KanbanCard ticket={ticket} allTags={tags} onMoveRequest={(tagId)=>quickMove(ticket, tagId)} onClick={() => handleCardClick(ticket.uuid)} />
-            ),
+            description: "",
+            metadata: {
+              ticket,
+              tags,
+              onMoveRequest: (tagId) => quickMove(ticket, tagId),
+              onClick: () => handleCardClick(ticket.uuid),
+            },
             title: "",
             draggable: true,
             href: "/tickets/" + ticket.uuid,
@@ -570,8 +578,7 @@ const Kanban = () => {
             <Board
               data={file}
               onCardMoveAcrossLanes={handleCardMove}
-              components={{ LaneHeader: KanbanLaneHeader }}
-              customCardLayout
+              components={{ LaneHeader: KanbanLaneHeader, Card: KanbanBoardCard }}
               hideCardDeleteIcon
               style={{ backgroundColor: 'rgba(252, 252, 252, 0.03)' }}
             />
