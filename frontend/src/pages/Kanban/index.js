@@ -10,7 +10,7 @@ import { Facebook, Instagram, WhatsApp, FilterList, Add, Refresh } from "@materi
 import SearchIcon from "@material-ui/icons/Search";
 import { Badge, Tooltip, Typography, Button, TextField, Box, Select, MenuItem, Paper, FormControl, InputLabel, Checkbox, ListItemText, Popover, Grid, useMediaQuery, InputAdornment, IconButton } from "@material-ui/core";
 import { DateRangePicker } from 'materialui-daterange-picker';
-import KanbanCard from "./KanbanCard";
+import KanbanBoardCard from "./KanbanBoardCard";
 import KanbanLaneHeader from "./KanbanLaneHeader";
 import { format, isSameDay, parseISO, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import { Can } from "../../components/Can";
@@ -231,6 +231,9 @@ const Kanban = () => {
 
   const fetchTickets = async () => {
     try {
+      // #region agent log
+      console.log('[DEBUG]', JSON.stringify({ location: 'Kanban/index.js:req', message: 'GET /ticket/kanban params', data: { queueIds: jsonString, dateStart: startDate, dateEnd: endDate }, hypothesisId: 'H1' }));
+      // #endregion
       const { data } = await api.get("/ticket/kanban", {
         params: {
           queueIds: JSON.stringify(jsonString),
@@ -238,6 +241,10 @@ const Kanban = () => {
           dateEnd: endDate,
         }
       });
+      // #region agent log
+      const first = data.tickets && data.tickets[0];
+      console.log('[DEBUG]', JSON.stringify({ location: 'Kanban/index.js:res', message: 'GET /ticket/kanban response', data: { len: data.tickets?.length, firstId: first?.id, firstStatus: first?.status, firstQueueId: first?.queueId, firstUserId: first?.userId }, hypothesisId: 'H1,H4' }));
+      // #endregion
       setTickets(data.tickets);
     } catch (err) {
       console.log(err);
@@ -355,9 +362,13 @@ const Kanban = () => {
         cards: filteredTickets.map(ticket => ({
           id: ticket.id.toString(),
           label: "",
-          description: (
-            <KanbanCard ticket={ticket} allTags={tags} onMoveRequest={(tagId)=>quickMove(ticket, tagId)} onClick={() => handleCardClick(ticket.uuid)} />
-          ),
+          description: "",
+          metadata: {
+            ticket,
+            tags,
+            onMoveRequest: (tagId) => quickMove(ticket, tagId),
+            onClick: () => handleCardClick(ticket.uuid),
+          },
           title: "",
           draggable: true,
           href: "/tickets/" + ticket.uuid,
@@ -381,9 +392,13 @@ const Kanban = () => {
           cards: filteredTickets.map(ticket => ({
             id: ticket.id.toString(),
             label: "",
-            description: (
-              <KanbanCard ticket={ticket} allTags={tags} onMoveRequest={(tagId)=>quickMove(ticket, tagId)} onClick={() => handleCardClick(ticket.uuid)} />
-            ),
+            description: "",
+            metadata: {
+              ticket,
+              tags,
+              onMoveRequest: (tagId) => quickMove(ticket, tagId),
+              onClick: () => handleCardClick(ticket.uuid),
+            },
             title: "",
             draggable: true,
             href: "/tickets/" + ticket.uuid,
@@ -570,8 +585,7 @@ const Kanban = () => {
             <Board
               data={file}
               onCardMoveAcrossLanes={handleCardMove}
-              components={{ LaneHeader: KanbanLaneHeader }}
-              customCardLayout
+              components={{ LaneHeader: KanbanLaneHeader, Card: KanbanBoardCard }}
               hideCardDeleteIcon
               style={{ backgroundColor: 'rgba(252, 252, 252, 0.03)' }}
             />

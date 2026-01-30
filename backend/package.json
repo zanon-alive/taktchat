@@ -32,7 +32,10 @@
     "type:comprehensive": "ts-node src/utils/comprehensive-type-check.ts",
     "auth:comprehensive": "ts-node src/utils/comprehensive-auth-diagnostic.ts",
     "auth:compatibility": "ts-node src/utils/auth-compatibility-check.ts",
-    "media:migrate": "ts-node src/utils/migrateLegacyMedia.ts"
+    "media:migrate": "ts-node src/utils/migrateLegacyMedia.ts",
+    "db:delete-company1": "ts-node src/database/scripts/deleteCompany1Data.ts",
+    "db:audit-contacts": "ts-node src/database/scripts/auditContacts.ts",
+    "db:dedupe-contacts": "ts-node src/scripts/dedupeContacts.ts"
   },
   "license": "MIT",
   "dependencies": {

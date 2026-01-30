@@ -39,7 +39,10 @@ const useTickets = ({
     const delayDebounceFn = setTimeout(() => {
       const fetchTickets = async () => {
         if (userFilter === undefined || userFilter === null) {
-          try {            
+          try {
+            // #region agent log
+            console.log('[DEBUG]', JSON.stringify({ location: 'useTickets/index.js:req', message: 'GET /tickets params', data: { status, queueIds, showAll }, hypothesisId: 'H3' }));
+            // #endregion
             const { data } = await api.get("/tickets", {
               params: {
                 searchParam,
@@ -63,7 +66,10 @@ const useTickets = ({
             if (!isMountedRef.current) {
               return;
             }
-            
+            // #region agent log
+            const first = data.tickets && data.tickets[0];
+            console.log('[DEBUG]', JSON.stringify({ location: 'useTickets/index.js:res', message: 'GET /tickets response', data: { count: data.count, len: data.tickets?.length, firstId: first?.id, firstStatus: first?.status, firstQueueId: first?.queueId, firstUserId: first?.userId }, hypothesisId: 'H3,H4' }));
+            // #endregion
             let tickets = [];
             
             tickets = data.tickets;

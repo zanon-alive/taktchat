@@ -289,7 +289,7 @@ const CreateOrUpdateContactService = async ({
       }
       await contact.update(contactData);
       await contact.reload();
-      
+
       // Marca para emitir update se nome ou avatar mudaram
       if (oldName !== contact.name || oldProfilePicUrl !== contact.profilePicUrl) {
         shouldEmitUpdate = true;

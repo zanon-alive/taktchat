@@ -4,6 +4,9 @@ import Company from "../../models/Company";
 import User from "../../models/User";
 import sequelize from "../../database";
 import CompaniesSettings from "../../models/CompaniesSettings";
+import Queue from "../../models/Queue";
+import UserQueue from "../../models/UserQueue";
+import Plan from "../../models/Plan";
 
 interface CompanyData {
   name: string;
@@ -102,8 +105,26 @@ const CreateCompanyService = async (
           updatedAt: new Date(),
           closeTicketOnTransfer: false,
           DirectTicketsToWallets: false
-    },{ transaction: t })
-    
+    },{ transaction: t });
+
+    const plan = planId ? await Plan.findByPk(planId) : null;
+    const canCreateQueue = plan && Number(plan.queues) >= 1;
+    if (canCreateQueue) {
+      const queue = await Queue.create({
+        name: "Padrão",
+        color: "#6366f1",
+        companyId: company.id,
+        greetingMessage: "",
+        orderQueue: 1,
+        ativarRoteador: false,
+        tempoRoteador: 0
+      }, { transaction: t });
+      await UserQueue.create({
+        userId: user.id,
+        queueId: queue.id
+      }, { transaction: t });
+    }
+
     await t.commit();
 
     return company;
