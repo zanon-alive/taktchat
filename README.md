@@ -81,7 +81,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Operação, monitoramento e suporte: `.docs/operacao/`
 - Funcionalidades por módulo: `.docs/funcionalidades/`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
-- Procedimentos de diagnóstico: `.docs/diagnosticos/`
+- Procedimentos de diagnóstico: `.docs/diagnosticos/` (inclui auditoria e deduplicação de contatos: `npm run db:audit-contacts`, `npm run db:dedupe-contacts`)
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`
 - Checklists e histórico: `.docs/anexos/`
 - Scripts SQL organizados: `.docs/sql/`

@@ -18,6 +18,9 @@ psql -d taktchat_database -f .docs/sql/diagnosticos/check-invalids.sql
 
 ### Correções disponíveis
 
+- **Auditoria de contatos:** `npm run db:audit-contacts` (opcional `-- --company=1`). Totais por empresa e grupos duplicados (companyId + canonicalNumber). Script: `backend/src/database/scripts/auditContacts.ts`.
+- **Deduplicação de contatos:** `npm run db:dedupe-contacts -- --company=1 [--apply] [--limit=n]`. Dry-run por padrão; `--apply` aplica alterações. Script: `backend/src/scripts/dedupeContacts.ts`.
+- **API/UI:** `POST /contacts/duplicates/process` e botão "Deduplicar contatos" na listagem de contatos (`ProcessDuplicateContactsService`).
 - `scripts/fix-contactlistitems-duplicates.ts`: remove duplicatas e reindexa contatos.
 - `scripts/fixMissingAvatars.ts`: corrige inconsistências de mídia associadas.
 - SQLs pontuais: `.docs/sql/correcoes/FIX-DUPLICATES.sql`, `.docs/sql/correcoes/QUICK-FIX-DUPLICATES-NOW.sql` (usar com cautela).

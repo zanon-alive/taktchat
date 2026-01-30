@@ -82,7 +82,7 @@ const ListTicketsService = async ({
 
   whereCondition = {
     [Op.or]: [{ userId }, { status: "pending" }],
-    queueId: showTicketWithoutQueue ? { [Op.or]: [queueIds, null] } : { [Op.or]: [queueIds] },
+    queueId: (showTicketWithoutQueue || status === "pending") ? { [Op.or]: [queueIds, null] } : { [Op.or]: [queueIds] },
     companyId
   };
 
@@ -124,7 +124,9 @@ const ListTicketsService = async ({
     whereCondition = {
       ...whereCondition,
       userId,
-      queueId: { [Op.in]: queueIds }
+      queueId: (showTicketWithoutQueue || queueIds.length === 0)
+        ? { [Op.or]: [queueIds, null] }
+        : { [Op.in]: queueIds }
     };
   } else
     if (status === "group" && user.allowGroup && user.whatsappId) {
@@ -159,10 +161,9 @@ const ListTicketsService = async ({
               ticketsIds = await Ticket.findAll({
                 where: {
                   companyId,
-                  userId:
-                    { [Op.or]: [user.id, null] },
+                  userId: { [Op.or]: [user.id, null] },
                   status: "pending",
-                  queueId: { [Op.in]: queueIds }
+                  queueId: showTicketWithoutQueue ? { [Op.or]: [queueIds, null] } : { [Op.in]: queueIds }
                 },
               });
             } else {

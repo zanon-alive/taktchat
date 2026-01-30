@@ -35,6 +35,7 @@ import CreateMessageService from "../MessageServices/CreateMessageService";
 import logger from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
+import { safeNormalizePhoneNumber } from "../../utils/phone";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
@@ -147,6 +148,9 @@ const GROUP_METADATA_CACHE_TTL_MS = 5 * 60 * 1000;
 const GROUP_METADATA_RATE_LIMIT_BACKOFF_MS = 30 * 1000;
 const groupMetadataCache = new Map<string, GroupMetadataCacheEntry>();
 const groupMetadataBackoffUntil = new Map<string, number>();
+
+/** Mutex global para FindOrCreateTicket: evita duplicar tickets por condição de corrida. */
+const findOrCreateTicketMutex = new Mutex();
 
 const getFallbackGroupName = (remoteJid: string): string => {
   if (!remoteJid) return "Grupo";
@@ -842,7 +846,7 @@ const verifyContact = async (
   wbot: Session,
   companyId: number,
   userId: number = null
-): Promise<Contact> => {
+): Promise<Contact | null> => {
   let profilePicUrl = ""; // Busca de avatar é feita por serviço dedicado, não aqui.
   const normalizedJid = jidNormalizedUser(msgContact.id);
   const cleaned = normalizedJid.replace(/\D/g, "");
@@ -856,46 +860,54 @@ const verifyContact = async (
     });
   }
 
-  // Validação: só cria contato se não for grupo e o número tiver entre 8 e 15 dígitos
-  const isPhoneLike = !isGroup && cleaned.length >= 8 && cleaned.length <= 15;
+  // Nunca tratar @lid como phone-like: evita criar contato duplicado para fromMe (echo usa LID)
+  const isPhoneLike = !isGroup && !isLinkedDevice && cleaned.length >= 8 && cleaned.length <= 15;
   if (!isPhoneLike) {
     const existing = await Contact.findOne({ where: { remoteJid: normalizedJid, companyId } });
-    if (existing) {
-      return existing;
+    if (existing) return existing;
+    if (isGroup) {
+      const basicContactData = {
+        name: msgContact.name || normalizedJid,
+        number: cleaned || normalizedJid,
+        profilePicUrl: "",
+        isGroup,
+        companyId,
+        remoteJid: normalizedJid,
+        whatsappId: wbot.id,
+        wbot
+      };
+      const newContact = await CreateOrUpdateContactService(basicContactData);
+      return newContact;
     }
-    // Se não existe, cria um contato básico para evitar erro null
-    const basicContactData = {
-      name: msgContact.name || normalizedJid,
-      number: cleaned || normalizedJid,
-      profilePicUrl: "",
-      isGroup,
-      companyId,
-      remoteJid: normalizedJid,
-      whatsappId: wbot.id,
-      wbot
-    };
-    const newContact = await CreateOrUpdateContactService(basicContactData);
-    return newContact;
+    logger.warn("[verifyContact] JID 1:1 sem número válido (ex.: @lid), não criando contato", {
+      normalizedJid,
+      companyId
+    });
+    return null;
+  }
+
+  const { canonical } = safeNormalizePhoneNumber(cleaned);
+  if (!canonical) {
+    logger.warn("[verifyContact] Número não normalizável, não criando contato", { cleaned, companyId });
+    return null;
   }
 
   debugLog('[verifyContact] processamento de contato', {
     isGroup,
     originalJid: msgContact.id,
     normalizedJid,
-    cleaned,
+    cleaned: canonical,
     name: msgContact.name
   });
-  // Corrige: nunca sobrescrever nome personalizado
   let nomeContato = msgContact.name;
   if (!isGroup) {
-    // Se nome está vazio ou igual ao número, usa número, senão mantém nome
-    if (!nomeContato || nomeContato === cleaned) {
-      nomeContato = cleaned;
+    if (!nomeContato || nomeContato === cleaned || nomeContato.replace(/\D/g, "") === canonical) {
+      nomeContato = canonical;
     }
   }
   const contactData = {
     name: nomeContato,
-    number: cleaned,
+    number: canonical,
     profilePicUrl,
     isGroup,
     companyId,
@@ -922,8 +934,6 @@ const verifyContact = async (
           where: { number: contactData.number, companyId }
         });
       } else {
-        // Buscar por canonicalNumber ou number usando Op.or
-        const { Op } = require("sequelize");
         existingContact = await Contact.findOne({
           where: {
             companyId,
@@ -954,10 +964,30 @@ const verifyContact = async (
         error: fallbackError.message
       });
     }
-    
-    // Se não conseguiu encontrar, retornar null e deixar processamento continuar
-    return null as any;
+    return null;
   }
+};
+
+/**
+ * Resolve contato para mensagem fromMe com remoteJid @lid (LID).
+ * Usa o ticket 1:1 mais recente (open/pending) para company+whatsapp como heurística:
+ * a resposta pelo celular pertence à mesma conversa que o ticket ativo.
+ */
+const resolveContactFromRecentLidTicket = async (
+  companyId: number,
+  whatsappId: number
+): Promise<Contact | null> => {
+  const ticket = await Ticket.findOne({
+    where: {
+      companyId,
+      whatsappId,
+      isGroup: false,
+      status: { [Op.in]: ["open", "pending"] }
+    },
+    order: [["updatedAt", "DESC"]],
+    include: [{ model: Contact, as: "contact" }]
+  });
+  return (ticket as any)?.contact ?? null;
 };
 
 const verifyQuotedMessage = async (
@@ -4274,11 +4304,23 @@ const handleMessage = async (
       groupContact = await verifyContact(msgGroupContact, wbot, companyId, userId);
     }
 
-    const contact = await verifyContact(msgContact, wbot, companyId);
+    let contact = await verifyContact(msgContact, wbot, companyId);
 
-    // Validação de segurança: se contact for null, interrompe processamento
+    // fromMe + remoteJid @lid: não criamos contato para LID; resolver via ticket 1:1 mais recente
+    if (!contact && msg.key.fromMe && String(msg.key.remoteJid || "").endsWith("@lid")) {
+      contact = await resolveContactFromRecentLidTicket(companyId, whatsapp.id);
+    }
+
     if (!contact) {
-      console.error('[handleMessage] ERROR: verifyContact retornou null para:', msgContact.id);
+      if (msg.key.fromMe && String(msg.key.remoteJid || "").endsWith("@lid")) {
+        logger.warn("[handleMessage] fromMe @lid sem ticket 1:1 recente; ignorando mensagem", {
+          remoteJid: msg.key.remoteJid,
+          companyId,
+          whatsappId: whatsapp.id
+        });
+      } else {
+        console.error('[handleMessage] ERROR: verifyContact retornou null para:', msgContact.id);
+      }
       return;
     }
 
@@ -4312,9 +4354,7 @@ const handleMessage = async (
       order: [["id", "DESC"]]
     });
 
-    const mutex = new Mutex();
-    // Inclui a busca de ticket aqui, se realmente não achar um ticket, então vai para o findorcreate
-    const ticket = await mutex.runExclusive(async () => {
+    const ticket = await findOrCreateTicketMutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(
         contact,
         whatsapp,
@@ -5257,6 +5297,7 @@ const verifyCampaignMessageAndCloseTicket = async (
     let msgContact: IMe;
     msgContact = await getContactMessage(message, wbot);
     const contact = await verifyContact(msgContact, wbot, companyId);
+    if (!contact) return;
 
     const messageRecord = await Message.findOne({
       where: {
@@ -5463,31 +5504,49 @@ const wbotUserJid = wbot?.user?.id;
       if (!contact?.id) return;
 
       if (typeof contact.imgUrl !== "undefined") {
-        console.log(`[contacts.update] contato: ${contact.id} | nome vindo do WhatsApp (notify):`, contact.notify);
+        const existingContact = await Contact.findOne({ where: { remoteJid: contact.id, companyId } });
+        if (!existingContact) {
+          const numero = contact.id.replace(/\D/g, "");
+          const isPhoneLike = !contact.id.includes("@g.us") && numero.length >= 8 && numero.length <= 15;
+          if (!isPhoneLike) {
+            logger.warn("[contacts.update] Contato inexistente e JID sem número válido (ex.: @lid), não criando", {
+              contactId: contact.id,
+              companyId
+            });
+            return;
+          }
+          const { canonical } = safeNormalizePhoneNumber(numero);
+          if (!canonical) {
+            logger.warn("[contacts.update] Número não normalizável, não criando", { numero, companyId });
+            return;
+          }
+          const newUrl =
+            contact.imgUrl === ""
+              ? ""
+              : await wbot!.profilePictureUrl(contact.id!).catch(() => null);
+          const newName = contact.notify && contact.notify.trim() !== "" ? contact.notify : canonical;
+          await CreateOrUpdateContactService({
+            name: newName,
+            number: canonical,
+            isGroup: contact.id.includes("@g.us"),
+            companyId,
+            remoteJid: contact.id,
+            profilePicUrl: newUrl,
+            whatsappId: wbot.id,
+            wbot
+          });
+          return;
+        }
         const newUrl =
           contact.imgUrl === ""
             ? ""
             : await wbot!.profilePictureUrl(contact.id!).catch(() => null);
-        // Busca contato atual no banco
-        const existingContact = await Contact.findOne({ where: { remoteJid: contact.id, companyId } });
-        let newName = existingContact?.name;
+        let newName = existingContact.name;
         const numero = contact.id.replace(/\D/g, "");
-        // Só atualiza nome se não existir nome válido
         if (!newName || newName.replace(/\D/g, "") === numero) {
-          newName = contact.notify && contact.notify.trim() !== "" ? contact.notify : numero;
+          newName = contact.notify && contact.notify.trim() !== "" ? contact.notify : newName;
         }
-        const contactData = {
-          name: newName,
-          number: numero,
-          isGroup: contact.id.includes("@g.us") ? true : false,
-          companyId: companyId,
-          remoteJid: contact.id,
-          profilePicUrl: newUrl,
-          whatsappId: wbot.id,
-          wbot: wbot
-        };
-
-        await CreateOrUpdateContactService(contactData);
+        await existingContact.update({ name: newName, profilePicUrl: newUrl || existingContact.profilePicUrl });
       }
     });
   });
