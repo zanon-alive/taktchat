@@ -5500,41 +5500,12 @@ const wbotUserJid = wbot?.user?.id;
 
   wbot.ev.on("contacts.update", (contacts: any) => {
     contacts.forEach(async (contact: any) => {
-      console.log(`[contacts.update] contato: ${contact.id} | notify:`, contact.notify, '| objeto completo:', contact);
       if (!contact?.id) return;
 
       if (typeof contact.imgUrl !== "undefined") {
         const existingContact = await Contact.findOne({ where: { remoteJid: contact.id, companyId } });
         if (!existingContact) {
-          const numero = contact.id.replace(/\D/g, "");
-          const isPhoneLike = !contact.id.includes("@g.us") && numero.length >= 8 && numero.length <= 15;
-          if (!isPhoneLike) {
-            logger.warn("[contacts.update] Contato inexistente e JID sem número válido (ex.: @lid), não criando", {
-              contactId: contact.id,
-              companyId
-            });
-            return;
-          }
-          const { canonical } = safeNormalizePhoneNumber(numero);
-          if (!canonical) {
-            logger.warn("[contacts.update] Número não normalizável, não criando", { numero, companyId });
-            return;
-          }
-          const newUrl =
-            contact.imgUrl === ""
-              ? ""
-              : await wbot!.profilePictureUrl(contact.id!).catch(() => null);
-          const newName = contact.notify && contact.notify.trim() !== "" ? contact.notify : canonical;
-          await CreateOrUpdateContactService({
-            name: newName,
-            number: canonical,
-            isGroup: contact.id.includes("@g.us"),
-            companyId,
-            remoteJid: contact.id,
-            profilePicUrl: newUrl,
-            whatsappId: wbot.id,
-            wbot
-          });
+          // Opção 1: não criar contatos novos — sincronização agenda/foto apenas atualiza existentes
           return;
         }
         const newUrl =

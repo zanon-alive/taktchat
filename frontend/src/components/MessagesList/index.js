@@ -661,6 +661,7 @@ const MessagesList = ({
   const { user, socket } = useContext(AuthContext);
   // Armazena a sala atual (idealmente ticket.uuid). Antes de sabermos o uuid, usa-se ticketId como fallback.
   const currentRoomIdRef = useRef(null);
+  const mountedRef = useRef(true);
 
   const { showSelectMessageCheckbox } = useContext(ForwardMessageContext);
 
@@ -791,10 +792,18 @@ const MessagesList = ({
   };
 
   useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
 
     async function fetchData() {
-
       const settings = await getAll(companyId);
+
+      if (!isMounted) return;
 
       let settinglgpdDeleteMessage;
       let settingEnableLGPD;
@@ -809,6 +818,9 @@ const MessagesList = ({
       }
     }
     fetchData();
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -824,6 +836,10 @@ const MessagesList = ({
   const composerReadyRef = useRef(false);
 
   useEffect(() => {
+    let isMounted = true;
+    const abortController = new AbortController();
+    let readyTimeoutId = null;
+
     setLoading(true);
     const fetchMessages = async () => {
         if (!ticketId || ticketId === "undefined") {
@@ -834,7 +850,10 @@ const MessagesList = ({
         try {
           const { data } = await api.get("/messages/" + ticketId, {
             params: { pageNumber, selectedQueues: JSON.stringify(selectedQueuesMessage) },
+            signal: abortController.signal,
           });
+
+          if (!isMounted) return;
 
           if (currentTicketId.current === ticketId) {
             dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
@@ -892,42 +911,57 @@ const MessagesList = ({
             }
           }
 
-          if (pageNumber === 1) {
+          if (pageNumber === 1 && isMounted) {
             // aguarda composer e layout
             const doReady = () => {
+              if (!isMounted) return;
               scrollToBottom();
               setUiReady(true);
               try { window.dispatchEvent(new Event('messages-ready')); } catch {}
             };
             if (composerReadyRef.current) {
-              setTimeout(doReady, 30);
+              readyTimeoutId = setTimeout(doReady, 30);
             } else {
               // fallback: garante readiness mesmo sem evento
-              setTimeout(doReady, 180);
+              readyTimeoutId = setTimeout(doReady, 180);
             }
           }
         } catch (err) {
-          setLoading(false);
-          toastError(err);
-          setLoadingMore(false);
+          if (err?.name === "AbortError" || err?.name === "CanceledError" || err?.code === "ERR_CANCELED") return;
+          if (isMounted) {
+            setLoading(false);
+            toastError(err);
+            setLoadingMore(false);
+          }
         }
     };
 
     fetchMessages();
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+      if (readyTimeoutId) clearTimeout(readyTimeoutId);
+    };
   }, [pageNumber, ticketId, selectedQueuesMessage]);
 
   // Garante que, quando o composer sinalizar que está pronto, a lista role ao final
   useEffect(() => {
+    let timeoutId = null;
     const onComposerReady = () => {
       composerReadyRef.current = true;
-      setTimeout(() => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
         scrollToBottom();
         setUiReady(true);
         try { window.dispatchEvent(new Event('messages-ready')); } catch {}
       }, 60);
     };
     window.addEventListener('composer-ready', onComposerReady);
-    return () => window.removeEventListener('composer-ready', onComposerReady);
+    return () => {
+      window.removeEventListener('composer-ready', onComposerReady);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -985,6 +1019,7 @@ const MessagesList = ({
 
     const onAppMessageMessagesList = (data) => {
       try {
+        if (!mountedRef.current) return;
         const evtUuid = data?.message?.ticket?.uuid || data?.ticket?.uuid;
         const hasUuid = Boolean(evtUuid);
         console.debug("[MessagesList] appMessage", {

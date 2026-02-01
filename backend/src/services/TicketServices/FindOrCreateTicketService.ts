@@ -91,6 +91,16 @@ const FindOrCreateTicketService = async (
 
     // isCreated = true;
 
+    // Marca contato como WhatsApp válido quando uma conversa existente é aberta (canal whatsapp, não grupo)
+    if (channel === "whatsapp" && !groupContact && contact && !contact.isGroup) {
+      try {
+        await Contact.update(
+          { isWhatsappValid: true, validatedAt: new Date() },
+          { where: { id: contact.id, companyId } }
+        );
+      } catch (_) {}
+    }
+
     return ticket
 
   }
@@ -213,6 +223,15 @@ const FindOrCreateTicketService = async (
     // });
   }
 
+  // Marca contato como WhatsApp válido quando ticket foi encontrado por timeCreateNewTicket ou criado acima (canal whatsapp, não grupo)
+  if (ticket && channel === "whatsapp" && !groupContact && contact && !contact.isGroup) {
+    try {
+      await Contact.update(
+        { isWhatsappValid: true, validatedAt: new Date() },
+        { where: { id: contact.id, companyId } }
+      );
+    } catch (_) {}
+  }
 
   if (queueId != 0 && !isNil(queueId)) {
     //Determina qual a fila esse ticket pertence.

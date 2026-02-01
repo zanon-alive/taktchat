@@ -10,10 +10,18 @@ const LazyContactAvatar = ({ contact, className, style, ...props }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasError, setHasError] = useState(false);
   const avatarRef = useRef(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // Reset visibilidade quando contato muda
   useEffect(() => {
-    setHasError(false);
+    if (mountedRef.current) setHasError(false);
   }, [contact]);
 
   useEffect(() => {
@@ -26,8 +34,8 @@ const LazyContactAvatar = ({ contact, className, style, ...props }) => {
     // Cria um novo observer
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Quando o elemento entra na viewport, marca como visível
-        if (entry.isIntersecting) {
+        // Quando o elemento entra na viewport, marca como visível (apenas se ainda montado)
+        if (entry.isIntersecting && mountedRef.current) {
           setIsVisible(true);
           // Desconecta o observer após tornar visível
           if (avatarRef.current) observer.unobserve(avatarRef.current);
@@ -46,9 +54,7 @@ const LazyContactAvatar = ({ contact, className, style, ...props }) => {
 
     // Limpa o observer ao desmontar
     return () => {
-      if (avatarRef.current) {
-        observer.unobserve(avatarRef.current);
-      }
+      observer.disconnect();
     };
   }, []);
   
@@ -57,7 +63,7 @@ const LazyContactAvatar = ({ contact, className, style, ...props }) => {
   const height = style?.height || "40px";
   
   const handleImageError = () => {
-    setHasError(true);
+    if (mountedRef.current) setHasError(true);
   };
 
   // Nome para placeholder ou fallback

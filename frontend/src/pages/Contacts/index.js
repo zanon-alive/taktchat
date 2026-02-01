@@ -18,26 +18,19 @@ import useContactUpdates from "../../hooks/useContactUpdates";
 import {
     Trash2,
     Edit,
-    Lock,
-    Unlock,
     ChevronLeft,
     ChevronRight,
     ChevronsLeft,
     ChevronsRight,
-    FileUp,
-    FileDown,
     UserPlus,
-    SlidersHorizontal,
+    Users,
     X,
-    Phone,
-    CheckCircle,
-    Ban,
+    SlidersHorizontal,
     GitMerge,
 } from "lucide-react";
-import { Facebook, Instagram, WhatsApp, ImportExport, Backup, ContactPhone } from "@material-ui/icons";
+import { ImportExport, Backup, ContactPhone } from "@material-ui/icons";
 import { Tooltip, Menu, MenuItem } from "@material-ui/core";
 import api from "../../services/api";
-import ContactAvatar from "../../components/ContactAvatar";
 import ContactRow from "../../components/ContactRow";
 import ContactCard from "../../components/ContactCard";
 import LazyContactAvatar from "../../components/LazyContactAvatar";
@@ -97,8 +90,16 @@ const useStyles = makeStyles((theme) => ({
         width: "100%",
         borderCollapse: "collapse",
     },
+    tableWrapper: {
+        overflow: "auto",
+        maxHeight: "calc(100vh - 280px)",
+    },
     tableHead: {
-        backgroundColor: theme.palette.grey[100],
+        position: "sticky",
+        top: 0,
+        zIndex: 1,
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: `0 1px 0 0 ${theme.palette.divider}`,
         "& th": {
             padding: theme.spacing(1.5),
             textAlign: "left",
@@ -107,6 +108,7 @@ const useStyles = makeStyles((theme) => ({
             textTransform: "uppercase",
             color: theme.palette.text.secondary,
             borderBottom: `2px solid ${theme.palette.divider}`,
+            backgroundColor: "inherit",
         },
     },
     sortButton: {
@@ -127,15 +129,26 @@ const useStyles = makeStyles((theme) => ({
         fontSize: "0.75rem",
         opacity: 0.6,
     },
+    thEmail: {
+        [theme.breakpoints.down("lg")]: {
+            display: "none",
+        },
+    },
     tableBody: {
         "& tr": {
             borderBottom: `1px solid ${theme.palette.divider}`,
             transition: "background-color 0.2s",
-            "&:hover": {
-                backgroundColor: theme.palette.action.hover,
-            },
             "&:last-child": {
                 borderBottom: "none",
+            },
+            "&:nth-of-type(odd)": {
+                backgroundColor: theme.palette.grey[50],
+            },
+            "&:nth-of-type(even)": {
+                backgroundColor: theme.palette.background.paper,
+            },
+            "&:hover": {
+                backgroundColor: theme.palette.action.hover,
             },
         },
         "& td": {
@@ -149,10 +162,31 @@ const useStyles = makeStyles((theme) => ({
         textAlign: "center",
         color: theme.palette.text.secondary,
     },
+    emptyStateBlock: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: theme.spacing(4, 2),
+        gap: theme.spacing(2),
+        "& svg": {
+            color: theme.palette.text.disabled,
+            width: 48,
+            height: 48,
+        },
+    },
+    emptyStateActions: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: theme.spacing(1),
+        justifyContent: "center",
+    },
     pagination: {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: theme.spacing(2),
         padding: theme.spacing(2),
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.shape.borderRadius,
@@ -162,11 +196,40 @@ const useStyles = makeStyles((theme) => ({
     paginationInfo: {
         fontSize: "0.875rem",
         color: theme.palette.text.secondary,
+        flexShrink: 0,
+    },
+    paginationRight: {
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: theme.spacing(2),
     },
     paginationControls: {
         display: "flex",
         alignItems: "center",
         gap: theme.spacing(1),
+    },
+    paginationMobile: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: theme.spacing(2),
+        padding: theme.spacing(2),
+        marginTop: theme.spacing(2),
+        width: "100%",
+        maxWidth: 375,
+        marginLeft: "auto",
+        marginRight: "auto",
+        [theme.breakpoints.up("sm")]: {
+            maxWidth: 520,
+        },
+        [theme.breakpoints.up("md")]: {
+            maxWidth: 680,
+        },
+        [theme.breakpoints.up("lg")]: {
+            maxWidth: 800,
+        },
     },
     pageButton: {
         minWidth: 32,
@@ -205,11 +268,165 @@ const useStyles = makeStyles((theme) => ({
         fontSize: "0.75rem",
         border: `1px solid ${theme.palette.success.main}`,
     },
+    filterSummaryToggle: {
+        display: "inline-flex",
+        alignItems: "center",
+        padding: theme.spacing(0.5, 1),
+        margin: theme.spacing(0.25),
+        backgroundColor: theme.palette.grey[200],
+        color: theme.palette.text.secondary,
+        borderRadius: theme.shape.borderRadius,
+        fontSize: "0.75rem",
+        border: `1px solid ${theme.palette.divider}`,
+        cursor: "pointer",
+        "&:hover": {
+            backgroundColor: theme.palette.grey[300],
+        },
+    },
+    clearFiltersBtn: {
+        fontSize: "0.75rem",
+        fontWeight: 500,
+        color: theme.palette.primary.main,
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        "&:hover": {
+            textDecoration: "underline",
+        },
+    },
     mobileCardContainer: {
         display: "flex",
         flexDirection: "column",
         gap: theme.spacing(1),
         marginTop: theme.spacing(2),
+    },
+    headerActions: {
+        display: "flex",
+        alignItems: "center",
+        gap: theme.spacing(1),
+        flexWrap: "wrap",
+        justifyContent: "flex-end",
+    },
+    filterButton: {
+        flexShrink: 0,
+        width: 40,
+        height: 40,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: theme.shape.borderRadius,
+        "&:hover": {
+            backgroundColor: theme.palette.action.hover,
+        },
+        "&:focus": {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+        },
+    },
+    filterButtonActive: {
+        color: theme.palette.success.dark,
+        backgroundColor: theme.palette.success.light,
+        border: `1px solid ${theme.palette.success.main}`,
+        "&:hover": {
+            backgroundColor: theme.palette.success.light,
+        },
+    },
+    checkboxSelectAll: {
+        width: 16,
+        height: 16,
+        accentColor: theme.palette.primary?.main || "#2563eb",
+    },
+    mobileSelectionBar: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: theme.spacing(1.5, 2),
+        marginBottom: theme.spacing(1),
+        width: "100%",
+        maxWidth: 375,
+        marginLeft: "auto",
+        marginRight: "auto",
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
+        borderRadius: theme.shape.borderRadius,
+        [theme.breakpoints.up("sm")]: {
+            maxWidth: 520,
+        },
+        [theme.breakpoints.up("md")]: {
+            maxWidth: 680,
+        },
+        [theme.breakpoints.up("lg")]: {
+            maxWidth: 800,
+        },
+    },
+    mobileCardsWrapper: {
+        width: "100%",
+        maxWidth: 375,
+        margin: "0 auto",
+        marginTop: theme.spacing(2),
+        display: "flex",
+        flexDirection: "column",
+        gap: theme.spacing(1.5),
+        padding: theme.spacing(2),
+        animation: "$cardsContainerFadeIn 0.3s ease-out",
+        "@media (prefers-reduced-motion: reduce)": {
+            animation: "none",
+        },
+        [theme.breakpoints.up("sm")]: {
+            maxWidth: 520,
+        },
+        [theme.breakpoints.up("md")]: {
+            maxWidth: 680,
+        },
+        [theme.breakpoints.up("lg")]: {
+            maxWidth: 800,
+        },
+    },
+    "@keyframes cardsContainerFadeIn": {
+        from: { opacity: 0 },
+        to: { opacity: 1 },
+    },
+    cardEntranceItem: {
+        animation: "$cardSlideIn 0.35s ease-out both",
+        "@media (prefers-reduced-motion: reduce)": {
+            animation: "none",
+        },
+    },
+    "@keyframes cardSlideIn": {
+        from: {
+            opacity: 0,
+            transform: "translateY(8px)",
+        },
+        to: {
+            opacity: 1,
+            transform: "translateY(0)",
+        },
+    },
+    longPressHint: {
+        width: "100%",
+        maxWidth: 375,
+        margin: "0 auto",
+        marginBottom: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        fontSize: "0.75rem",
+        color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.grey[100],
+        borderRadius: theme.shape.borderRadius,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        [theme.breakpoints.up("sm")]: {
+            maxWidth: 520,
+        },
+        [theme.breakpoints.up("md")]: {
+            maxWidth: 680,
+        },
+        [theme.breakpoints.up("lg")]: {
+            maxWidth: 800,
+        },
     },
 }));
 
@@ -329,6 +546,7 @@ const Contacts = () => {
     const [contactTicket, setContactTicket] = useState({});
     const fileUploadRef = useRef(null);
     const [appliedFilters, setAppliedFilters] = useState({}); // Novo estado para os filtros aplicados
+    const [filtersSummaryExpanded, setFiltersSummaryExpanded] = useState(true); // Resumo de filtros colapsável
     const [segmentFilter, setSegmentFilter] = useState([]); // array de segmentos vindos da URL
     const { setCurrentTicket } = useContext(TicketsContext);
 
@@ -341,6 +559,9 @@ const Contacts = () => {
     const [bulkEditOpen, setBulkEditOpen] = useState(false); // Modal de edição em massa
     const [importTagsModalOpen, setImportTagsModalOpen] = useState(false); // Modal de importação com tags
     const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+    const [longPressHintSeen, setLongPressHintSeen] = useState(() =>
+        typeof window !== "undefined" && window.localStorage.getItem("contacts-longpress-hint-seen") === "true"
+    );
 
     const { getAll: getAllSettings } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
@@ -456,12 +677,6 @@ const Contacts = () => {
     }, [appliedFilters, formatCurrency, formatDate, safeNumber]);
 
     const hasActiveFilters = filtersSummary.length > 0;
-
-    const filterButtonClass = hasActiveFilters
-        ? "shrink-0 w-10 h-10 flex items-center justify-center text-green-700 bg-green-50 dark:bg-green-900/30 border border-green-400 dark:border-green-500 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500"
-        : "shrink-0 w-10 h-10 flex items-center justify-center text-gray-700 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500";
-
-    const filterIconClass = hasActiveFilters ? "w-5 h-5 text-green-600" : "w-5 h-5";
 
     // Estados para seleção avançada
     const [lastSelectedIndex, setLastSelectedIndex] = useState(null); // Desktop: shift-select
@@ -761,6 +976,8 @@ const Contacts = () => {
 
     // Mobile: toque longo para entrar em modo seleção
     const handleCardLongPressStart = useCallback((contactId) => {
+        if (typeof window !== "undefined") window.localStorage.setItem("contacts-longpress-hint-seen", "true");
+        setLongPressHintSeen(true);
         setIsSelectionMode(true);
         setSelectedContactIds((prev) => prev.includes(contactId) ? prev : [...prev, contactId]);
     }, []);
@@ -1119,17 +1336,17 @@ const Contacts = () => {
                         }}
                     />
 
-                    {/* Cabeçalho */}
+                    {/* Cabeçalho: linha 1 = título + contador; linha 2 = busca + ações */}
                     <MainHeader>
-                        <Grid style={{ width: "99.6%" }} container>
-                            <Grid xs={12} sm={5} item>
+                        <Grid style={{ width: "100%" }} container spacing={2}>
+                            <Grid item xs={12}>
                                 <Title>
                                     {i18n.t("contacts.title")} ({totalContacts})
                                 </Title>
                             </Grid>
-                            <Grid xs={12} sm={7} item>
-                                <Grid container alignItems="center" spacing={2}>
-                                    <Grid item xs>
+                            <Grid item xs={12}>
+                                <Grid container alignItems="center" spacing={2} wrap="wrap">
+                                    <Grid item xs={12} sm style={{ flex: "1 1 auto", minWidth: 0, maxWidth: "100%" }}>
                                         <TextField
                                             fullWidth
                                             placeholder="Buscar por nome, telefone, cidade, cnpj/cpf, cod. representante ou email..."
@@ -1145,231 +1362,236 @@ const Contacts = () => {
                                             }}
                                         />
                                     </Grid>
-                                    <Grid item>
-                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                            <Tooltip {...CustomTooltipProps} title="Filtrar Contatos">
-                                <IconButton
-                                    onClick={handleOpenFilterContactModal}
-                                    size="small"
-                                    style={{
-                                        color: hasActiveFilters ? "#059669" : "#374151",
-                                        backgroundColor: hasActiveFilters ? "#d1fae5" : "#ffffff",
-                                        border: hasActiveFilters ? "1px solid #10b981" : "1px solid #d1d5db",
-                                        borderRadius: "8px"
-                                    }}
-                                    aria-label="Filtrar Contatos"
-                                >
-                                    <SlidersHorizontal className="w-5 h-5" />
-                                </IconButton>
-                            </Tooltip>
+                                    <Grid item xs={12} sm="auto">
+                                        <div className={classes.headerActions}>
+                                            <Tooltip {...CustomTooltipProps} title="Filtrar Contatos">
+                                                <IconButton
+                                                    onClick={handleOpenFilterContactModal}
+                                                    size="small"
+                                                    className={hasActiveFilters ? classes.filterButtonActive : classes.filterButton}
+                                                    aria-label="Filtrar Contatos"
+                                                >
+                                                    <SlidersHorizontal style={{ width: 20, height: 20 }} />
+                                                </IconButton>
+                                            </Tooltip>
                                             <PopupState variant="popover" popupId="contacts-import-export-menu">
-                                    {(popupState) => (
-                                        <>
-                                            <Tooltip {...CustomTooltipProps} title="Importar/Exportar">
-                                                <IconButton
-                                                    size="small"
-                                                    aria-label="Importar/Exportar"
-                                                    {...bindTrigger(popupState)}
-                                                    style={{ 
-                                                        color: "#374151",
-                                                        backgroundColor: "#ffffff",
-                                                        border: "1px solid #d1d5db",
-                                                        borderRadius: "8px"
-                                                    }}
-                                                >
-                                                    <ImportExport fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Menu {...bindMenu(popupState)}>
-                                                <MenuItem onClick={() => { setImportTagsModalOpen(true); popupState.close(); }}>
-                                                    <ContactPhone fontSize="small" color="primary" style={{ marginRight: 10 }} />
-                                                    Importar com Tags
-                                                </MenuItem>
-                                                <MenuItem onClick={() => { setImportContactModalOpen(true) }}>
-                                                    <Backup fontSize="small" color="primary" style={{ marginRight: 10 }} />
-                                                    {i18n.t("contacts.menu.importToExcel")}
-                                                </MenuItem>
-                                            </Menu>
-                                        </>
-                                    )}
-                                </PopupState>
-                                <Can
-                                    role={user.profile}
-                                    perform="contacts-page:deleteContact"
-                                    yes={() => (
-                                        selectedContactIds.length > 0 ? (
-                                            <Tooltip {...CustomTooltipProps} title={`Deletar (${selectedContactIds.length})`}>
-                                                {loading ? (
-                                                    <span>
+                                                {(popupState) => (
+                                                    <>
+                                                        <Tooltip {...CustomTooltipProps} title="Importar/Exportar">
+                                                            <IconButton
+                                                                size="small"
+                                                                aria-label="Importar/Exportar"
+                                                                {...bindTrigger(popupState)}
+                                                                style={{
+                                                                    color: "#374151",
+                                                                    backgroundColor: "#ffffff",
+                                                                    border: "1px solid #d1d5db",
+                                                                    borderRadius: "8px"
+                                                                }}
+                                                            >
+                                                                <ImportExport fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Menu {...bindMenu(popupState)}>
+                                                            <MenuItem onClick={() => { setImportTagsModalOpen(true); popupState.close(); }}>
+                                                                <ContactPhone fontSize="small" color="primary" style={{ marginRight: 10 }} />
+                                                                Importar com Tags
+                                                            </MenuItem>
+                                                            <MenuItem onClick={() => { setImportContactModalOpen(true) }}>
+                                                                <Backup fontSize="small" color="primary" style={{ marginRight: 10 }} />
+                                                                {i18n.t("contacts.menu.importToExcel")}
+                                                            </MenuItem>
+                                                        </Menu>
+                                                    </>
+                                                )}
+                                            </PopupState>
+                                            <Can
+                                                role={user.profile}
+                                                perform="contacts-page:deleteContact"
+                                                yes={() => (
+                                                    selectedContactIds.length > 0 ? (
+                                                        <Tooltip {...CustomTooltipProps} title={`Deletar (${selectedContactIds.length})`}>
+                                                            {loading ? (
+                                                                <span>
+                                                                    <IconButton
+                                                                        disabled
+                                                                        size="small"
+                                                                        style={{
+                                                                            color: "#ffffff",
+                                                                            backgroundColor: "#dc2626",
+                                                                            borderRadius: "8px"
+                                                                        }}
+                                                                        aria-label={`Deletar ${selectedContactIds.length} contato(s)`}
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </IconButton>
+                                                                </span>
+                                                            ) : (
+                                                                <IconButton
+                                                                    onClick={() => setConfirmDeleteManyOpen(true)}
+                                                                    size="small"
+                                                                    style={{
+                                                                        color: "#ffffff",
+                                                                        backgroundColor: "#dc2626",
+                                                                        borderRadius: "8px"
+                                                                    }}
+                                                                    aria-label={`Deletar ${selectedContactIds.length} contato(s)`}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </IconButton>
+                                                            )}
+                                                        </Tooltip>
+                                                    ) : null
+                                                )}
+                                                no={() => null}
+                                            />
+                                            <Can
+                                                role={user.profile}
+                                                perform="contacts-page:bulkEdit"
+                                                yes={() => (
+                                                    selectedContactIds.length > 0 ? (
+                                                        <Tooltip {...CustomTooltipProps} title={`Editar em massa (${selectedContactIds.length})`}>
+                                                            {loading ? (
+                                                                <span>
+                                                                    <IconButton
+                                                                        disabled
+                                                                        size="small"
+                                                                        style={{
+                                                                            color: "#ffffff",
+                                                                            backgroundColor: "#ca8a04",
+                                                                            borderRadius: "8px"
+                                                                        }}
+                                                                        aria-label={`Editar em massa ${selectedContactIds.length} contato(s)`}
+                                                                    >
+                                                                        <Edit className="w-4 h-4" />
+                                                                    </IconButton>
+                                                                </span>
+                                                            ) : (
+                                                                <IconButton
+                                                                    onClick={() => setBulkEditOpen(true)}
+                                                                    size="small"
+                                                                    style={{
+                                                                        color: "#ffffff",
+                                                                        backgroundColor: "#ca8a04",
+                                                                        borderRadius: "8px"
+                                                                    }}
+                                                                    aria-label={`Editar em massa ${selectedContactIds.length} contato(s)`}
+                                                                >
+                                                                    <Edit className="w-4 h-4" />
+                                                                </IconButton>
+                                                            )}
+                                                        </Tooltip>
+                                                    ) : null
+                                                )}
+                                                no={() => null}
+                                            />
+                                            {String(user?.profile || "").toLowerCase() === "admin" && (
+                                                <Tooltip {...CustomTooltipProps} title="Deduplicar contatos">
+                                                    {loading ? (
+                                                        <span>
+                                                            <IconButton
+                                                                disabled
+                                                                size="small"
+                                                                style={{
+                                                                    color: "#6366f1",
+                                                                    backgroundColor: "#ffffff",
+                                                                    border: "1px solid #6366f1",
+                                                                    borderRadius: "8px"
+                                                                }}
+                                                                aria-label="Gerenciar duplicados"
+                                                            >
+                                                                <GitMerge className="w-5 h-5" />
+                                                            </IconButton>
+                                                        </span>
+                                                    ) : (
                                                         <IconButton
-                                                            disabled
+                                                            onClick={() => setDuplicateModalOpen(true)}
                                                             size="small"
-                                                            style={{ 
-                                                                color: "#ffffff",
-                                                                backgroundColor: "#dc2626",
+                                                            style={{
+                                                                color: "#6366f1",
+                                                                backgroundColor: "#ffffff",
+                                                                border: "1px solid #6366f1",
                                                                 borderRadius: "8px"
                                                             }}
-                                                            aria-label={`Deletar ${selectedContactIds.length} contato(s)`}
+                                                            aria-label="Gerenciar duplicados"
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <GitMerge className="w-5 h-5" />
                                                         </IconButton>
-                                                    </span>
-                                                ) : (
-                                                    <IconButton
-                                                        onClick={() => setConfirmDeleteManyOpen(true)}
-                                                        size="small"
-                                                        style={{ 
-                                                            color: "#ffffff",
-                                                            backgroundColor: "#dc2626",
-                                                            borderRadius: "8px"
-                                                        }}
-                                                        aria-label={`Deletar ${selectedContactIds.length} contato(s)`}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </IconButton>
-                                                )}
-                                            </Tooltip>
-                                        ) : null
-                                    )}
-                                    no={() => null}
-                                />
-                                <Can
-                                    role={user.profile}
-                                    perform="contacts-page:bulkEdit"
-                                    yes={() => (
-                                        selectedContactIds.length > 0 ? (
-                                            <Tooltip {...CustomTooltipProps} title={`Editar em massa (${selectedContactIds.length})`}>
-                                                {loading ? (
-                                                    <span>
-                                                        <IconButton
-                                                            disabled
-                                                            size="small"
-                                                            style={{ 
-                                                                color: "#ffffff",
-                                                                backgroundColor: "#ca8a04",
-                                                                borderRadius: "8px"
-                                                            }}
-                                                            aria-label={`Editar em massa ${selectedContactIds.length} contato(s)`}
-                                                        >
-                                                            <Edit className="w-4 h-4" />
-                                                        </IconButton>
-                                                    </span>
-                                                ) : (
-                                                    <IconButton
-                                                        onClick={() => setBulkEditOpen(true)}
-                                                        size="small"
-                                                        style={{ 
-                                                            color: "#ffffff",
-                                                            backgroundColor: "#ca8a04",
-                                                            borderRadius: "8px"
-                                                        }}
-                                                        aria-label={`Editar em massa ${selectedContactIds.length} contato(s)`}
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                    </IconButton>
-                                                )}
-                                            </Tooltip>
-                                        ) : null
-                                    )}
-                                    no={() => null}
-                                />
-                                {String(user?.profile || "").toLowerCase() === "admin" && (
-                                    <Tooltip {...CustomTooltipProps} title="Deduplicar contatos">
-                                        {loading ? (
-                                            <span>
-                                                <IconButton
-                                                    disabled
-                                                    size="small"
-                                                    style={{ 
-                                                        color: "#6366f1",
-                                                        backgroundColor: "#ffffff",
-                                                        border: "1px solid #6366f1",
-                                                        borderRadius: "8px"
-                                                    }}
-                                                    aria-label="Gerenciar duplicados"
-                                                >
-                                                    <GitMerge className="w-5 h-5" />
-                                                </IconButton>
-                                            </span>
-                                        ) : (
-                                            <IconButton
-                                                onClick={() => setDuplicateModalOpen(true)}
+                                                    )}
+                                                </Tooltip>
+                                            )}
+                                            <Button
+                                                onClick={handleOpenContactModal}
+                                                variant="contained"
                                                 size="small"
-                                                style={{ 
-                                                    color: "#6366f1",
-                                                    backgroundColor: "#ffffff",
-                                                    border: "1px solid #6366f1",
+                                                style={{
+                                                    backgroundColor: "#4ade80",
+                                                    color: "#ffffff",
+                                                    textTransform: "uppercase",
+                                                    fontWeight: 600,
                                                     borderRadius: "8px"
                                                 }}
-                                                aria-label="Gerenciar duplicados"
+                                                startIcon={<UserPlus className="w-4 h-4" />}
+                                                aria-label="Novo Contato"
                                             >
-                                                <GitMerge className="w-5 h-5" />
-                                            </IconButton>
-                                        )}
-                                    </Tooltip>
-                                )}
-                                <Button
-                                    onClick={handleOpenContactModal}
-                                    variant="contained"
-                                    size="small"
-                                    style={{ 
-                                        backgroundColor: "#4ade80",
-                                        color: "#ffffff",
-                                        textTransform: "uppercase",
-                                        fontWeight: 600,
-                                        borderRadius: "8px"
-                                    }}
-                                    startIcon={<UserPlus className="w-4 h-4" />}
-                                    aria-label="Novo Contato"
-                                >
-                                    {i18n.t("contactLists.buttons.add") || "Adicionar"}
-                                </Button>
-                            </div>
+                                                {i18n.t("contactLists.buttons.add") || "Adicionar"}
+                                            </Button>
+                                        </div>
                                     </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                     </MainHeader>
 
-                    {/* Filtros Ativos - Unificado (Responsivo) */}
+                    {/* Filtros Ativos - Colapsável quando há muitos */}
                     {hasActiveFilters && filtersSummary.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mb-4">
-                            <SlidersHorizontal className="w-4 h-4 text-green-600" />
-                            {filtersSummary.map((item, index) => (
-                                <span
-                                    key={`${item.label}-${index}`}
-                                    className="px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-700"
+                        <Box style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: theme.spacing(1), marginBottom: theme.spacing(2) }}>
+                            <SlidersHorizontal className="w-4 h-4" style={{ color: theme.palette.success.dark, flexShrink: 0 }} />
+                            {filtersSummary.length > 5 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setFiltersSummaryExpanded(!filtersSummaryExpanded)}
+                                    className={classes.filterSummaryToggle}
+                                    aria-expanded={filtersSummaryExpanded}
+                                    aria-label={filtersSummaryExpanded ? "Recolher filtros" : "Expandir filtros"}
                                 >
+                                    {filtersSummary.length} filtros ativos {filtersSummaryExpanded ? "▼" : "▶"}
+                                </button>
+                            )}
+                            {(filtersSummaryExpanded || filtersSummary.length <= 5) && filtersSummary.map((item, index) => (
+                                <span key={`${item.label}-${index}`} className={classes.filterChip}>
                                     <span className="font-semibold">{item.label}:</span> {item.value}
                                 </span>
                             ))}
                             <button
                                 type="button"
                                 onClick={handleClearFilters}
-                                className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                                className={classes.clearFiltersBtn}
                             >
                                 Limpar filtros
                             </button>
-                        </div>
+                        </Box>
                     )}
 
                     {/* Lista de Contatos - Desktop (Tabela) */}
                     {isDesktop ? (
                         <Paper className={classes.mainPaper} variant="outlined">
-                            <Box style={{ overflowX: "auto" }}>
+                            <Box className={classes.tableWrapper}>
                                 <table className={classes.table}>
                                     <thead className={classes.tableHead}>
                                         <tr>
-                                            <th scope="col" style={{ width: "48px", textAlign: "center" }}>
+                                            <th scope="col" style={{ width: 48, minWidth: 48, textAlign: "center" }}>
                                                 <input type="checkbox"
                                                     checked={isSelectAllChecked}
                                                     onChange={handleSelectAllContacts}
-                                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                    className={classes.checkboxSelectAll} />
                                             </th>
-                                            <th scope="col" style={{ width: "300px" }}>
-                                                <button 
-                                                    onClick={() => handleSort('name')} 
+                                            <th scope="col" style={{ minWidth: 200 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSort('name')}
                                                     className={classes.sortButton}
+                                                    aria-sort={sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                                                 >
                                                     NOME
                                                     <span className={classes.sortIcon}>
@@ -1377,11 +1599,13 @@ const Contacts = () => {
                                                     </span>
                                                 </button>
                                             </th>
-                                            <th scope="col" style={{ width: "167px" }}>
-                                                <button 
-                                                    onClick={() => handleSort('number')} 
+                                            <th scope="col" style={{ minWidth: 140 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSort('number')}
                                                     className={classes.sortButton}
                                                     style={{ width: "100%" }}
+                                                    aria-sort={sortField === 'number' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                                                 >
                                                     WHATSAPP
                                                     <span className={classes.sortIcon}>
@@ -1389,10 +1613,12 @@ const Contacts = () => {
                                                     </span>
                                                 </button>
                                             </th>
-                                            <th scope="col" className="hidden lg:table-cell" style={{ width: "140px" }}>
-                                                <button 
-                                                    onClick={() => handleSort('email')} 
+                                            <th scope="col" className={classes.thEmail} style={{ minWidth: 120 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSort('email')}
                                                     className={classes.sortButton}
+                                                    aria-sort={sortField === 'email' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                                                 >
                                                     EMAIL
                                                     <span className={classes.sortIcon}>
@@ -1400,10 +1626,12 @@ const Contacts = () => {
                                                     </span>
                                                 </button>
                                             </th>
-                                            <th scope="col" style={{ width: "100px" }}>
-                                                <button 
-                                                    onClick={() => handleSort('city')} 
+                                            <th scope="col" style={{ minWidth: 90 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSort('city')}
                                                     className={classes.sortButton}
+                                                    aria-sort={sortField === 'city' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                                                 >
                                                     CIDADE/UF
                                                     <span className={classes.sortIcon}>
@@ -1411,11 +1639,13 @@ const Contacts = () => {
                                                     </span>
                                                 </button>
                                             </th>
-                                            <th scope="col" style={{ textAlign: "center", width: "auto", minWidth: "80px", maxWidth: "200px" }}>
-                                                <button 
-                                                    onClick={() => handleSort('tags')} 
+                                            <th scope="col" style={{ textAlign: "center", minWidth: 80, maxWidth: 200 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSort('tags')}
                                                     className={classes.sortButton}
                                                     style={{ width: "100%", justifyContent: "center" }}
+                                                    aria-sort={sortField === 'tags' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                                                 >
                                                     TAGS
                                                     <span className={classes.sortIcon}>
@@ -1423,11 +1653,13 @@ const Contacts = () => {
                                                     </span>
                                                 </button>
                                             </th>
-                                            <th scope="col" style={{ textAlign: "center", width: "80px" }}>
-                                                <button 
-                                                    onClick={() => handleSort('status')} 
+                                            <th scope="col" style={{ textAlign: "center", width: 80, minWidth: 80 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSort('status')}
                                                     className={classes.sortButton}
                                                     style={{ width: "100%", justifyContent: "center" }}
+                                                    aria-sort={sortField === 'status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                                                 >
                                                     STATUS
                                                     <span className={classes.sortIcon}>
@@ -1435,14 +1667,39 @@ const Contacts = () => {
                                                     </span>
                                                 </button>
                                             </th>
-                                            <th scope="col" style={{ textAlign: "center", width: "120px" }}>AÇÕES</th>
+                                            <th scope="col" style={{ textAlign: "center", width: 180, minWidth: 180 }}>AÇÕES</th>
                                         </tr>
                                     </thead>
                                     <tbody className={classes.tableBody}>
                                         {!loading && sortedContacts.length === 0 && (
                                             <tr>
                                                 <td colSpan={8} className={classes.emptyState}>
-                                                    Nenhum contato encontrado com os filtros selecionados. Tente ajustar os campos.
+                                                    <div className={classes.emptyStateBlock}>
+                                                        <Users />
+                                                        <span>
+                                                            Nenhum contato encontrado com os filtros selecionados.
+                                                        </span>
+                                                        <div className={classes.emptyStateActions}>
+                                                            {hasActiveFilters && (
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    onClick={handleClearFilters}
+                                                                >
+                                                                    Limpar filtros
+                                                                </Button>
+                                                            )}
+                                                            <Button
+                                                                size="small"
+                                                                variant="contained"
+                                                                color="primary"
+                                                                startIcon={<UserPlus className="w-4 h-4" />}
+                                                                onClick={handleOpenContactModal}
+                                                            >
+                                                                Adicionar contato
+                                                            </Button>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )}
@@ -1476,184 +1733,243 @@ const Contacts = () => {
                                     {" "} • {" "}
                                     <strong>{totalContacts}</strong> contatos
                                 </span>
-                                <Box className={classes.paginationControls}>
-                                    <span style={{ fontSize: "0.875rem", marginRight: 8 }}>Itens por página:</span>
+                                <Box className={classes.paginationRight}>
+                                    <Box className={classes.paginationControls}>
+                                        <span style={{ fontSize: "0.875rem", marginRight: 8 }}>Itens por página:</span>
+                                        <select
+                                            value={contactsPerPage}
+                                            onChange={(e) => {
+                                                setContactsPerPage(Number(e.target.value));
+                                                setPageNumber(1);
+                                            }}
+                                            style={{ fontSize: "0.875rem", padding: "4px 8px", border: "1px solid #E5E7EB", borderRadius: "4px" }}
+                                        >
+                                            <option value={5}>5</option>
+                                            <option value={25}>25</option>
+                                            <option value={50}>50</option>
+                                            <option value={100}>100</option>
+                                            <option value={500}>500</option>
+                                            <option value={1000}>1000</option>
+                                        </select>
+                                    </Box>
+                                    <Box className={classes.paginationControls} component="ul" style={{ listStyle: "none", display: "flex", gap: 4, margin: 0, padding: 0 }}>
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(1)}
+                                                disabled={pageNumber === 1}
+                                                className={classes.pageButton}
+                                                style={{ borderRadius: "4px 0 0 4px" }}
+                                            >
+                                                <ChevronsLeft className="w-5 h-5" />
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(pageNumber - 1)}
+                                                disabled={pageNumber === 1}
+                                                className={classes.pageButton}
+                                            >
+                                                <ChevronLeft className="w-5 h-5" />
+                                            </button>
+                                        </li>
+                                        {renderPageNumbers().map((page, index) => (
+                                            <li key={index}>
+                                                <button
+                                                    onClick={() => handlePageChange(page)}
+                                                    className={`${classes.pageButton} ${page === pageNumber ? classes.pageButtonActive : ""}`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            </li>
+                                        ))}
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(pageNumber + 1)}
+                                                disabled={pageNumber === totalPages}
+                                                className={classes.pageButton}
+                                                style={{ borderRadius: "0 4px 4px 0" }}
+                                            >
+                                                <ChevronRight className="w-5 h-5" />
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(totalPages)}
+                                                disabled={pageNumber === totalPages}
+                                                className={classes.pageButton}
+                                                style={{ borderRadius: "0 4px 4px 0", marginLeft: 4 }}
+                                            >
+                                                <ChevronsRight className="w-5 h-5" />
+                                            </button>
+                                        </li>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Paper>
+                    ) : (
+                        /* Lista de Contatos - Mobile (Cards) */
+                        <Paper className={classes.mainPaper} variant="outlined">
+                            {isSelectionMode && (
+                                <Box className={classes.mobileSelectionBar}>
+                                    <span>
+                                        <strong>{selectedContactIds.length}</strong> selecionado(s)
+                                    </span>
+                                    <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => {
+                                            setIsSelectionMode(false);
+                                            setSelectedContactIds([]);
+                                        }}
+                                    >
+                                        Sair
+                                    </Button>
+                                </Box>
+                            )}
+                            {!longPressHintSeen && (
+                                <Box className={classes.longPressHint}>
+                                    <span>Mantenha pressionado em um card para selecionar vários.</span>
+                                    <IconButton
+                                        size="small"
+                                        aria-label="Fechar dica"
+                                        onClick={() => {
+                                            if (typeof window !== "undefined") window.localStorage.setItem("contacts-longpress-hint-seen", "true");
+                                            setLongPressHintSeen(true);
+                                        }}
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </IconButton>
+                                </Box>
+                            )}
+                            <div className={classes.mobileCardsWrapper}>
+                        {!loading && sortedContacts.length === 0 && (
+                            <div className={classes.emptyStateBlock} style={{ background: "inherit", marginTop: 16 }}>
+                                <Users />
+                                <span style={{ textAlign: "center", fontSize: "0.875rem" }}>
+                                    Nenhum contato encontrado com os filtros selecionados.
+                                </span>
+                                <div className={classes.emptyStateActions}>
+                                    {hasActiveFilters && (
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={handleClearFilters}
+                                        >
+                                            Limpar filtros
+                                        </Button>
+                                    )}
+                                    <Button
+                                        size="small"
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<UserPlus className="w-4 h-4" />}
+                                        onClick={handleOpenContactModal}
+                                    >
+                                        Adicionar contato
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        {sortedContacts.map((contact, index) => (
+                            <div
+                                key={contact.id}
+                                className={classes.cardEntranceItem}
+                                style={{ animationDelay: `${Math.min(index * 35, 280)}ms` }}
+                            >
+                                <ContactCard
+                                    contact={contact}
+                                    onEdit={handleEditContact}
+                                    onSendMessage={handleStartNewTicket}
+                                    onDelete={handleShowDeleteConfirm}
+                                    onBlock={handleShowBlockConfirm}
+                                    onUnblock={handleShowUnblockConfirm}
+                                    formatPhoneNumber={formatPhoneNumber}
+                                    CustomTooltipProps={CustomTooltipProps}
+                                    isSelectionMode={isSelectionMode}
+                                    onLongPressStart={handleCardLongPressStart}
+                                    onDragSelect={handleCardDragSelect}
+                                    onLongPressEnd={handleCardLongPressEnd}
+                                    onTapWhileSelection={handleTapWhileSelection}
+                                    isSelected={selectedContactIds.includes(contact.id)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                            {/* Paginação Mobile */}
+                            <Box className={classes.paginationMobile} component="nav" aria-label="Mobile navigation">
+                                <span className={classes.paginationInfo} style={{ fontSize: "0.75rem" }}>
+                                    Página <strong>{pageNumber}</strong> de <strong>{totalPages}</strong> • <strong>{totalContacts}</strong> contatos
+                                </span>
+                                <Box className={classes.paginationRight}>
                                     <select
                                         value={contactsPerPage}
                                         onChange={(e) => {
                                             setContactsPerPage(Number(e.target.value));
                                             setPageNumber(1);
                                         }}
-                                        style={{ fontSize: "0.875rem", padding: "4px 8px", border: "1px solid #E5E7EB", borderRadius: "4px" }}
+                                        style={{ fontSize: "0.75rem", padding: "4px 8px", border: "1px solid #E5E7EB", borderRadius: "4px" }}
                                     >
                                         <option value={5}>5</option>
                                         <option value={25}>25</option>
                                         <option value={50}>50</option>
                                         <option value={100}>100</option>
-                                        <option value={500}>500</option>
-                                        <option value={1000}>1000</option>
                                     </select>
-                                </Box>
-                                <Box className={classes.paginationControls} component="ul" style={{ listStyle: "none", display: "flex", gap: 4, margin: 0, padding: 0 }}>
-                                    <li>
-                                        <button
-                                            onClick={() => handlePageChange(1)}
-                                            disabled={pageNumber === 1}
-                                            className={classes.pageButton}
-                                            style={{ borderRadius: "4px 0 0 4px" }}
-                                        >
-                                            <ChevronsLeft className="w-5 h-5" />
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button
-                                            onClick={() => handlePageChange(pageNumber - 1)}
-                                            disabled={pageNumber === 1}
-                                            className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <ChevronLeft className="w-5 h-5" />
-                                        </button>
-                                    </li>
-                                    {renderPageNumbers().map((page, index) => (
-                                        <li key={index}>
+                                    <Box className={classes.paginationControls} component="ul" style={{ listStyle: "none", display: "flex", gap: 2, margin: 0, padding: 0 }}>
+                                        <li>
                                             <button
-                                                onClick={() => handlePageChange(page)}
-                                                className={`${classes.pageButton} ${page === pageNumber ? classes.pageButtonActive : ""}`}
+                                                onClick={() => handlePageChange(1)}
+                                                disabled={pageNumber === 1}
+                                                className={classes.pageButton}
+                                                style={{ minWidth: 28, height: 28, padding: 0, borderRadius: "4px 0 0 4px" }}
                                             >
-                                                {page}
+                                                <ChevronsLeft className="w-4 h-4" />
                                             </button>
                                         </li>
-                                    ))}
-                                    <li>
-                                        <button
-                                            onClick={() => handlePageChange(pageNumber + 1)}
-                                            disabled={pageNumber === totalPages}
-                                            className={classes.pageButton}
-                                            style={{ borderRadius: "0 4px 4px 0" }}
-                                        >
-                                            <ChevronRight className="w-5 h-5" />
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button
-                                            onClick={() => handlePageChange(totalPages)}
-                                            disabled={pageNumber === totalPages}
-                                            className={classes.pageButton}
-                                            style={{ borderRadius: "0 4px 4px 0", marginLeft: 4 }}
-                                        >
-                                            <ChevronsRight className="w-5 h-5" />
-                                        </button>
-                                    </li>
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(pageNumber - 1)}
+                                                disabled={pageNumber === 1}
+                                                className={classes.pageButton}
+                                                style={{ minWidth: 28, height: 28, padding: 0 }}
+                                            >
+                                                <ChevronLeft className="w-4 h-4" />
+                                            </button>
+                                        </li>
+                                        {renderPageNumbers().map((page, index) => (
+                                            <li key={index}>
+                                                <button
+                                                    onClick={() => handlePageChange(page)}
+                                                    className={`${classes.pageButton} ${page === pageNumber ? classes.pageButtonActive : ""}`}
+                                                    style={{ minWidth: 28, height: 28, padding: 0 }}
+                                                >
+                                                    {page}
+                                                </button>
+                                            </li>
+                                        ))}
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(pageNumber + 1)}
+                                                disabled={pageNumber === totalPages}
+                                                className={classes.pageButton}
+                                                style={{ minWidth: 28, height: 28, padding: 0 }}
+                                            >
+                                                <ChevronRight className="w-4 h-4" />
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                onClick={() => handlePageChange(totalPages)}
+                                                disabled={pageNumber === totalPages}
+                                                className={classes.pageButton}
+                                                style={{ minWidth: 28, height: 28, padding: 0, borderRadius: "0 4px 4px 0", marginLeft: 2 }}
+                                            >
+                                                <ChevronsRight className="w-4 h-4" />
+                                            </button>
+                                        </li>
+                                    </Box>
                                 </Box>
                             </Box>
                         </Paper>
-                    ) : (
-                        /* Lista de Contatos - Mobile (Cards) */
-                        <>
-                            <div className="flex flex-col gap-1.5 mt-3 w-full max-w-[375px] mx-auto">
-                        {!loading && sortedContacts.length === 0 && (
-                            <div className="text-center text-sm text-gray-500 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                                Nenhum contato encontrado com os filtros selecionados. Tente ajustar os campos.
-                            </div>
-                        )}
-                        {sortedContacts.map((contact) => (
-                            <ContactCard
-                                key={contact.id}
-                                contact={contact}
-                                onEdit={handleEditContact}
-                                onSendMessage={handleStartNewTicket}
-                                onDelete={handleShowDeleteConfirm}
-                                onBlock={handleShowBlockConfirm}
-                                onUnblock={handleShowUnblockConfirm}
-                                formatPhoneNumber={formatPhoneNumber}
-                                CustomTooltipProps={CustomTooltipProps}
-                                isSelectionMode={isSelectionMode}
-                                onLongPressStart={handleCardLongPressStart}
-                                onDragSelect={handleCardDragSelect}
-                                onLongPressEnd={handleCardLongPressEnd}
-                                onTapWhileSelection={handleTapWhileSelection}
-                                isSelected={selectedContactIds.includes(contact.id)}
-                            />
-                        ))}
-                    </div>
-                            {/* Paginação Mobile */}
-                            <nav className="flex items-center justify-between p-3 mt-2 w-full max-w-[375px] mx-auto" aria-label="Mobile navigation">
-                        <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                            Página <span className="font-semibold text-gray-900 dark:text-white">{pageNumber}</span>
-                            {" "} de {" "}
-                            <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
-                            {" "} • {" "}
-                            <span className="font-semibold text-gray-900 dark:text-white">{totalContacts}</span> contatos
-                        </span>
-                        <div className="flex items-center gap-2">
-                            <select
-                                value={contactsPerPage}
-                                onChange={(e) => {
-                                    setContactsPerPage(Number(e.target.value));
-                                    setPageNumber(1);
-                                }}
-                                className="text-xs bg-gray-50 border border-gray-300 rounded-md p-1 dark:bg-gray-700 dark:border-gray-600"
-                            >
-                                <option value={5}>5</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
-                            <ul className="inline-flex items-center -space-x-px">
-                                <li>
-                                    <button
-                                        onClick={() => handlePageChange(1)}
-                                        disabled={pageNumber === 1}
-                                        className="flex items-center justify-center px-2 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <ChevronsLeft className="w-4 h-4" />
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        onClick={() => handlePageChange(pageNumber - 1)}
-                                        disabled={pageNumber === 1}
-                                        className="flex items-center justify-center px-2 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                    </button>
-                                </li>
-                                {renderPageNumbers().map((page, index) => (
-                                    <li key={index}>
-                                        <button
-                                            onClick={() => handlePageChange(page)}
-                                            className={`flex items-center justify-center px-2 h-8 leading-tight border
-                                            ${page === pageNumber
-                                                    ? "text-blue-600 border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-                                                    : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                                }`}
-                                        >
-                                            {page}
-                                        </button>
-                                    </li>
-                                ))}
-                                <li>
-                                    <button
-                                        onClick={() => handlePageChange(pageNumber + 1)}
-                                        disabled={pageNumber === totalPages}
-                                        className="flex items-center justify-center px-2 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        onClick={() => handlePageChange(totalPages)}
-                                        disabled={pageNumber === totalPages}
-                                        className="flex items-center justify-center px-2 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <ChevronsRight className="w-4 h-4" />
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
-                        </>
                     )}
                 </Box>
             </MainContainer>
