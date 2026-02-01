@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import GetDefaultWhatsAppByUser from "../../helpers/GetDefaultWhatsAppByUser";
 import Ticket from "../../models/Ticket";
+import Contact from "../../models/Contact";
 import ShowContactService from "../ContactServices/ShowContactService";
 import { getIO } from "../../libs/socket";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
@@ -68,6 +69,16 @@ const CreateTicketService = async ({
     status: isGroup ? "group" : "open",
     isActiveDemand: true
   });
+
+  // Marca contato como WhatsApp válido quando uma conversa é criada (canal whatsapp, não grupo)
+  if (!isGroup && defaultWhatsapp.channel === "whatsapp") {
+    try {
+      await Contact.update(
+        { isWhatsappValid: true, validatedAt: new Date() },
+        { where: { id: contactId, companyId } }
+      );
+    } catch (_) {}
+  }
 
   // await Ticket.update(
   //   { companyId, queueId, userId, status: isGroup? "group": "open", isBot: true },

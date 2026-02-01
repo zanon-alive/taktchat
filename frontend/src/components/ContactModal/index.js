@@ -15,6 +15,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import CloseIcon from "@material-ui/icons/Close";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Switch from "@material-ui/core/Switch";
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -242,21 +243,39 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 
 	return (
 		<div className={classes.root}>
-			<Dialog open={open} onClose={handleClose} maxWidth="sm" scroll="paper">
+			<Dialog
+				open={open}
+				onClose={(e, reason) => {
+					if (reason === "backdropClick") return;
+					handleClose();
+				}}
+				maxWidth="sm"
+				scroll="paper"
+			>
 				<DialogTitle id="form-dialog-title">
 					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 						<span>{i18n.t("contactModal.form.mainInfo")} • {contactId ? i18n.t("contactModal.title.edit") : i18n.t("contactModal.title.add")}</span>
-						{(() => {
-							const avatarImageUrl = contact?.profilePicUrl || contact?.urlPicture;
-							return (
-								<div
-									onClick={() => { if (avatarImageUrl) setAvatarOpen(true); }}
-									style={{ cursor: avatarImageUrl ? 'pointer' : 'default' }}
-								>
-									<ContactAvatar contact={contact} style={{ width: 44, height: 44, borderRadius: '50%' }} />
-								</div>
-							);
-						})()}
+						<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+							{(() => {
+								const avatarImageUrl = contact?.profilePicUrl || contact?.urlPicture;
+								return (
+									<div
+										onClick={() => { if (avatarImageUrl) setAvatarOpen(true); }}
+										style={{ cursor: avatarImageUrl ? 'pointer' : 'default' }}
+									>
+										<ContactAvatar contact={contact} style={{ width: 44, height: 44, borderRadius: '50%' }} />
+									</div>
+								);
+							})()}
+							<IconButton
+								onClick={handleClose}
+								aria-label="Fechar"
+								size="small"
+								style={{ marginRight: -8 }}
+							>
+								<CloseIcon />
+							</IconButton>
+						</div>
 					</div>
 				</DialogTitle>
 				<Formik
