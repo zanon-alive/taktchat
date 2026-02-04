@@ -231,9 +231,6 @@ const Kanban = () => {
 
   const fetchTickets = async () => {
     try {
-      // #region agent log
-      console.log('[DEBUG]', JSON.stringify({ location: 'Kanban/index.js:req', message: 'GET /ticket/kanban params', data: { queueIds: jsonString, dateStart: startDate, dateEnd: endDate }, hypothesisId: 'H1' }));
-      // #endregion
       const { data } = await api.get("/ticket/kanban", {
         params: {
           queueIds: JSON.stringify(jsonString),
@@ -241,10 +238,6 @@ const Kanban = () => {
           dateEnd: endDate,
         }
       });
-      // #region agent log
-      const first = data.tickets && data.tickets[0];
-      console.log('[DEBUG]', JSON.stringify({ location: 'Kanban/index.js:res', message: 'GET /ticket/kanban response', data: { len: data.tickets?.length, firstId: first?.id, firstStatus: first?.status, firstQueueId: first?.queueId, firstUserId: first?.userId }, hypothesisId: 'H1,H4' }));
-      // #endregion
       setTickets(data.tickets);
     } catch (err) {
       console.log(err);
