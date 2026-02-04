@@ -1,0 +1,197 @@
+version: "3.8"
+
+# Stack TaktChat com BUILD NATIVO no servidor ARM64
+# 
+# Esta stack usa imagens Docker pré-construídas que devem ser buildadas NATIVAMENTE no servidor
+# Build nativo é 5-10x mais rápido que cross-compilation (30-60min -> 8-15min)
+#
+# ⚠️ PROCESSO DE BUILD E DEPLOY:
+# 
+# 1. BUILD NATIVO (executar no servidor VPS ARM64):
+#    cd /root/taktchat  # ou /home/zanonr/desenvolvimento/taktchat
+#    git pull origin main
+#    ./scripts/deploy-vps-server.sh latest main
+#
+#    O script deploy-vps-server.sh irá:
+#    - Atualizar código do Git
+#    - Fazer build NATIVO das imagens Docker (ARM64)
+#    - Fazer push para Docker Hub
+#    - Atualizar a stack Docker Swarm
+#
+# 2. OU BUILD MANUAL:
+#    # Configurar variáveis de ambiente
+#    export FRONT_BACKEND_URL="https://api.taktchat.com.br"
+#    export FRONT_PUBLIC_URL="https://taktchat.com.br"
+#    export DOCKER_PLATFORM="linux/arm64"
+#    export BUILD_MODE="load"  # nativo, não precisa push durante build
+#
+#    # Build das imagens
+#    ./scripts/build-docker-optimized.sh latest all
+#
+#    # Push para Docker Hub
+#    docker push zanonalivesolucoes/taktchat-frontend:latest
+#    docker push zanonalivesolucoes/taktchat-backend:latest
+#
+# 3. ATUALIZAR STACK (se não foi feito pelo script):
+#    docker stack deploy -c 14_taktchat.yml --with-registry-auth taktchat
+#
+# BENEFÍCIOS DO BUILD NATIVO:
+# - Build 5-10x mais rápido (8-15 minutos vs 30-60 minutos)
+# - Sem emulação QEMU (cross-compilation)
+# - Menor uso de recursos do servidor
+# - Imagens otimizadas para ARM64
+
+services:
+  # Serviço de migração e seed do banco de dados (executa uma vez)
+  # Usa a mesma imagem do backend, executando migrations via sequelize
+  taktchat-migrate:
+    image: zanonalivesolucoes/taktchat-backend:latest
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - app_network
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres_postgres
+      - DB_PORT=5432
+      - DB_NAME=taktchat_database
+      - DB_USER=taktchat_user
+      - DB_PASS=T4ktch4tUs3r@2025
+      - DB_DIALECT=postgres
+    command: ["sh", "-c", "npx sequelize db:migrate"]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: none  # Não reiniciar após conclusão (executa uma vez)
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 512M
+
+  taktchat-backend:
+    image: zanonalivesolucoes/taktchat-backend:latest
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - app_network
+      - traefik_public
+    volumes:
+      - taktchat_media:/usr/src/app/public  # Uploads e arquivos públicos
+    environment:
+      - NODE_ENV=production
+      - BACKEND_URL=https://taktchat-api.alivesolucoes.com.br
+      - FRONTEND_URL=https://taktchat.alivesolucoes.com.br,https://taktchat.com.br
+      - DB_HOST=postgres_postgres
+      - DB_PORT=5432
+      - DB_NAME=taktchat_database
+      - DB_USER=taktchat_user
+      - DB_PASS=T4ktch4tUs3r@2025
+      - DB_DIALECT=postgres
+      - JWT_SECRET=04a6ba1d382bcf1e76befc94a75dd687
+      - JWT_REFRESH_SECRET=b97a351da95ba6ba8dedafba553f5012
+      - REDIS_URI=redis://:z9w5TbZ1mZUHtAfzkbBi@redis_redis:6379
+      - REDIS_URI_ACK=redis://:z9w5TbZ1mZUHtAfzkbBi@redis_redis:6379
+      - REDIS_URI_MSG_CONN=redis://:z9w5TbZ1mZUHtAfzkbBi@redis_redis:6379
+      - SOCKET_FALLBACK_NS_BROADCAST=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 1024M  # Reduzido (não precisa compilar TypeScript, já está compilado na imagem)
+        # Reservations comentadas temporariamente para evitar 'task has not been scheduled'
+        # Se houver recursos suficientes, descomente:
+        # reservations:
+        #   cpus: "0.3"
+        #   memory: 384M
+
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: stop-first
+        failure_action: pause  # Pausar em caso de falha para análise (não fazer rollback)
+        monitor: 60s
+
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 2  # Limitar a 2 tentativas para análise de logs
+        window: 180s
+
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik_public"
+        - "traefik.http.routers.taktchat-api.rule=Host(`api.taktchat.com.br`) || Host(`taktchat-api.alivesolucoes.com.br`)"
+        - "traefik.http.routers.taktchat-api.entrypoints=websecure"
+        - "traefik.http.routers.taktchat-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.taktchat-api.loadbalancer.server.port=8080"
+        - "traefik.http.services.taktchat-api.loadbalancer.passHostHeader=true"
+
+    # Healthcheck melhorado (verifica endpoint /health que retorna status de API, DB, etc)
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const http = require('http'); const req = http.get('http://localhost:8080/health', (res) => { let data = ''; res.on('data', (chunk) => { data += chunk; }); res.on('end', () => { try { const json = JSON.parse(data); if (json.status === 'ok' && json.api && json.api.status === 'ok' && json.database && json.database.status === 'ok') { process.exit(0); } else { console.error('Healthcheck failed:', JSON.stringify(json)); process.exit(1); } } catch (e) { console.error('Healthcheck parse error:', e.message); process.exit(1); } }); }); req.on('error', (e) => { console.error('Healthcheck error:', e.message); process.exit(1); }); req.setTimeout(8000, () => { req.destroy(); process.exit(1); });\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  taktchat-frontend:
+    image: zanonalivesolucoes/taktchat-frontend:latest
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - traefik_public
+    environment:
+      - REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+      - REACT_APP_SOCKET_URL=https://api.taktchat.com.br
+      - REACT_APP_PRIMARY_COLOR=#2563EB
+      - REACT_APP_PRIMARY_DARK=#1E3A8A
+      - PUBLIC_URL=https://taktchat.com.br
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+        failure_action: pause  # Pausar em caso de falha para análise (não fazer rollback)
+        monitor: 60s
+
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 2  # Limitar a 2 tentativas para análise de logs
+        window: 120s
+
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik_public"
+        - "traefik.http.routers.taktchat-app.rule=Host(`taktchat.com.br`) || Host(`taktchat.alivesolucoes.com.br`)"
+        - "traefik.http.routers.taktchat-app.entrypoints=websecure"
+        - "traefik.http.routers.taktchat-app.tls.certresolver=letsencrypt"
+        - "traefik.http.services.taktchat-app.loadbalancer.server.port=80"
+        - "traefik.http.services.taktchat-app.loadbalancer.passHostHeader=true"
+
+networks:
+  app_network:
+    external: true
+  traefik_public:
+    external: true
+
+volumes:
+  taktchat_media:
+    driver: local  # Uploads e arquivos públicos do backend
+
