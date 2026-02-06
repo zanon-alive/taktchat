@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, CircularProgress, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, Typography } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import * as XLSX from 'xlsx';
 
@@ -642,13 +643,7 @@ const Reports = () => {
                         </td>
                       </tr>
                     ))}
-                    {loading && (
-                      <tr>
-                        <td colSpan={12}>
-                          <TableRowSkeleton avatar columns={3} />
-                        </td>
-                      </tr>
-                    )}
+                    {loading && <TableRowSkeleton avatar columns={3} />}
                   </tbody>
                 </table>
               </Box>
@@ -788,7 +783,7 @@ const Reports = () => {
                     </div>
                   </div>
               ))}
-              {loading && <TableRowSkeleton avatar columns={3} />}
+              {loading && <CardSkeleton />}
               </div>
               {/* Paginação Mobile */}
               <nav className="flex items-center justify-between p-3 mt-2 w-full max-w-[375px] mx-auto" aria-label="Mobile navigation">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useReducer, useContext, useMemo } from "rea
 import { toast } from "react-toastify";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, Avatar, CircularProgress } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
@@ -700,7 +701,7 @@ const Users = () => {
                         </div>
                       </div>
                     ))}
-                    {loading && <TableRowSkeleton columns={9} />}
+                    {loading && <CardSkeleton />}
                   </div>
                   {/* Paginação Mobile */}
                   <nav className="flex items-center justify-between p-3 mt-2 w-full max-w-[375px] mx-auto" aria-label="Mobile navigation">

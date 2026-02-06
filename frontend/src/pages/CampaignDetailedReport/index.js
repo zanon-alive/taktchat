@@ -21,6 +21,7 @@ import {
   LinearProgress,
   useMediaQuery
 } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
@@ -1003,13 +1004,7 @@ const CampaignDetailedReport = () => {
                     </td>
                   </tr>
                 ))}
-                {loading && (
-                  <tr>
-                    <td colSpan={8}>
-                      <TableRowSkeleton columns={8} />
-                    </td>
-                  </tr>
-              )}
+                {loading && <TableRowSkeleton columns={8} />}
               </tbody>
             </table>
           </Box>
@@ -1054,7 +1049,7 @@ const CampaignDetailedReport = () => {
                 </div>
               </div>
             ))}
-            {loading && <TableRowSkeleton columns={8} />}
+            {loading && <CardSkeleton />}
           </div>
         )}
 

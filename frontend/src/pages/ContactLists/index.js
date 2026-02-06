@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, Popover, Typography } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
@@ -799,7 +800,7 @@ const ContactLists = () => {
                     </div>
                   </div>
                 ))}
-                {loading && <TableRowSkeleton columns={4} />}
+                {loading && <CardSkeleton />}
               </div>
               {/* Paginação Mobile */}
               <nav className="flex items-center justify-between p-3 mt-2 w-full max-w-[375px] mx-auto" aria-label="Mobile navigation">

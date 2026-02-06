@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useReducer, useContext, useMemo } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, TextField, Button, Select, MenuItem, FormControl, InputLabel, Grid, Typography, Chip, InputAdornment, Box, useMediaQuery, Tooltip, IconButton } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
@@ -421,13 +422,7 @@ const AuditLogs = () => {
                         </td>
                       </tr>
             ))}
-                    {loading && (
-                      <tr>
-                        <td colSpan={6}>
-                          <TableRowSkeleton columns={6} />
-                        </td>
-                      </tr>
-                    )}
+                    {loading && <TableRowSkeleton columns={6} />}
                   </tbody>
                 </table>
               </Box>
@@ -521,7 +516,7 @@ const AuditLogs = () => {
                     </div>
                   </div>
                 ))}
-                {loading && <TableRowSkeleton columns={6} />}
+                {loading && <CardSkeleton />}
               </div>
               {/* Paginação Mobile */}
               {hasMore && !loading && (

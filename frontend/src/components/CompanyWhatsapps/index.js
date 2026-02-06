@@ -531,7 +531,7 @@ const WhatsAppModalCompany = ({
                   </TableHead>
                   <TableBody>
                     {loading ? (
-                      <TableRowSkeleton />
+                      <TableRowSkeleton columns={user.profile === "admin" ? 7 : 5} />
                     ) : (
                       <>
                         {filteredWhatsapps?.length > 0 &&

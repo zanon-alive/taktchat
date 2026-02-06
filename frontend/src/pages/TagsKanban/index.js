@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
@@ -418,13 +419,7 @@ const Tags = () => {
                         </td>
                       </tr>
                     ))}
-                    {loading && (
-                      <tr>
-                        <td colSpan={3}>
-                          <TableRowSkeleton columns={3} />
-                        </td>
-                      </tr>
-                    )}
+                    {loading && <TableRowSkeleton columns={3} />}
                   </tbody>
                 </table>
               </Box>
@@ -489,7 +484,7 @@ const Tags = () => {
                   </div>
                 </div>
               ))}
-              {loading && <TableRowSkeleton columns={3} />}
+              {loading && <CardSkeleton variant="chip" />}
             </div>
           )}
         </Box>
