@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Snackbar, Paper, Typography, Divider } from "@material-ui/core";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faReply, faPhone, faExternalLink } from '@fortawesome/free-solid-svg-icons';
-import { faCopy } from '@fortawesome/free-regular-svg-icons';
+import { Reply, Phone, ExternalLink, Copy } from 'lucide-react';
 import api from "../../services/api";
 import copy from 'clipboard-copy'; // Biblioteca para copiar para área de transferência
 
@@ -63,13 +61,13 @@ const ButtonPreview = ({ titulo, descricao, textoBotao, secoes = [], rodape, tic
     const getIcon = (tipo) => {
         switch (tipo) {
             case 'quick_reply':
-                return <FontAwesomeIcon icon={faReply} />;
+                return <Reply size={18} />;
             case 'cta_copy':
-                return <FontAwesomeIcon icon={faCopy} />;
+                return <Copy size={18} />;
             case 'cta_call':
-                return <FontAwesomeIcon icon={faPhone} />;
+                return <Phone size={18} />;
             case 'cta_url':
-                return <FontAwesomeIcon icon={faExternalLink} />;
+                return <ExternalLink size={18} />;
             default:
                 return null;
         }

@@ -61,7 +61,7 @@ A plataforma inclui uma landing page pública de vendas acessível em `/landing`
   - Meta tags avançadas (Open Graph, Twitter Cards, Mobile)
   - Dados estruturados Schema.org (SoftwareApplication, Organization, FAQPage)
   - Lazy loading com React.lazy para melhor performance
-- **Performance**: Code splitting e carregamento sob demanda de componentes
+- **Performance**: Code splitting, lazy load de componentes pesados (PDF) e carregamento sob demanda
 - **Responsivo**: Design adaptado para todos os dispositivos
 
 > Detalhes da implementação: `.docs/branchs/feature/melhorias-pagina-vendas/`
