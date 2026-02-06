@@ -840,6 +840,8 @@ const messages = {
         noTicketsMessage:
           "Nenhum atendimento encontrado com esse status ou termo pesquisado",
         noQueue: "Sem Fila",
+        noQueueDefined: "Sem fila definida",
+        noQueuesAssigned: "Nenhuma fila atribuída. Contate o administrador.",
         buttons: {
           accept: "Aceitar",
           cancel: "Cancelar",

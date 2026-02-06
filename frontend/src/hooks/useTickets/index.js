@@ -39,6 +39,17 @@ const useTickets = ({
     const delayDebounceFn = setTimeout(() => {
       const fetchTickets = async () => {
         if (userFilter === undefined || userFilter === null) {
+          const parsedQueueIds = typeof queueIds === 'string' ? JSON.parse(queueIds || '[]') : (queueIds || []);
+          const shouldSkipFetch = Array.isArray(parsedQueueIds) && parsedQueueIds.length === 0 && status !== "search";
+
+          if (shouldSkipFetch) {
+            setLoading(true);
+            setTickets([]);
+            setHasMore(false);
+            setCount(0);
+            return;
+          }
+
           try {
             const { data } = await api.get("/tickets", {
               params: {
@@ -66,7 +77,6 @@ const useTickets = ({
             let tickets = [];
             
             tickets = data.tickets;
-          
             setTickets(tickets);
             setHasMore(data.hasMore);
             setCount(data.count);

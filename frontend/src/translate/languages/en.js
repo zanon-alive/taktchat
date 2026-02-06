@@ -827,6 +827,8 @@ const messages = {
 		  noTicketsMessage:
 			"No service found with this status or search term",
 		  noQueue: "No Queue",
+		  noQueueDefined: "No queue defined",
+		  noQueuesAssigned: "No queues assigned. Contact the administrator.",
 		  buttons: {
 			accept: "Accept",
 			cancel: "Cancel",

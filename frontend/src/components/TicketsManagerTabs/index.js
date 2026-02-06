@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@material-ui/core/styles";
 import { useHistory } from "react-router-dom";
 import {
@@ -34,9 +34,9 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 
 import NewTicketModal from "../NewTicketModal";
 import TicketsList from "../TicketsListCustom";
+import TicketsListSkeleton from "../TicketsListSkeleton";
 import TabPanel from "../TabPanel";
 import { Can } from "../Can";
-import TicketsQueueSelect from "../TicketsQueueSelect";
 import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
 import { StatusFilter } from "../StatusFilter";
@@ -350,9 +350,11 @@ const TicketsManagerTabs = () => {
   const [groupingCount, setGroupingCount] = useState(0);
   const [allQueues, setAllQueues] = useState([]);
   const [botCount, setBotCount] = useState(0);
+  const [queuesLoading, setQueuesLoading] = useState(profile === "admin");
 
-  const userQueueIds = user.queues.map((q) => q.id);
-  const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
+  const queuesForUser = profile === "admin" ? allQueues : (user?.queues || []);
+  const selectedQueueIds = useMemo(() => queuesForUser.map((q) => q.id), [queuesForUser]);
+  const queuesReady = profile !== "admin" || !queuesLoading;
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedWhatsapp, setSelectedWhatsapp] = useState([]);
@@ -374,6 +376,10 @@ const TicketsManagerTabs = () => {
 
   // Carregar todas as filas disponíveis (apenas uma vez)
   useEffect(() => {
+    if (profile !== "admin") {
+      setQueuesLoading(false);
+      return;
+    }
     // Evitar múltiplas chamadas simultâneas
     if (queuesLoadedRef.current || loadingQueuesRef.current || allQueues.length > 0) {
       return;
@@ -394,6 +400,7 @@ const TicketsManagerTabs = () => {
         }
       } finally {
         loadingQueuesRef.current = false;
+        setQueuesLoading(false);
       }
     };
     loadQueues();
@@ -402,7 +409,7 @@ const TicketsManagerTabs = () => {
 
   useEffect(() => {
     setSelectedQueuesMessage(selectedQueueIds);
-  }, [selectedQueueIds]);
+  }, [selectedQueueIds.join(",")]);
 
   useEffect(() => {
     if (user.profile.toUpperCase() === "ADMIN" || user.allUserChat.toUpperCase() === "ENABLED") {
@@ -971,13 +978,6 @@ const TicketsManagerTabs = () => {
               </Badge>
             )}
           </Grid>
-          <Grid item>
-            <TicketsQueueSelect
-              selectedQueueIds={selectedQueueIds}
-              userQueues={allQueues.length > 0 ? allQueues : (user?.queues || [])}
-              onChange={(values) => setSelectedQueueIds(values)}
-            />
-          </Grid>
         </Grid>
       </Paper>
       <TabPanel value={tab} name="open" className={classes.ticketsWrapper}>
@@ -1136,56 +1136,84 @@ const TicketsManagerTabs = () => {
           />
         </Tabs>
 
+        {queuesReady ? (
         <Paper className={classes.ticketsWrapper}>
           <TicketsList
+            key="open"
             status="open"
             showAll={showAllTickets}
             sortTickets={sortTickets ? "ASC" : "DESC"}
             selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setOpenCount(val)}
+            queuesForUser={queuesForUser}
+            showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
+            updateCount={setOpenCount}
             style={applyPanelStyle("open")}
             setTabOpen={setTabOpen}
           />
           <TicketsList
+            key="pending"
             status="pending"
             selectedQueueIds={selectedQueueIds}
             sortTickets={sortTickets ? "ASC" : "DESC"}
             showAll={user.profile === "admin" || user.allUserChat === 'enabled' ? showAllTickets : false}
-            updateCount={(val) => setPendingCount(val)}
+            queuesForUser={queuesForUser}
+            showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
+            updateCount={setPendingCount}
             style={applyPanelStyle("pending")}
             setTabOpen={setTabOpen}
           />
           {user.allowGroup && (
             <TicketsList
+              key="group"
               status="group"
               showAll={showAllTickets}
               sortTickets={sortTickets ? "ASC" : "DESC"}
               selectedQueueIds={selectedQueueIds}
-              updateCount={(val) => setGroupingCount(val)}
+              queuesForUser={queuesForUser}
+              showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
+              updateCount={setGroupingCount}
               style={applyPanelStyle("group")}
               setTabOpen={setTabOpen}
             />
           )}
           <TicketsList
+            key="bot"
             status="bot"
             showAll={showAllTickets}
             sortTickets={sortTickets ? "ASC" : "DESC"}
             selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setBotCount(val)}
+            queuesForUser={queuesForUser}
+            showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
+            updateCount={setBotCount}
             style={applyPanelStyle("bot")}
             setTabOpen={setTabOpen}
           />
         </Paper>
+        ) : (
+          <Paper className={classes.ticketsWrapper}>
+            <TicketsListSkeleton />
+          </Paper>
+        )}
       </TabPanel>
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
-        <TicketsList
-          status="closed"
-          showAll={showAllTickets}
-          selectedQueueIds={selectedQueueIds}
-          setTabOpen={setTabOpen}
-        />
+        {queuesReady ? (
+          <TicketsList
+            status="closed"
+            showAll={showAllTickets}
+            selectedQueueIds={selectedQueueIds}
+            queuesForUser={queuesForUser}
+            showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
+            setTabOpen={setTabOpen}
+          />
+        ) : (
+          <Paper className={classes.ticketsWrapper}>
+            <TicketsListSkeleton />
+          </Paper>
+        )}
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
+        {queuesReady ? (
+        <>
         {profile === "admin" && (
           <>
             <TicketsList
@@ -1195,6 +1223,8 @@ const TicketsManagerTabs = () => {
               tags={selectedTags}
               users={selectedUsers}
               selectedQueueIds={selectedQueueIds}
+              queuesForUser={queuesForUser}
+              showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
               whatsappIds={selectedWhatsapp}
               forceSearch={forceSearch}
               searchOnMessages={searchOnMessages}
@@ -1210,11 +1240,19 @@ const TicketsManagerTabs = () => {
             showAll={false}
             tags={selectedTags}
             selectedQueueIds={selectedQueueIds}
+            queuesForUser={queuesForUser}
+            showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
             whatsappIds={selectedWhatsapp}
             forceSearch={forceSearch}
             searchOnMessages={searchOnMessages}
             status="search"
           />
+        )}
+        </>
+        ) : (
+          <Paper className={classes.ticketsWrapper}>
+            <TicketsListSkeleton />
+          </Paper>
         )}
       </TabPanel>
     </Paper >
