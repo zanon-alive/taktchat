@@ -20,8 +20,6 @@ import { ForwardMessageProvider } from "../../context/ForwarMessage/ForwardMessa
 import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
 
-import html2pdf from "html2pdf.js";
-
 const drawerWidth = 320;
 
 const useStyles = makeStyles((theme) => ({
@@ -73,12 +71,11 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   const [exportedToPDF, setExportedToPDF] = useState(false);
 
   
-  const handleExportToPDF = () => {
-    const messagesListElement = document.getElementById("messagesList"); // Id do elemento que você deseja exportar para PDF
-    const headerElement = document.getElementById("TicketHeader"); // Id do elemento de cabeçalho que você deseja exportar
+  const handleExportToPDF = async () => {
+    const messagesListElement = document.getElementById("messagesList");
+    const headerElement = document.getElementById("TicketHeader");
 
-
-    const pdfOPtions = {
+    const pdfOptions = {
       margin: 1,
       filename: `relatório_atendimento_${ticketId}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
@@ -87,35 +84,35 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
     };
 
     if (messagesListElement) {
-      const headerClone = headerElement.cloneNode(true);
+      const { default: html2pdf } = await import("html2pdf.js");
+      const headerClone = headerElement?.cloneNode(true);
       const messagesListClone = messagesListElement.cloneNode(true);
 
       const containerElement = document.createElement("div");
-      containerElement.appendChild(headerClone); // Adicione o elemento do cabeçalho
+      if (headerClone) containerElement.appendChild(headerClone);
       containerElement.appendChild(messagesListClone);
       html2pdf()
         .from(containerElement)
-        .set(pdfOPtions)
+        .set(pdfOptions)
         .save();
     } else {
       toastError("Elemento não encontrado para exportar.");
     }
   };
 
-  const handleExportAndClose = () => {
+  const handleExportAndClose = async () => {
     if (!exportedToPDF) {
-      handleExportToPDF();
+      await handleExportToPDF();
       setExportedToPDF(true);
-      handleClose(); // Fecha o Dialog
+      handleClose();
     }
   };
 
   useEffect(() => {
     if (open) {
-      // Execute a exportação para PDF e feche o Dialog
       handleExportAndClose();
     }
-  }, [open, ticketId, handleExportAndClose]);
+  }, [open, ticketId]);
 
 
   return (

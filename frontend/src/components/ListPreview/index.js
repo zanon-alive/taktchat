@@ -13,8 +13,7 @@ import {
   IconButton,
   Paper,
 } from "@material-ui/core";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList } from '@fortawesome/free-solid-svg-icons';
+import { List } from 'lucide-react';
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import api from "../../services/api";
 
@@ -107,7 +106,7 @@ const ListPreview = ({ titulo, descricao, textoBotao, secoes, rodape, ticketId }
             margin: '3px 0', // Espaço acima e abaixo do botão
           }}
         >
-          <FontAwesomeIcon icon={faList} style={{ marginRight: '8px', fontSize: '0.8rem' }} />
+          <List size={14} style={{ marginRight: '8px' }} />
           {textoBotao}
         </div>
       </div>

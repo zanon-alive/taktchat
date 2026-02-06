@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, Suspense, lazy } from 'react';
 import {
     Button,
     Dialog,
@@ -12,12 +12,11 @@ import {
 } from '@mui/material';
 import { Cancel, Search, Send, SkipNext, SkipPrevious } from '@material-ui/icons';
 import AudioModal from '../AudioModal';
-import { Document, Page, pdfjs } from 'react-pdf';
 import { makeStyles } from "@material-ui/core/styles";
 import { grey } from '@material-ui/core/colors';
 import { InputAdornment, InputBase } from '@material-ui/core';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+const PdfPreview = lazy(() => import('./PdfPreview'));
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -159,12 +158,14 @@ const MessageUploadMedias = ({ isOpen, files, onClose, onSend, onCancelSelection
                             className={classes.modal}
 
                         >
-                            <Document file={URL.createObjectURL(currentFile)} onLoadSuccess={onDocumentLoadSuccess} >
-                                <Page pageNumber={1}
+                            <Suspense fallback={<Typography variant="body2">Carregando visualização...</Typography>}>
+                                <PdfPreview
+                                    fileUrl={URL.createObjectURL(currentFile)}
+                                    onLoadSuccess={onDocumentLoadSuccess}
                                     width={200}
                                     height={300}
                                 />
-                            </Document>
+                            </Suspense>
                         </div>
                         <div style={{
                             display: 'flex',

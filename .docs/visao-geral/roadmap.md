@@ -33,6 +33,13 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 - [ ] Auditoria avançada de ações
 - [ ] SSO (Single Sign-On)
 
+### Otimizações de Frontend (Bundle)
+- [x] Remoção de dependências não usadas (socket.io/admin-ui)
+- [x] Migração de ícones Font Awesome para lucide-react
+- [x] Lazy load de react-pdf e html2pdf (carregamento sob demanda)
+- [ ] Migração Material-UI v4 para MUI v5 (opcional, alto esforço)
+- [ ] Substituição gradual de lodash/moment por alternativas leves
+
 ### Otimizações de Infraestrutura
 - [ ] Otimizar pipelines de processamento de mídia
 - [ ] Melhorar resiliência de filas (Bull/Redis)
