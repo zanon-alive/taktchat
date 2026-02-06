@@ -815,6 +815,8 @@ const messages = {
         noTicketsTitle: "¡Nada aquí!",
         noTicketsMessage: "Ningún atendimiento encontrado con este estado o término buscado",
         noQueue: "Sin Cola",
+        noQueueDefined: "Sin cola definida",
+        noQueuesAssigned: "Sin colas asignadas. Contacte al administrador.",
         buttons: {
           accept: "Aceptar",
           cancel: "Cancelar",

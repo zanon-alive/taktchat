@@ -831,6 +831,8 @@ const messages = {
         noTicketsMessage:
           "Bu durum veya arama terimiyle ilgili hiçbir görüşme bulunamadı",
         noQueue: "Sıra Yok",
+        noQueueDefined: "Kuyruk tanımlanmadı",
+        noQueuesAssigned: "Atanmış kuyruk yok. Yöneticiyle iletişime geçin.",
         buttons: {
           accept: "Kabul Et",
           cancel: "İptal Et",

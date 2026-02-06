@@ -3,6 +3,8 @@ import React, { useState, useEffect, useReducer, useContext, useMemo, useRef } f
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import Paper from "@material-ui/core/Paper";
+import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
 
 import TicketListItem from "../TicketListItemCustom";
 import TicketsListSkeleton from "../TicketsListSkeleton";
@@ -69,6 +71,32 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center",
     },
+    queueSectionHeader: {
+        display: "flex",
+        alignItems: "center",
+        padding: theme.spacing(1, 2),
+        backgroundColor: theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.06)",
+        borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+        position: "sticky",
+        top: 0,
+        zIndex: 1,
+    },
+    queueColorIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: theme.spacing(1),
+        flexShrink: 0,
+    },
+    queueSectionTitle: {
+        fontWeight: 600,
+        fontSize: 13,
+        flex: 1,
+    },
+    queueSectionCount: {
+        fontSize: 12,
+        color: theme.palette.text.secondary,
+    },
 }));
 
 const ticketSortAsc = (a, b) => {
@@ -93,107 +121,90 @@ const ticketSortDesc = (a, b) => {
     return 0;
 }
 
+const sortState = (arr, sortDir) => {
+    if (!sortDir || !['ASC', 'DESC'].includes(sortDir)) return arr;
+    const copy = [...arr];
+    return sortDir === 'ASC' ? copy.sort(ticketSortAsc) : copy.sort(ticketSortDesc);
+};
+
 const reducer = (state, action) => {
-    //console.log("action", action, state)
     const sortDir = action.sortDir;
-    
+
     if (action.type === "LOAD_TICKETS") {
         const newTickets = action.payload;
+        let next = [...state];
 
         newTickets.forEach((ticket) => {
-            const ticketIndex = state.findIndex((t) => t.id === ticket.id);
-            if (ticketIndex !== -1) {
-                state[ticketIndex] = ticket;
+            const idx = next.findIndex((t) => t.id === ticket.id);
+            if (idx !== -1) {
+                next = next.map((t, i) => (i === idx ? ticket : t));
                 if (ticket.unreadMessages > 0) {
-                    state.unshift(state.splice(ticketIndex, 1)[0]);
+                    const moved = next[idx];
+                    const rest = next.filter((_, i) => i !== idx);
+                    next = [moved, ...rest];
                 }
             } else {
-                state.push(ticket);
+                next = [...next, ticket];
             }
         });
-        if (sortDir && ['ASC', 'DESC'].includes(sortDir)) {
-            sortDir === 'ASC' ? state.sort(ticketSortAsc) : state.sort(ticketSortDesc);
-        }
-
-        return [...state];
+        return sortState(next, sortDir);
     }
 
     if (action.type === "RESET_UNREAD") {
         const ticketId = action.payload;
-
-        const ticketIndex = state.findIndex((t) => t.id === ticketId);
-        if (ticketIndex !== -1) {
-            state[ticketIndex].unreadMessages = 0;
-        }
-
-        if (sortDir && ['ASC', 'DESC'].includes(sortDir)) {
-            sortDir === 'ASC' ? state.sort(ticketSortAsc) : state.sort(ticketSortDesc);
-        }
-
-        return [...state];
+        const next = state.map((t) =>
+            t.id === ticketId ? { ...t, unreadMessages: 0 } : t
+        );
+        return sortState(next, sortDir);
     }
 
     if (action.type === "UPDATE_TICKET") {
         const ticket = action.payload;
-
-        const ticketIndex = state.findIndex((t) => t.id === ticket.id);
-        if (ticketIndex !== -1) {
-            state[ticketIndex] = ticket;
+        const idx = state.findIndex((t) => t.id === ticket.id);
+        let next;
+        if (idx !== -1) {
+            next = state.map((t, i) => (i === idx ? ticket : t));
         } else {
-            state.unshift(ticket);
+            next = [ticket, ...state];
         }
-        if (sortDir && ['ASC', 'DESC'].includes(sortDir)) {
-            sortDir === 'ASC' ? state.sort(ticketSortAsc) : state.sort(ticketSortDesc);
-        }
-
-        return [...state];
+        return sortState(next, sortDir);
     }
 
     if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
         const ticket = action.payload;
-
-        const ticketIndex = state.findIndex((t) => t.id === ticket.id);
-        if (ticketIndex !== -1) {
-            state[ticketIndex] = ticket;
-            state.unshift(state.splice(ticketIndex, 1)[0]);
+        const idx = state.findIndex((t) => t.id === ticket.id);
+        let next;
+        if (idx !== -1) {
+            const updated = state.map((t, i) => (i === idx ? ticket : t));
+            const moved = updated[idx];
+            const rest = updated.filter((_, i) => i !== idx);
+            next = [moved, ...rest];
+        } else if (action.status === ticket.status) {
+            next = [ticket, ...state];
         } else {
-            if (action.status === action.payload.status) {
-                state.unshift(ticket);
-            }
+            next = state;
         }
-        if (sortDir && ['ASC', 'DESC'].includes(sortDir)) {
-            sortDir === 'ASC' ? state.sort(ticketSortAsc) : state.sort(ticketSortDesc);
-        }
-
-        return [...state];
+        return sortState(next, sortDir);
     }
 
     if (action.type === "UPDATE_TICKET_CONTACT") {
         const contact = action.payload;
-        const ticketIndex = state.findIndex((t) => t.contactId === contact.id);
-        if (ticketIndex !== -1) {
-            state[ticketIndex].contact = contact;
-        }
-        return [...state];
+        return state.map((t) =>
+            t.contactId === contact.id ? { ...t, contact } : t
+        );
     }
 
     if (action.type === "DELETE_TICKET") {
         const ticketId = action.payload;
-        const ticketIndex = state.findIndex((t) => t.id === ticketId);
-        if (ticketIndex !== -1) {
-            state.splice(ticketIndex, 1);
-        }
-
-        if (sortDir && ['ASC', 'DESC'].includes(sortDir)) {
-            sortDir === 'ASC' ? state.sort(ticketSortAsc) : state.sort(ticketSortDesc);
-        }
-
-        return [...state];
+        const next = state.filter((t) => t.id !== ticketId);
+        return sortState(next, sortDir);
     }
 
     if (action.type === "RESET") {
         return [];
     }
+
+    return state;
 };
 
 const TicketsListCustom = (props) => {
@@ -206,6 +217,8 @@ const TicketsListCustom = (props) => {
         users,
         showAll,
         selectedQueueIds,
+        queuesForUser = [],
+        showNoQueuesAssignedMessage,
         updateCount,
         style,
         whatsappIds,
@@ -223,7 +236,6 @@ const TicketsListCustom = (props) => {
     const { user, socket } = useContext(AuthContext);
 
     const { profile, queues } = user;
-    const showTicketWithoutQueue = user.allTicket === 'enable';
     const companyId = user.companyId;
 
     useEffect(() => {
@@ -232,10 +244,23 @@ const TicketsListCustom = (props) => {
         };
     }, []);
 
+    const resetKey = [
+        status,
+        searchParam || "",
+        Array.isArray(selectedQueueIds) ? selectedQueueIds.join(",") : "",
+        showAll,
+        Array.isArray(tags) ? tags.join(",") : "",
+        Array.isArray(users) ? users.join(",") : "",
+        forceSearch,
+        Array.isArray(whatsappIds) ? whatsappIds.join(",") : "",
+        Array.isArray(statusFilter) ? statusFilter.join(",") : "",
+        sortTickets,
+        searchOnMessages
+    ].join("|");
     useEffect(() => {
         dispatch({ type: "RESET" });
         setPageNumber(1);
-    }, [status, searchParam, dispatch, showAll, tags, users, forceSearch, selectedQueueIds, whatsappIds, statusFilter, sortTickets, searchOnMessages]);
+    }, [resetKey]);
 
     const { tickets, hasMore, loading } = useTickets({
         pageNumber,
@@ -287,8 +312,7 @@ const TicketsListCustom = (props) => {
         const companyId = user.companyId;
         const shouldUpdateTicket = ticket => {
             return (!ticket?.userId || ticket?.userId === user?.id || showAll) &&
-                ((!ticket?.queueId && showTicketWithoutQueue) || selectedQueueIds.indexOf(ticket?.queueId) > -1)
-            // (!blockNonDefaultConnections || (ticket.status == 'group' && ignoreUserConnectionForGroups) || !user?.whatsappId || ticket.whatsappId == user?.whatsappId);
+                (!ticket?.queueId || selectedQueueIds.indexOf(ticket?.queueId) > -1);
         }
         // const shouldUpdateTicketUser = (ticket) =>
         //     selectedQueueIds.indexOf(ticket?.queueId) > -1 && (ticket?.userId === user?.id || !ticket?.userId);
@@ -407,7 +431,7 @@ const TicketsListCustom = (props) => {
             }
         };
 
-    }, [status, showAll, user?.companyId, selectedQueueIds, tags, users, profile, queues, sortTickets, showTicketWithoutQueue]);
+    }, [status, showAll, user?.companyId, selectedQueueIds, tags, users, profile, queues, sortTickets]);
 
     useEffect(() => {
         if (typeof updateCount === "function") {
@@ -431,8 +455,61 @@ const TicketsListCustom = (props) => {
     };
 
     if (status && status !== "search") {
-        ticketsList = ticketsList.filter(ticket => ticket.status === status)
+        ticketsList = ticketsList.filter(ticket => ticket.status === status);
     }
+
+    const NO_QUEUE_KEY = "no-queue";
+
+    const groupedByQueue = useMemo(() => {
+        const noQueueVirtual = {
+            id: NO_QUEUE_KEY,
+            name: i18n.t("ticketsList.noQueueDefined"),
+            color: "#9e9e9e",
+            orderQueue: 0
+        };
+        const queueMap = new Map();
+        queueMap.set(NO_QUEUE_KEY, { queue: noQueueVirtual, tickets: [] });
+
+        queuesForUser.forEach((q) => {
+            if (!queueMap.has(q.id)) {
+                queueMap.set(q.id, { queue: q, tickets: [] });
+            }
+        });
+
+        ticketsList.forEach((ticket) => {
+            const qId = ticket.queueId == null ? NO_QUEUE_KEY : ticket.queueId;
+            if (!queueMap.has(qId)) {
+                const q = ticket.queue || { id: qId, name: `Fila ${qId}`, color: "#9e9e9e", orderQueue: 999 };
+                queueMap.set(qId, { queue: q, tickets: [] });
+            }
+            queueMap.get(qId).tickets.push(ticket);
+        });
+
+        const queueOrder = new Map();
+        queueOrder.set(NO_QUEUE_KEY, { order: 0, name: noQueueVirtual.name });
+        queuesForUser.forEach((q, idx) => {
+            queueOrder.set(q.id, { order: (q.orderQueue ?? idx + 1), name: q.name });
+        });
+
+        const sections = Array.from(queueMap.entries()).map(([key, { queue, tickets }]) => ({
+            key,
+            queue,
+            tickets,
+            sortOrder: queueOrder.get(key)?.order ?? 999,
+            sortName: queueOrder.get(key)?.name ?? queue.name
+        }));
+
+        sections.sort((a, b) => {
+            if (a.key === NO_QUEUE_KEY) return -1;
+            if (b.key === NO_QUEUE_KEY) return 1;
+            if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+            return (a.sortName || "").localeCompare(b.sortName || "");
+        });
+
+        return sections;
+    }, [ticketsList, queuesForUser]);
+
+    const showEmptyNoQueues = showNoQueuesAssignedMessage && !loading && ticketsList.length === 0;
 
     return (
         <Paper className={classes.ticketsListWrapper} style={style}>
@@ -444,26 +521,39 @@ const TicketsListCustom = (props) => {
                 onScroll={handleScroll}
             >
                 <List style={{ paddingTop: 0 }} >
-                    {ticketsList.length === 0 && !loading ? (
+                    {showEmptyNoQueues ? (
                         <div className={classes.noTicketsDiv}>
                             <span className={classes.noTicketsTitle}>
                                 {i18n.t("ticketsList.noTicketsTitle")}
                             </span>
                             <p className={classes.noTicketsText}>
-                                {i18n.t("ticketsList.noTicketsMessage")}
+                                {i18n.t("ticketsList.noQueuesAssigned")}
                             </p>
                         </div>
                     ) : (
                         <>
-                            {ticketsList.map((ticket) => (
-                                // <List key={ticket.id}>
-                                //     {console.log(ticket)}
-                                <TicketListItem
-                                    ticket={ticket}
-                                    key={ticket.id}
-                                    setTabOpen={setTabOpen}
-                                />
-                                // </List>
+                            {groupedByQueue.map(({ key, queue, tickets }) => (
+                                <React.Fragment key={key}>
+                                    <Box className={classes.queueSectionHeader}>
+                                        <Box
+                                            className={classes.queueColorIndicator}
+                                            style={{ backgroundColor: queue.color || "#9e9e9e" }}
+                                        />
+                                        <Typography className={classes.queueSectionTitle}>
+                                            {queue.name}
+                                        </Typography>
+                                        <Typography className={classes.queueSectionCount}>
+                                            {tickets.length}
+                                        </Typography>
+                                    </Box>
+                                    {tickets.map((ticket) => (
+                                        <TicketListItem
+                                            ticket={ticket}
+                                            key={ticket.id}
+                                            setTabOpen={setTabOpen}
+                                        />
+                                    ))}
+                                </React.Fragment>
                             ))}
                         </>
                     )}
