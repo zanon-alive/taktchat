@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import Skeleton from "@material-ui/lab/Skeleton";
@@ -12,7 +13,7 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const TableRowSkeleton = ({ avatar, columns }) => {
+const TableRowSkeleton = ({ avatar, columns = 4 }) => {
 	const classes = useStyles();
 	return (
 		<>
@@ -47,6 +48,11 @@ const TableRowSkeleton = ({ avatar, columns }) => {
 			</TableRow>
 		</>
 	);
+};
+
+TableRowSkeleton.propTypes = {
+	avatar: PropTypes.bool,
+	columns: PropTypes.number,
 };
 
 export default TableRowSkeleton;

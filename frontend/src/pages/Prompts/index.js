@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState, useMemo } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import { DeleteOutline, Edit } from "@material-ui/icons";
 import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles } from "lucide-react";
@@ -531,7 +532,7 @@ const Prompts = () => {
                         </div>
                       </div>
                   ))}
-                  {loading && <TableRowSkeleton columns={4} />}
+                  {loading && <CardSkeleton />}
                   </div>
                 </>
               )}

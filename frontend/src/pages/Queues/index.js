@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer, useState, useContext, useMemo } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, Typography } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@material-ui/icons/Search";
 import { DeleteOutline, Edit } from "@material-ui/icons";
 import { Plus } from "lucide-react";
@@ -506,7 +507,7 @@ const Queues = () => {
                         </div>
                       </div>
                   ))}
-                    {loading && <TableRowSkeleton columns={6} />}
+                    {loading && <CardSkeleton />}
                   </div>
                 </>
               )}

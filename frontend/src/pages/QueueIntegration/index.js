@@ -8,6 +8,7 @@ import flowbuilder from "../../assets/flowbuilders.png";
 import openai from "../../assets/openai.png";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Avatar, Button, IconButton, InputAdornment, Paper, TextField, Box, Grid, Tooltip, useMediaQuery } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import { DeleteOutline, Edit } from "@material-ui/icons";
 import SearchIcon from "@material-ui/icons/Search";
 import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
@@ -447,13 +448,7 @@ const QueueIntegration = () => {
                             </td>
                           </tr>
                         ))}
-                        {loading && (
-                          <tr>
-                            <td colSpan={4}>
-                              <TableRowSkeleton columns={4} />
-                            </td>
-                          </tr>
-                        )}
+                        {loading && <TableRowSkeleton columns={4} />}
                       </tbody>
                     </table>
                   </Box>
@@ -516,7 +511,7 @@ const QueueIntegration = () => {
                       </div>
                     </div>
                   ))}
-                  {loading && <TableRowSkeleton columns={4} />}
+                  {loading && <CardSkeleton />}
                 </div>
               )}
             </>

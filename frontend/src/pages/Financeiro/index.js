@@ -674,13 +674,7 @@ const Invoices = () => {
                         </tr>
                   );
                 })}
-                    {loading && (
-                      <tr>
-                        <td colSpan={8}>
-                          <TableRowSkeleton columns={8} />
-                        </td>
-                      </tr>
-                    )}
+                    {loading && <TableRowSkeleton columns={8} />}
                   </tbody>
                 </table>
               </Box>

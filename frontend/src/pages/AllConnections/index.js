@@ -25,6 +25,7 @@ import {
   Grid,
   useMediaQuery
 } from "@material-ui/core";
+import CardSkeleton from "../../components/CardSkeleton";
 import {
   Edit,
   CheckCircle,
@@ -624,13 +625,10 @@ const AllConnections = () => {
                             </tr>
                           </thead>
                           <tbody className={classes.tableBody}>
-                    {loadingWhatsapp ? (
-                              <tr>
-                                <td colSpan={user.profile === "admin" ? 5 : 4}>
-                      <TableRowSkeleton />
-                                </td>
-                              </tr>
-                    ) : (
+                    {loadingWhatsapp && (
+                      <TableRowSkeleton columns={user.profile === "admin" ? 5 : 4} />
+                    )}
+                    {!loadingWhatsapp && (
                       <>
                                 {!loadingWhatsapp && companies?.length === 0 && (
                                   <tr>
@@ -729,7 +727,7 @@ const AllConnections = () => {
                             </div>
                           </div>
                         ))}
-                        {loadingWhatsapp && <TableRowSkeleton />}
+                        {loadingWhatsapp && <CardSkeleton />}
                       </div>
                     )}
               </Paper>
