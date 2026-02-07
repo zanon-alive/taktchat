@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo, Fragment } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 import {
 	List,
 	ListItem,
@@ -16,7 +16,7 @@ import {
 	Badge,
 	Grid,
 	Tooltip
-} from "@material-ui/core";
+} from "@mui/material";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -28,7 +28,7 @@ import { toast } from "react-toastify";
 import { yellow } from "@mui/material/colors";
 import { useHistory } from "react-router-dom";
 import { format, isSameDay, parseISO } from "date-fns";
-import { grey } from "@material-ui/core/colors";
+import { grey } from "@mui/material/colors";
 import { getBackendUrl } from "../../config";
 
 const backendUrl = getBackendUrl();

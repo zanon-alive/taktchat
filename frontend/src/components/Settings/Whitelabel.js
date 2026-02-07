@@ -1,21 +1,21 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 
-import Grid from "@material-ui/core/Grid";
-import FormControl from "@material-ui/core/FormControl";
-import TextField from "@material-ui/core/TextField";
+import Grid from "@mui/material/Grid";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
 import useSettings from "../../hooks/useSettings";
 import { toast } from 'react-toastify';
-import { makeStyles } from "@material-ui/core/styles";
-import { grey, blue } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { grey, blue } from "@mui/material/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js/index.js";
 
 import {
   IconButton,
   InputAdornment,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import { Colorize, AttachFile, Delete } from "@material-ui/icons";
+import { Colorize, AttachFile, Delete } from "@mui/icons-material";
 import ColorPicker from "../ColorPicker";
 import ColorModeContext from "../../layout/themeContext";
 import api from "../../services/api";
@@ -261,7 +261,7 @@ export default function Whitelabel(props) {
                       endAdornment: (
                         <IconButton
                           size="small"
-                          color="default"
+                          color="inherit"
                           onClick={() => setPrimaryColorLightModalOpen(true)}
                         >
                           <Colorize />
@@ -304,7 +304,7 @@ export default function Whitelabel(props) {
                       endAdornment: (
                         <IconButton
                           size="small"
-                          color="default"
+                          color="inherit"
                           onClick={() => setPrimaryColorDarkModalOpen(true)}
                         >
                           <Colorize />
@@ -356,7 +356,7 @@ export default function Whitelabel(props) {
                           {settingsLoaded.appLogoLight &&
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={() => {
                                 handleSaveSetting("appLogoLight", "");
                                 colorMode.setAppLogoLight(defaultLogoLight);
@@ -376,7 +376,7 @@ export default function Whitelabel(props) {
                           <label htmlFor="upload-logo-light-button">
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={
                                 () => {
                                   logoLightInput.current.click();
@@ -405,7 +405,7 @@ export default function Whitelabel(props) {
                           {settingsLoaded.appLogoDark &&
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={() => {
                                 handleSaveSetting("appLogoDark", "");
                                 colorMode.setAppLogoDark(defaultLogoDark);
@@ -425,7 +425,7 @@ export default function Whitelabel(props) {
                           <label htmlFor="upload-logo-dark-button">
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={
                                 () => {
                                   logoDarkInput.current.click();
@@ -454,7 +454,7 @@ export default function Whitelabel(props) {
                           {settingsLoaded.appLogoFavicon &&
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={() => {
                                 handleSaveSetting("appLogoFavicon", "");
                                 colorMode.setAppLogoFavicon(defaultLogoFavicon);
@@ -474,7 +474,7 @@ export default function Whitelabel(props) {
                           <label htmlFor="upload-logo-favicon-button">
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={
                                 () => {
                                   logoFaviconInput.current.click();

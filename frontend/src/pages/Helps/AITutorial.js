@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  makeStyles,
   Paper,
   Typography,
   Tabs,
@@ -26,8 +25,9 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
-} from "@material-ui/core";
-import Alert from "@material-ui/lab/Alert";
+} from "@mui/material";
+import { Alert } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 
 import {
   ExpandMore as ExpandMoreIcon,
@@ -44,7 +44,7 @@ import {
   Build as TipsIcon,
   Link as LinkIcon,
   Forum,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";

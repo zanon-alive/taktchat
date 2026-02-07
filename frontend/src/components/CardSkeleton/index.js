@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Skeleton from "@material-ui/lab/Skeleton";
+import { Skeleton } from "@mui/material";
 
 /**
  * Skeleton de card para loading em views mobile (listas em formato card).

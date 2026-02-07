@@ -2,16 +2,19 @@ import React, { useContext, useState, useEffect, useReducer, useRef, useCallback
 import { isSameDay, parseISO, format } from "date-fns";
 import clsx from "clsx";
 import { isNil } from "lodash";
-import { blue, green } from "@material-ui/core/colors";
+import { blue, green } from "@mui/material/colors";
 import {
+  Box,
   Button,
   CircularProgress,
   Divider,
   IconButton,
-  makeStyles,
   Dialog,
   DialogContent,
-} from "@material-ui/core";
+  DialogTitle,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { makeStyles } from "@mui/styles";
 
 import {
   AccessTime,
@@ -22,7 +25,7 @@ import {
   Facebook,
   Instagram,
   Reply,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import MarkdownWrapper from "../MarkdownWrapper";
 import VcardPreview from "../VcardPreview";
@@ -1651,7 +1654,14 @@ const MessagesList = ({
         </div>
       )}
 
-      <Dialog open={videoDialog.open} onClose={() => setVideoDialog({ open: false, url: null })} maxWidth="md">
+      <Dialog open={videoDialog.open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") setVideoDialog({ open: false, url: null }); }} maxWidth="md">
+        <DialogTitle>
+          <Box display="flex" justifyContent="flex-end">
+            <IconButton onClick={() => setVideoDialog({ open: false, url: null })} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
         <DialogContent style={{ padding: 0 }}>
           {videoDialog.url && (
             <video src={videoDialog.url} controls style={{ maxWidth: '90vw', maxHeight: '85vh', display: 'block' }} />
@@ -1659,7 +1669,14 @@ const MessagesList = ({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={pdfDialog.open} onClose={() => setPdfDialog({ open: false, url: null })} maxWidth="lg" fullWidth>
+      <Dialog open={pdfDialog.open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") setPdfDialog({ open: false, url: null }); }} maxWidth="lg" fullWidth>
+        <DialogTitle>
+          <Box display="flex" justifyContent="flex-end">
+            <IconButton onClick={() => setPdfDialog({ open: false, url: null })} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
         <DialogContent style={{ padding: 0 }}>
           {pdfDialog.url && (
             <iframe title="PDF" src={pdfDialog.url} style={{ width: '100%', height: '85vh', border: 'none' }} />

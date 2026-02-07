@@ -10,7 +10,7 @@ import {
   ListItemText,
   Typography,
   Button
-} from '@material-ui/core';
+} from '@mui/material';
 import {
   Warning as WarningIcon,
   Error as ErrorIcon,
@@ -19,7 +19,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Settings as SettingsIcon
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import { validateAIConfig } from '../../utils/aiErrorHandler';
 
 const AIConfigValidator = ({ 

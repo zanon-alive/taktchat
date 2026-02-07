@@ -5,23 +5,24 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 
 import { toast } from "react-toastify";
 
-import { withStyles } from "@material-ui/core/styles";
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import Checkbox from "@material-ui/core/Checkbox";
-import { FormControl, Grid, InputLabel } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import AttachFileIcon from "@material-ui/icons/AttachFile";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { withStyles } from "@mui/styles";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Checkbox from "@mui/material/Checkbox";
+import { Box, FormControl, Grid, IconButton, InputLabel } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Autocomplete } from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CircularProgress from "@mui/material/CircularProgress";
 import moment from "moment";
 
 import { i18n } from "../../translate/i18n";
@@ -273,15 +274,22 @@ const MessageModal = ({ open, onClose, messageId, reload }) => {
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="md"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {messageId
-            ? `${i18n.t("messageModal.title.edit")}`
-            : `${i18n.t("messageModal.title.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>
+              {messageId
+                ? `${i18n.t("messageModal.title.edit")}`
+                : `${i18n.t("messageModal.title.add")}`}
+            </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={scheduleMessage}
@@ -356,7 +364,7 @@ const MessageModal = ({ open, onClose, messageId, reload }) => {
                           setCurrentConexao(contact ? contact : initialConexoes);
                         }}
                         getOptionLabel={(option) => option.name}
-                        getOptionSelected={(option, value) => {
+                        isOptionEqualToValue={(option, value) => {
                           return value.id === option.id;
                         }}
                         renderInput={(params) => (
@@ -394,7 +402,7 @@ const MessageModal = ({ open, onClose, messageId, reload }) => {
                           }
 
                         }}
-                        getOptionSelected={(option, value) => {
+                        isOptionEqualToValue={(option, value) => {
                           return value.id === option.id;
                         }}
                         renderInput={(params) => (
@@ -430,7 +438,7 @@ const MessageModal = ({ open, onClose, messageId, reload }) => {
                           }
 
                         }}
-                        getOptionSelected={(option, value) => {
+                        isOptionEqualToValue={(option, value) => {
                           return value.id === option.id;
                         }}
                         renderInput={(params) => (
@@ -583,7 +591,7 @@ const MessageModal = ({ open, onClose, messageId, reload }) => {
                           setCurrentUsers(usuario ? usuario : initialCurrentUser);
                         }}
                         getOptionLabel={(option) => option.name}
-                        getOptionSelected={(option, value) => {
+                        isOptionEqualToValue={(option, value) => {
                           return value.id === option.id;
                         }}
                         renderInput={(params) => (

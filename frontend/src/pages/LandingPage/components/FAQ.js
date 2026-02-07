@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Box, Accordion, AccordionSummary, AccordionDetails, Container, TextField, InputAdornment } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SearchIcon from "@material-ui/icons/Search";
+import { makeStyles } from "@mui/styles";
+import { Typography, Box, Accordion, AccordionSummary, AccordionDetails, Container, TextField, InputAdornment } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SearchIcon from "@mui/icons-material/Search";
 
 const useStyles = makeStyles((theme) => ({
     root: {

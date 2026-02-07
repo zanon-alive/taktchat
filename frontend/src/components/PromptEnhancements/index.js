@@ -21,14 +21,14 @@ import {
   InputLabel,
   Select,
   MenuItem
-} from '@material-ui/core';
+} from '@mui/material';
 import {
   Memory as BrainIcon,
   Description as TemplateIcon,
   History as VersionIcon,
   Info as InfoIcon
-} from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/icons-material';
+import { makeStyles } from '@mui/styles';
 
 
 const useStyles = makeStyles((theme) => ({

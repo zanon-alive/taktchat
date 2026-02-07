@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import Board from 'react-trello';
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import { useHistory } from 'react-router-dom';
-import { Facebook, Instagram, WhatsApp, FilterList, Add, Refresh } from "@material-ui/icons";
-import SearchIcon from "@material-ui/icons/Search";
-import { Badge, Tooltip, Typography, Button, TextField, Box, Select, MenuItem, Paper, FormControl, InputLabel, Checkbox, ListItemText, Popover, Grid, useMediaQuery, InputAdornment, IconButton } from "@material-ui/core";
+import { Facebook, Instagram, WhatsApp, FilterList, Add, Refresh } from "@mui/icons-material";
+import SearchIcon from "@mui/icons-material/Search";
+import { Badge, Tooltip, Typography, Button, TextField, Box, Select, MenuItem, Paper, FormControl, InputLabel, Checkbox, ListItemText, Popover, Grid, useMediaQuery, InputAdornment, IconButton } from "@mui/material";
 import { DateRangePicker } from 'materialui-daterange-picker';
 import KanbanBoardCard from "./KanbanBoardCard";
 import KanbanLaneHeader from "./KanbanLaneHeader";
@@ -117,20 +118,24 @@ const Kanban = () => {
   const usersLoadedRef = useRef(false);
   const loadingQueuesRef = useRef(false);
   const loadingUsersRef = useRef(false);
+  const mountedRef = useRef(true);
 
   const jsonString = user.queues.map(queue => queue.UserQueue.queueId);
+
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   // Carregar todas as filas disponíveis (apenas uma vez)
   useEffect(() => {
     if (queuesLoadedRef.current || loadingQueuesRef.current || allQueues.length > 0) {
       return;
     }
+    let isMounted = true;
 
     const loadQueues = async () => {
       loadingQueuesRef.current = true;
       try {
         const list = await findAllQueues();
-        if (list && list.length > 0) {
+        if (isMounted && list && list.length > 0) {
           const queueList = list.map(q => ({ 
             id: String(q.id), 
             name: q.name || `Fila ${q.id}` 
@@ -139,15 +144,17 @@ const Kanban = () => {
           queuesLoadedRef.current = true;
         }
       } catch (err) {
-        // Não logar erro se backend estiver desligado - é esperado em desenvolvimento
-        if (err.message && !err.message.includes('Connection refused')) {
+        if (isMounted && err.message && !err.message.includes('Connection refused')) {
           console.error("[Kanban] Erro ao carregar filas:", err);
         }
       } finally {
-        loadingQueuesRef.current = false;
+        if (isMounted) {
+          loadingQueuesRef.current = false;
+        }
       }
     };
     loadQueues();
+    return () => { isMounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Executar apenas uma vez ao montar
 
@@ -156,12 +163,13 @@ const Kanban = () => {
     if (usersLoadedRef.current || loadingUsersRef.current || allUsers.length > 0) {
       return;
     }
+    let isMounted = true;
 
     const loadUsers = async () => {
       loadingUsersRef.current = true;
       try {
         const { data } = await api.get("/users/list");
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (isMounted && data && Array.isArray(data) && data.length > 0) {
           const userList = data.map(u => ({ 
             id: String(u.id), 
             name: u.name || `Usuário ${u.id}` 
@@ -170,16 +178,18 @@ const Kanban = () => {
           usersLoadedRef.current = true;
         }
       } catch (err) {
-        // Não logar erro se backend estiver desligado - é esperado em desenvolvimento
-        if (err.message && !err.message.includes('Connection refused')) {
+        if (isMounted && err.message && !err.message.includes('Connection refused')) {
           console.error("[Kanban] Erro ao carregar usuários:", err);
           toastError(err);
         }
       } finally {
-        loadingUsersRef.current = false;
+        if (isMounted) {
+          loadingUsersRef.current = false;
+        }
       }
     };
     loadUsers();
+    return () => { isMounted = false; };
   }, []); // Executar apenas uma vez ao montar
 
   // Usar todas as filas disponíveis para os filtros (não apenas as dos tickets)
@@ -214,36 +224,41 @@ const Kanban = () => {
 
   const tagOptions = useMemo(() => (tags || []).map(t => ({ id: String(t.id), name: t.name })), [tags]);
 
-  useEffect(() => {
-    fetchTags();
-  }, [user]);
-
-  const fetchTags = async () => {
-    try {
-      const response = await api.get("/tag/kanban/");
-      const fetchedTags = response.data.lista || [];
-      setTags(fetchedTags);
-      fetchTickets();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const fetchTickets = async () => {
+  const fetchTickets = async (options = {}) => {
     try {
       const { data } = await api.get("/ticket/kanban", {
         params: {
           queueIds: JSON.stringify(jsonString),
           dateStart: startDate,
           dateEnd: endDate,
-        }
+        },
+        signal: options.signal,
       });
-      setTickets(data.tickets);
+      if (mountedRef.current) setTickets(data?.tickets ?? []);
     } catch (err) {
+      if (err?.name === "AbortError") return;
       console.log(err);
-      setTickets([]);
+      if (mountedRef.current) setTickets([]);
     }
   };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const load = async () => {
+      try {
+        const response = await api.get("/tag/kanban/", { signal: controller.signal });
+        const fetchedTags = response.data.lista || [];
+        if (!mountedRef.current) return;
+        setTags(fetchedTags);
+        await fetchTickets({ signal: controller.signal });
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+        console.log(err);
+      }
+    };
+    load();
+    return () => controller.abort();
+  }, [user]);
 
   useEffect(() => {
     const companyId = user.companyId;
@@ -275,7 +290,9 @@ const Kanban = () => {
 
   // Atualiza a lista de tickets ao alterar intervalo de datas
   useEffect(() => {
-    fetchTickets();
+    const controller = new AbortController();
+    fetchTickets({ signal: controller.signal });
+    return () => controller.abort();
   }, [startDate, endDate]);
 
   const IconChannel = (channel) => {

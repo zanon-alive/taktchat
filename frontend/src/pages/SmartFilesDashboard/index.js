@@ -29,7 +29,7 @@ import {
   Step,
   StepLabel,
   StepContent
-} from "@material-ui/core";
+} from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   SmartToy as AIIcon,
@@ -49,8 +49,8 @@ import {
   Speed as SpeedIcon,
   Security as SecurityIcon,
   Group as TeamIcon
-} from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/icons-material";
+import { makeStyles } from "@mui/styles";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import QueueTemplateGallery from "../../components/QueueTemplateGallery";

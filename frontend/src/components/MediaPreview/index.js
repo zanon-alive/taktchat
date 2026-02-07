@@ -1,7 +1,7 @@
 import React from 'react';
-import { makeStyles } from "@material-ui/core/styles";
-import DescriptionIcon from '@material-ui/icons/Description';
-import { Box, Typography, Tooltip } from '@material-ui/core';
+import { makeStyles } from "@mui/styles";
+import DescriptionIcon from '@mui/icons-material/Description';
+import { Box, Typography, Tooltip } from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
   mediaContainer: {

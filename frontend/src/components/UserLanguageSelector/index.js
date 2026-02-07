@@ -1,8 +1,8 @@
 // ARQUIVO COMPLETO: frontend/src/components/UserLanguageSelector/index.js
 
 import React, { useContext, useState } from "react";
-import { Button, Menu, MenuItem, Tooltip } from "@material-ui/core"; // Adicione Tooltip para acessibilidade
-import LanguageIcon from "@material-ui/icons/Language"; // 1. Importe o ícone do globo
+import { Button, Menu, MenuItem, Tooltip } from "@mui/material"; // Adicione Tooltip para acessibilidade
+import LanguageIcon from "@mui/icons-material/Language"; // 1. Importe o ícone do globo
 
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";

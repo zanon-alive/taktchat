@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CardHeader } from "@material-ui/core";
+import { CardHeader } from "@mui/material";
 import ContactAvatar from "../ContactAvatar";
 import { useParams } from "react-router-dom";
 import api from "../../services/api";

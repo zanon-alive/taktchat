@@ -24,10 +24,10 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails
-} from '@material-ui/core';
-import { Refresh, ExpandMore } from "@material-ui/icons";
-import { Alert } from '@material-ui/lab';
-import { makeStyles } from "@material-ui/core/styles";
+} from '@mui/material';
+import { Refresh, ExpandMore } from "@mui/icons-material";
+import { Alert } from '@mui/material';
+import { makeStyles } from "@mui/styles";
 import { toast } from 'react-toastify';
 import toastError from '../../errors/toastError';
 import api from '../../services/api';

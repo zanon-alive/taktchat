@@ -1,5 +1,5 @@
 import React from "react";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 import { List as ListIcon, Upload as UploadIcon, Filter as FilterIcon, Plus as PlusIcon, Trash2, RefreshCw, Eraser, UserPlus } from "lucide-react";
 
 // Dock minimalista: apenas ícones, alinhados, com tooltip.

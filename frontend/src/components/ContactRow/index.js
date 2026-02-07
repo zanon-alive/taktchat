@@ -1,9 +1,10 @@
 import React, { memo, useCallback } from "react";
 import { CheckCircle, Ban } from "lucide-react";
-import { WhatsApp, Edit as EditIcon, DeleteOutline as DeleteOutlineIcon, Lock as LockIcon } from "@material-ui/icons";
+import { WhatsApp, Edit as EditIcon, DeleteOutline as DeleteOutlineIcon, Lock as LockIcon } from "@mui/icons-material";
 import { Unlock } from "lucide-react";
-import { Tooltip, IconButton } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { Tooltip, IconButton } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
 import LazyContactAvatar from "../LazyContactAvatar";
 
 const useStyles = makeStyles((theme) => ({

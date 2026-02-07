@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from "react";
-import { Avatar } from "@material-ui/core";
+import { Avatar } from "@mui/material";
 
 // Componente de avatar com otimização de desempenho (memoizado)
 const ContactAvatar = memo(({ contact, ...props }) => {

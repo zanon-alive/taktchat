@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog } from "@material-ui/core";
+import { Dialog } from "@mui/material";
 import { BlockPicker } from "react-color";
 
 const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {

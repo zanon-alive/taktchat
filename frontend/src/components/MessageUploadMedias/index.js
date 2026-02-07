@@ -10,11 +10,11 @@ import {
     Card,
     CardContent,
 } from '@mui/material';
-import { Cancel, Search, Send, SkipNext, SkipPrevious } from '@material-ui/icons';
+import { Cancel, Search, Send, SkipNext, SkipPrevious } from '@mui/icons-material';
 import AudioModal from '../AudioModal';
-import { makeStyles } from "@material-ui/core/styles";
-import { grey } from '@material-ui/core/colors';
-import { InputAdornment, InputBase } from '@material-ui/core';
+import { makeStyles } from "@mui/styles";
+import { grey } from '@mui/material/colors';
+import { InputAdornment, InputBase } from '@mui/material';
 
 const PdfPreview = lazy(() => import('./PdfPreview'));
 

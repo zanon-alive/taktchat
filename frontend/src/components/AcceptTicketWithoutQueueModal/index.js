@@ -2,17 +2,20 @@ import React, { useState, useContext, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 
 import {
+    Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     FormControl,
+    IconButton,
     InputLabel,
-    makeStyles,
     MenuItem,
     Select
-} from "@material-ui/core";
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { makeStyles } from "@mui/styles";
 import { v4 as uuidv4 } from "uuid";
 
 import api from "../../services/api";
@@ -195,9 +198,14 @@ const handleUpdateTicketStatus = async (queueId) => {
 
 return (
 	<>
-		<Dialog open={modalOpen} onClose={handleClose}>
+		<Dialog open={modalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}>
 			<DialogTitle id="form-dialog-title">
-				{i18n.t("ticketsList.acceptModal.title")}
+				<Box display="flex" justifyContent="space-between" alignItems="center">
+					<span>{i18n.t("ticketsList.acceptModal.title")}</span>
+					<IconButton onClick={handleClose} size="small" aria-label="fechar">
+						<CloseIcon />
+					</IconButton>
+				</Box>
 			</DialogTitle>
 			<DialogContent dividers>
 				<FormControl variant="outlined" className={classes.maxWidth}>

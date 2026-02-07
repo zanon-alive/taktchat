@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useContext } from "react";
-import QRCode from "qrcode.react";
+import QRCode from "react-qr-code";
 import toastError from "../../errors/toastError";
-import { makeStyles } from "@material-ui/core/styles";
-import { Dialog, DialogContent, Paper, Typography } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Paper, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 
@@ -66,7 +67,14 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
   }, [whatsAppId, onClose, user?.companyId]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
+    <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }} maxWidth="lg" scroll="paper">
+      <DialogTitle>
+        <Box display="flex" justifyContent="flex-end" alignItems="center">
+          <IconButton onClick={onClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Paper elevation={0}>
           <Typography color="secondary" gutterBottom>
@@ -74,7 +82,9 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
           </Typography>
           <div className={classes.root}>
             {qrCode ? (
-              <QRCode value={qrCode} size={300} style={{ backgroundColor: "white", padding: '5px' }} />
+              <div style={{ backgroundColor: "white", padding: "5px", display: "inline-block" }}>
+                <QRCode value={qrCode} size={300} />
+              </div>
             ) : (
               <span>Aguardando pelo QR Code</span>
             )}

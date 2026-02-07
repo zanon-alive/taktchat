@@ -12,15 +12,15 @@ import { Bar } from 'react-chartjs-2';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import brLocale from 'date-fns/locale/pt-BR';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { Button, Grid, TextField } from '@material-ui/core';
-import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
+import { Button, Grid, TextField } from '@mui/material';
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 import api from '../../services/api';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { i18n } from '../../translate/i18n';
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { useTheme } from '@material-ui/core';
+import { useTheme } from '@mui/material';
 
 // Registrar componentes do Chart.js
 ChartJS.register(
@@ -41,7 +41,7 @@ export const ChartsDate = () => {
     const { user } = useContext(AuthContext);
 
     const companyId = user.companyId;
-    const isDarkMode = theme.palette.type === 'dark';
+    const isDarkMode = theme.palette.mode === 'dark';
 
     useEffect(() => {
         if (companyId) {

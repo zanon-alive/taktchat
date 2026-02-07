@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 
 import MomentsUser from "../../components/MomentsUser";
 // import MomentsQueues from "../../components/MomentsQueues";
 
 import MainHeader from "../../components/MainHeader";
-import { Grid, Paper } from "@material-ui/core";
+import { Grid, Paper } from "@mui/material";
 import Title from "../../components/Title";
 import ForbiddenPage from "../../components/ForbiddenPage";
 import { AuthContext } from "../../context/Auth/AuthContext";

@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Autocomplete, {
-	createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import { Autocomplete, createFilterOptions } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -17,8 +15,9 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError"; 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Typography } from "@mui/material";
-import { FormControlLabel, Switch } from "@material-ui/core";
+import { Box, IconButton, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { FormControlLabel, Switch } from "@mui/material";
 
 const ForwardMessageModal = ({ messages, onClose, modalOpen }) => {
     const [optionsContacts, setOptionsContacts] = useState([]);
@@ -141,9 +140,14 @@ const ForwardMessageModal = ({ messages, onClose, modalOpen }) => {
 				initialValues={newContact}
 				onClose={handleCloseContactModal}
 			></ContactModal>
-			<Dialog open={modalOpen} onClose={handleClose}>
+			<Dialog open={modalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}>
 				<DialogTitle id="form-dialog-title">
-					Encaminhar mensagem
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>Encaminhar mensagem</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<DialogContent dividers>
 					<Autocomplete

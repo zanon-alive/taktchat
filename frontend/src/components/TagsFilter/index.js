@@ -1,9 +1,9 @@
-import { Box, Chip, TextField } from "@material-ui/core";
-import Paper from "@material-ui/core/Paper";
-import Popper from "@material-ui/core/Popper";
-import Checkbox from "@material-ui/core/Checkbox";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { makeStyles } from "@material-ui/core/styles";
+import { Box, Chip, TextField } from "@mui/material";
+import Paper from "@mui/material/Paper";
+import Popper from "@mui/material/Popper";
+import Checkbox from "@mui/material/Checkbox";
+import { Autocomplete } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -132,7 +132,7 @@ export function TagsFilter({ onFiltered }) {
         value={selecteds}
         onChange={(e, v) => onChange(v)}
         getOptionLabel={(option) => option.name}
-        getOptionSelected={(option, value) => option.id === value.id}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         noOptionsText="Sem resultados"
         ListboxProps={{ style: { maxHeight: 180, overflow: "auto", width: "auto", backgroundColor: "#f3f4f6" } }}
         PaperComponent={(paperProps) => (
@@ -150,8 +150,8 @@ export function TagsFilter({ onFiltered }) {
         )}
         PopperComponent={CustomPopper}
         classes={{ inputRoot: classes.inputRoot, paper: classes.paper, listbox: classes.listbox }}
-        renderOption={(option, { selected }) => (
-          <>
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
             <Checkbox
               checked={selected}
               color="primary"
@@ -159,7 +159,7 @@ export function TagsFilter({ onFiltered }) {
               style={{ marginRight: 8 }}
             />
             {option.name}
-          </>
+          </li>
         )}
         renderTags={(value, getTagProps) =>
           value.slice(0, 2).map((option, index) => {

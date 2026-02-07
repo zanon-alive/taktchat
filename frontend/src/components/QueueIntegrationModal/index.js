@@ -30,17 +30,17 @@ import {
   AccordionDetails,
   FormControlLabel,
   Switch,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -24,10 +24,10 @@ import {
   ClickAwayListener,
   Popover,
   Chip,
-} from "@material-ui/core";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
+} from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import AIIntegrationSelector from "../AIIntegrationSelector";

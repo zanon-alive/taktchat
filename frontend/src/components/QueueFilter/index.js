@@ -1,5 +1,5 @@
-import { Chip, TextField } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Chip, TextField } from "@mui/material";
+import { Autocomplete } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";

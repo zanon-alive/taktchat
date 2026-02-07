@@ -2,12 +2,12 @@ import React, { useState, useCallback, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import { format, parseISO, set } from "date-fns";
 
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Stack } from "@mui/material";
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
 import {
   Button,
   TableBody,
@@ -23,7 +23,7 @@ import {
   Typography,
   CircularProgress,
   Divider
-} from "@material-ui/core";
+} from "@mui/material";
 import {
   Edit,
   CheckCircle,
@@ -35,7 +35,7 @@ import {
   Facebook,
   Instagram,
   WhatsApp
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 
@@ -348,7 +348,7 @@ const WhatsAppModalCompany = ({
             </Button>
           )}
         {whatsApp.status === "OPENING" && (
-          <Button size="small" variant="outlined" disabled color="default">
+          <Button size="small" variant="outlined" disabled color="inherit">
             {i18n.t("connections.buttons.connecting")}
           </Button>
         )}

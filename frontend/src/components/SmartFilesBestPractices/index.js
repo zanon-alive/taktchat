@@ -30,7 +30,7 @@ import {
   LinearProgress,
   IconButton,
   Tooltip
-} from "@material-ui/core";
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   CheckCircle as CheckIcon,
@@ -50,8 +50,8 @@ import {
   Assessment as AssessmentIcon,
   Close as CloseIcon,
   PlayArrow as PlayIcon
-} from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/icons-material";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   root: {

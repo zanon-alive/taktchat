@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useReducer, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, CircularProgress, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, Typography } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, CircularProgress, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, Typography } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import * as XLSX from 'xlsx';
@@ -29,9 +30,9 @@ import QueueSelectCustom from "../../components/QueueSelectCustom";
 import moment from "moment";
 import ShowTicketLogModal from "../../components/ShowTicketLogModal";
 
-import { blue, green } from "@material-ui/core/colors";
-import { Facebook, Forward, History, Instagram, SaveAlt, Visibility, WhatsApp } from "@material-ui/icons";
-import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import { blue, green } from "@mui/material/colors";
+import { Facebook, Forward, History, Instagram, SaveAlt, Visibility, WhatsApp } from "@mui/icons-material";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import { Field } from "formik";
 
 const useStyles = makeStyles((theme) => ({

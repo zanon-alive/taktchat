@@ -54,9 +54,35 @@ const ModalCamera = ({ isOpen, onRequestClose, onCapture }) => {
   return (
    <Modal
       isOpen={isOpen}
-      onRequestClose={onRequestClose}  
-      style={customStyles}    
+      onRequestClose={onRequestClose}
+      shouldCloseOnOverlayClick={false}
+      shouldCloseOnEsc={false}
+      style={customStyles}
     >
+       <div style={{ position: 'relative', width: '100%', flex: 1 }}>
+          <button
+            onClick={onRequestClose}
+            aria-label="fechar"
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 10,
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(0,0,0,0.5)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 20,
+            }}
+          >
+            ×
+          </button>
        <div style={{ flex: 1 }}>
           <Camera
             onTakePhoto={handleTakePhoto}
@@ -68,6 +94,7 @@ const ModalCamera = ({ isOpen, onRequestClose, onCapture }) => {
         {capturedImage && 
           handleConfirm()
         }
+       </div>
     </Modal>
   );
 };

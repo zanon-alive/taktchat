@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from "react";
 import { FixedSizeList as List } from "react-window";
-import { Tooltip, IconButton } from "@material-ui/core";
-import { WhatsApp, Edit as EditIcon, DeleteOutline as DeleteOutlineIcon, Lock as LockIcon } from "@material-ui/icons";
+import { Tooltip, IconButton } from "@mui/material";
+import { WhatsApp, Edit as EditIcon, DeleteOutline as DeleteOutlineIcon, Lock as LockIcon } from "@mui/icons-material";
 import { Unlock, CheckCircle, Ban } from "lucide-react";
 import LazyContactAvatar from "../LazyContactAvatar";
 

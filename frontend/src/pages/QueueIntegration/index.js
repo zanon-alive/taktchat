@@ -6,11 +6,12 @@ import webhooks from "../../assets/webhook.png";
 import typebot from "../../assets/typebot.jpg";
 import flowbuilder from "../../assets/flowbuilders.png";
 import openai from "../../assets/openai.png";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Avatar, Button, IconButton, InputAdornment, Paper, TextField, Box, Grid, Tooltip, useMediaQuery } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Avatar, Button, IconButton, InputAdornment, Paper, TextField, Box, Grid, Tooltip, useMediaQuery } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
-import { DeleteOutline, Edit } from "@material-ui/icons";
-import SearchIcon from "@material-ui/icons/Search";
+import { DeleteOutline, Edit } from "@mui/icons-material";
+import SearchIcon from "@mui/icons-material/Search";
 import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 import MainContainer from "../../components/MainContainer";

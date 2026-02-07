@@ -1,5 +1,5 @@
-import { Chip, TextField, Checkbox, Popover } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Chip, TextField, Checkbox, Popover } from "@mui/material";
+import { Autocomplete } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { isArray, isString } from "lodash";
 import toastError from "../../errors/toastError";
@@ -21,6 +21,7 @@ export function TagsContainer({ contact, pendingTags = [], onPendingChange }) {
     useEffect(() => {
         if (!isMounted.current) return;
         loadTags().then(() => {
+            if (!isMounted.current) return;
             if (contact && contact.id && Array.isArray(contact.tags)) {
                 setSelecteds(contact.tags);
             } else if (!contact?.id && Array.isArray(pendingTags)) {
@@ -46,9 +47,9 @@ export function TagsContainer({ contact, pendingTags = [], onPendingChange }) {
             const { data } = await api.get(`/tags/list`, 
             {params: { kanban: 0}
         });
-            setTags(data);
+            if (isMounted.current) setTags(data);
         } catch (err) {
-            toastError(err);
+            if (isMounted.current) toastError(err);
         }
     }
 
@@ -82,6 +83,7 @@ export function TagsContainer({ contact, pendingTags = [], onPendingChange }) {
         } else {
             optionsChanged = value;
         }
+        if (!isMounted.current) return;
         setSelecteds(optionsChanged);
         if (contact && contact.id) {
             await syncTags({ contactId: contact.id, tags: optionsChanged });
@@ -119,7 +121,7 @@ export function TagsContainer({ contact, pendingTags = [], onPendingChange }) {
             disableCloseOnSelect
             onChange={(e, v, r) => onChange(v, r)}
             getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-            getOptionSelected={(option, value) => {
+            isOptionEqualToValue={(option, value) => {
                 const optLabel = typeof option === 'string' ? option : option?.name;
                 const valLabel = typeof value === 'string' ? value : value?.name;
                 if (option?.id && value?.id) return option.id === value.id;

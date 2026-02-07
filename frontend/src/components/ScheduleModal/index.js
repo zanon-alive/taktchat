@@ -5,33 +5,34 @@ import { Formik, Form, Field, FieldArray } from "formik";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { Chip, FormControl, FormControlLabel, Grid, IconButton, InputLabel, MenuItem, Select, Switch, Typography } from "@material-ui/core";
-import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import { Box, Chip, FormControl, FormControlLabel, Grid, IconButton, InputLabel, MenuItem, Select, Switch, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import moment from "moment"
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { isArray, capitalize } from "lodash";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import AttachFile from "@material-ui/icons/AttachFile";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import AttachFile from "@mui/icons-material/AttachFile";
 import { head } from "lodash";
 import ConfirmationModal from "../ConfirmationModal";
 import MessageVariablesPicker from "../MessageVariablesPicker";
 import useQueues from "../../hooks/useQueues";
 import UserStatusIcon from "../UserModal/statusIcon";
-import { Facebook, Instagram, WhatsApp } from "@material-ui/icons";
+import { Facebook, Instagram, WhatsApp } from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -113,7 +114,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	const messageInputRef = useRef();
 	const [channelFilter, setChannelFilter] = useState("whatsapp");
 	const [whatsapps, setWhatsapps] = useState([]);
-	const [selectedWhatsapps, setSelectedWhatsapps] = useState([]);
+	const [selectedWhatsapps, setSelectedWhatsapps] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [queues, setQueues] = useState([]);
 	const [allQueues, setAllQueues] = useState([]);
@@ -122,6 +123,9 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	const { findAll: findAllQueues } = useQueues();
 	const [options, setOptions] = useState([]);
 	const [searchParam, setSearchParam] = useState("");
+	const [contactSearchParam, setContactSearchParam] = useState("");
+	const [contactOptions, setContactOptions] = useState([]);
+	const [contactsLoading, setContactsLoading] = useState(false);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -209,15 +213,45 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 	}, [contactId, contacts]);
 
 	useEffect(() => {
+		if (!open) return;
+		setContactSearchParam("");
+		setContactOptions([]);
+	}, [open]);
+
+	useEffect(() => {
+		if (!open || !isMounted.current) return;
+		const delayDebounceFn = setTimeout(() => {
+			setContactsLoading(true);
+			api.get('/contacts/list', {
+				params: {
+					companyId: user.companyId,
+					...(contactSearchParam.trim().length >= 2 && { name: contactSearchParam.trim() })
+				}
+			})
+				.then(({ data }) => {
+					if (!isMounted.current) return;
+					const list = Array.isArray(data) ? data : (data?.contacts || data?.data || []);
+					const customList = list.map((c) => ({ id: c.id, name: c.name || c.contactName || "", channel: c.channel || "whatsapp" }));
+					setContactOptions(customList);
+					if (isArray(customList)) {
+						setContacts([{ id: "", name: "", channel: "" }, ...customList]);
+					}
+				})
+				.catch((err) => {
+					if (isMounted.current) toastError(err);
+				})
+				.finally(() => {
+					if (isMounted.current) setContactsLoading(false);
+				});
+		}, contactSearchParam.trim().length >= 2 ? 400 : 100);
+		return () => clearTimeout(delayDebounceFn);
+	}, [open, contactSearchParam, user.companyId]);
+
+	useEffect(() => {
 		const { companyId } = user;
 		if (open) {
 			try {
 				(async () => {
-					const { data: contactList } = await api.get('/contacts/list', { params: { companyId: companyId } });
-					let customList = contactList.map((c) => ({ id: c.id, name: c.name, channel: c.channel }));
-					if (isArray(customList)) {
-						setContacts([{ id: "", name: "", channel: "" }, ...customList]);
-					}
 					if (contactId) {
 						setSchedule(prevState => {
 							return { ...prevState, contactId }
@@ -266,6 +300,8 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 		onClose();
 		setAttachment(null);
 		setSchedule(initialState);
+		setContactSearchParam("");
+		setCurrentContact(initialContact);
 	};
 
 	const handleAttachmentFile = (e) => {
@@ -387,13 +423,18 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 			</ConfirmationModal>
 			<Dialog
 				open={open}
-				onClose={handleClose}
+				onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
 				maxWidth="md"
 				fullWidth
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{schedule.status === 'ERRO' ? 'Erro de Envio' : `Mensagem ${capitalize(schedule.status)}`}
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>{schedule.status === 'ERRO' ? 'Erro de Envio' : `Mensagem ${capitalize(schedule.status)}`}</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<div style={{ display: "none" }}>
 					<input
@@ -425,19 +466,37 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										<Autocomplete
 											fullWidth
 											value={currentContact}
-											options={contacts}
+											options={[
+												{ id: "", name: "", channel: "" },
+												...contactOptions
+											]}
 											onChange={(e, contact) => {
 												const contactId = contact ? contact.id : '';
 												setSchedule({ ...schedule, contactId });
 												setCurrentContact(contact ? contact : initialContact);
 												setChannelFilter(contact ? contact.channel : "whatsapp");
 											}}
-											getOptionLabel={(option) => option.name}
+											onInputChange={(e, value) => setContactSearchParam(value || "")}
+											getOptionLabel={(option) => option?.name || ""}
 											renderOption={renderOption}
-											getOptionSelected={(option, value) => {
-												return value.id === option.id
-											}}
-											renderInput={(params) => <TextField {...params} variant="outlined" placeholder="Contato" />}
+											isOptionEqualToValue={(option, value) => option?.id === value?.id}
+											loading={contactsLoading}
+											renderInput={(params) => (
+												<TextField
+													{...params}
+													variant="outlined"
+													placeholder="Contato (digite para buscar)"
+													InputProps={{
+														...params.InputProps,
+														endAdornment: (
+															<>
+																{contactsLoading ? <CircularProgress color="inherit" size={20} style={{ marginRight: 8 }} /> : null}
+																{params.InputProps.endAdornment}
+															</>
+														)
+													}}
+												/>
+											)}
 										/>
 									</FormControl>
 								</div>
@@ -485,6 +544,9 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 												value={selectedWhatsapps}
 												onChange={(event) => setSelectedWhatsapps(event.target.value)}
 											>
+												<MenuItem value="">
+													<em>{i18n.t("campaigns.dialog.form.whatsapp")}</em>
+												</MenuItem>
 												{whatsapps &&
 													whatsapps.map((whatsapp) => (
 														<MenuItem key={whatsapp.id} value={whatsapp.id}>

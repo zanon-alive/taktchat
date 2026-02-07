@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  makeStyles,
   Modal,
   Backdrop,
   Fade,
@@ -12,9 +11,10 @@ import {
   TableRow,
   Paper,
   IconButton,
-} from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
-import CloseIcon from "@material-ui/icons/Close";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
 

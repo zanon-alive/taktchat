@@ -1,8 +1,8 @@
 import React, { useEffect, useReducer, useState, useContext } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 import toastError from "../../errors/toastError";
-import Popover from "@material-ui/core/Popover";
-import AnnouncementIcon from "@material-ui/icons/Announcement";
+import Popover from "@mui/material/Popover";
+import AnnouncementIcon from "@mui/icons-material/Announcement";
 
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -23,7 +23,7 @@ import {
   DialogActions,
   Button,
   DialogContentText,
-} from "@material-ui/core";
+} from "@mui/material";
 import api from "../../services/api";
 import { isArray } from "lodash";
 import moment from "moment";

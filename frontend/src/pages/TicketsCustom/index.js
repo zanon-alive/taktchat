@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useContext, useEffect, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import Paper from "@material-ui/core/Paper";
-import Hidden from "@material-ui/core/Hidden";
-import { makeStyles } from "@material-ui/core/styles";
+import Paper from "@mui/material/Paper";
+import { useTheme, useMediaQuery } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import TicketsManager from "../../components/TicketsManagerTabs";
 import Ticket from "../../components/Ticket";
 
@@ -11,7 +11,7 @@ import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import api from "../../services/api";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import { getBackendUrl } from "../../config";
 import logo from "../../assets/logo.png";
 import logoDark from "../../assets/logo-black.png";
@@ -73,7 +73,8 @@ const useStyles = makeStyles((theme) => ({
 
 const TicketsCustom = () => {
 	const { user } = useContext(AuthContext);
-
+	const theme = useTheme();
+	const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 	const classes = useStyles({ ticketsManagerWidth: user.defaultTicketsManagerWidth || defaultTicketsManagerWidth });
 
 	const { ticketId } = useParams();
@@ -147,15 +148,16 @@ const TicketsCustom = () => {
 								{/* </Suspense> */}
 							</>
 						) : (
-							<Hidden only={["sm", "xs"]}>
+							isMdUp && (
 								<Paper square variant="outlined" className={classes.welcomeMsg}>
 									<span>
 										<center>
 											<img className={classes.logo} width="50%" alt="" />
 										</center>
 										{i18n.t("chat.noTicketMessage")}
-									</span>								</Paper>
-							</Hidden>
+									</span>
+								</Paper>
+							)
 						)}
 					</div>
 				</div>

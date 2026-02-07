@@ -7,9 +7,9 @@ import {
   IconButton,
   Tooltip,
   FormGroup
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const useStyles = makeStyles((theme) => ({
   categoryTitle: {

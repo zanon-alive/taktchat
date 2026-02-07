@@ -1,10 +1,10 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Container, Typography, Button, Box, Grid } from "@material-ui/core";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
-import PeopleIcon from "@material-ui/icons/People";
-import StarIcon from "@material-ui/icons/Star";
+import { makeStyles } from "@mui/styles";
+import { Container, Typography, Button, Box, Grid } from "@mui/material";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import PeopleIcon from "@mui/icons-material/People";
+import StarIcon from "@mui/icons-material/Star";
 
 const useStyles = makeStyles((theme) => ({
   hero: {

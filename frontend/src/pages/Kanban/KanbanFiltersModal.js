@@ -15,7 +15,7 @@ import {
   Grid,
   Typography,
   Popover
-} from "@material-ui/core";
+} from "@mui/material";
 import { DateRangePicker } from 'materialui-daterange-picker';
 import { format, parseISO, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 
@@ -159,7 +159,7 @@ export default function KanbanFiltersModal({
         </Popover>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClear} color="default">Limpar filtros</Button>
+        <Button onClick={handleClear} color="inherit">Limpar filtros</Button>
         <Button onClick={handleApply} color="primary" variant="contained">Aplicar</Button>
       </DialogActions>
     </Dialog>

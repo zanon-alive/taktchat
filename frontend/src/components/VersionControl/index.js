@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Chip, Tooltip } from "@material-ui/core";
+import { Chip, Tooltip } from "@mui/material";
 import api from "../../services/api";
 
 // Componente responsável por exibir informações de versão do backend:

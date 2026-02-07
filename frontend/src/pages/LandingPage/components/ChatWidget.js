@@ -1,7 +1,7 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Fab, Tooltip } from "@material-ui/core";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
+import { makeStyles } from "@mui/styles";
+import { Fab, Tooltip } from "@mui/material";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getNumberSupport } from "../../../config";
 
 const useStyles = makeStyles((theme) => ({

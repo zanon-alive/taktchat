@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Grid, Box, Card, CardContent, Avatar, IconButton } from "@material-ui/core";
-import { Rating } from "@material-ui/lab";
-import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
-import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
+import { makeStyles } from "@mui/styles";
+import { Typography, Grid, Box, Card, CardContent, Avatar, IconButton } from "@mui/material";
+import { Rating } from "@mui/material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {

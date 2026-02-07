@@ -8,7 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import { importFlow } from "../services/flowBuilder";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";

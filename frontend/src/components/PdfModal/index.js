@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Dialog, DialogContent, IconButton, Tooltip } from "@material-ui/core";
-import { GetApp, PictureAsPdf } from "@material-ui/icons";
+import { makeStyles } from "@mui/styles";
+import { Dialog, DialogContent, IconButton, Tooltip } from "@mui/material";
+import { GetApp, PictureAsPdf } from "@mui/icons-material";
 import { Document, Page, pdfjs } from "react-pdf";
 
 // Configura o worker do pdf.js (necessário para renderização)

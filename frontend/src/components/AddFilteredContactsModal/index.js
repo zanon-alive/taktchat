@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
 
 import {
   Dialog,
@@ -29,10 +29,10 @@ import {
   Box,
   IconButton,
   InputBase
-} from "@material-ui/core";
+} from "@mui/material";
 
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
+import { Autocomplete } from "@mui/material";
+import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
 
 import toastError from "../../errors/toastError";
 import api from "../../services/api";

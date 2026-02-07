@@ -3,10 +3,10 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 import { isNil } from "lodash";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
 import moment from "moment";
 import {
   Dialog,
@@ -28,15 +28,17 @@ import {
   Tabs,
   Paper,
   Box,
+  IconButton,
   Typography
-} from "@material-ui/core";
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import TabPanel from "../TabPanel";
-import { Autorenew, FileCopy, WhatsApp, CheckCircle } from "@material-ui/icons";
+import { Autorenew, FileCopy, WhatsApp, CheckCircle } from "@mui/icons-material";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import SchedulesForm from "../SchedulesForm";
 import usePlans from "../../hooks/usePlans";
@@ -163,7 +165,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     collectiveVacationEnd: "",
     collectiveVacationStart: "",
     collectiveVacationMessage: "",
-    queueIdImportMessages: null,
+    queueIdImportMessages: 0,
     channelType: "baileys",
     wabaPhoneNumberId: "",
     wabaAccessToken: "",
@@ -206,10 +208,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [prompts, setPrompts] = useState([]);
 
   const [webhooks, setWebhooks] = useState([]);
-  const [flowIdNotPhrase, setFlowIdNotPhrase] = useState();
-  const [flowIdWelcome, setFlowIdWelcome] = useState();
+  const [flowIdNotPhrase, setFlowIdNotPhrase] = useState("");
+  const [flowIdWelcome, setFlowIdWelcome] = useState("");
 
-  const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [selectedIntegration, setSelectedIntegration] = useState("");
   const [integrations, setIntegrations] = useState([]);
 
   useEffect(() => {
@@ -275,20 +277,22 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
         if (data && data?.flowIdNotPhrase) {
           const { data: flowDefault } = await api.get(`flowbuilder/${data.flowIdNotPhrase}`)
-          console.log(flowDefault?.flow.id)
-          const selectedFlowIdNotPhrase = flowDefault?.flow.id
+          const selectedFlowIdNotPhrase = flowDefault?.flow?.id ?? ""
           setFlowIdNotPhrase(selectedFlowIdNotPhrase)
+        } else {
+          setFlowIdNotPhrase("")
         }
         if (data && data?.flowIdWelcome) {
           const { data: flowDefault } = await api.get(`flowbuilder/${data.flowIdWelcome}`)
-          console.log(flowDefault?.flow.id)
-          const selectedFlowIdWelcome = flowDefault?.flow.id
+          const selectedFlowIdWelcome = flowDefault?.flow?.id ?? ""
           setFlowIdWelcome(selectedFlowIdWelcome)
+        } else {
+          setFlowIdWelcome("")
         }
-        setWhatsApp(data);
+        setWhatsApp({ ...data, queueIdImportMessages: data?.queueIdImportMessages ?? 0, sendIdQueue: data?.sendIdQueue ?? 0 });
         setAttachmentName(data.greetingMediaAttachment);
         setAutoToken(data.token);
-        setSelectedIntegration(data?.integrationId)
+        setSelectedIntegration(data?.integrationId ?? "")
         data.promptId ? setSelectedPrompt(data.promptId) : setSelectedPrompt(null);
         const whatsQueueIds = data.queues?.map((queue) => queue.id);
         setSelectedQueueIds(whatsQueueIds);
@@ -345,23 +349,21 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const handleChangeQueue = (e) => {
     setSelectedQueueIds(e);
     setSelectedPrompt(null);
-    setSelectedIntegration(null)
+    setSelectedIntegration("")
   };
 
   const handleChangeIntegration = (e) => {
-    setSelectedIntegration(e.target.value)
-    setSelectedPrompt(null)
+    setSelectedIntegration(e.target.value ?? "");
+    setSelectedPrompt(null);
     setSelectedQueueIds([])
   }
 
   const handleChangeFlowIdNotPhrase = (e) => {
-    console.log(e.target.value)
-    setFlowIdNotPhrase(e.target.value)
+    setFlowIdNotPhrase(e.target.value ?? "");
   }
 
   const handleChangeFlowIdWelcome = (e) => {
-    console.log(e.target.value)
-    setFlowIdWelcome(e.target.value)
+    setFlowIdWelcome(e.target.value ?? "");
   }
 
 
@@ -507,15 +509,22 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="lg"
         fullWidth
         scroll="paper"
       >
         <DialogTitle>
-          {whatsAppId
-            ? i18n.t("whatsappModal.title.edit")
-            : i18n.t("whatsappModal.title.add")}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>
+              {whatsAppId
+                ? i18n.t("whatsappModal.title.edit")
+                : i18n.t("whatsappModal.title.add")}
+            </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={whatsApp}
@@ -535,7 +544,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   value={tab}
                   indicatorColor="primary"
                   textColor="primary"
-                  scrollButtons="on"
+                  scrollButtons={true}
                   variant="scrollable"
                   onChange={handleTabChange}
                   className={classes.tab}
@@ -842,7 +851,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                                 as={Select}
                                 name="queueIdImportMessages"
                                 id="queueIdImportMessages"
-                                value={values.queueIdImportMessages || '0'}
+                                value={values.queueIdImportMessages ?? 0}
                                 required={enableImportMessage}
                                 label={i18n.t("whatsappModal.form.queueIdImportMessages")}
                                 placeholder={i18n.t("whatsappModal.form.queueIdImportMessages")}
@@ -917,7 +926,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                               as={Select}
                               name="sendIdQueue"
                               id="sendIdQueue"
-                              value={values.sendIdQueue || '0'}
+                              value={values.sendIdQueue ?? 0}
                               required={values.timeSendQueue > 0}
                               label={i18n.t("whatsappModal.form.sendIdQueue")}
                               placeholder={i18n.t("whatsappModal.form.sendIdQueue")}
@@ -983,7 +992,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           margin="dense"
                           placeholder={i18n.t("queueModal.form.integrationId")}
                           labelId="integrationId-selection-label"                        >
-                          <MenuItem value={null} >{"Desabilitado"}</MenuItem>
+                          <MenuItem value="">{"Desabilitado"}</MenuItem>
                           {integrations.map((integration) => (
                             <MenuItem key={integration.id} value={integration.id}>
                               {integration.name}
@@ -1018,7 +1027,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                               vertical: "top",
                               horizontal: "left",
                             },
-                            getContentAnchorEl: null,
                           }}
                         >
                           {prompts.map((prompt) => (
@@ -1380,7 +1388,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                             variant="outlined"
                             margin="dense"
                             labelId="flowIdWelcome-selection-label"                        >
-                            <MenuItem value={null} >{"Desabilitado"}</MenuItem>
+                            <MenuItem value="">{"Desabilitado"}</MenuItem>
                             {webhooks.map(webhook => (
                               <MenuItem key={webhook.id} value={webhook.id}>
                                 {webhook.name}
@@ -1408,7 +1416,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                             variant="outlined"
                             margin="dense"
                             labelId="flowNotIdPhrase-selection-label"                        >
-                            <MenuItem value={null} >{"Desabilitado"}</MenuItem>
+                            <MenuItem value="">{"Desabilitado"}</MenuItem>
                             {webhooks.map(webhook => (
                               <MenuItem key={webhook.id} value={webhook.id}>
                                 {webhook.name}

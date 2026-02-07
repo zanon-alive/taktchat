@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   Dialog,
   DialogTitle,
@@ -32,7 +32,7 @@ import {
   ClickAwayListener,
   Popover,
   CircularProgress,
-} from "@material-ui/core";
+} from "@mui/material";
 import QueueSelectSingle from "../QueueSelectSingle";
 import AIIntegrationSelector from "../AIIntegrationSelector";
 import api from "../../services/api";

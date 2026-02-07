@@ -1,10 +1,10 @@
-import { Chip, Paper, Select, MenuItem, Grid, InputLabel, FormControl } from "@material-ui/core";
+import { Chip, Paper, Select, MenuItem, Grid, InputLabel, FormControl } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { isString } from "lodash";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { toast } from "react-toastify";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 import { i18n } from "../../translate/i18n";
 import { Field, Form } from "formik";
 const useStyles = makeStyles((theme) => ({
@@ -98,7 +98,6 @@ export function TagsKanbanContainer({ ticket }) {
             <FormControl fullWidth margin="dense" variant="outlined">
                 <InputLabel id="tag-kanban-id">{i18n.t("Etapa Kanban")}</InputLabel>
                 <Select
-                    labelWidth={60}
                     value={selected}
                     labelId="tag-kanban-id"
                     label={i18n.t("Etapa Kanban")}
@@ -112,7 +111,6 @@ export function TagsKanbanContainer({ ticket }) {
                             vertical: "top",
                             horizontal: "left",
                         },
-                        getContentAnchorEl: null,
                     }}
                     renderValue={renderSelectedValue}
                 >

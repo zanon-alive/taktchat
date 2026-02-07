@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-    makeStyles,
     Paper,
     Grid,
     TextField,
@@ -10,12 +9,13 @@ import {
     TableCell,
     TableRow,
     IconButton
-} from "@material-ui/core";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { Formik, Form, Field } from 'formik';
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ConfirmationModal from "../ConfirmationModal";
 
-import { Edit as EditIcon } from "@material-ui/icons";
+import { Edit as EditIcon } from "@mui/icons-material";
 
 import { toast } from "react-toastify";
 import useHelps from "../../hooks/useHelps";

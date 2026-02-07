@@ -12,9 +12,9 @@ import {
   InputBase,
   IconButton,
   Paper,
-} from "@material-ui/core";
+} from "@mui/material";
 import { List } from 'lucide-react';
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import api from "../../services/api";
 
 const CustomRadioLabel = ({ title, description }) => (

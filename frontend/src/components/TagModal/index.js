@@ -4,16 +4,16 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import { Colorize, Add, Delete, PlayArrow, Visibility } from "@material-ui/icons";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Colorize, Add, Close as CloseIcon, Delete, PlayArrow, Visibility } from "@mui/icons-material";
 import { ColorBox } from 'material-ui-color';
 
 import { i18n } from "../../translate/i18n";
@@ -21,9 +21,9 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Select, Typography, Paper, Divider, Chip, Box } from "@material-ui/core";
-import { Grid } from "@material-ui/core";
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Select, Typography, Paper, Divider, Chip, Box } from "@mui/material";
+import { Grid } from "@mui/material";
+import { Autocomplete } from '@mui/material';
 
 const SITUATION_VALUES = [
 	"Ativo",
@@ -90,8 +90,8 @@ const TagModal = ({ open, onClose, tagId, kanban }) => {
 	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
 	const [lanes, setLanes] = useState([]);
 	const [loading, setLoading] = useState(false);
-	const [selectedLane, setSelectedLane] = useState([]);
-	const [selectedRollbackLane, setSelectedRollbackLane] = useState([]);
+	const [selectedLane, setSelectedLane] = useState("");
+	const [selectedRollbackLane, setSelectedRollbackLane] = useState("");
 	const [tagRules, setTagRules] = useState([]);
 	const [applyingRules, setApplyingRules] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
@@ -415,15 +415,22 @@ const TagModal = ({ open, onClose, tagId, kanban }) => {
 		<div className={classes.root}>
 			<Dialog
 				open={open}
-				onClose={handleClose}
+				onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
 				maxWidth="md"
 				fullWidth
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{(tagId ? (kanban === 0 ? `${i18n.t("tagModal.title.edit")}` : `${i18n.t("tagModal.title.editKanban")}`) :
-						(kanban === 0 ? `${i18n.t("tagModal.title.add")}` : `${i18n.t("tagModal.title.addKanban")}`))
-					}
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>
+							{(tagId ? (kanban === 0 ? `${i18n.t("tagModal.title.edit")}` : `${i18n.t("tagModal.title.editKanban")}`) :
+								(kanban === 0 ? `${i18n.t("tagModal.title.add")}` : `${i18n.t("tagModal.title.addKanban")}`))
+							}
+						</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<Formik
 					initialValues={tag}
@@ -476,7 +483,7 @@ const TagModal = ({ open, onClose, tagId, kanban }) => {
 												endAdornment: (
 													<IconButton
 														size="small"
-														color="default"
+														color="inherit"
 														onClick={() => setColorPickerModalOpen(!colorPickerModalOpen)}
 													>
 														<Colorize />
@@ -536,10 +543,10 @@ const TagModal = ({ open, onClose, tagId, kanban }) => {
 														name="nextLaneId"
 														style={{ left: "-7px" }}
 														error={touched.nextLaneId && Boolean(errors.nextLaneId)}
-														value={selectedLane}
-														onChange={(e) => setSelectedLane(e.target.value || null)}
+														value={selectedLane ?? ""}
+														onChange={(e) => setSelectedLane(e.target.value || "")}
 													>
-														<MenuItem value={null}>&nbsp;</MenuItem>
+														<MenuItem value="">&nbsp;</MenuItem>
 														{lanes &&
 															lanes.map((lane) => (
 																<MenuItem key={lane.id} value={lane.id}>
@@ -583,10 +590,10 @@ const TagModal = ({ open, onClose, tagId, kanban }) => {
 														name="rollbackLaneId"
 														style={{ left: "-7px" }}
 														error={touched.rollbackLaneId && Boolean(errors.rollbackLaneId)}
-														value={selectedRollbackLane}
-														onChange={(e) => setSelectedRollbackLane(e.target.value)}
+														value={selectedRollbackLane ?? ""}
+														onChange={(e) => setSelectedRollbackLane(e.target.value || "")}
 													>
-														<MenuItem value={null}>&nbsp;</MenuItem>
+														<MenuItem value="">&nbsp;</MenuItem>
 														{lanes &&
 															lanes.map((lane) => (
 																<MenuItem key={lane.id} value={lane.id}>
@@ -622,7 +629,7 @@ const TagModal = ({ open, onClose, tagId, kanban }) => {
 															size="small"
 															startIcon={<Visibility />}
 															onClick={handlePreviewRules}
-															color="default"
+															color="inherit"
 															variant="outlined"
 															disabled={tagRules.length === 0}
 															style={{ marginRight: 8 }}

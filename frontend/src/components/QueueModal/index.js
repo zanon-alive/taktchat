@@ -4,48 +4,49 @@ import * as Yup from "yup";
 import { Formik, FieldArray, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Paper, Select, Tab, Tabs } from "@material-ui/core";
+import { FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Paper, Select, Tab, Tabs } from "@mui/material";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import SaveIcon from "@material-ui/icons/Save";
-import EditIcon from "@material-ui/icons/Edit";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import SaveIcon from "@mui/icons-material/Save";
+import EditIcon from "@mui/icons-material/Edit";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { i18n } from "../../translate/i18n";
-import Switch from "@material-ui/core/Switch";
+import Switch from "@mui/material/Switch";
 import { isArray } from "lodash";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
-import { IconButton, InputAdornment } from "@material-ui/core";
-import { Colorize } from "@material-ui/icons";
-import Typography from "@material-ui/core/Typography";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
-import StepContent from "@material-ui/core/StepContent";
+import { IconButton, InputAdornment } from "@mui/material";
+import { Colorize } from "@mui/icons-material";
+import Typography from "@mui/material/Typography";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import StepContent from "@mui/material/StepContent";
 import ConfirmationModal from "../ConfirmationModal";
 import Checkbox from '@mui/material/Checkbox';
 
 import OptionsChatBot from "../ChatBots/options";
 import CustomToolTip from "../ToolTips";
-import { Tooltip, Box } from "@material-ui/core";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import HelpIcon from "@material-ui/icons/Help";
+import { Tooltip, Box } from "@mui/material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import CloseIcon from "@mui/icons-material/Close";
+import HelpIcon from "@mui/icons-material/Help";
 
 import SchedulesForm from "../SchedulesForm";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import useQueues from "../../hooks/useQueues";
 import UserStatusIcon from "../UserModal/statusIcon";
 import usePlans from "../../hooks/usePlans";
@@ -325,8 +326,8 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
 
   useEffect(() => {
 
-    if (activeStep) {
-      setSelectedQueueOption(queue.chatbots[activeStep]?.optQueueId)
+    if (activeStep != null) {
+      setSelectedQueueOption(queue.chatbots[activeStep]?.optQueueId ?? "")
     }
 
     if (activeStep === isNameEdit) {
@@ -461,13 +462,20 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
         maxWidth="md"
         fullWidth
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         scroll="paper"
       >
         <DialogTitle>
-          {queueId
-            ? `${i18n.t("queueModal.title.edit")}`
-            : `${i18n.t("queueModal.title.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>
+              {queueId
+                ? `${i18n.t("queueModal.title.edit")}`
+                : `${i18n.t("queueModal.title.add")}`}
+            </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Tabs
           value={tab}
@@ -561,7 +569,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                           endAdornment: (
                             <IconButton
                               size="small"
-                              color="default"
+                              color="inherit"
                               onClick={() => setColorPickerModalOpen(!colorPickerModalOpen)}
                             >
                               <Colorize />
@@ -928,7 +936,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                         <>
                           <Stepper
                             nonLinear
-                            activeStep={activeStep}
+                            activeStep={activeStep ?? 0}
                             orientation="vertical"
                           >
                             {values.chatbots &&
@@ -1162,20 +1170,29 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                                                   >
                                                     <InputLabel id="queue-selection-label">{i18n.t("queueModal.form.queue")}</InputLabel>
                                                     <Field
-                                                      as={Select}
                                                       name={`chatbots[${index}].optQueueId`}
-                                                      error={touched?.chatbots?.[index]?.optQueueId &&
-                                                        Boolean(errors?.chatbots?.[index]?.optQueueId)}
-                                                      helpertext={touched?.chatbots?.[index]?.optQueueId && errors?.chatbots?.[index]?.optQueueId}
-                                                      // value={`chatbots[${index}].optQueueId`}
-                                                      className={classes.textField1}
-                                                    >
-                                                      {queues.map(queue => (
-                                                        <MenuItem key={queue.id} value={queue.id}>
-                                                          {queue.name}
-                                                        </MenuItem>
-                                                      ))}
-                                                    </Field>
+                                                      render={({ field }) => (
+                                                        <Select
+                                                          {...field}
+                                                          value={field.value ?? ""}
+                                                          error={touched?.chatbots?.[index]?.optQueueId &&
+                                                            Boolean(errors?.chatbots?.[index]?.optQueueId)}
+                                                          className={classes.textField1}
+                                                          variant="outlined"
+                                                          margin="dense"
+                                                          labelId="queue-selection-label"
+                                                        >
+                                                          <MenuItem value="">
+                                                            <em>{i18n.t("transferTicketModal.fieldQueuePlaceholder")}</em>
+                                                          </MenuItem>
+                                                          {queues.map(queue => (
+                                                            <MenuItem key={queue.id} value={queue.id}>
+                                                              {queue.name}
+                                                            </MenuItem>
+                                                          ))}
+                                                        </Select>
+                                                      )}
+                                                    />
                                                   </FormControl>
                                                 </Grid>
                                               </>
@@ -1270,13 +1287,16 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                                                       {i18n.t("transferTicketModal.fieldQueueLabel")}
                                                     </InputLabel>
                                                     <Select
-                                                      value={selectedQueueOption}
+                                                      value={selectedQueueOption ?? ""}
                                                       onChange={(e) => {
                                                         setSelectedQueueOption(e.target.value)
                                                         setFieldValue(`chatbots[${index}].optQueueId`, e.target.value);
                                                       }}
                                                       label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
                                                     >
+                                                      <MenuItem value="">
+                                                        <em>{i18n.t("transferTicketModal.fieldQueuePlaceholder")}</em>
+                                                      </MenuItem>
                                                       {queues.map((queue) => (
                                                         <MenuItem key={queue.id} value={queue.id}>
                                                           {queue.name}

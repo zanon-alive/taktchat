@@ -4,19 +4,19 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
 import whatsappIcon from '../../assets/nopicture.png'
 import { i18n } from "../../translate/i18n";
 
@@ -28,17 +28,18 @@ import useWhatsApps from "../../hooks/useWhatsApps";
 import useTags from "../../hooks/useTags";
 
 import { Can } from "../Can";
-import { Avatar, Grid, Input, Paper, Tab, Tabs, Chip, Typography, Divider, FormControlLabel, Switch } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Avatar, Box, Grid, IconButton, Input, Paper, Tab, Tabs, Chip, Typography, Divider, FormControlLabel, Switch } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Autocomplete } from "@mui/material";
 import { getBackendUrl } from "../../config";
 import TabPanel from "../TabPanel";
 import AvatarUploader from "../AvatarUpload";
 import PermissionTransferList from "../PermissionTransferList";
 import LegacySettingsGroup from "../LegacySettingsGroup";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import GroupIcon from "@material-ui/icons/Group";
-import DashboardIcon from "@material-ui/icons/Dashboard";
-import AccessTimeIcon from "@material-ui/icons/AccessTime";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import GroupIcon from "@mui/icons-material/Group";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 const backendUrl = getBackendUrl();
 
@@ -173,11 +174,12 @@ const UserModal = ({ open, onClose, userId }) => {
       try {
         const { data } = await api.get(`/users/${userId}`);
         setUser(prevState => {
-          return { 
-            ...prevState, 
-            ...data,
-            permissions: Array.isArray(data.permissions) ? data.permissions : []
-          };
+          const normalized = { ...prevState, ...data };
+          ["name", "email", "password", "farewellMessage", "startWork", "endWork"].forEach(f => {
+            if (normalized[f] == null) normalized[f] = "";
+          });
+          normalized.permissions = Array.isArray(data.permissions) ? data.permissions : [];
+          return normalized;
         });
 
         const { profileImage } = data;
@@ -260,15 +262,22 @@ const UserModal = ({ open, onClose, userId }) => {
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="sm"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {userId
-            ? `${i18n.t("userModal.title.edit")}`
-            : `${i18n.t("userModal.title.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>
+              {userId
+                ? `${i18n.t("userModal.title.edit")}`
+                : `${i18n.t("userModal.title.add")}`}
+            </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={user}
@@ -288,7 +297,7 @@ const UserModal = ({ open, onClose, userId }) => {
                   value={tab}
                   indicatorColor="primary"
                   textColor="primary"
-                  scrollButtons="on"
+                  scrollButtons={true}
                   variant="scrollable"
                   onChange={handleTabChange}
                   className={classes.tab}

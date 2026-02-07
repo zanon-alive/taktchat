@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Dialog, DialogTitle, DialogActions, Button, Box, } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogActions, Button, Box, } from '@mui/material';
 import { i18n } from '../../translate/i18n';
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 import api from "../../services/api";
 import { Can } from "../Can";
 

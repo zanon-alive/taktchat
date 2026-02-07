@@ -1,7 +1,7 @@
 import React from "react";
-import { Paper, Typography, Box, Avatar } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import CheckIcon from "@material-ui/icons/Check";
+import { Paper, Typography, Box, Avatar } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import CheckIcon from "@mui/icons-material/Check";
 
 const useStyles = makeStyles((theme) => ({
   phoneFrame: {

@@ -3,7 +3,8 @@ import { useParams, useHistory } from "react-router-dom";
 
 import clsx from "clsx";
 
-import { makeStyles, Paper, Hidden } from "@material-ui/core";
+import { Paper } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 

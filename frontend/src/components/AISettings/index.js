@@ -32,18 +32,18 @@ import {
   TableCell,
   TableContainer,
   Divider
-} from "@material-ui/core";
-import SaveIcon from '@material-ui/icons/Save';
-import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import InfoIcon from '@material-ui/icons/Info';
-import SettingsIcon from '@material-ui/icons/Settings';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import BrainIcon from '@material-ui/icons/Memory';
-import DescriptionIcon from '@material-ui/icons/Description';
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import SaveIcon from '@mui/icons-material/Save';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import InfoIcon from '@mui/icons-material/Info';
+import SettingsIcon from '@mui/icons-material/Settings';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import BrainIcon from '@mui/icons-material/Memory';
+import DescriptionIcon from '@mui/icons-material/Description';
+import { makeStyles } from "@mui/styles";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import {

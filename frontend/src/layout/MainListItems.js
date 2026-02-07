@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { useLocation, Link as RouterLink } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@mui/styles";
 import {
   Tooltip,
   ListItem,
@@ -13,7 +13,7 @@ import {
   ListSubheader,
   Collapse,
   List,
-} from "@material-ui/core";
+} from "@mui/material";
 import {
   AllInclusive,
   AttachFile,
@@ -43,7 +43,7 @@ import {
   SyncAlt as SyncAltIcon,
   LocalAtm as LocalAtmIcon,
   Business as BusinessIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -806,11 +806,7 @@ const MainListItems = ({ collapsed, onItemClick }) => {
       {!collapsed && (
         <React.Fragment>
           <Divider />
-          {/* // IMAGEM NO MENU
-              <Hidden only={['sm', 'xs']}>
-                <img style={{ width: "100%", padding: "10px" }} src={logo} alt="image" />            
-              </Hidden> 
-              */}
+          {/* Imagem no menu (oculta em sm/xs; se reativar, usar: const isMdUp = useMediaQuery(theme.breakpoints.up("md")); {isMdUp && <img ... /> }) */}
           <Tooltip title={`BACKEND BUILD: ${versionInfo.buildDate} | Commit: ${versionInfo.commitShort || versionInfo.commit} | Frontend: ${versionInfo.frontend}`}>
             <Typography
               style={{

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, makeStyles } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { ColorBox } from "material-ui-color";
 
 

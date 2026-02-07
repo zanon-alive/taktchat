@@ -26,7 +26,8 @@ import {
   FormControl,
   InputLabel,
   Select
-} from "@material-ui/core";
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { RefreshCw, Trash2, GitMerge, Search, Wand2, Tag as TagIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
@@ -518,7 +519,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
                 <ListItemText
                   primary={`${contact.name || "(sem nome)"}`}
                   secondary={
-                    <Box component="span" display="flex" flexDirection="column" gridGap={4}>
+                    <Box component="span" display="flex" flexDirection="column" gap={4}>
                       <Typography variant="body2">Número: {contact.number}</Typography>
                       <Typography variant="body2">Atualizado em: {new Date(contact.updatedAt).toLocaleString()}</Typography>
                       {contact.email ? <Typography variant="body2">Email: {contact.email}</Typography> : null}
@@ -566,7 +567,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
     const canonicalPreview = canonicalSuggestion ? formatDisplayNumber(canonicalSuggestion) : "";
 
     return (
-      <Box display="flex" flexDirection="column" gridGap={12}>
+      <Box display="flex" flexDirection="column" gap={12}>
         <Box>
           <Typography variant="subtitle2" gutterBottom>
             Número sugerido
@@ -580,7 +581,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
             helperText={canonicalPreview ? `Pré-visualização: ${canonicalPreview}` : "Informe somente números"}
           />
           {currentGroup.issues && currentGroup.issues.length > 0 && (
-            <Box mt={1} display="flex" flexWrap="wrap" gridGap={6}>
+            <Box mt={1} display="flex" flexWrap="wrap" gap={6}>
               {currentGroup.issues.map((issue, index) => (
                 <Chip
                   key={`${issue.type}-${index}`}
@@ -592,7 +593,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
             </Box>
           )}
           {totalSummary.length > 0 && (
-            <Box mt={1.5} display="flex" flexWrap="wrap" gridGap={6}>
+            <Box mt={1.5} display="flex" flexWrap="wrap" gap={6}>
               {totalSummary.map(item => {
                 const info = classificationLabels[item.key] || classificationLabels.unknown;
                 return (
@@ -621,14 +622,14 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
                 <ListItemText
                   primary={contact.name || "(sem nome)"}
                   secondary={
-                    <Box component="span" display="flex" flexDirection="column" gridGap={4}>
+                    <Box component="span" display="flex" flexDirection="column" gap={4}>
                       <Typography variant="body2">Número original: {contact.number}</Typography>
                       {contact.canonicalNumber ? (
                         <Typography variant="body2">Canonical atual: {contact.canonicalNumber}</Typography>
                       ) : (
                         <Typography variant="body2" color="error">Canonical ausente</Typography>
                       )}
-                      <Box display="flex" alignItems="center" gridGap={6}>
+                      <Box display="flex" alignItems="center" gap={6}>
                         <Chip
                           label={(classificationLabels[contact.normalization?.classification || "unknown"] || classificationLabels.unknown).label}
                           size="small"
@@ -693,8 +694,15 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
-      <DialogTitle>Gestão de contatos</DialogTitle>
+    <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="lg">
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Gestão de contatos</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent dividers style={{ minHeight: 420 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Box>
@@ -716,7 +724,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
               </Typography>
             )}
           </Box>
-          <Box display="flex" alignItems="center" gridGap={8}>
+          <Box display="flex" alignItems="center" gap={8}>
             <Tooltip title={activeTab === "duplicates" ? "Localizar duplicados" : "Localizar contatos para normalizar"}>
               <span>
                 <Button
@@ -755,7 +763,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
         )}
 
         {!loading && groups.length > 0 && (
-          <Box display="flex" gridGap={16}>
+          <Box display="flex" gap={16}>
             <Box flex={1.1} maxHeight={360} overflow="auto" borderRight="1px solid rgba(0,0,0,0.08)">
               {renderGroupList()}
               {activeTab === "duplicates" && totalPages > 1 && (
@@ -784,10 +792,10 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
             </Box>
 
             {activeTab === "normalization" && (
-              <Box flex={1.5} display="flex" flexDirection="column" gridGap={12}>
+              <Box flex={1.5} display="flex" flexDirection="column" gap={12}>
                 <Typography variant="subtitle2">Aplicar ações</Typography>
                 <FormControl component="fieldset">
-                  <Box display="flex" alignItems="center" gridGap={8}>
+                  <Box display="flex" alignItems="center" gap={8}>
                     <Switch
                       checked={applyNormalization}
                       onChange={(event) => setApplyNormalization(event.target.checked)}
@@ -813,7 +821,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
                     </MenuItem>
                     {tags.map(tag => (
                       <MenuItem key={tag.id} value={tag.id}>
-                        <Box display="flex" alignItems="center" gridGap={8}>
+                        <Box display="flex" alignItems="center" gap={8}>
                           <TagIcon size={16} color={tag.color || "#FFB020"} />
                           <span>{tag.name}</span>
                         </Box>
@@ -845,7 +853,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
                   InputLabelProps={{ shrink: true }}
                 />
 
-                <Box display="flex" flexDirection="column" gridGap={8} mt={1}>
+                <Box display="flex" flexDirection="column" gap={8} mt={1}>
                   <Typography variant="subtitle2">Grupo atual</Typography>
                   <Button
                     variant="contained"
@@ -880,7 +888,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
 
                 <Divider />
 
-                <Box display="flex" flexDirection="column" gridGap={8}>
+                <Box display="flex" flexDirection="column" gap={8}>
                   <Typography variant="subtitle2">Ações em lote</Typography>
                   <Button
                     variant="contained"
@@ -920,7 +928,7 @@ const DuplicateContactsModal = ({ open, onClose, onActionCompleted }) => {
       <DialogActions>
         <Button onClick={handleClose} disabled={loading}>Fechar</Button>
         {activeTab === "duplicates" && (
-          <Box display="flex" alignItems="center" gridGap={8} mr={2}>
+          <Box display="flex" alignItems="center" gap={8} mr={2}>
             <Tooltip title="Mesclar apenas selecionados">
               <span>
                 <Button

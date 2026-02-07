@@ -17,8 +17,8 @@ import {
   CircularProgress,
   Chip,
   IconButton
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import {
   Search,
   Person,
@@ -27,7 +27,7 @@ import {
   LocationOn,
   Business,
   Clear
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
