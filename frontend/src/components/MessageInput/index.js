@@ -1,28 +1,27 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
-import { useMediaQuery, useTheme } from '@material-ui/core';
+import { useMediaQuery, useTheme } from '@mui/material';
 import { isNil } from "lodash";
 import {
   CircularProgress,
   ClickAwayListener,
   IconButton,
   InputBase,
-  makeStyles,
   Paper,
-  Hidden,
   Menu,
   MenuItem,
   Divider,
   Tooltip,
   Fab,
-} from "@material-ui/core";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import {
   blue,
   green,
   pink,
   grey,
-} from "@material-ui/core/colors";
+} from "@mui/material/colors";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 import {
@@ -119,14 +118,14 @@ const useStyles = makeStyles((theme) => ({
     overflow: "scroll",
   },
   newMessageBox: {
-    backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? "#ffffff" : "#202c33",
+    backgroundColor: (theme.palette.mode === 'light') ? "#ffffff" : "#202c33",
     width: "100%",
     display: "flex",
     padding: "0px 8px",
     alignItems: "center",
     borderRadius: 40,
-    border: ((theme.palette.mode || theme.palette.type) === 'light') ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.10)",
-    boxShadow: ((theme.palette.mode || theme.palette.type) === 'light')
+    border: (theme.palette.mode === 'light') ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.10)",
+    boxShadow: (theme.palette.mode === 'light')
       ? "0 2px 6px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)"
       : "0 2px 6px rgba(0,0,0,0.50)",
     gap: 4,
@@ -141,7 +140,7 @@ const useStyles = makeStyles((theme) => ({
     //marginRight: 7,
     marginBottom: 0,
     
-    backgroundImage: ((theme.palette.mode || theme.palette.type) === 'light') ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
+    backgroundImage: (theme.palette.mode === 'light') ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
     
     display: "flex",
     borderRadius: 0,
@@ -151,10 +150,10 @@ const useStyles = makeStyles((theme) => ({
     border: "none",
     // Container do InputBase: controla a borda e o fundo do campo de digitação
     '& .MuiInputBase-root': {
-      backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? '#ffffff' : '#202c33',
+      backgroundColor: (theme.palette.mode === 'light') ? '#ffffff' : '#202c33',
       borderRadius: 0,
       // Para deixar sem borda depois, troque a linha abaixo por: 'border: "none"'
-      border: ((theme.palette.mode || theme.palette.type) === 'light') ? '0px solid #ffffff' : '0px solid rgba(255,255,255,0.18)',
+      border: (theme.palette.mode === 'light') ? '0px solid #ffffff' : '0px solid rgba(255,255,255,0.18)',
       // Garante que o input ocupe altura fixa dentro do composer
       height: 40,
       display: 'flex',
@@ -241,8 +240,8 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? "transparent" : "#202c33",
-    backgroundImage: ((theme.palette.mode || theme.palette.type) === 'light') ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
+    backgroundColor: (theme.palette.mode === 'light') ? "transparent" : "#202c33",
+    backgroundImage: (theme.palette.mode === 'light') ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
     backgroundRepeat: "repeat",
     backgroundSize: "400px auto",
     backgroundPosition: "center bottom",
@@ -459,6 +458,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
 
   const classes = useStyles();
   const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [mediasUpload, setMediasUpload] = useState([]);
   const isMounted = useRef(true);
   const [buttonModalOpen, setButtonModalOpen] = useState(false);
@@ -1366,7 +1366,8 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
         >
           {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
           <div className={classes.newMessageBox}>
-            <Hidden only={["sm", "xs"]}>
+            {isMdUp && (
+              <>
               <IconButton
                 aria-label="emojiPicker"
                 component="span"
@@ -1451,9 +1452,10 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                   </IconButton>
                 </Tooltip>
             )}
-            </Hidden>
+              </>
+            )}
             {/* Botão + para mobile */}
-            <Hidden only={["md", "lg", "xl"]}>
+            {!isMdUp && (
               <IconButton
                 aria-label="uploadMediasMobile"
                 component="span"
@@ -1463,7 +1465,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
               >
                 <Plus size={18} className={classes.sendMessageIcons} />
               </IconButton>
-            </Hidden>
+            )}
             {/* Menu de anexos (disponível em todos os tamanhos) */}
             <Menu
               anchorEl={anchorEl}
@@ -1578,7 +1580,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                           : i18n.t("messagesInput.placeholderClosed")
                       }
                       multiline
-                      rowsMin={1}
+                      minRows={1}
                       maxRows={isMobile ? 3 : 5}
                       value={inputMessage}
                       onChange={handleChangeInput}
@@ -1628,7 +1630,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                       className={classes.messageInput}
                       placeholder={placeholderText}
                       multiline
-                      rowsMin={1}
+                      minRows={1}
                       maxRows={isMobile ? 3 : 5}
                       value={inputMessage}
                       onChange={handleChangeInput}

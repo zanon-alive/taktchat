@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Snackbar, Paper, Typography, Divider } from "@material-ui/core";
+import { Snackbar, Paper, Typography, Divider } from "@mui/material";
 import { Reply, Phone, ExternalLink, Copy } from 'lucide-react';
 import api from "../../services/api";
 import copy from 'clipboard-copy'; // Biblioteca para copiar para área de transferência

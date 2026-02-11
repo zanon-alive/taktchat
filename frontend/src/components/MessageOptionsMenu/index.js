@@ -1,13 +1,14 @@
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 
-import AddCircleOutlineIcon from '@material-ui/icons/Add';
-import { GetApp } from "@material-ui/icons";
+import AddCircleOutlineIcon from '@mui/icons-material/Add';
+import { GetApp } from "@mui/icons-material";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ConfirmationModal from "../ConfirmationModal";
-import { Menu, MenuItem, MenuList, Grid, Popover, IconButton, makeStyles } from "@material-ui/core";
+import { Menu, MenuItem, MenuList, Grid, Popover, IconButton } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import EditMessageModal from "../EditMessageModal";
 import { ForwardMessageContext } from "../../context/ForwarMessage/ForwardMessageContext";
@@ -211,7 +212,6 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 			</EditMessageModal>
 			<Menu
 				anchorEl={anchorEl}
-				getContentAnchorEl={null}
 				anchorOrigin={{
 					vertical: "bottom",
 					horizontal: "right",

@@ -10,8 +10,8 @@ import {
   Fade,
   Grow,
   LinearProgress,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import React, { useState, useEffect } from "react";
 import { Link as RouterLink, useLocation, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";

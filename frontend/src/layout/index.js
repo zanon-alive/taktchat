@@ -7,8 +7,8 @@ import clsx from "clsx";
 // import SoftPhone from "react-softphone";
 // import { WebSocketInterface } from "jssip";
 
+import { makeStyles } from "@mui/styles";
 import {
-  makeStyles,
   Drawer,
   AppBar,
   Toolbar,
@@ -21,16 +21,14 @@ import {
   useTheme,
   useMediaQuery,
   Avatar,
-  // FormControl,
   Badge,
-  withStyles,
   Chip,
-} from "@material-ui/core";
+} from "@mui/material";
+import { withStyles } from "@mui/styles";
 
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-// import AccountCircle from "@material-ui/icons/AccountCircle";
-import CachedIcon from "@material-ui/icons/Cached";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import CachedIcon from "@mui/icons-material/Cached";
 // import whatsappIcon from "../assets/nopicture.png";
 
 import MainListItems from "./MainListItems";
@@ -50,8 +48,8 @@ import { useDate } from "../hooks/useDate";
 import UserLanguageSelector from "../components/UserLanguageSelector";
 
 import ColorModeContext from "./themeContext";
-import Brightness4Icon from "@material-ui/icons/Brightness4";
-import Brightness7Icon from "@material-ui/icons/Brightness7";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { getBackendUrl } from "../config";
 import useSettings from "../hooks/useSettings";
 import useVersion from "../hooks/useVersion";
@@ -665,7 +663,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "right",

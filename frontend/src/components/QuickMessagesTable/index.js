@@ -7,11 +7,11 @@ import {
     TableCell,
     TableRow,
     IconButton
-} from '@material-ui/core';
+} from '@mui/material';
 import {
     Edit as EditIcon,
     DeleteOutline as DeleteOutlineIcon
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import TableRowSkeleton from "../TableRowSkeleton";
 

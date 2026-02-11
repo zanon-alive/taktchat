@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import TextField from '@material-ui/core/TextField';
-import List from '@material-ui/core/List';
-import { makeStyles } from '@material-ui/core/styles';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import CloseIcon from '@mui/icons-material/Close';
+import List from '@mui/material/List';
+import { makeStyles } from '@mui/styles';
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 
@@ -43,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 const NoteSchema = Yup.object().shape({
     note: Yup.string()
         .min(2, "Parâmetros incompletos!")
-        .required("Required")
+        .required(() => i18n.t("validation.required"))
 });
 
 export default function ContactNotesDialog({ modalOpen, onClose, ticket }) {
@@ -155,12 +158,17 @@ export default function ContactNotesDialog({ modalOpen, onClose, ticket }) {
             </ConfirmationModal>
             <Dialog
                 open={open}
-                onClose={handleClose}
+                onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
                 <DialogTitle id="alert-dialog-title">
-                    {i18n.t("ticketOptionsMenu.appointmentsModal.title")}
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <span>{i18n.t("ticketOptionsMenu.appointmentsModal.title")}</span>
+                        <IconButton onClick={handleClose} size="small" aria-label="fechar">
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
                 </DialogTitle>
                 <Formik
                     initialValues={newNote}
@@ -175,7 +183,7 @@ export default function ContactNotesDialog({ modalOpen, onClose, ticket }) {
                 >
 
                     {({ touched, errors }) => (
-                        <Form>
+                        <Form noValidate>
                             <DialogContent className={classes.root} dividers>
                                 <Field
                                     as={TextField}

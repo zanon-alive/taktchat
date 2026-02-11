@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
-import { Paper, Grid, TextField, Typography, Button, CircularProgress, AppBar, Tabs, Tab, Box } from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
+import { makeStyles } from "@mui/styles";
+import { Paper, Grid, TextField, Typography, Button, CircularProgress, AppBar, Tabs, Tab, Box } from "@mui/material";
+import { Alert, AlertTitle } from "@mui/material";
 import { Field, Form, Formik } from "formik";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
@@ -10,8 +10,8 @@ import axios from "axios";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-import WarningIcon from '@material-ui/icons/Warning';
-import SendIcon from '@material-ui/icons/Send';
+import WarningIcon from '@mui/icons-material/Warning';
+import SendIcon from '@mui/icons-material/Send';
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -180,7 +180,7 @@ const MessagesAPI = () => {
         <br />O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por: Código do País+DDD+Número 5511999999999
       </Alert>
 
-      <AppBar position="static" color="default" elevation={0}>
+      <AppBar position="static" color="inherit" elevation={0}>
         <Tabs value={tab} onChange={handleTabChange} indicatorColor="primary" textColor="primary" variant="fullWidth">
           <Tab label="Mensagens de Texto" />
           <Tab label="Mensagens de Mídia" />

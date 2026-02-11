@@ -4,22 +4,22 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import { Colorize } from "@material-ui/icons";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Colorize } from "@mui/icons-material";
 import { ColorBox } from 'material-ui-color';
-import { FormControlLabel, Switch } from '@material-ui/core';
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import Checkbox from '@material-ui/core/Checkbox';
+import { FormControlLabel, Switch } from '@mui/material';
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import Checkbox from '@mui/material/Checkbox';
 
 
 import { i18n } from "../../translate/i18n";
@@ -27,7 +27,8 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { IconButton, InputAdornment, FormControl } from "@material-ui/core";
+import { Box, IconButton, InputAdornment, FormControl } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 
 const useStyles = makeStyles(theme => ({
@@ -143,13 +144,18 @@ const handleKanbanChange = (e) => {
 		<div className={classes.root}>
 			<Dialog
 				open={open}
-				onClose={handleClose}
+				onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
 				maxWidth="xs"
 				fullWidth
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{ (tagId ? `${i18n.t("tagModal.title.edit")}` : `${i18n.t("tagModal.title.add")}`) }
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>{tagId ? i18n.t("tagModal.title.edit") : i18n.t("tagModal.title.add")}</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<Formik
 					initialValues={tag}
@@ -163,7 +169,7 @@ const handleKanbanChange = (e) => {
 					}}
 				>
 					{({ touched, errors, isSubmitting, values }) => (
-						<Form>
+						<Form noValidate>
 							<DialogContent dividers>
 								<div className={classes.multFieldLine}>
 									<Field
@@ -200,7 +206,7 @@ const handleKanbanChange = (e) => {
 											endAdornment: (
 												<IconButton
 													size="small"
-													color="default"
+													color="inherit"
 													onClick={() => setColorPickerModalOpen(!colorPickerModalOpen)}
 												>
 													<Colorize />

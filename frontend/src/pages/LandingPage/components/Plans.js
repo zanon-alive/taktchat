@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Grid, Box, Card, CardContent, Button, Chip, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@material-ui/core";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import CheckIcon from "@material-ui/icons/Check";
-import StarIcon from "@material-ui/icons/Star";
-import ViewModuleIcon from "@material-ui/icons/ViewModule";
-import ViewListIcon from "@material-ui/icons/ViewList";
+import { makeStyles } from "@mui/styles";
+import { Typography, Grid, Box, Card, CardContent, Button, Chip, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import StarIcon from "@mui/icons-material/Star";
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
+import ViewListIcon from "@mui/icons-material/ViewList";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {

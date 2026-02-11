@@ -28,8 +28,8 @@ import {
     SlidersHorizontal,
     GitMerge,
 } from "lucide-react";
-import { ImportExport, Backup, ContactPhone } from "@material-ui/icons";
-import { Tooltip, Menu, MenuItem } from "@material-ui/core";
+import { ImportExport, Backup, ContactPhone } from "@mui/icons-material";
+import { Tooltip, Menu, MenuItem } from "@mui/material";
 import api from "../../services/api";
 import ContactRow from "../../components/ContactRow";
 import ContactCard from "../../components/ContactCard";
@@ -44,9 +44,10 @@ import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 import toastError from "../../errors/toastError";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button } from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";

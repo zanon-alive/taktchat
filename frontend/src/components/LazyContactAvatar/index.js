@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Avatar } from "@material-ui/core";
+import { Avatar } from "@mui/material";
 import ContactAvatar from "../ContactAvatar";
 
 /**

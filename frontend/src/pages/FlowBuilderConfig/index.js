@@ -12,9 +12,9 @@ import { HiOutlinePuzzle } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
+import { makeStyles } from "@mui/styles";
+import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
 
 import audioNode from "./nodes/audioNode";
 import typebotNode from "./nodes/typebotNode";
@@ -44,7 +44,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
-import { Box, CircularProgress } from "@material-ui/core";
+import { Box, CircularProgress } from "@mui/material";
 import BallotIcon from '@mui/icons-material/Ballot';
 
 import "reactflow/dist/style.css";
@@ -87,7 +87,7 @@ import FlowBuilderSingleBlockModal from "../../components/FlowBuilderSingleBlock
 import singleBlockNode from "./nodes/singleBlockNode";
 import { colorPrimary } from "../../styles/styles";
 import ticketNode from "./nodes/ticketNode";
-import { ConfirmationNumber } from "@material-ui/icons";
+import { ConfirmationNumber } from "@mui/icons-material";
 import FlowBuilderTypebotModal from "../../components/FlowBuilderAddTypebotModal";
 import FlowBuilderOpenAIModal from "../../components/FlowBuilderAddOpenAIModal";
 import FlowBuilderAddQuestionModal from "../../components/FlowBuilderAddQuestionModal";

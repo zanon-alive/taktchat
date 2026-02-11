@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import MenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu";
-import Switch from "@material-ui/core/Switch";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+import Switch from "@mui/material/Switch";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -99,7 +99,6 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 			<Menu
 				id="menu-appbar"
 				anchorEl={anchorEl}
-				getContentAnchorEl={null}
 				anchorOrigin={{
 					vertical: "bottom",
 					horizontal: "right",

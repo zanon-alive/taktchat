@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useReducer, useContext, useRef, useMemo } from "react";
 import { toast } from "react-toastify";
 
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
-import SearchIcon from "@material-ui/icons/Search";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
+import SearchIcon from "@mui/icons-material/Search";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus } from "lucide-react";
 
 import MainContainer from "../../components/MainContainer";

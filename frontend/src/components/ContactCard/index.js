@@ -1,8 +1,9 @@
 import React, { memo, useRef, useCallback, useState } from "react";
 import { Unlock, CheckCircle, Ban } from "lucide-react";
-import { WhatsApp, Edit as EditIcon, DeleteOutline as DeleteOutlineIcon, Lock as LockIcon, MoreVert } from "@material-ui/icons";
-import { Tooltip, IconButton, Button, Menu, MenuItem } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { WhatsApp, Edit as EditIcon, DeleteOutline as DeleteOutlineIcon, Lock as LockIcon, MoreVert } from "@mui/icons-material";
+import { Tooltip, IconButton, Button, Menu, MenuItem } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
 import LazyContactAvatar from "../LazyContactAvatar";
 
 const TOUCH_TARGET_SIZE = 44;
@@ -475,7 +476,6 @@ const ContactCard = memo(({
           onClose={handleMoreClose}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           transformOrigin={{ vertical: "top", horizontal: "right" }}
-          getContentAnchorEl={null}
         >
           <MenuItem
             onClick={() => { handleMoreClose(); onEdit(contact.id); }}

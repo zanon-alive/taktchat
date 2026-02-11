@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, Divider, Typography } from "@material-ui/core";
+import { Button, Divider, Typography } from "@mui/material";
 import toastError from "../../errors/toastError";
 
 const AdMetaPreview = ({ image, title, body, sourceUrl, messageUser }) => {

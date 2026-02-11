@@ -1,7 +1,8 @@
 import React from 'react';
-import { Modal, makeStyles, Backdrop, Fade, IconButton, Typography } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import GetAppIcon from '@material-ui/icons/GetApp';
+import { Modal, Backdrop, Fade, IconButton, Typography } from '@mui/material';
+import { makeStyles } from "@mui/styles";
+import CloseIcon from '@mui/icons-material/Close';
+import GetAppIcon from '@mui/icons-material/GetApp';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -106,7 +107,7 @@ const MediaViewerModal = ({ open, onClose, url, mediaType, name }) => {
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }}
       className={classes.modal}
       closeAfterTransition
       BackdropComponent={Backdrop}

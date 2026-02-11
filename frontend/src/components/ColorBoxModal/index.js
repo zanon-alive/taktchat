@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, makeStyles } from "@material-ui/core";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { makeStyles } from "@mui/styles";
 import { ColorBox } from "material-ui-color";
 
 
@@ -25,9 +27,16 @@ const ColorBoxModal = ({ onChange, currentColor, handleClose, open }) => {
 
     return (
 
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}>
 
-            <DialogTitle>Escolha uma cor</DialogTitle>
+            <DialogTitle>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <span>Escolha uma cor</span>
+                <IconButton onClick={handleClose} size="small" aria-label="fechar">
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            </DialogTitle>
             <DialogContent>
                 <ColorBox
                     disableAlpha={true}

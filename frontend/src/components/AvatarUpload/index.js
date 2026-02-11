@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Button from '@material-ui/core/Button';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import Box from '@material-ui/core/Box';
+import Avatar from '@mui/material/Avatar';
+import { makeStyles } from "@mui/styles";
+import Button from '@mui/material/Button';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Box from '@mui/material/Box';
 import { AuthContext } from '../../context/Auth/AuthContext';
 
 const useStyles = makeStyles((theme) => ({

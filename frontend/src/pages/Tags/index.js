@@ -6,12 +6,13 @@ import React, {
 } from "react";
 import { toast } from "react-toastify";
 
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, Chip, Typography, Divider, Table, TableBody, TableCell, TableHead, TableRow } from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
-import { MoreHoriz, Info } from "@material-ui/icons";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip, Chip, Typography, Divider, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
+import { MoreHoriz, Info } from "@mui/icons-material";
 import { Plus } from "lucide-react";
 
 import MainContainer from "../../components/MainContainer";

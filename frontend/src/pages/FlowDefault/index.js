@@ -3,9 +3,9 @@ import React, { useState, useEffect, useReducer, useContext } from "react";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import TextField from "@material-ui/core/TextField";
+import { makeStyles } from "@mui/styles";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
 
 import api from "../../services/api";
 import ConfirmationModal from "../../components/ConfirmationModal";

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { i18n } from "../../translate/i18n";
-import { CardHeader } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import Tooltip from "@material-ui/core/Tooltip";
+import { CardHeader } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import Tooltip from "@mui/material/Tooltip";
 import ContactAvatar from "../ContactAvatar";
 import api from "../../services/api";
 import ConnectionIcon from "../ConnectionIcon";

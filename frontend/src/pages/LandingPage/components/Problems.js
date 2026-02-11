@@ -1,8 +1,8 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Grid, Box, Card, CardContent, Button } from "@material-ui/core";
-import ErrorOutlineIcon from "@material-ui/icons/ErrorOutline";
-import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
+import { makeStyles } from "@mui/styles";
+import { Typography, Grid, Box, Card, CardContent, Button } from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {

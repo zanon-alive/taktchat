@@ -7,18 +7,18 @@ import {
   IconButton,
   Tooltip,
   ClickAwayListener,
-  makeStyles,
   Popover,
   Typography,
   Chip,
   Box,
-} from "@material-ui/core";
-import AutorenewIcon from "@material-ui/icons/Autorenew";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
-import TranslateIcon from "@material-ui/icons/Translate";
-import SpellcheckIcon from "@material-ui/icons/Spellcheck";
-import TrendingUpIcon from "@material-ui/icons/TrendingUp";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import TranslateIcon from "@mui/icons-material/Translate";
+import SpellcheckIcon from "@mui/icons-material/Spellcheck";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Bot as BotIcon } from "lucide-react";
 import api from "../../services/api";
 import OpenAIService from "../../services/openaiService";
@@ -90,14 +90,14 @@ const useStyles = makeStyles((theme) => ({
   modeButton: {
     color: theme.palette.text.secondary,
     '&:hover': {
-      backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)'
+      backgroundColor: (theme.palette.mode === 'light') ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)'
     }
   },
   modeButtonActive: {
     color: theme.palette.primary.main,
-    backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.20)',
+    backgroundColor: (theme.palette.mode === 'light') ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.20)',
     '&:hover': {
-      backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.28)'
+      backgroundColor: (theme.palette.mode === 'light') ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.28)'
     }
   },
   body: {
@@ -182,10 +182,10 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 11,
     userSelect: 'none',
     color: theme.palette.text.secondary,
-    '&:hover': { backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)' }
+    '&:hover': { backgroundColor: (theme.palette.mode === 'light') ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)' }
   },
   providerChipActive: {
-    backgroundColor: ((theme.palette.mode || theme.palette.type) === 'light') ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.20)',
+    backgroundColor: (theme.palette.mode === 'light') ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.20)',
     color: theme.palette.primary.main,
   },
   actionButtons: {

@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { Field } from "formik";
 import { useHistory } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
+import { makeStyles } from "@mui/styles";
+import Paper from "@mui/material/Paper";
 import { toast } from "react-toastify";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import api from "../../services/api";
 import usePlans from "../../hooks/usePlans";
 import toastError from "../../errors/toastError";
@@ -26,8 +26,8 @@ import {
   Tooltip,
   InputAdornment,
   FormHelperText
-} from "@material-ui/core";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+} from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import ForbiddenPage from "../../components/ForbiddenPage";
 import usePermissions from "../../hooks/usePermissions";

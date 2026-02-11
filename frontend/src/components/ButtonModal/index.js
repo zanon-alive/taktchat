@@ -1,14 +1,17 @@
 import React, { useRef, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
-import { Grid } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import CloseIcon from "@mui/icons-material/Close";
+import Select from "@mui/material/Select";
+import { Grid } from "@mui/material";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
@@ -600,7 +603,7 @@ const ButtonModal = ({ modalOpen, onClose, ticketId }) => {
   };
 
   return (
-    <Dialog open={modalOpen} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={modalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }} maxWidth="sm" fullWidth>
 
       {/* Wrapper que contém tanto o título quanto a barra */}
       <div className={classes.dialogTitleWrapper}>
@@ -609,7 +612,12 @@ const ButtonModal = ({ modalOpen, onClose, ticketId }) => {
 
         {/* Título com posição relativa */}
         <DialogTitle className={classes.dialogTitle}>
-          Selecione uma opção
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>Selecione uma opção</span>
+            <IconButton onClick={onClose} size="small" aria-label="fechar" sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
       </div>
 

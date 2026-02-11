@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, IconButton, Tooltip, Chip, Menu, MenuItem, ListItemText } from "@material-ui/core";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import { makeStyles } from "@mui/styles";
+import { Typography, IconButton, Tooltip, Chip, Menu, MenuItem, ListItemText } from "@mui/material";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
@@ -78,7 +78,7 @@ export default function KanbanLaneHeader(props) {
           <MoreHorizIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} getContentAnchorEl={null} anchorOrigin={{vertical:'bottom', horizontal:'right'}} transformOrigin={{vertical:'top', horizontal:'right'}}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} anchorOrigin={{vertical:'bottom', horizontal:'right'}} transformOrigin={{vertical:'top', horizontal:'right'}}>
         <MenuItem onClick={handleHide}><ListItemText primary={i18n.t('kanban.hideColumn')} /></MenuItem>
         <MenuItem onClick={handleManage}><ListItemText primary={i18n.t('kanban.manageColumns')} /></MenuItem>
         <MenuItem onClick={handleCopyLink}><ListItemText primary={i18n.t('kanban.copyLink')} /></MenuItem>

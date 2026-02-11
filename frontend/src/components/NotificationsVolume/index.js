@@ -1,13 +1,13 @@
 import React, { useState, useRef } from "react";
 
-import Popover from "@material-ui/core/Popover";
-import IconButton from "@material-ui/core/IconButton";
-import List from "@material-ui/core/List";
-import { makeStyles } from "@material-ui/core/styles";
-import VolumeUpIcon from "@material-ui/icons/VolumeUp";
-import VolumeDownIcon from "@material-ui/icons/VolumeDown";
+import Popover from "@mui/material/Popover";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import { makeStyles } from "@mui/styles";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeDownIcon from "@mui/icons-material/VolumeDown";
 
-import { Grid, Slider } from "@material-ui/core";
+import { Grid, Slider } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
     tabContainer: {

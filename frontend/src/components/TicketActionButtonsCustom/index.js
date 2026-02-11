@@ -2,9 +2,9 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 
 import { Can } from "../Can";
-import { makeStyles } from "@material-ui/core/styles";
-import { IconButton, Menu, Hidden } from "@material-ui/core";
-import { DeviceHubOutlined, History, MoreVert, PictureAsPdf, Replay, SwapHorizOutlined } from "@material-ui/icons";
+import { makeStyles } from "@mui/styles";
+import { IconButton, Menu, useTheme, useMediaQuery } from "@mui/material";
+import { DeviceHubOutlined, History, MoreVert, PictureAsPdf, Replay, SwapHorizOutlined } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 
 import { i18n } from "../../translate/i18n";
@@ -15,31 +15,32 @@ import toastError from "../../errors/toastError";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import ConfirmationModal from "../ConfirmationModal";
 import * as Yup from "yup";
 import { Formik, Form } from "formik";
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogTitle from '@mui/material/DialogTitle';
+import CloseIcon from "@mui/icons-material/Close";
 
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import TransferTicketModalCustom from "../TransferTicketModalCustom";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 
 //icones
-import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import UndoIcon from '@material-ui/icons/Undo';
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import UndoIcon from '@mui/icons-material/Undo';
 
 import ScheduleModal from "../ScheduleModal";
-import MenuItem from "@material-ui/core/MenuItem";
-import { Switch } from "@material-ui/core";
+import MenuItem from "@mui/material/MenuItem";
+import { Switch } from "@mui/material";
 import ShowTicketOpen from "../ShowTicketOpenModal";
 import { toast } from "react-toastify";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import ShowTicketLogModal from "../ShowTicketLogModal";
 import TicketMessagesDialog from "../TicketMessagesDialog";
-import { useTheme } from "@material-ui/styles";
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 const useStyles = makeStyles(theme => ({
     actionButtons: {
@@ -87,6 +88,7 @@ const TicketActionButtonsCustom = ({ ticket
 }) => {
     const classes = useStyles();
     const theme = useTheme();
+    const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
     const history = useHistory();
     const [isMounted, setIsMounted] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -416,7 +418,8 @@ const TicketActionButtonsCustom = ({ ticket
                 />
             )}
             <div className={classes.actionButtons}>
-                    <Hidden smDown>
+                    {isSmUp && (
+                    <>
                     {ticket.status === "closed" && (ticket.queueId === null || ticket.queueId === undefined) && (
                         <ButtonWithSpinner
                             loading={loading}
@@ -460,7 +463,8 @@ const TicketActionButtonsCustom = ({ ticket
                             </MenuItem>
                         </>
                     )}
-                </Hidden>
+                    </>
+                    )}
 
                 {confirmationOpen && (
                     <ConfirmationModal
@@ -514,7 +518,6 @@ const TicketActionButtonsCustom = ({ ticket
                 <Menu
                     id="menu-appbar"
                     anchorEl={anchorEl}
-                    getContentAnchorEl={null}
                     anchorOrigin={{
                         vertical: "bottom",
                         horizontal: "right",
@@ -580,10 +583,15 @@ const TicketActionButtonsCustom = ({ ticket
                     {({ values, touched, errors, isSubmitting, setFieldValue, resetForm }) => (
                         <Dialog
                             open={open}
-                            onClose={handleClose}
+                            onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
                             aria-labelledby="alert-dialog-title"
                             aria-describedby="alert-dialog-description"
                         >
+                            <DialogTitle sx={{ m: 0, p: 1 }}>
+                                <IconButton onClick={handleClose} size="small" aria-label="fechar" sx={{ position: 'absolute', right: 8, top: 8 }}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </DialogTitle>
                             <Form>
                                 <DialogActions className={classes.botoes}>
                                     <Button

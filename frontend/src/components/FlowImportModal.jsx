@@ -1,14 +1,17 @@
 import React, { useState, useRef } from "react";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
-import { CircularProgress } from "@material-ui/core";
+import CloseIcon from "@mui/icons-material/Close";
+import { CircularProgress } from "@mui/material";
 import { importFlow } from "../services/flowBuilder";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
@@ -47,8 +50,15 @@ const FlowImportModal = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Importar fluxo</DialogTitle>
+    <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }} fullWidth maxWidth="sm">
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Importar fluxo</span>
+          <IconButton onClick={onClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2}>
           <Typography>Selecione um arquivo .zip exportado pelo Flowbuilder.</Typography>

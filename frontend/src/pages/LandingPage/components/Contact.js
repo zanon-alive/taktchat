@@ -1,10 +1,10 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Grid, Box, Card, CardContent } from "@material-ui/core";
-import EmailIcon from "@material-ui/icons/Email";
-import PhoneIcon from "@material-ui/icons/Phone";
-import LocationOnIcon from "@material-ui/icons/LocationOn";
-import AccessTimeIcon from "@material-ui/icons/AccessTime";
+import { makeStyles } from "@mui/styles";
+import { Typography, Grid, Box, Card, CardContent } from "@mui/material";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { getNumberSupport } from "../../../config";
 
 const useStyles = makeStyles((theme) => ({

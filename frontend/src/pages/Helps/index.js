@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { makeStyles, Paper, Typography, Modal, IconButton, Button } from "@material-ui/core";
+import { Paper, Typography, Modal, IconButton, Button } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { Link } from "react-router-dom";
 import { 
   EmojiObjects as AIIcon,
@@ -23,7 +24,7 @@ import {
   AttachMoney,
   Announcement,
   Psychology
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";

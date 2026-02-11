@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@mui/material/styles";
 import { useHistory } from "react-router-dom";
 import {
-  makeStyles,
   Paper,
   InputBase,
   Tabs,
@@ -13,7 +12,8 @@ import {
   Grid,
   Tooltip,
   Switch,
-} from "@material-ui/core";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import {
   Group,
   MoveToInbox as MoveToInboxIcon,
@@ -25,12 +25,12 @@ import {
   TextRotateUp,
   TextRotationDown,
   Android as BotIcon,
-} from "@material-ui/icons";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+} from "@mui/icons-material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { ToggleButton } from "@mui/material";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import NewTicketModal from "../NewTicketModal";
 import TicketsList from "../TicketsListCustom";
@@ -41,7 +41,7 @@ import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
 import { StatusFilter } from "../StatusFilter";
 import { WhatsappsFilter } from "../WhatsappsFilter";
-import { Button, Snackbar } from "@material-ui/core";
+import { Button, Snackbar } from "@mui/material";
 
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -987,7 +987,7 @@ const TicketsManagerTabs = () => {
           indicatorColor="primary"
           textColor="primary"
           variant="fullWidth"
-          scrollButtons="off"
+          scrollButtons={false}
         >
           {/* ATENDENDO */}
           <Tab

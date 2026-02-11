@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import Select from "@material-ui/core/Select";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import { Grid, makeStyles } from "@material-ui/core";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import Select from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import { Box, Grid, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { makeStyles } from "@mui/styles";
 
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Autocomplete, {
-  createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import { Autocomplete, createFilterOptions } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -132,10 +132,15 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid, ticket }) => 
 
 
   return (
-    <Dialog open={modalOpen} onClose={handleClose} maxWidth="md" fullWidth scroll="paper">
+    <Dialog open={modalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} maxWidth="md" fullWidth scroll="paper">
       {/* <form onSubmit={handleSaveTicket}> */}
       <DialogTitle id="form-dialog-title">
-        {i18n.t("transferTicketModal.title")}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>{i18n.t("transferTicketModal.title")}</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>

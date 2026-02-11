@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useContext } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Drawer from "@material-ui/core/Drawer";
-import Link from "@material-ui/core/Link";
-import InputLabel from "@material-ui/core/InputLabel";
-import Paper from "@material-ui/core/Paper";
-import CreateIcon from '@material-ui/icons/Create';
-import BlockIcon from "@material-ui/icons/Block";
-import LockOpenIcon from "@material-ui/icons/LockOpen";
-import VolumeUpIcon from "@material-ui/icons/VolumeUp";
-import VolumeOffIcon from "@material-ui/icons/VolumeOff";
+import { makeStyles } from "@mui/styles";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Drawer from "@mui/material/Drawer";
+import Link from "@mui/material/Link";
+import InputLabel from "@mui/material/InputLabel";
+import Paper from "@mui/material/Paper";
+import CreateIcon from '@mui/icons-material/Create';
+import BlockIcon from "@mui/icons-material/Block";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import formatSerializedId from '../../utils/formatSerializedId';
 import { i18n } from "../../translate/i18n";
 import ContactAvatar from "../ContactAvatar";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import MarkdownWrapper from "../MarkdownWrapper";
-import { CardHeader, Tooltip, Dialog, DialogContent, CircularProgress, Collapse } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { Box, CardHeader, Tooltip, Dialog, DialogContent, DialogTitle, CircularProgress, Collapse } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { ContactForm } from "../ContactForm";
 import ContactModal from "../ContactModal";
 import { ContactNotes } from "../ContactNotes";
@@ -422,7 +422,15 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                 contactId={contact.id}
             ></ContactModal>
             {/* Modal para exibir a imagem do avatar ampliada diretamente */}
-            <Dialog open={avatarModalOpen} onClose={() => setAvatarModalOpen(false)} maxWidth="md">
+            <Dialog open={avatarModalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") setAvatarModalOpen(false); }} maxWidth="md">
+                <DialogTitle>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <span>Avatar</span>
+                    <IconButton onClick={() => setAvatarModalOpen(false)} size="small" aria-label="fechar">
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+                </DialogTitle>
                 <DialogContent style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {avatarImageUrl && (
                         avatarLargeUrl ? (

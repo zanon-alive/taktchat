@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import { format, parseISO, set } from "date-fns";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Stack } from "@mui/material";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
 import { useHistory } from "react-router-dom";
-import { green } from "@material-ui/core/colors";
+import { green } from "@mui/material/colors";
 import {
   Button,
   TableBody,
@@ -24,7 +25,7 @@ import {
   Box,
   Grid,
   useMediaQuery
-} from "@material-ui/core";
+} from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
 import {
   Edit,
@@ -37,7 +38,7 @@ import {
   Facebook,
   Instagram,
   WhatsApp
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 
@@ -419,7 +420,7 @@ const AllConnections = () => {
             </Button>
           )}
         {whatsApp.status === "OPENING" && (
-          <Button size="small" variant="outlined" disabled color="default">
+          <Button size="small" variant="outlined" disabled color="inherit">
             {i18n.t("connections.buttons.connecting")}
           </Button>
         )}

@@ -3,10 +3,10 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 import { isNil } from "lodash";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
 import moment from "moment";
 import {
   Dialog,
@@ -27,15 +27,17 @@ import {
   Tab,
   Tabs,
   Paper,
-  Box
-} from "@material-ui/core";
+  Box,
+  IconButton
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import TabPanel from "../TabPanel";
-import { Autorenew, FileCopy } from "@material-ui/icons";
+import { Autorenew, FileCopy } from "@mui/icons-material";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import SchedulesForm from "../SchedulesForm";
 
@@ -96,7 +98,7 @@ const SessionSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
@@ -199,7 +201,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
       try {
         const { data } = await api.get(`whatsapp-admin/${whatsAppId}?session=0`);
-        setWhatsApp(data);
+        setWhatsApp({ ...data, integrationId: data?.integrationId ?? "" });
         setAttachmentName(data.greetingMediaAttachment);
         setAutoToken(data.token);
         data.promptId ? setSelectedPrompt(data.promptId) : setSelectedPrompt(null);
@@ -378,15 +380,22 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="xl"
         fullWidth
         scroll="paper"
       >
         <DialogTitle>
-          {whatsAppId
-            ? i18n.t("whatsappModal.title.edit")
-            : i18n.t("whatsappModal.title.add")}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>
+              {whatsAppId
+                ? i18n.t("whatsappModal.title.edit")
+                : i18n.t("whatsappModal.title.add")}
+            </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={whatsApp}
@@ -400,13 +409,13 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
           }}
         >
           {({ values, touched, errors, isSubmitting }) => (
-            <Form>
+            <Form noValidate>
               <Paper className={classes.mainPaper} elevation={1}>
                 <Tabs
                   value={tab}
                   indicatorColor="primary"
                   textColor="primary"
-                  scrollButtons="on"
+                  scrollButtons={true}
                   variant="scrollable"
                   onChange={handleTabChange}
                   className={classes.tab}
@@ -710,7 +719,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                               as={Select}
                               name="sendIdQueue"
                               id="sendIdQueue"
-                              value={values.sendIdQueue || '0'}
+                              value={values.sendIdQueue ?? 0}
                               label={i18n.t("whatsappModal.form.sendIdQueue")}
                               placeholder={i18n.t("whatsappModal.form.sendIdQueue")}
                               labelId="sendIdQueue-selection-label"
@@ -772,7 +781,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                         margin="dense"
                         placeholder={i18n.t("queueModal.form.integrationId")}
                         labelId="integrationId-selection-label"                        >
-                        <MenuItem value={null} >{"Desabilitado"}</MenuItem>
+                        <MenuItem value="">{"Desabilitado"}</MenuItem>
                         {integrations.map((integration) => (
                           <MenuItem key={integration.id} value={integration.id}>
                             {integration.name}
@@ -805,7 +814,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                             vertical: "top",
                             horizontal: "left",
                           },
-                          getContentAnchorEl: null,
                         }}
                       >
                         {prompts.map((prompt) => (

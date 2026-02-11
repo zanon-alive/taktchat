@@ -11,31 +11,31 @@ import {
   Chip,
   Box,
   CircularProgress
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import HeadsetMicIcon from '@material-ui/icons/HeadsetMic';
-import SendIcon from '@material-ui/icons/Send';
-import PeopleIcon from '@material-ui/icons/People';
-import AccountTreeIcon from '@material-ui/icons/AccountTree';
-import SyncAltIcon from '@material-ui/icons/SyncAlt';
-import SettingsIcon from '@material-ui/icons/Settings';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import CodeIcon from '@material-ui/icons/Code';
-import MessageIcon from '@material-ui/icons/Message';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
-import TimelineIcon from '@material-ui/icons/Timeline';
-import ChatIcon from '@material-ui/icons/Chat';
-import ScheduleIcon from '@material-ui/icons/Schedule';
-import DeviceHubIcon from '@material-ui/icons/DeviceHub';
-import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import BusinessIcon from '@material-ui/icons/Business';
-import AnnouncementIcon from '@material-ui/icons/Announcement';
-import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import SearchIcon from '@mui/icons-material/Search';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import HeadsetMicIcon from '@mui/icons-material/HeadsetMic';
+import SendIcon from '@mui/icons-material/Send';
+import PeopleIcon from '@mui/icons-material/People';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
+import SettingsIcon from '@mui/icons-material/Settings';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import CodeIcon from '@mui/icons-material/Code';
+import MessageIcon from '@mui/icons-material/Message';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import ChatIcon from '@mui/icons-material/Chat';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import BusinessIcon from '@mui/icons-material/Business';
+import AnnouncementIcon from '@mui/icons-material/Announcement';
+import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import api from '../../services/api';
 import toastError from '../../errors/toastError';
 

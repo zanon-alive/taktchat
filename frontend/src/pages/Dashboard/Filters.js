@@ -10,7 +10,7 @@ import {
     Paper,
     // Select,
     TextField,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import Title from "./Title";
 import { i18n } from "../../translate/i18n";

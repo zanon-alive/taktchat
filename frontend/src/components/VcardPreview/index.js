@@ -5,16 +5,16 @@ import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import { toast } from "react-toastify";
 
-import Avatar from "@material-ui/core/Avatar";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
+import Avatar from "@mui/material/Avatar";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-import { Button, Divider, useTheme, } from "@material-ui/core";
+import { Button, Divider, useTheme, } from "@mui/material";
 import { isNil } from 'lodash';
 import ShowTicketOpen from '../ShowTicketOpenModal';
-import { grey } from '@material-ui/core/colors';
+import { grey } from '@mui/material/colors';
 import ContactAvatar from "../ContactAvatar";
 
 const VcardPreview = ({ contact, numbers, queueId, whatsappId }) => {

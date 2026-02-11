@@ -17,9 +17,10 @@ import {
 	IconButton,
 	Paper,
 	Tooltip
-} from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { green, grey } from "@material-ui/core/colors";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { green, grey } from "@mui/material/colors";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
@@ -33,19 +34,19 @@ import ContactTag from "../ContactTag";
 import ContactAvatar from "../ContactAvatar";
 import { v4 as uuidv4 } from "uuid";
 
-import GroupIcon from '@material-ui/icons/Group';
+import GroupIcon from '@mui/icons-material/Group';
 import ConnectionIcon from "../ConnectionIcon";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 import TransferTicketModalCustom from "../TransferTicketModalCustom";
 import ShowTicketOpen from "../ShowTicketOpenModal";
 import { isNil } from "lodash";
 import { toast } from "react-toastify";
-import { Done, HighlightOff, Replay, SwapHoriz } from "@material-ui/icons";
+import { Done, HighlightOff, Replay, SwapHoriz } from "@mui/icons-material";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import CloseIcon from "@material-ui/icons/Close";
-import MessageIcon from "@material-ui/icons/Message";
-import { blue } from "@material-ui/core/colors";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import CloseIcon from "@mui/icons-material/Close";
+import MessageIcon from "@mui/icons-material/Message";
+import { blue } from "@mui/material/colors";
 
 const useStyles = makeStyles((theme) => ({
     ticket: {
@@ -589,11 +590,11 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
             {/* Improved Message Dialog */}
             <Dialog 
                 open={openTicketMessageDialog} 
-                onClose={() => setOpenTicketMessageDialog(false)}
+                onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") setOpenTicketMessageDialog(false); }}
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle disableTypography className={classes.dialogTitle}>
+                <DialogTitle component="div" className={classes.dialogTitle}>
                     <Typography variant="h6">
                         Espiando a conversa
                     </Typography>

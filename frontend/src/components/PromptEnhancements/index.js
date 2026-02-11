@@ -20,15 +20,17 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
-} from '@material-ui/core';
+  MenuItem,
+  IconButton
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Memory as BrainIcon,
   Description as TemplateIcon,
   History as VersionIcon,
   Info as InfoIcon
-} from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/icons-material';
+import { makeStyles } from '@mui/styles';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -1126,11 +1128,16 @@ const PromptEnhancements = ({ open, onClose, onSelectTemplate, filterByProvider,
   ];
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }} maxWidth="lg" fullWidth>
       <DialogTitle>
-        <Box display="flex" alignItems="center" gap={1}>
-          <InfoIcon color="primary" />
-          {filterByProvider ? `Templates para ${filterByProvider.toUpperCase()}` : isPresetMode ? 'Templates para Presets' : 'Melhorias para Prompts'}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" alignItems="center" gap={1}>
+            <InfoIcon color="primary" />
+            {filterByProvider ? `Templates para ${filterByProvider.toUpperCase()}` : isPresetMode ? 'Templates para Presets' : 'Melhorias para Prompts'}
+          </Box>
+          <IconButton onClick={onClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
         </Box>
       </DialogTitle>
       

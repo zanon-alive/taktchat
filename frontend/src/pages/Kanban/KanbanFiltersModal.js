@@ -14,8 +14,10 @@ import {
   Box,
   Grid,
   Typography,
-  Popover
-} from "@material-ui/core";
+  Popover,
+  IconButton
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { DateRangePicker } from 'materialui-daterange-picker';
 import { format, parseISO, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 
@@ -66,8 +68,15 @@ export default function KanbanFiltersModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Filtrar e ordenar</DialogTitle>
+    <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }} fullWidth maxWidth="sm">
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Filtrar e ordenar</span>
+          <IconButton onClick={onClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
           {/* Linha 1: Filas + Usuários */}
@@ -159,7 +168,7 @@ export default function KanbanFiltersModal({
         </Popover>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClear} color="default">Limpar filtros</Button>
+        <Button onClick={handleClear} color="inherit">Limpar filtros</Button>
         <Button onClick={handleApply} color="primary" variant="contained">Aplicar</Button>
       </DialogActions>
     </Dialog>

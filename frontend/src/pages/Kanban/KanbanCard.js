@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Avatar, Chip, Typography, Tooltip, IconButton, Menu, MenuItem, ListItemText } from "@material-ui/core";
-import { Facebook, Instagram, WhatsApp, Close as CloseIcon } from "@material-ui/icons";
+import { makeStyles } from "@mui/styles";
+import { Avatar, Chip, Typography, Tooltip, IconButton, Menu, MenuItem, ListItemText } from "@mui/material";
+import { Facebook, Instagram, WhatsApp, Close as CloseIcon } from "@mui/icons-material";
 import ContactAvatar from "../../components/ContactAvatar";
-import { ChatBubbleOutline, AttachFile, EventAvailable } from "@material-ui/icons";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { ChatBubbleOutline, AttachFile, EventAvailable } from "@mui/icons-material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { i18n } from "../../translate/i18n";
 import { format, parseISO } from "date-fns";
 
@@ -246,7 +246,7 @@ export default function KanbanCard({ ticket, onClick, allTags = [], onMoveReques
       </div>
 
       {/* Menus (fixos no topo/esquerda) */}
-      <Menu anchorEl={menuEl} open={Boolean(menuEl)} onClose={()=>setMenuEl(null)} getContentAnchorEl={null} anchorOrigin={{vertical:'bottom', horizontal:'left'}} transformOrigin={{vertical:'top', horizontal:'left'}} onClick={(e)=>e.stopPropagation()}>
+      <Menu anchorEl={menuEl} open={Boolean(menuEl)} onClose={()=>setMenuEl(null)} anchorOrigin={{vertical:'bottom', horizontal:'left'}} transformOrigin={{vertical:'top', horizontal:'left'}} onClick={(e)=>e.stopPropagation()}>
         <MenuItem onClick={async ()=>{ try { await navigator.clipboard.writeText(`${window.location.origin}/tickets/${ticket?.uuid}`); } catch(e){} setMenuEl(null); }}>
           <ListItemText primary={i18n.t('kanban.copyTicketLink')} />
         </MenuItem>
@@ -270,7 +270,7 @@ export default function KanbanCard({ ticket, onClick, allTags = [], onMoveReques
           <ListItemText primary={i18n.t('kanban.togglePriority')} />
         </MenuItem>
       </Menu>
-      <Menu anchorEl={moveEl} open={Boolean(moveEl)} onClose={()=>setMoveEl(null)} getContentAnchorEl={null} anchorOrigin={{vertical:'bottom', horizontal:'left'}} transformOrigin={{vertical:'top', horizontal:'left'}} onClick={(e)=>e.stopPropagation()}>
+      <Menu anchorEl={moveEl} open={Boolean(moveEl)} onClose={()=>setMoveEl(null)} anchorOrigin={{vertical:'bottom', horizontal:'left'}} transformOrigin={{vertical:'top', horizontal:'left'}} onClick={(e)=>e.stopPropagation()}>
         {allTags && allTags.length ? allTags.map(t=> (
           <MenuItem key={t.id} onClick={()=>{ setMoveEl(null); setMenuEl(null); onMoveRequest && onMoveRequest(String(t.id)); }}>
             <span style={{ width: 8, height: 8, borderRadius: 999, background: t.color, display: 'inline-block', marginRight: 8 }} />

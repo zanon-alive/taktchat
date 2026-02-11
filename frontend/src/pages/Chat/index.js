@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { useParams, useHistory } from "react-router-dom";
 
+import { makeStyles } from "@mui/styles";
 import {
   Button,
   Dialog,
@@ -9,12 +10,13 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  makeStyles,
   Paper,
   Tab,
   Tabs,
   TextField,
-} from "@material-ui/core";
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import ChatList from "./ChatList";
 import ChatMessages from "./ChatMessages";
 import { UsersFilter } from "../../components/UsersFilter";
@@ -24,7 +26,6 @@ import api from "../../services/api";
 import { has, isObject } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
@@ -144,7 +145,9 @@ export function ChatModal({
   );
 }
 
-function Chat(props) {
+function Chat() {
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const classes = useStyles();
   const { user, socket } = useContext(AuthContext);
   const history = useHistory();
@@ -459,10 +462,10 @@ function Chat(props) {
         handleClose={() => setShowDialog(false)}
       />
       <Paper className={classes.mainContainer}>
-        {isWidthUp("md", props.width) ? renderGrid() : renderTab()}
+        {isMdUp ? renderGrid() : renderTab()}
       </Paper>
     </>
   );
 }
 
-export default withWidth()(Chat);
+export default Chat;

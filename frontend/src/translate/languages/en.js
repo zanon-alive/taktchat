@@ -1,6 +1,13 @@
 const messages = {
 	en: {
 	  translations: {
+		validation: {
+		  required: "Required",
+		  tooShort: "Too short",
+		  emailInvalid: "Invalid email",
+		  arrayRequired: "Must add at least one item",
+		  typeString: "Value must be text. Use an empty value if needed.",
+		},
 		signup: {
 		  title: "Sign Up",
 		  toasts: {

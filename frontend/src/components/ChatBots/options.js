@@ -1,28 +1,28 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
-import { makeStyles } from "@material-ui/core/styles";
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
-import StepContent from "@material-ui/core/StepContent";
+import { makeStyles } from "@mui/styles";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import StepContent from "@mui/material/StepContent";
 import api from "../../services/api";
-import Typography from "@material-ui/core/Typography";
-import EditIcon from "@material-ui/icons/Edit";
-import { CircularProgress, Grid, IconButton, InputLabel, MenuItem, Select, Checkbox } from "@material-ui/core";
+import Typography from "@mui/material/Typography";
+import EditIcon from "@mui/icons-material/Edit";
+import { CircularProgress, Grid, IconButton, InputLabel, MenuItem, Select, Checkbox } from "@mui/material";
 import { Formik, Field, FieldArray } from "formik";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import SaveIcon from "@material-ui/icons/Save";
-import TextField from "@material-ui/core/TextField";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import SaveIcon from "@mui/icons-material/Save";
+import TextField from "@mui/material/TextField";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import CustomToolTip from "../ToolTips";
 import ConfirmationModal from "../ConfirmationModal";
 import { i18n } from "../../translate/i18n";
-import Switch from "@material-ui/core/Switch";
-import { FormControlLabel, FormControl } from "@material-ui/core";
+import Switch from "@mui/material/Switch";
+import { FormControlLabel, FormControl } from "@mui/material";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import useQueues from "../../hooks/useQueues";
 import UserStatusIcon from "../UserModal/statusIcon";
 
@@ -30,10 +30,10 @@ const QueueSchema = Yup.object().shape({
   options: Yup.array()
     .of(
       Yup.object().shape({
-        name: Yup.string().min(4, "too short").required("Required"),
+        name: Yup.string().min(4, () => i18n.t("validation.tooShort")).required(() => i18n.t("validation.required")),
       })
     )
-    .required("Must have friends"),
+    .required(() => i18n.t("validation.arrayRequired")),
 });
 
 const useStyles = makeStyles((theme) => ({

@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useContext } from "react";
 
-import Grid from "@material-ui/core/Grid";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import FormHelperText from "@material-ui/core/FormHelperText";
+import Grid from "@mui/material/Grid";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import FormHelperText from "@mui/material/FormHelperText";
 
 import useSettings from "../../hooks/useSettings";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { grey, blue } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { grey, blue } from "@mui/material/colors";
 
-import { Tab, Tabs, TextField } from "@material-ui/core";
+import { Tab, Tabs, TextField } from "@mui/material";
 import { i18n } from "../../translate/i18n";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 
@@ -918,7 +918,7 @@ export default function Options(props) {
               value={0}
               indicatorColor="primary"
               textColor="primary"
-              scrollButtons="on"
+              scrollButtons={true}
               variant="scrollable"
               className={classes.tab}
             >

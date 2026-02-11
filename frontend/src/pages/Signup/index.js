@@ -5,21 +5,21 @@ import { useHistory } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
-import Box from "@material-ui/core/Box";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import { makeStyles } from "@mui/styles";
+import Container from "@mui/material/Container";
 import usePlans from "../../hooks/usePlans";
 import { i18n } from "../../translate/i18n";
-import { FormControl } from "@material-ui/core";
-import { InputLabel, MenuItem, Select } from "@material-ui/core";
+import { FormControl } from "@mui/material";
+import { InputLabel, MenuItem, Select } from "@mui/material";
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
 
@@ -96,6 +96,8 @@ const SignUp = () => {
       : process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserCreationStatus = async () => {
       try {
         const response = await fetch(`${backendUrl}/settings/userCreation`, {
@@ -111,21 +113,29 @@ const SignUp = () => {
 
         const data = await response.json();
         const isEnabled = data.userCreation === "enabled";
-        setUserCreationEnabled(isEnabled);
+        if (isMounted) {
+          setUserCreationEnabled(isEnabled);
+        }
 
-        if (!isEnabled) {
+        if (isMounted && !isEnabled) {
           toast.info("Cadastro de novos usuários está desabilitado.");
           history.push("/login");
         }
       } catch (err) {
         console.error("Erro ao verificar userCreation:", err);
-        setUserCreationEnabled(false);
-        toast.error("Erro ao verificar permissão de cadastro.");
-        history.push("/login");
+        if (isMounted) {
+          setUserCreationEnabled(false);
+          toast.error("Erro ao verificar permissão de cadastro.");
+          history.push("/login");
+        }
       }
     };
 
     fetchUserCreationStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, [backendUrl, history]);
 
   useEffect(() => {
@@ -174,7 +184,7 @@ const SignUp = () => {
           }}
         >
           {({ touched, errors, isSubmitting }) => (
-            <Form className={classes.form}>
+            <Form noValidate className={classes.form}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <Field

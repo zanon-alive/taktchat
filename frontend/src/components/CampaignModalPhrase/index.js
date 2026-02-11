@@ -5,18 +5,19 @@ import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 import { head } from "lodash";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import AttachFileIcon from "@material-ui/icons/AttachFile";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 import { i18n } from "../../translate/i18n";
 import moment from "moment";
@@ -34,7 +35,7 @@ import {
   Tab,
   Tabs,
   Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import ConfirmationModal from "../ConfirmationModal";
 import { Autocomplete, Checkbox, Chip, Stack } from "@mui/material";
@@ -101,8 +102,10 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
   if (!FlowCampaignId) {
     const stored = localStorage.getItem("selectedWhatsappId");
     if (stored) {
-      console.log("Forçando selectedWhatsapp via localStorage:", stored);
-      setSelectedWhatsapp(parseInt(stored));
+      const parsed = parseInt(stored, 10);
+      if (Number.isFinite(parsed)) {
+        setSelectedWhatsapp(parsed);
+      }
     }
   }
 }, [FlowCampaignId]);
@@ -139,7 +142,7 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
         setFlowSelected(nameFlow[0].name);
         if (res.data.details.whatsappId) {
           console.log("Aplicando whatsappId do banco:", res.data.details.whatsappId);
-          setSelectedWhatsapp(res.data.details.whatsappId);
+          setSelectedWhatsapp(res.data.details.whatsappId ?? "");
         }
       }
       setLoading(false);
@@ -263,21 +266,24 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         fullWidth
         maxWidth="md"
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {campaignEditable ? (
-            <>
-              {FlowCampaignId
-                ? `Editar campanha com fluxo por frase`
-                : `Nova campanha com fluxo por frase`}
-            </>
-          ) : (
-            <>{`${i18n.t("campaigns.dialog.readonly")}`}</>
-          )}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>
+              {campaignEditable ? (
+                FlowCampaignId ? "Editar campanha com fluxo por frase" : "Nova campanha com fluxo por frase"
+              ) : (
+                i18n.t("campaigns.dialog.readonly")
+              )}
+            </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <div style={{ display: "none" }}>
           <input type="file" ref={attachmentFile} />
@@ -291,7 +297,7 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                   label={""}
                   name="text"
                   variant="outlined"
-                  error={dataItemError.name}
+                  error={dataItemError.name ? true : undefined}
                   defaultValue={dataItem.name}
                   margin="dense"
                   onChange={e => {
@@ -311,7 +317,6 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                   disablePortal
                   id="combo-box-demo"
                   value={flowSelected}
-                  error={dataItemError.flowId}
                   defaultValue={flowSelected}
                   options={flowsData}
                   onChange={(event, newValue) => {
@@ -321,7 +326,7 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                   renderInput={params => (
                     <TextField
                       {...params}
-                      error={dataItemError.flowId}
+                      error={dataItemError.flowId ? true : undefined}
                       variant="outlined"
                       style={{ width: "100%" }}
                       placeholder="Escolha um fluxo"
@@ -345,10 +350,8 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                   fullWidth
                   displayEmpty
                   variant="outlined"
-                  value={selectedWhatsapp}
-                  onChange={(e) => {
-                    setSelectedWhatsapp(e.target.value)
-                  }}
+                  value={selectedWhatsapp ?? ""}
+                  onChange={(e) => setSelectedWhatsapp(e.target.value || "")}
                   MenuProps={{
                     anchorOrigin: {
                       vertical: "bottom",
@@ -358,7 +361,6 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                       vertical: "top",
                       horizontal: "left"
                     },
-                    getContentAnchorEl: null,
                   }}
                   renderValue={() => {
                     if (selectedWhatsapp === "") {
@@ -368,7 +370,9 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                     return whatsapp.name
                   }}
                 >
-
+                  <MenuItem value="">
+                    <em>Selecione uma Conexão</em>
+                  </MenuItem>
                   {whatsApps?.length > 0 &&
                     whatsApps.map((whatsapp, key) => (
                       <MenuItem dense key={key} value={whatsapp.id}>
@@ -392,7 +396,7 @@ const CampaignModalPhrase = ({ open, onClose, FlowCampaignId, onSave, defaultWha
                   label={""}
                   name="text"
                   variant="outlined"
-                  error={dataItemError.phrase}
+                  error={dataItemError.phrase ? true : undefined}
                   defaultValue={dataItem.phrase}
                   margin="dense"
                   onChange={e => {

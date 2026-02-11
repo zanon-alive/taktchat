@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 
 import ModalImage from "react-modal-image";
 import api from "../../services/api";
@@ -69,14 +69,15 @@ const ModalImageCors = ({ imageUrl }) => {
 
 	useEffect(() => {
 		if (!imageUrl) return;
+		let isMounted = true;
 		// Detecta GIF pela URL inicial
 		const isGifUrl = /\.gif(\?.*)?$/i.test(imageUrl || "");
 		// Detecta sticker pela URL (.webp ou .gif pequenos)
 		const isStickerUrl = /\.(webp|gif)(\?.*)?$/i.test(imageUrl || "");
-		
+
 		setIsGif(isGifUrl);
 		setIsSticker(isStickerUrl);
-		
+
 		const fetchImage = async () => {
 			try {
 				// Limpar duplicação de caminho se existir
@@ -85,22 +86,22 @@ const ModalImageCors = ({ imageUrl }) => {
 					// Remove a primeira ocorrência de /public/companyX/
 					cleanUrl = cleanUrl.replace(/^\/public\/company\d+\//, '/');
 				}
-				
+
 				// Verificar se URL é absoluta (começa com http:// ou https://)
 				const isAbsoluteUrl = /^https?:\/\//i.test(cleanUrl);
-				
+
 				let data, headers;
-				
+
 				if (isAbsoluteUrl) {
 					// URL absoluta: usar fetch direto para evitar conflito com baseURL do axios
 					const response = await fetch(cleanUrl, {
 						credentials: 'include'  // Enviar cookies para autenticação
 					});
-					
+
 					if (!response.ok) {
 						throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 					}
-					
+
 					data = await response.blob();
 					headers = {
 						"content-type": response.headers.get("content-type") || "image/jpeg"
@@ -113,7 +114,8 @@ const ModalImageCors = ({ imageUrl }) => {
 					data = res.data;
 					headers = res.headers;
 				}
-				
+
+				if (!isMounted) return;
 				const contentType = headers["content-type"] || "";
 				if (contentType.includes("gif")) {
 					setIsGif(true);
@@ -122,29 +124,36 @@ const ModalImageCors = ({ imageUrl }) => {
 				if (contentType.includes("webp")) {
 					setIsSticker(true);
 				}
+				if (!isMounted) return;
 				const url = window.URL.createObjectURL(
 					new Blob([data], { type: contentType })
 				);
 				setBlobUrl(url);
 				setFetching(false);
 			} catch (error) {
+				if (!isMounted) return;
 				console.error('[ModalImageCors] Erro ao carregar imagem:', error);
 				console.error('[ModalImageCors] URL tentada:', imageUrl);
 				setFetching(false);
 			}
 		};
 		fetchImage();
+		return () => { isMounted = false; };
 	}, [imageUrl]);
 
 	// Checa dimensões da imagem para exibir selo HD
 	useEffect(() => {
 		const src = blobUrl || imageUrl;
 		if (!src) return;
+		let isMounted = true;
 		const img = new Image();
 		img.onload = () => {
-			setIsHd((img.naturalWidth || 0) >= 1280 && (img.naturalHeight || 0) >= 720);
+			if (isMounted) {
+				setIsHd((img.naturalWidth || 0) >= 1280 && (img.naturalHeight || 0) >= 720);
+			}
 		};
 		img.src = src;
+		return () => { isMounted = false; };
 	}, [blobUrl, imageUrl]);
 
 	return (

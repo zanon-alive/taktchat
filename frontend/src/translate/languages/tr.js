@@ -1,6 +1,13 @@
 const messages = {
   tr: {
     translations: {
+      validation: {
+        required: "Bu alan zorunludur",
+        tooShort: "Çok kısa",
+        emailInvalid: "Geçersiz e-posta",
+        arrayRequired: "En az bir öğe eklenmelidir",
+        typeString: "Değer metin olmalıdır. Gerekirse boş bir değer kullanın.",
+      },
       signup: {
         title: "Kaydol",
         toasts: {

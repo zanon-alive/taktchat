@@ -1,6 +1,6 @@
-import { Button, IconButton } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { PlayArrow, Pause } from "@material-ui/icons";
+import { Button, IconButton } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { PlayArrow, Pause } from "@mui/icons-material";
 import React, { useRef, useEffect, useState } from "react";
 import ContactAvatar from "../ContactAvatar";
 import { openApi } from "../../services/api";

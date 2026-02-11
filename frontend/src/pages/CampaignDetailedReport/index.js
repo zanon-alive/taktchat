@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
 import {
   Paper,
   TextField,
@@ -20,31 +21,31 @@ import {
   Box,
   LinearProgress,
   useMediaQuery
-} from "@material-ui/core";
+} from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
-import SearchIcon from "@material-ui/icons/Search";
-import RefreshIcon from "@material-ui/icons/Refresh";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import ErrorIcon from "@material-ui/icons/Error";
-import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
-import BlockIcon from "@material-ui/icons/Block";
-import SyncIcon from "@material-ui/icons/Sync";
-import TrendingUpIcon from "@material-ui/icons/TrendingUp";
-import TrendingDownIcon from "@material-ui/icons/TrendingDown";
-import AssessmentIcon from "@material-ui/icons/Assessment";
-import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
-import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
-import StopIcon from "@material-ui/icons/Stop";
-import ScheduleIcon from "@material-ui/icons/Schedule";
-import SpeedIcon from "@material-ui/icons/Speed";
-import MessageIcon from "@material-ui/icons/Message";
-import PhoneAndroidIcon from "@material-ui/icons/PhoneAndroid";
-import InfoIcon from "@material-ui/icons/Info";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import SearchIcon from "@mui/icons-material/Search";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import BlockIcon from "@mui/icons-material/Block";
+import SyncIcon from "@mui/icons-material/Sync";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
+import StopIcon from "@mui/icons-material/Stop";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import SpeedIcon from "@mui/icons-material/Speed";
+import MessageIcon from "@mui/icons-material/Message";
+import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
+import InfoIcon from "@mui/icons-material/Info";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { toast } from "react-toastify";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";

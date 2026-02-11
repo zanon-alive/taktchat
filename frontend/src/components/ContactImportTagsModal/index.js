@@ -24,10 +24,11 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails
-} from '@material-ui/core';
-import { Refresh, ExpandMore } from "@material-ui/icons";
-import { Alert } from '@material-ui/lab';
-import { makeStyles } from "@material-ui/core/styles";
+} from '@mui/material';
+import CloseIcon from "@mui/icons-material/Close";
+import { Refresh, ExpandMore } from "@mui/icons-material";
+import { Alert } from '@mui/material';
+import { makeStyles } from "@mui/styles";
 import { toast } from 'react-toastify';
 import toastError from '../../errors/toastError';
 import api from '../../services/api';
@@ -553,9 +554,14 @@ const ContactImportTagsModal = ({ isOpen, handleClose, onImport }) => {
 
   return (
     <>
-    <Dialog fullWidth maxWidth="md" open={isOpen} onClose={handleCloseModal}>
+    <Dialog fullWidth maxWidth="md" open={isOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleCloseModal(); }}>
       <DialogTitle>
-        Importar Contatos com Tags
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Importar Contatos com Tags</span>
+          <IconButton onClick={handleCloseModal} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent>
@@ -977,8 +983,15 @@ const ContactImportTagsModal = ({ isOpen, handleClose, onImport }) => {
     </Dialog>
 
     {/* Modal de QR Code do WhatsApp-Web.js */}
-    <Dialog fullWidth maxWidth="xs" open={qrOpen} onClose={() => setQrOpen(false)}>
-      <DialogTitle>Conectar WhatsApp-Web.js</DialogTitle>
+    <Dialog fullWidth maxWidth="xs" open={qrOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") setQrOpen(false); }}>
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Conectar WhatsApp-Web.js</span>
+          <IconButton onClick={() => setQrOpen(false)} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" p={1}>
           <Typography variant="body2" gutterBottom>

@@ -29,7 +29,7 @@ import {
   IconButton,
   Tooltip,
   Badge
-} from "@material-ui/core";
+} from "@mui/material";
 import {
   ShoppingCart as ShoppingIcon,
   Support as SupportIcon,
@@ -46,8 +46,8 @@ import {
   Security as SecurityIcon,
   TrendingUp as TrendingIcon,
   Close as CloseIcon
-} from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/icons-material";
+import { makeStyles } from "@mui/styles";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
@@ -481,7 +481,7 @@ const QueueTemplateGallery = ({ open, onClose, onTemplatesSelected }) => {
     <>
       <Dialog
         open={open}
-        onClose={onClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }}
         maxWidth="lg"
         fullWidth
         className={classes.setupDialog}

@@ -2,19 +2,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { Formik, Form } from "formik";
 import {
+  Box,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   Grid,
+  IconButton,
   TextField,
   CircularProgress,
   FormControlLabel,
   Checkbox,
   Typography,
-} from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Autocomplete } from "@mui/material";
 import { TagsFilter } from "../TagsFilter";
 import api from "../../services/api";
 import { toast } from "react-toastify";
@@ -112,8 +115,15 @@ const BulkEditContactsModal = ({ open, onClose, selectedContactIds = [], onSucce
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Editar contatos em massa</DialogTitle>
+    <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }} fullWidth maxWidth="sm">
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Editar contatos em massa</span>
+          <IconButton onClick={onClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <Formik
         initialValues={initialValues}
         enableReinitialize={true}
@@ -178,7 +188,7 @@ const BulkEditContactsModal = ({ open, onClose, selectedContactIds = [], onSucce
                     value={typeof values.whatsapp === "string" ? null : values.whatsapp}
                     onChange={(e, v) => setFieldValue("whatsapp", v)}
                     getOptionLabel={(opt) => opt?.name || ""}
-                    getOptionSelected={(opt, val) => opt?.id === val?.id}
+                    isOptionEqualToValue={(opt, val) => opt?.id === val?.id}
                     renderInput={(params) => (
                       <TextField {...params} variant="outlined" margin="dense" label="Conexão WhatsApp" />
                     )}

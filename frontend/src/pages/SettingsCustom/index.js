@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
-import { makeStyles, Paper, Tabs, Tab } from "@material-ui/core";
+import { Paper, Tabs, Tab } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
 import TabPanel from "../../components/TabPanel";
 
@@ -144,7 +145,7 @@ const SettingsCustom = () => {
               value={tab}
               indicatorColor="primary"
               textColor="primary"
-              scrollButtons="on"
+              scrollButtons={true}
               variant="scrollable"
               onChange={handleTabChange}
               className={classes.tab}

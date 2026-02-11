@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@mui/material";
 import { InputField, SelectField } from "../../FormFields";
 import { AuthContext } from "../../../context/Auth/AuthContext";
 

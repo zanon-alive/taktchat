@@ -1,9 +1,9 @@
 import React from "react";
 
-import { grey } from "@material-ui/core/colors";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
-import InstagramIcon from "@material-ui/icons/Instagram";
-import FacebookIcon from "@material-ui/icons/Facebook";
+import { grey } from "@mui/material/colors";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import FacebookIcon from "@mui/icons-material/Facebook";
 
 const ConnectionIcon = ({ connectionType }) => {
 

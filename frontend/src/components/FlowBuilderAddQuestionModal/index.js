@@ -2,18 +2,20 @@ import React, { useState, useEffect, useRef } from "react";
 
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import { MenuItem, FormControl, InputLabel, Select } from "@material-ui/core";
-import { Visibility, VisibilityOff } from "@material-ui/icons";
-import { InputAdornment, IconButton } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { InputAdornment, IconButton } from "@mui/material";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import { i18n } from "../../translate/i18n";
-import TextField from "@material-ui/core/TextField";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -149,13 +151,18 @@ const FlowBuilderAddQuestionModal = ({
     <div className={classes.root}>
       <Dialog
         open={activeModal}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         fullWidth
         maxWidth="md"
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {open === "create" ? `Adicionar Perguta ao fluxo` : `Editar Perguta`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{open === "create" ? "Adicionar Perguta ao fluxo" : "Editar Perguta"}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={integration}
@@ -168,7 +175,7 @@ const FlowBuilderAddQuestionModal = ({
           }}
         >
           {({ touched, errors, isSubmitting, values }) => (
-            <Form style={{ width: "100%" }}>
+            <Form noValidate style={{ width: "100%" }}>
               <DialogContent dividers>
                 <TextField
                   label={"Mensagem"}

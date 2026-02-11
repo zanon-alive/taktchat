@@ -1,4 +1,4 @@
-import Avatar from "@material-ui/core/Avatar";
+import Avatar from "@mui/material/Avatar";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { parseISO, format, isSameDay } from "date-fns";
 import clsx from "clsx";
@@ -13,17 +13,17 @@ import {
 	Badge,
 	ListItemSecondaryAction,
 	Box
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
-import MarkChatReadIcon from "@material-ui/icons/MarkChatRead";
-import MarkChatUnreadIcon from "@material-ui/icons/MarkChatUnread";
+import MarkChatReadIcon from "@mui/icons-material/MarkChatRead";
+import MarkChatUnreadIcon from "@mui/icons-material/MarkChatUnread";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import MarkdownWrapper from "../MarkdownWrapper";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";

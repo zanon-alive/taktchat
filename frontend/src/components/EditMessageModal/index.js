@@ -7,13 +7,13 @@ import {
   IconButton,
   Paper,
   InputBase
-} from "@material-ui/core";
-import CloseIcon from '@material-ui/icons/Close';
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+} from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import whatsBackground from "../../assets/wa-background.png";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
 import MarkdownWrapper from "../MarkdownWrapper";
-import MoodIcon from "@material-ui/icons/Mood";
+import MoodIcon from "@mui/icons-material/Mood";
 import api from "../../services/api";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png"
 
@@ -169,7 +169,7 @@ const EditMessageModal = ({ open, onClose, onSave, message }) => {
   return (
     <Dialog
       open={open}
-      onClose={() => onClose(false)}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(false); }}
       aria-labelledby="edit-message-dialog"
       PaperProps={{
         style: {

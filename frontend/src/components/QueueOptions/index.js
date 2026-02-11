@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
-import Typography from "@material-ui/core/Typography";
-import { Button, IconButton, StepContent, TextField } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import SaveIcon from "@material-ui/icons/Save";
-import EditIcon from "@material-ui/icons/Edit";
+import { makeStyles } from "@mui/styles";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Typography from "@mui/material/Typography";
+import { Button, IconButton, StepContent, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import SaveIcon from "@mui/icons-material/Save";
+import EditIcon from "@mui/icons-material/Edit";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 

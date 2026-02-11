@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import makeStyles from "@material-ui/core/styles/makeStyles";
+import { makeStyles } from "@mui/styles";
 import { read, utils } from "xlsx";
 import {
   Button,
@@ -15,7 +15,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@material-ui/core";
+} from "@mui/material";
 import api from "../../services/api";
 import upload from "../../assets/upload.gif";
 import { useHistory } from "react-router-dom";

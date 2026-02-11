@@ -4,18 +4,18 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import AttachFileIcon from "@material-ui/icons/AttachFile";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import IconButton from "@material-ui/core/IconButton";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import IconButton from "@mui/material/IconButton";
 import { i18n } from "../../translate/i18n";
 import { head } from "lodash";
 import api from "../../services/api";
@@ -25,12 +25,14 @@ import MessageVariablesPicker from "../MessageVariablesPicker";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 
 import {
+  Box,
   FormControl,
   Grid,
   InputLabel,
   MenuItem,
   Select,
-} from "@material-ui/core";
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import ConfirmationModal from "../ConfirmationModal";
 
 
@@ -198,15 +200,18 @@ const QuickMessageDialog = ({ open, onClose, quickemessageId, reload }) => {
       </ConfirmationModal>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="xs"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {quickemessageId
-            ? `${i18n.t("quickMessages.dialog.edit")}`
-            : `${i18n.t("quickMessages.dialog.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{quickemessageId ? i18n.t("quickMessages.dialog.edit") : i18n.t("quickMessages.dialog.add")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <div style={{ display: "none" }}>
           <input
@@ -228,7 +233,7 @@ const QuickMessageDialog = ({ open, onClose, quickemessageId, reload }) => {
           }}
         >
           {({ touched, errors, isSubmitting, setFieldValue, values }) => (
-            <Form>
+            <Form noValidate>
               <DialogContent dividers>
                 <Grid spacing={2} container>
                   <Grid xs={12} item>

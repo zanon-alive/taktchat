@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Field } from "formik";
-import { makeStyles } from "@material-ui/core/styles";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
+import { makeStyles } from "@mui/styles";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
-import Typography from "@material-ui/core/Typography";
+import Typography from "@mui/material/Typography";
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -19,15 +19,19 @@ const useStyles = makeStyles(theme => ({
 const QueueSelectSingle = ({ selectedQueueId, onChange, label }) => {
     const classes = useStyles();
     const [queues, setQueues] = useState([]);
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
 
     useEffect(() => {
         (async () => {
             try {
                 const { data } = await api.get("/queue");
-                setQueues(data);
-                // Debug removido - funcionando corretamente
+                if (isMounted.current) setQueues(data);
             } catch (err) {
-                toastError(`QUEUESELETSINGLE >>> ${err}`);
+                if (isMounted.current) toastError(`QUEUESELETSINGLE >>> ${err}`);
             }
         })();
     }, []);

@@ -2,11 +2,12 @@
 import React, { useState, useCallback, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import { add, format, parseISO } from "date-fns";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { green } from "@mui/material/colors";
 import {
   Button,
   IconButton,
@@ -20,7 +21,7 @@ import {
   Chip,
   Grid,
   useMediaQuery
-} from "@material-ui/core";
+} from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
 import {
   Edit,
@@ -33,7 +34,7 @@ import {
   Facebook,
   Instagram,
   WhatsApp,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 
@@ -523,7 +524,7 @@ const Connections = () => {
             />
           )}
         {whatsApp.status === "OPENING" && (
-          <Button size="small" variant="outlined" disabled color="default">
+          <Button size="small" variant="outlined" disabled color="inherit">
             {i18n.t("connections.buttons.connecting")}
           </Button>
         )}
@@ -688,9 +689,9 @@ const Connections = () => {
                               />
                               WhatsApp
                             </MenuItem>
-                            {/* FACEBOOK */}
+                            {/* FACEBOOK - requer HTTPS e SDK carregado (FB.init) antes de FB.login */}
                             <FacebookLogin
-                              appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                              appId={process.env.REACT_APP_FACEBOOK_APP_ID || ""}
                               autoLoad={false}
                               fields="name,email,picture"
                               version="9.0"
@@ -698,9 +699,13 @@ const Connections = () => {
                                 "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
                                 : "public_profile,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
                               callback={responseFacebook}
-                              render={(renderProps) => (
+                              isDisabled={!process.env.REACT_APP_FACEBOOK_APP_ID}
+                              render={(renderProps) => {
+                                const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+                                const sdkReady = renderProps.isSdkLoaded && !renderProps.isProcessing;
+                                return (
                                 <MenuItem
-                                  disabled={planConfig?.plan?.useFacebook ? false : true}
+                                  disabled={!(planConfig?.plan?.useFacebook) || !sdkReady || !isHttps}
                                   onClick={renderProps.onClick}
                                 >
                                   <Facebook
@@ -712,11 +717,12 @@ const Connections = () => {
                                   />
                                   Facebook
                                 </MenuItem>
-                              )}
+                                );
+                              }}
                             />
                             {/* INSTAGRAM */}
                             <FacebookLogin
-                              appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                              appId={process.env.REACT_APP_FACEBOOK_APP_ID || ""}
                               autoLoad={false}
                               fields="name,email,picture"
                               version="9.0"
@@ -724,9 +730,13 @@ const Connections = () => {
                                 "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement,business_management"
                                 : "public_profile,instagram_basic,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement"}
                               callback={responseInstagram}
-                              render={(renderProps) => (
+                              isDisabled={!process.env.REACT_APP_FACEBOOK_APP_ID}
+                              render={(renderProps) => {
+                                const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+                                const sdkReady = renderProps.isSdkLoaded && !renderProps.isProcessing;
+                                return (
                                 <MenuItem
-                                  disabled={planConfig?.plan?.useInstagram ? false : true}
+                                  disabled={!(planConfig?.plan?.useInstagram) || !sdkReady || !isHttps}
                                   onClick={renderProps.onClick}
                                 >
                                   <Instagram
@@ -738,7 +748,8 @@ const Connections = () => {
                                   />
                                   Instagram
                                 </MenuItem>
-                              )}
+                                );
+                              }}
                             />
                           </Menu>
                         </>

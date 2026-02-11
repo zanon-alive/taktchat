@@ -4,8 +4,8 @@ import TicketInfo from "../TicketInfo";
 import TicketActionButtons from "../TicketActionButtonsCustom";
 import { useParams } from "react-router-dom";
 import api from "../../services/api";
-import { useTheme } from "@material-ui/core/styles";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 // Header completo (Voltar + Avatar/infos + Ações) para ser exibido no topo da página TicketsAdvanced
 const ExternalTicketHeader = () => {

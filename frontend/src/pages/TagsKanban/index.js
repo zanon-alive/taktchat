@@ -8,12 +8,13 @@ import React, {
 } from "react";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
-import SearchIcon from "@material-ui/icons/Search";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
+import SearchIcon from "@mui/icons-material/Search";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
 import { Plus, ArrowLeft } from "lucide-react";
 
 import MainContainer from "../../components/MainContainer";
@@ -29,7 +30,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { CheckCircle } from "@material-ui/icons";
+import { CheckCircle } from "@mui/icons-material";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_TAGS") {

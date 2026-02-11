@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import api from "./services/api";
 import "react-toastify/dist/ReactToastify.css";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ptBR } from "@material-ui/core/locale";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import { ptBR } from "@mui/material/locale";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   useMediaQuery,
   Dialog,
@@ -15,8 +15,10 @@ import {
   Typography,
   Box,
   CircularProgress,
-} from "@material-ui/core";
-import Alert from "@material-ui/lab/Alert";
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Alert } from "@mui/material";
 import ColorModeContext from "./layout/themeContext";
 import { ActiveMenuProvider } from "./context/ActiveMenuContext";
 import Favicon from "react-favicon";
@@ -130,6 +132,14 @@ const App = () => {
     () =>
       createTheme(
         {
+          components: {
+            MuiDialog: {
+              defaultProps: {
+                disableEnforceFocus: true,
+                disableRestoreFocus: true,
+              },
+            },
+          },
           scrollbarStyles: {
             "&::-webkit-scrollbar": {
               width: "8px",
@@ -149,7 +159,7 @@ const App = () => {
             },
           },
           palette: {
-            type: mode,
+            mode,
             primary: { main: mode === "light" ? primaryColorLight : primaryColorDark },
             textPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
             borderPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
@@ -427,14 +437,17 @@ const App = () => {
                   open={showApiStatusDialog}
                   aria-labelledby="api-offline-dialog-title"
                   onClose={(_, reason) => {
-                    if (reason === "backdropClick") {
-                      return;
-                    }
+                    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
                     setShowApiStatusDialog(false);
                   }}
                 >
                   <DialogTitle id="api-offline-dialog-title">
-                    {apiStatus === "degraded" ? "Banco de Dados indisponível" : "Servidor de API indisponível"}
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <span>{apiStatus === "degraded" ? "Banco de Dados indisponível" : "Servidor de API indisponível"}</span>
+                      <IconButton onClick={() => setShowApiStatusDialog(false)} size="small" aria-label="fechar">
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
                   </DialogTitle>
                   <DialogContent>
                     <DialogContentText component="div">
@@ -472,7 +485,7 @@ const App = () => {
                     )}
                   </DialogContent>
                   <DialogActions>
-                    <Button onClick={runHealthCheck} color="default" disabled={apiStatus === "checking"}>
+                    <Button onClick={runHealthCheck} color="inherit" disabled={apiStatus === "checking"}>
                       {apiStatus === "checking" ? (
                         <>
                           <CircularProgress size={18} style={{ marginRight: 8 }} /> Verificando…
@@ -487,14 +500,19 @@ const App = () => {
                 <Dialog
                   open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute()}
                   onClose={(event, reason) => {
-                    if (reason === "backdropClick") {
-                      return;
-                    }
+                    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
                     handleRemindLaterThisSession();
                   }}
                   aria-labelledby="install-dialog-title"
                 >
-                  <DialogTitle id="install-dialog-title">Instalar o TaktChat?</DialogTitle>
+                  <DialogTitle id="install-dialog-title">
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <span>Instalar o TaktChat?</span>
+                      <IconButton onClick={handleRemindLaterThisSession} size="small" aria-label="fechar">
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
+                  </DialogTitle>
                   <DialogContent>
                     <DialogContentText component="div">
                       <Typography gutterBottom>
@@ -511,7 +529,7 @@ const App = () => {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions style={{ padding: "0 24px 16px" }}>
-                    <Button onClick={handleRemindLaterThisSession} color="default">
+                    <Button onClick={handleRemindLaterThisSession} color="inherit">
                       Perguntar depois
                     </Button>
                     <Button onClick={handleRemindTomorrow} color="secondary">

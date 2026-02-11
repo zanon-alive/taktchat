@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 
-import { Card, IconButton } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Card, IconButton } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import TicketHeaderSkeleton from "../TicketHeaderSkeleton";
-import ArrowBackIos from "@material-ui/icons/ArrowBackIos";
+import ArrowBackIos from "@mui/icons-material/ArrowBackIos";
 import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({

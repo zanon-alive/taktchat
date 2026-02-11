@@ -4,15 +4,18 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { i18n } from "../../translate/i18n";
 
@@ -53,7 +56,7 @@ const ContactListSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
 });
 
 const ContactListModal = ({ open, onClose, contactListId }) => {
@@ -105,15 +108,18 @@ const ContactListModal = ({ open, onClose, contactListId }) => {
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="xs"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {contactListId
-            ? `${i18n.t("contactLists.dialog.edit")}`
-            : `${i18n.t("contactLists.dialog.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{contactListId ? i18n.t("contactLists.dialog.edit") : i18n.t("contactLists.dialog.add")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={contactList}
@@ -127,7 +133,7 @@ const ContactListModal = ({ open, onClose, contactListId }) => {
           }}
         >
           {({ touched, errors, isSubmitting }) => (
-            <Form>
+            <Form noValidate>
               <DialogContent dividers>
                 <div className={classes.multFieldLine}>
                   <Field

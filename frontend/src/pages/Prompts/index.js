@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useReducer, useState, useMemo } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Box, useMediaQuery, TextField, InputAdornment, Grid, IconButton, Button, Tooltip } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
-import SearchIcon from "@material-ui/icons/Search";
-import { DeleteOutline, Edit } from "@material-ui/icons";
+import SearchIcon from "@mui/icons-material/Search";
+import { DeleteOutline, Edit } from "@mui/icons-material";
 import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles } from "lucide-react";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";

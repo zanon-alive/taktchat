@@ -4,18 +4,20 @@ import * as Yup from "yup";
 import { Formik, FieldArray, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { makeStyles } from "@mui/styles";
+import { green } from "@mui/material/colors";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 
@@ -109,11 +111,14 @@ const WebhookModal = ({ open, onClose, webhookId, nameWebhook, initialValues, on
 
 	return (
 		<div className={classes.root}>
-			<Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" scroll="paper">
+			<Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="md" scroll="paper">
 				<DialogTitle id="form-dialog-title">
-					{webhookId
-						? `${i18n.t("webhookModal.title.edit")}`
-						: `${i18n.t("webhookModal.title.add")}`}
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>{webhookId ? i18n.t("webhookModal.title.edit") : i18n.t("webhookModal.title.add")}</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<Formik
 					initialValues={contact}
@@ -127,7 +132,7 @@ const WebhookModal = ({ open, onClose, webhookId, nameWebhook, initialValues, on
 					}}
 				>
 					{({ values, errors, touched, isSubmitting }) => (
-						<Form>
+						<Form noValidate>
 							<DialogContent dividers>
 								<Field
 									as={TextField}

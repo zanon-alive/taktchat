@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Button, TextField, Typography, Fab, Tooltip } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Button, TextField, Typography, Fab, Tooltip } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { IconButton, InputAdornment, Switch } from "@mui/material";
-import Visibility from "@material-ui/icons/Visibility";
-import VisibilityOff from "@material-ui/icons/VisibilityOff";
-import EmailIcon from "@material-ui/icons/Email";
-import LockIcon from "@material-ui/icons/Lock";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import EmailIcon from "@mui/icons-material/Email";
+import LockIcon from "@mui/icons-material/Lock";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { getNumberSupport, getBackendUrl } from "../../config";
@@ -198,6 +198,8 @@ const Login = () => {
   const backendUrl = getBackendUrl() || process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserCreationStatus = async () => {
       try {
         const response = await fetch(`${backendUrl}/settings/userCreation`, {
@@ -212,14 +214,22 @@ const Login = () => {
         }
 
         const data = await response.json();
-        setUserCreationEnabled(data.userCreation === "enabled");
+        if (isMounted) {
+          setUserCreationEnabled(data.userCreation === "enabled");
+        }
       } catch (err) {
         console.error("Erro ao verificar userCreation:", err);
-        setUserCreationEnabled(false);
+        if (isMounted) {
+          setUserCreationEnabled(false);
+        }
       }
     };
 
     fetchUserCreationStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, [backendUrl]);
 
   const handleSubmit = (e) => {

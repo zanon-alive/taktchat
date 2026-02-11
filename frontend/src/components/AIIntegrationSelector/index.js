@@ -11,10 +11,10 @@ import {
   IconButton,
   Popover,
   ClickAwayListener
-} from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { Alert } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { makeStyles } from "@mui/styles";
 import api from "../../services/api";
 
 const useStyles = makeStyles((theme) => ({

@@ -1,7 +1,7 @@
 import React from "react";
 import CookieConsent from "react-cookie-consent";
-import { makeStyles } from "@material-ui/core/styles";
-import { Button, Typography, Link } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { Button, Typography, Link } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
     container: {

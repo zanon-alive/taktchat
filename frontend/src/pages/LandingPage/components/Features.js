@@ -1,14 +1,14 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Grid, Box, Card, CardContent, Chip, Button } from "@material-ui/core";
-import ChatIcon from "@material-ui/icons/Chat";
-import SettingsIcon from "@material-ui/icons/Settings";
-import SendIcon from "@material-ui/icons/Send";
-import MemoryIcon from "@material-ui/icons/Memory";
-import AssessmentIcon from "@material-ui/icons/Assessment";
-import DeviceHubIcon from "@material-ui/icons/DeviceHub";
-import NewReleasesIcon from "@material-ui/icons/NewReleases";
-import WhatshotIcon from "@material-ui/icons/Whatshot";
+import { makeStyles } from "@mui/styles";
+import { Typography, Grid, Box, Card, CardContent, Chip, Button } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SendIcon from "@mui/icons-material/Send";
+import MemoryIcon from "@mui/icons-material/Memory";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import DeviceHubIcon from "@mui/icons-material/DeviceHub";
+import NewReleasesIcon from "@mui/icons-material/NewReleases";
+import WhatshotIcon from "@mui/icons-material/Whatshot";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {

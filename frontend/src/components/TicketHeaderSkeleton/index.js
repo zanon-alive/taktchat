@@ -1,8 +1,8 @@
 import React from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { Avatar, Card, CardHeader } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
+import { makeStyles } from "@mui/styles";
+import { Avatar, Card, CardHeader } from "@mui/material";
+import { Skeleton } from "@mui/material";
 
 const useStyles = makeStyles(theme => ({
 	ticketHeader: {

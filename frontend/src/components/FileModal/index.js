@@ -10,6 +10,7 @@ import {
 import { toast } from "react-toastify";
 
 import {
+    Box,
     Button,
     CircularProgress,
     Dialog,
@@ -17,17 +18,18 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    makeStyles,
     TextField
-} from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import AttachFileIcon from "@material-ui/icons/AttachFile";
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { makeStyles } from "@mui/styles";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import MediaPreview from "../MediaPreview";
 import MediaViewerModal from "../MediaViewerModal";
 
-import { green } from "@material-ui/core/colors";
+import { green } from "@mui/material/colors";
 
 import { i18n } from "../../translate/i18n";
 
@@ -172,12 +174,17 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
         <div className={classes.root}>
             <Dialog
                 open={open}
-                onClose={handleClose}
+                onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
                 maxWidth="md"
                 fullWidth
                 scroll="paper">
                 <DialogTitle id="form-dialog-title">
-                    {(fileListId ? `${i18n.t("fileModal.title.edit")}` : `${i18n.t("fileModal.title.add")}`)}
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <span>{(fileListId ? `${i18n.t("fileModal.title.edit")}` : `${i18n.t("fileModal.title.add")}`)}</span>
+                        <IconButton onClick={handleClose} size="small" aria-label="fechar">
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
                 </DialogTitle>
                 <Formik
                     initialValues={fileList}
@@ -191,7 +198,7 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                     }}
                 >
                     {({ touched, errors, isSubmitting, values, setFieldValue }) => (
-                        <Form>
+                        <Form noValidate>
                             <DialogContent dividers>
                                 <div className={classes.multFieldLine}>
                                     <Field

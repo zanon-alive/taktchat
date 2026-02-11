@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useReducer, useContext, useMemo } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Paper, Button, Chip, Typography, Grid, Box, Card, CardContent, CardHeader, Divider, Avatar, CircularProgress, Tooltip, useMediaQuery } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material";
+import { Paper, Button, Chip, Typography, Grid, Box, Card, CardContent, CardHeader, Divider, Avatar, CircularProgress, Tooltip, useMediaQuery } from "@mui/material";
 
 // Ícones
-import PaymentIcon from "@material-ui/icons/Payment";
-import ReceiptIcon from "@material-ui/icons/Receipt";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import ErrorIcon from "@material-ui/icons/Error";
-import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
-import PersonIcon from "@material-ui/icons/Person";
-import DevicesIcon from "@material-ui/icons/Devices";
-import QueueIcon from "@material-ui/icons/Queue";
-import MoneyIcon from "@material-ui/icons/Money";
-import DateRangeIcon from "@material-ui/icons/DateRange";
-import InfoIcon from "@material-ui/icons/Info";
+import PaymentIcon from "@mui/icons-material/Payment";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import PersonIcon from "@mui/icons-material/Person";
+import DevicesIcon from "@mui/icons-material/Devices";
+import QueueIcon from "@mui/icons-material/Queue";
+import MoneyIcon from "@mui/icons-material/Money";
+import DateRangeIcon from "@mui/icons-material/DateRange";
+import InfoIcon from "@mui/icons-material/Info";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
