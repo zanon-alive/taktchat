@@ -36,6 +36,7 @@ type StorePlanData = {
   connections: number | 0;
   queues: number | 0;
   amount: string | "0";
+  amountAnnual?: string;
   useWhatsapp?: boolean;
   useFacebook?: boolean;
   useInstagram?: boolean;
@@ -56,6 +57,7 @@ type UpdatePlanData = {
   connections?: number;
   queues?: number;
   amount?: string;
+  amountAnnual?: string;
   useWhatsapp?: boolean;
   useFacebook?: boolean;
   useInstagram?: boolean;

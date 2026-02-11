@@ -73,6 +73,7 @@ export function PlanManagerForm(props) {
         connections: 0,
         queues: 0,
         amount: 0,
+        amountAnnual: '',
         useWhatsapp: true,
         useFacebook: true,
         useInstagram: true,
@@ -185,6 +186,20 @@ export function PlanManagerForm(props) {
                                 className={classes.fullWidth}
                                 margin="dense"
                                 type="text"
+                            />
+                        </Grid>
+
+                        {/* VALOR ANUAL */}
+                        <Grid xs={12} sm={6} md={1} item>
+                            <Field
+                                as={TextField}
+                                label={i18n.t("plans.form.amountAnnual")}
+                                name="amountAnnual"
+                                variant="outlined"
+                                className={classes.fullWidth}
+                                margin="dense"
+                                type="text"
+                                placeholder="Opcional"
                             />
                         </Grid>
 
@@ -512,6 +527,7 @@ export default function PlansManager() {
         connections: 0,
         queues: 0,
         amount: 0,
+        amountAnnual: '',
         useWhatsapp: true,
         useFacebook: true,
         useInstagram: true,
@@ -587,6 +603,7 @@ export default function PlansManager() {
             connections: 0,
             queues: 0,
             amount: 0,
+            amountAnnual: '',
             useWhatsapp: true,
             useFacebook: true,
             useInstagram: true,
@@ -621,6 +638,7 @@ export default function PlansManager() {
             connections: data.connections || 0,
             queues: data.queues || 0,
             amount: data.amount?.toLocaleString('pt-br', { minimumFractionDigits: 2 }) || 0,
+            amountAnnual: data.amountAnnual || '',
             useWhatsapp,
             useFacebook,
             useInstagram,

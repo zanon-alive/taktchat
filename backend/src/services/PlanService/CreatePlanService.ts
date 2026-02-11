@@ -8,6 +8,7 @@ interface PlanData {
   connections?: number;
   queues?: number;
   amount?: string;
+  amountAnnual?: string;
   useWhatsapp?: boolean;
   useFacebook?: boolean;
   useInstagram?: boolean;
@@ -44,11 +45,25 @@ const CreatePlanService = async (planData: PlanData): Promise<Plan> => {
           }
           return false;
         }
+      ),
+    amountAnnual: Yup.string()
+      .nullable()
+      .test(
+        "valid-number",
+        "ERR_PLAN_INVALID_AMOUNT_ANNUAL",
+        function (value) {
+          if (!value || value.trim() === "") return true;
+          const num = parseFloat(value);
+          if (isNaN(num) || num < 0) return false;
+          const amount = parseFloat(this.parent?.amount);
+          if (!isNaN(amount) && amount > 0 && num < amount) return false;
+          return true;
+        }
       )
   });
 
   try {
-    await planSchema.validate({ name });
+    await planSchema.validate(planData);
   } catch (err) {
     throw new AppError(err.message);
   }

@@ -8,6 +8,30 @@ const messages = {
         arrayRequired: "É necessário adicionar pelo menos um item",
         typeString: "O valor deve ser um texto. Use um valor vazio se necessário.",
       },
+      valueProposition: {
+        headline: "Toda a potência da automação, com a simplicidade de um chat.",
+        pillars: {
+          blindagemAtendimento: {
+            title: "Blindagem de Atendimento (Segurança e Estabilidade)",
+            description: "Conexão estável e segura. Proteja seu principal ativo de vendas com uma infraestrutura que garante que nenhuma mensagem seja perdida, mesmo em picos de demanda.",
+          },
+          omnicanalidadeInteligente: {
+            title: "Omnicanalidade Inteligente (Centralização)",
+            description: "Centralize WhatsApp, Instagram e Webchat em uma única tela. Sua equipe não precisa mais pular de aba em aba; tudo o que importa acontece em um só lugar.",
+          },
+          motorCrescimento: {
+            title: "Motor de Crescimento (Campanhas e Escala)",
+            description: "Dispare campanhas segmentadas e recupere vendas perdidas automaticamente. Transforme sua base de contatos em uma máquina de faturamento recorrente com envios em massa inteligentes.",
+          },
+          inteligenciaDados: {
+            title: "Inteligência de Dados (BI e Decisão)",
+            description: "Transforme conversas em números. Saiba qual atendente vende mais, qual o horário de pico e qual o gargalo do seu funil com relatórios que guiam suas decisões.",
+          },
+        },
+        easeBadge: "Setup em menos de 5 minutos",
+        socialProof: "Junte-se a centenas de empresas que já automatizaram mais de 1 milhão de conversas.",
+        ctaLabel: "Quero conhecer",
+      },
       signup: {
         title: "Cadastre-se",
         toasts: {
@@ -1454,8 +1478,14 @@ const messages = {
           yes: "Sim",
           no: "Não",
           money: "R$",
-          public: "Público"
+          public: "Público",
+          amountAnnual: "Valor Anual"
         },
+        landing: {
+          or: "ou",
+          orPerYear: "ou {{value}}/ano",
+          installments12x: "12x de {{value}} no cartão"
+        }
       },
       helps: {
         title: "Central de Ajuda",

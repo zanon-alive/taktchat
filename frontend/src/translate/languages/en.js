@@ -1426,8 +1426,14 @@ const messages = {
 			yes: "Yes",
 			no: "No",
 			money: "$",
-			public: "Public"
+			public: "Public",
+			amountAnnual: "Annual Amount"
 		  },
+		  landing: {
+			or: "or",
+			orPerYear: "or {{value}}/year",
+			installments12x: "12x of {{value}} on card"
+		  }
 		},
 		helps: {
 		  title: "Help Center",

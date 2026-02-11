@@ -1422,8 +1422,14 @@ const messages = {
           yes: "Evet",
           no: "Hayır",
           money: "TL",
-          public: "Herkese Açık"
+          public: "Herkese Açık",
+          amountAnnual: "Yıllık Tutar"
         },
+        landing: {
+          or: "veya",
+          orPerYear: "veya {{value}}/yıl",
+          installments12x: "12x {{value}} kart ile"
+        }
       },
       helps: {
         title: "Yardım Merkezi",
