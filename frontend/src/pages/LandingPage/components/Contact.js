@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Contact = () => {
   const classes = useStyles();
-  const supportNumber = getNumberSupport() || "5514981252988";
+  const supportNumber = getNumberSupport() || "5514996870843";
 
   const formatPhoneForWhatsApp = (phone) => {
     // Remove caracteres não numéricos
@@ -76,7 +76,7 @@ const Contact = () => {
   };
 
   const formatPhoneDisplay = (phone) => {
-    // Formata para exibição: +55 (14) 98125-2988
+    // Formata para exibição: +55 (14) 99687-0843
     const cleaned = phone.replace(/\D/g, "");
     if (cleaned.length === 13 && cleaned.startsWith("55")) {
       // Formato: +55 (DDD) NNNNN-NNNN

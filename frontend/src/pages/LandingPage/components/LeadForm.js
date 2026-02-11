@@ -203,7 +203,7 @@ const LeadForm = () => {
   const classes = useStyles();
   const [submitting, setSubmitting] = useState(false);
   const recaptchaRef = useRef(null);
-  const supportNumber = getNumberSupport() || "5514981252988";
+  const supportNumber = getNumberSupport() || "5514996870843";
 
   const formatPhoneForWhatsApp = (phone, countryCode = "BR") => {
     // Remove todos os caracteres não numéricos
@@ -215,10 +215,10 @@ const LeadForm = () => {
     
     // Se já tem código do país, retorna como está
     if (cleaned.startsWith(countryCodeDigits)) {
-      return cleaned; // Já tem código do país: 5514981252988
+      return cleaned; // Já tem código do país: 5514996870843
     }
     
-    // Adiciona código do país: 55 + 14981252988 = 5514981252988
+    // Adiciona código do país: 55 + 14996870843 = 5514996870843
     return countryCodeDigits + cleaned;
   };
 
@@ -235,10 +235,10 @@ const LeadForm = () => {
       phoneDigits = cleaned.substring(countryCodeDigits.length);
     }
     
-    // Brasil: +55 (14) 98125-2988
+    // Brasil: +55 (14) 99687-0843
     if (country.code === "BR") {
       if (phoneDigits.length === 11) {
-        // Celular: (14) 98125-2988
+        // Celular: (14) 99687-0843
         return phoneDigits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
       } else if (phoneDigits.length === 10) {
         // Fixo: (14) 1234-5678
@@ -262,7 +262,7 @@ const LeadForm = () => {
       phoneDigits = cleaned.substring(countryCodeDigits.length);
     }
     
-    // Brasil: +55 (14) 98125-2988
+    // Brasil: +55 (14) 99687-0843
     if (country.code === "BR") {
       if (phoneDigits.length === 0) {
         return "";
@@ -313,7 +313,7 @@ ${values.message ? `\nMensagem: ${values.message}` : ""}`;
         const response = await api.post("/leads", {
           name: values.name,
           email: values.email,
-          phone: fullPhoneNumber, // Número completo sem máscara: 5514981252988
+          phone: fullPhoneNumber, // Número completo sem máscara: 5514996870843
           countryCode: values.countryCode,
           company: values.company || null,
           message: values.message || null,
