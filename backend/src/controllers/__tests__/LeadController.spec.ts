@@ -224,7 +224,7 @@ describe("LeadController", () => {
       mockRequest.body = {
         name: "João Silva",
         email: "joao@example.com",
-        phone: "(14) 98125-2988", // Número com formatação
+        phone: "(14) 99687-0843", // Número com formatação
       };
 
       (Company.findOne as jest.Mock).mockResolvedValue(mockCompany);
@@ -245,13 +245,13 @@ describe("LeadController", () => {
       // Assert
       expect(Contact.findOne).toHaveBeenCalledWith({
         where: {
-          number: "14981252988", // Número limpo
+          number: "14996870843", // Número limpo
           companyId: 1,
         },
       });
       expect(Contact.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          number: "14981252988",
+          number: "14996870843",
         })
       );
     });

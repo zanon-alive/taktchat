@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ChatWidget = () => {
     const classes = useStyles();
-    const supportNumber = getNumberSupport() || "5514981252988";
+    const supportNumber = getNumberSupport() || "5514996870843";
 
     const handleClick = () => {
         const link = `https://wa.me/${supportNumber.replace(/\D/g, "")}?text=Olá! Gostaria de saber mais sobre o TaktChat.`;

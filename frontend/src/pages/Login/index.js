@@ -354,7 +354,7 @@ const Login = () => {
           <Fab 
             className={classes.fab} 
             onClick={() => {
-              const supportNumber = getNumberSupport() || "5514981252988";
+              const supportNumber = getNumberSupport() || "5514996870843";
               const link = `https://wa.me/${supportNumber.replace(/\D/g, "")}?text=Olá! Gostaria de saber mais sobre o TaktChat.`;
               window.open(link, "_blank");
             }} 
