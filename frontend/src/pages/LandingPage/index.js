@@ -7,6 +7,8 @@ import api from "../../services/api";
 
 // Lazy loading components for performance
 const Hero = React.lazy(() => import("./components/Hero"));
+const LandingNav = React.lazy(() => import("./components/LandingNav"));
+const ValueProposition = React.lazy(() => import("./components/ValueProposition"));
 const Problems = React.lazy(() => import("./components/Problems"));
 const Features = React.lazy(() => import("./components/Features"));
 const Plans = React.lazy(() => import("./components/Plans"));
@@ -182,7 +184,7 @@ const LandingPage = () => {
     "description": "Plataforma de atendimento e automação para WhatsApp",
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+55-14-98125-2988",
+      "telephone": "+55-14-99687-0843",
       "contactType": "customer service",
       "areaServed": "BR",
       "availableLanguage": ["Portuguese"]
@@ -285,7 +287,7 @@ const LandingPage = () => {
         {/* Mobile */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
         <meta name="theme-color" content="#065183" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="TaktChat" />
 
@@ -303,43 +305,53 @@ const LandingPage = () => {
 
       <div className={classes.root}>
         <Suspense fallback={<Box className={classes.loader}><CircularProgress /></Box>}>
-          <Hero />
+          <LandingNav />
 
-          <Box className={`${classes.section} ${classes.sectionDark}`}>
+          <Box id="inicio">
+            <Hero />
+          </Box>
+
+          <Box id="proposta-valor" className={classes.section}>
+            <Container>
+              <ValueProposition />
+            </Container>
+          </Box>
+
+          <Box id="problemas" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
               <Problems />
             </Container>
           </Box>
 
-          <Box className={classes.section} id="features">
+          <Box id="features" className={classes.section}>
             <Container>
               <Features />
             </Container>
           </Box>
 
-          <Box className={`${classes.section} ${classes.sectionDark}`}>
+          <Box id="planos" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
               <Plans plans={plans} loading={loadingPlans} />
             </Container>
           </Box>
 
-          <Box className={classes.section}>
+          <Box id="depoimentos" className={classes.section}>
             <Container>
               <Testimonials />
             </Container>
           </Box>
 
-          <Box className={`${classes.section} ${classes.sectionDark}`}>
+          <Box id="faq" className={`${classes.section} ${classes.sectionDark}`}>
             <FAQ />
           </Box>
 
-          <Box className={`${classes.section} ${classes.sectionPrimary}`}>
+          <Box id="lead-form-section" className={`${classes.section} ${classes.sectionPrimary}`}>
             <Container>
               <LeadForm />
             </Container>
           </Box>
 
-          <Box className={classes.section}>
+          <Box id="contato" className={classes.section}>
             <Container>
               <Contact />
             </Container>

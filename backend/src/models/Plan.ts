@@ -33,7 +33,11 @@ class Plan extends Model<Plan> {
   queues: number;
 
   @Column
-  amount: string;   
+  amount: string;
+
+  @AllowNull(true)
+  @Column
+  amountAnnual?: string;
 
   @Column
   useWhatsapp: boolean;   

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Grid, Box, Card, CardContent, Button, Chip, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { i18n } from "../../../translate/i18n";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import StarIcon from "@mui/icons-material/Star";
@@ -74,6 +75,13 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "1rem",
     fontWeight: 500,
   },
+  planInstallments: {
+    marginBottom: theme.spacing(2),
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    color: theme.palette.primary.main,
+    textAlign: "center",
+  },
   planFeatures: {
     listStyle: "none",
     padding: 0,
@@ -125,8 +133,45 @@ const useStyles = makeStyles((theme) => ({
   },
   tableHeader: {
     backgroundColor: theme.palette.primary.main,
-    color: "#fff",
+    color: theme.palette.primary.contrastText || "#fff",
     fontWeight: 700,
+    minHeight: 120,
+    verticalAlign: "top",
+    "& .MuiTypography-root": {
+      color: "inherit",
+    },
+    "& .MuiChip-root, & .MuiChip-label, & .MuiSvgIcon-root": {
+      color: "inherit",
+    },
+  },
+  tableHeaderContent: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+  },
+  tableHeaderPlanName: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+  },
+  tableHeaderChip: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    color: "inherit",
+  },
+  tableHeaderPrice: {
+    color: "inherit",
+    fontWeight: 700,
+  },
+  tableHeaderAnnual: {
+    color: "inherit",
+    opacity: 1,
+    lineHeight: 1.3,
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    textAlign: "center",
   },
   tableCell: {
     padding: theme.spacing(2),
@@ -167,6 +212,18 @@ const Plans = ({ plans, loading }) => {
       style: "currency",
       currency: "BRL",
     }).format(numAmount);
+  };
+
+  const getAnnualInfo = (plan) => {
+    const annual = plan.amountAnnual && String(plan.amountAnnual).trim();
+    if (!annual) return null;
+    const annualNum = parseFloat(annual);
+    if (isNaN(annualNum) || annualNum < 0) return null;
+    const installmentValue = (annualNum / 12).toFixed(2);
+    return {
+      formattedAnnual: formatPrice(annual),
+      formattedInstallment: formatPrice(installmentValue),
+    };
   };
 
   const getFeatureLabel = (feature) => {
@@ -279,23 +336,34 @@ const Plans = ({ plans, loading }) => {
                 {sortedPlans.map((plan, index) => {
                   const isFeatured = plan.name.toLowerCase().includes("premium") || (sortedPlans.length === 3 && index === 1);
                   return (
-                    <TableCell 
+                    <TableCell
                       key={plan.id || index}
-                      className={`${classes.tableHeader} ${classes.tableCell} ${isFeatured ? classes.tableRowFeatured : ""}`}
+                      className={`${classes.tableHeader} ${classes.tableCell}`}
                       align="center"
                     >
-                      {plan.name}
-                      {isFeatured && (
-                        <Chip
-                          icon={<StarIcon style={{ color: "#fff", fontSize: 14 }} />}
-                          label="Recomendado"
-                          size="small"
-                          style={{ marginTop: 8, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}
-                        />
-                      )}
-                      <Typography variant="h6" style={{ marginTop: 8, color: "#fff" }}>
-                        {formatPrice(plan.amount)}
-                      </Typography>
+                      <Box className={classes.tableHeaderContent}>
+                        <Box className={classes.tableHeaderPlanName}>
+                          <span>{plan.name}</span>
+                          {isFeatured && (
+                            <Chip
+                              icon={<StarIcon style={{ fontSize: 14 }} />}
+                              label="Recomendado"
+                              size="small"
+                              className={classes.tableHeaderChip}
+                            />
+                          )}
+                        </Box>
+                        <Typography variant="h6" className={classes.tableHeaderPrice}>
+                          {formatPrice(plan.amount)}
+                        </Typography>
+                        {getAnnualInfo(plan) && (
+                          <Typography variant="body2" component="div" className={classes.tableHeaderAnnual}>
+                            {i18n.t("plans.landing.or")}
+                            <br />
+                            {i18n.t("plans.landing.installments12x", { value: getAnnualInfo(plan).formattedInstallment })}
+                          </Typography>
+                        )}
+                      </Box>
                     </TableCell>
                   );
                 })}
@@ -398,6 +466,14 @@ const Plans = ({ plans, loading }) => {
                   <Typography variant="body2" className={classes.planRecurrence}>
                     por {plan.recurrence === "MENSAL" ? "mês" : plan.recurrence || "mês"}
                   </Typography>
+                  {getAnnualInfo(plan) && (
+                    <Typography
+                      variant="body2"
+                      className={classes.planInstallments}
+                    >
+                      {i18n.t("plans.landing.or")} {i18n.t("plans.landing.installments12x", { value: getAnnualInfo(plan).formattedInstallment })}
+                    </Typography>
+                  )}
 
                   <ul className={classes.planFeatures}>
                     <li className={classes.planFeatureItem}>

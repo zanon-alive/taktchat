@@ -1396,7 +1396,13 @@ const messages = {
           yes: "Sí",
           no: "No",
           money: "€",
-          public: "Público"
+          public: "Público",
+          amountAnnual: "Valor Anual"
+        },
+        landing: {
+          or: "o",
+          orPerYear: "o {{value}}/año",
+          installments12x: "12x de {{value}} en tarjeta"
         }
       },
       helps: {
