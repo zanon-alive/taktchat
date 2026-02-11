@@ -1,6 +1,13 @@
 const messages = {
   pt: {
     translations: {
+      validation: {
+        required: "Campo obrigatório",
+        tooShort: "Muito curto",
+        emailInvalid: "E-mail inválido",
+        arrayRequired: "É necessário adicionar pelo menos um item",
+        typeString: "O valor deve ser um texto. Use um valor vazio se necessário.",
+      },
       signup: {
         title: "Cadastre-se",
         toasts: {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Dialog, DialogTitle, DialogActions, Button, Box, } from '@mui/material';
+import { Dialog, DialogTitle, DialogActions, Button, Box, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { i18n } from '../../translate/i18n';
 import { makeStyles } from "@mui/styles";
 import api from "../../services/api";
@@ -180,8 +181,15 @@ const ContactImportWpModal = ({ isOpen, handleClose, selectedTags, hideNum, user
   // Botão de importação do aparelho padrão removido
 
   return (
-    <Dialog fullWidth open={isOpen} onClose={handleClosed}>
-      <DialogTitle>{i18n.t("Exportar / Importar contatos")}</DialogTitle>
+    <Dialog fullWidth open={isOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClosed(); }}>
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>{i18n.t("Exportar / Importar contatos")}</span>
+          <IconButton onClick={handleClosed} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <div>
         <Box style={{ padding: "0px 10px 10px" }} >
           <Can

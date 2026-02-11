@@ -98,7 +98,7 @@ const SessionSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
@@ -409,7 +409,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
           }}
         >
           {({ values, touched, errors, isSubmitting }) => (
-            <Form>
+            <Form noValidate>
               <Paper className={classes.mainPaper} elevation={1}>
                 <Tabs
                   value={tab}

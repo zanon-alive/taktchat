@@ -18,7 +18,7 @@ import { i18n } from "../../translate/i18n";
 import ContactAvatar from "../ContactAvatar";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import MarkdownWrapper from "../MarkdownWrapper";
-import { CardHeader, Tooltip, Dialog, DialogContent, CircularProgress, Collapse } from "@mui/material";
+import { Box, CardHeader, Tooltip, Dialog, DialogContent, DialogTitle, CircularProgress, Collapse } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { ContactForm } from "../ContactForm";
@@ -422,7 +422,15 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                 contactId={contact.id}
             ></ContactModal>
             {/* Modal para exibir a imagem do avatar ampliada diretamente */}
-            <Dialog open={avatarModalOpen} onClose={() => setAvatarModalOpen(false)} maxWidth="md">
+            <Dialog open={avatarModalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") setAvatarModalOpen(false); }} maxWidth="md">
+                <DialogTitle>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <span>Avatar</span>
+                    <IconButton onClick={() => setAvatarModalOpen(false)} size="small" aria-label="fechar">
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+                </DialogTitle>
                 <DialogContent style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {avatarImageUrl && (
                         avatarLargeUrl ? (

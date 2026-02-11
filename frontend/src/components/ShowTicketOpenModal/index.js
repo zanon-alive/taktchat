@@ -1,11 +1,19 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+import { Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { i18n } from '../../translate/i18n';
 
 const ShowTicketOpen = ({ isOpen, handleClose, user, queue }) => {
   return (
-    <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle>{i18n.t("showTicketOpenModal.title.header")}</DialogTitle>
+    <Dialog open={isOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}>
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>{i18n.t("showTicketOpenModal.title.header")}</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         {user !== undefined && queue !== undefined && (
           <DialogContentText>

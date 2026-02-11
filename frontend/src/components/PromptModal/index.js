@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { makeStyles } from "@mui/styles";
 import { green } from "@mui/material/colors";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Dialog,
   DialogTitle,
@@ -415,7 +416,7 @@ const PromptModal = ({ open, onClose, promptId, templateData }) => {
     <div className={classes.root}>
       <Dialog 
         open={open} 
-        onClose={handleClose} 
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} 
         maxWidth="md" 
         scroll="paper" 
         fullWidth
@@ -427,9 +428,10 @@ const PromptModal = ({ open, onClose, promptId, templateData }) => {
         }}
       >
         <DialogTitle id="form-dialog-title">
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {promptId ? i18n.t("promptModal.title.edit") : i18n.t("promptModal.title.add")}
-            <Tooltip
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {promptId ? i18n.t("promptModal.title.edit") : i18n.t("promptModal.title.add")}
+              <Tooltip
               title={(
                 <span>
                   Crie prompts para uso com modelos de IA no WhatsApp e campanhas.<br/>
@@ -442,6 +444,10 @@ const PromptModal = ({ open, onClose, promptId, templateData }) => {
               <InfoOutlinedIcon fontSize="small" style={{ opacity: 0.7 }} />
             </Tooltip>
           </span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={prompt}
@@ -450,7 +456,7 @@ const PromptModal = ({ open, onClose, promptId, templateData }) => {
           onSubmit={handleSavePrompt}
         >
           {({ touched, errors, isSubmitting, values, setFieldValue }) => (
-            <Form style={{ width: "100%" }}>
+            <Form noValidate style={{ width: "100%" }}>
               <DialogContent 
                 dividers 
                 style={{ 

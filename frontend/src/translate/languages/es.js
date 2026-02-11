@@ -1,7 +1,13 @@
 const messages = {
   es: {
     translations: {
-
+      validation: {
+        required: "Campo obligatorio",
+        tooShort: "Muy corto",
+        emailInvalid: "Correo inválido",
+        arrayRequired: "Es necesario agregar al menos un elemento",
+        typeString: "El valor debe ser texto. Use un valor vacío si es necesario.",
+      },
       signup: {
         title: "Registrarse",
         toasts: {

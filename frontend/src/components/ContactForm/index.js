@@ -56,7 +56,7 @@ const ContactSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2, "Parâmetros incompletos!")
 		.max(50, "Parâmetros acima do esperado!")
-		.required("Required"),
+		.required(() => i18n.t("validation.required")),
 	number: Yup.string().min(8, "Parâmetros incompletos!").max(50, "Parâmetros acima do esperado!"),
 	email: Yup.string().email("E-mail inválido"),
     cpfCnpj: Yup.string()
@@ -122,7 +122,7 @@ export function ContactForm ({ initialContact, onSave, onCancel }) {
             }}
         >
             {({ values, errors, touched, isSubmitting }) => (
-                <Form>
+                <Form noValidate>
                     <Grid container spacing={1}>
                         {/* <Grid item xs={12}>
                             <Typography variant="subtitle1" gutterBottom>

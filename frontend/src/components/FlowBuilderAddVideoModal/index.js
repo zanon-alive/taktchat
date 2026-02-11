@@ -12,9 +12,11 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 import Compressor from "compressorjs";
 
@@ -146,8 +148,15 @@ const FlowBuilderAddVideoModal = ({ open, onSave, onUpdate, data, close }) => {
 
   return (
     <div className={classes.root}>
-      <Dialog open={activeModal} onClose={handleClose} fullWidth maxWidth="md" scroll="paper">
-        <DialogTitle id="form-dialog-title">{labels.title}</DialogTitle>
+      <Dialog open={activeModal} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="md" scroll="paper">
+        <DialogTitle id="form-dialog-title">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{labels.title}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
         <Stack>
           <DialogContent dividers>
             <Stack gap="16px">

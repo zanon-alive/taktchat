@@ -169,7 +169,7 @@ const EditMessageModal = ({ open, onClose, onSave, message }) => {
   return (
     <Dialog
       open={open}
-      onClose={() => onClose(false)}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(false); }}
       aria-labelledby="edit-message-dialog"
       PaperProps={{
         style: {

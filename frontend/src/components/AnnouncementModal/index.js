@@ -23,12 +23,14 @@ import { head } from "lodash";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import {
+  Box,
   FormControl,
   Grid,
   InputLabel,
   MenuItem,
   Select,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles((theme) => ({
@@ -178,15 +180,18 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
       </ConfirmationModal>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="xs"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {announcementId
-            ? `${i18n.t("announcements.dialog.edit")}`
-            : `${i18n.t("announcements.dialog.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{announcementId ? i18n.t("announcements.dialog.edit") : i18n.t("announcements.dialog.add")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <div style={{ display: "none" }}>
           <input
@@ -208,7 +213,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
           }}
         >
           {({ touched, errors, isSubmitting, values }) => (
-            <Form>
+            <Form noValidate>
               <DialogContent dividers>
                 <Grid spacing={2} container>
                   <Grid xs={12} item>

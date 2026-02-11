@@ -184,7 +184,7 @@ const SignUp = () => {
           }}
         >
           {({ touched, errors, isSubmitting }) => (
-            <Form className={classes.form}>
+            <Form noValidate className={classes.form}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <Field

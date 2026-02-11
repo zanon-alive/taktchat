@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { makeStyles } from "@mui/styles";
-import { Dialog, DialogContent, IconButton, Tooltip } from "@mui/material";
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { GetApp, PictureAsPdf } from "@mui/icons-material";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -122,14 +123,22 @@ const PdfModal = ({ url }) => {
         )}
       </div>
 
-      <Dialog open={open} onClose={handleClose} maxWidth={false}>
-        <div className={classes.modalToolbar}>
-          <Tooltip title="Baixar PDF">
-            <IconButton onClick={handleDownload} color="inherit">
-              <GetApp />
-            </IconButton>
-          </Tooltip>
-        </div>
+      <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} maxWidth={false}>
+        <DialogTitle>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>Visualizar PDF</span>
+            <Box display="flex" gap={1}>
+              <Tooltip title="Baixar PDF">
+                <IconButton onClick={handleDownload} color="inherit" size="small">
+                  <GetApp />
+                </IconButton>
+              </Tooltip>
+              <IconButton onClick={handleClose} size="small" aria-label="fechar">
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </DialogTitle>
         <DialogContent className={classes.modalContent}>
           <Document file={url} onLoadSuccess={onLoadSuccess} onLoadError={onLoadError}>
             <Page pageNumber={1} renderAnnotationLayer={false} renderTextLayer={false} className={classes.modalPage} />

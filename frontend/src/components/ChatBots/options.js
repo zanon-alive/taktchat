@@ -30,10 +30,10 @@ const QueueSchema = Yup.object().shape({
   options: Yup.array()
     .of(
       Yup.object().shape({
-        name: Yup.string().min(4, "too short").required("Required"),
+        name: Yup.string().min(4, () => i18n.t("validation.tooShort")).required(() => i18n.t("validation.required")),
       })
     )
-    .required("Must have friends"),
+    .required(() => i18n.t("validation.arrayRequired")),
 });
 
 const useStyles = makeStyles((theme) => ({

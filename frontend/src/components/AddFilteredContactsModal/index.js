@@ -33,6 +33,7 @@ import {
 
 import { Autocomplete } from "@mui/material";
 import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
+import CloseIcon from "@mui/icons-material/Close";
 
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -763,12 +764,17 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
       maxWidth="sm"
       scroll="paper"
     >
       <DialogTitle>
-        {i18n.t("contactListItems.dialog.filter")}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>{i18n.t("contactListItems.dialog.filter")}</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
       <Formik
         initialValues={{
@@ -802,7 +808,7 @@ const AddFilteredContactsModal = ({ open, onClose, contactListId, reload, savedF
         }}
       >
         {({ values, errors, touched, isSubmitting }) => (
-          <Form>
+          <Form noValidate>
             <DialogContent dividers>
               <Grid container spacing={2}>
 

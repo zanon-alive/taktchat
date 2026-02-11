@@ -409,7 +409,7 @@ const SmartFilesBestPractices = ({ open, onClose }) => {
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }}
       maxWidth="lg"
       fullWidth
       PaperProps={{

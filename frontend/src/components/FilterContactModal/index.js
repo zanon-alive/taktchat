@@ -732,7 +732,7 @@ const FilterContactModal = ({ isOpen, onClose, onFiltered, initialFilter = {} })
   return (
     <Dialog
       open={isOpen}
-      onClose={handleClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
       maxWidth="sm"
       scroll="paper"
     >
@@ -753,7 +753,7 @@ const FilterContactModal = ({ isOpen, onClose, onFiltered, initialFilter = {} })
         }}
       >
         {({ values, errors, touched, isSubmitting, resetForm }) => (
-          <Form>
+          <Form noValidate>
             <DialogContent dividers>
               <Grid container spacing={2}>
 

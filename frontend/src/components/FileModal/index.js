@@ -198,7 +198,7 @@ const FilesModal = ({ open, onClose, fileListId, reload }) => {
                     }}
                 >
                     {({ touched, errors, isSubmitting, values, setFieldValue }) => (
-                        <Form>
+                        <Form noValidate>
                             <DialogContent dividers>
                                 <div className={classes.multFieldLine}>
                                     <Field

@@ -108,8 +108,8 @@ const QueueSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
-  color: Yup.string().min(3, "Parâmetros incompletos!").max(9, "Parâmetros acima do esperado!").required(),
+    .required(() => i18n.t("validation.required")),
+  color: Yup.string().min(3, "Parâmetros incompletos!").max(9, "Parâmetros acima do esperado!").required(() => i18n.t("validation.required")),
   greetingMessage: Yup.string(),
   orderQueue: Yup.number().min(1, "Ordem deve ser maior que 0").required("Ordem da fila é obrigatória"),
   tempoRoteador: Yup.number().min(0, "Tempo deve ser positivo"),
@@ -120,10 +120,10 @@ const QueueSchema = Yup.object().shape({
   chatbots: Yup.array()
     .of(
       Yup.object().shape({
-        name: Yup.string().min(4, "too short").required("Required"),
+        name: Yup.string().min(4, () => i18n.t("validation.tooShort")).required(() => i18n.t("validation.required")),
       })
     )
-    .required("Must have friends"),
+    .required(() => i18n.t("validation.arrayRequired")),
 });
 
 const QueueModal = ({ open, onClose, queueId, onEdit }) => {
@@ -512,7 +512,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
             }}
           >
             {({ setFieldValue, touched, errors, isSubmitting, values }) => (
-              <Form>
+              <Form noValidate>
                 <DialogContent dividers>
                   {/* PRIMEIRA LINHA: Nome, Cor, Ordem da Fila */}
                   <Grid container spacing={2} style={{ marginBottom: 16 }}>

@@ -456,7 +456,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 					}}
 				>
 					{({ touched, errors, isSubmitting, values, setFieldValue }) => (
-						<Form>
+						<Form noValidate>
 							<DialogContent dividers>
 								<div className={classes.multFieldLine}>
 									<FormControl

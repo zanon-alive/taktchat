@@ -5,6 +5,7 @@ import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
 import {
+	Box,
 	Button,
 	Dialog,
 	DialogActions,
@@ -23,6 +24,7 @@ import {
 } from '@mui/material';
 
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { makeStyles } from "@mui/styles";
 import { green } from "@mui/material/colors";
@@ -207,15 +209,18 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 		<div className={classes.root}>
 			<Dialog
 				open={open}
-				onClose={handleClose}
+				onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
 				maxWidth="xs"
 				fullWidth
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{companyId
-						? `${i18n.t("companyModal.title.edit")}`
-						: `${i18n.t("companyModal.title.add")}`}
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>{companyId ? i18n.t("companyModal.title.edit") : i18n.t("companyModal.title.add")}</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<Formik
 					initialValues={{
@@ -238,7 +243,7 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 					}}
 				>
 					{({ values, touched, errors, isSubmitting }) => (
-						<Form>
+						<Form noValidate>
 							<DialogContent dividers>
 								<div className={classes.multFieldLine}>
 									<Field

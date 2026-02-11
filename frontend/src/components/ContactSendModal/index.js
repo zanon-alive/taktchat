@@ -17,7 +17,8 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Grid, ListItemText, MenuItem, Select } from "@mui/material";
+import { Box, Grid, IconButton, ListItemText, MenuItem, Select } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { toast } from "react-toastify";
 import { Facebook, Instagram, WhatsApp } from "@mui/icons-material";
 import ShowTicketOpen from "../ShowTicketOpenModal";
@@ -195,9 +196,14 @@ const ContactSendModal = ({ modalOpen, onClose }) => {
         onClose={handleCloseContactModal}
         onSave={handleAddNewContactTicket}
       ></ContactModal>
-      <Dialog open={modalOpen} onClose={handleClose}>
+      <Dialog open={modalOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}>
         <DialogTitle id="form-dialog-title">
-          {i18n.t("SendContactModal.title")}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{i18n.t("SendContactModal.title")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <DialogContent dividers>
           <Grid style={{ width: 300 }} container spacing={2}>

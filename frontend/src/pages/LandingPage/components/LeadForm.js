@@ -25,6 +25,7 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import ReCAPTCHA from "react-google-recaptcha";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
+import { i18n } from "../../../translate/i18n";
 import { getNumberSupport } from "../../../config";
 
 // Lista de países com código e bandeira
@@ -193,7 +194,7 @@ const LeadSchema = Yup.object().shape({
       // Outros países: pelo menos 7 dígitos
       return phoneDigits.length >= 7;
     }),
-  countryCode: Yup.string().required(),
+  countryCode: Yup.string().required(() => i18n.t("validation.required")),
   company: Yup.string().max(100, "Nome da empresa muito longo"),
   message: Yup.string().max(500, "Mensagem muito longa"),
 });
@@ -387,7 +388,7 @@ ${values.message ? `\nMensagem: ${values.message}` : ""}`;
               const progress = (filledFields.length / fields.length) * 100;
               
               return (
-              <Form>
+              <Form noValidate>
                 {progress > 0 && progress < 100 && (
                   <Box className={classes.progressContainer}>
                     <Box className={classes.progressBar}>

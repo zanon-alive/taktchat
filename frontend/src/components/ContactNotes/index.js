@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 const NoteSchema = Yup.object().shape({
     note: Yup.string()
         .min(2, "Parâmetros incompletos!")
-        .required("Required")
+        .required(() => i18n.t("validation.required"))
 });
 export function ContactNotes({ ticket }) {
     const { id: ticketId, contactId } = ticket
@@ -164,7 +164,7 @@ export function ContactNotes({ ticket }) {
             >
 
                 {({ touched, errors, setErrors }) => (
-                    <Form>
+                    <Form noValidate>
                         <Grid container spacing={2}>
                             <Grid xs={12} item>
                                 <Field

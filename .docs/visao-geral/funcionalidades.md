@@ -64,6 +64,7 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 - **Documentação dedicada**: `.docs/funcionalidades/anti-ban.md` e arquivos `legacy/ANTI-BAN-*.md` descrevem políticas de uso, integrações com Baileys e checklists de segurança.
 
 ### 12. Recursos auxiliares
+- **Validação i18n**: mensagens de validação de formulários (campo obrigatório, muito curto, e-mail inválido, etc.) internacionalizadas via namespace `validation` em pt-BR, en, es e tr. Formulários Formik utilizam `noValidate` para evitar mensagens nativas do navegador em inglês. Detalhes em `.docs/plano-analise-mensagens-campo-requerido.md`.
 - **Uploads e LGPD**: configuração de `FILESYSTEM_DRIVER`, sanitização de mídia, opções de anonimização (`LGPD` flags).
 - **Ferramentas de suporte**: `Helps`, `ToDoList`, `Announcements`, `AuditLogs`, `SettingsCustom` centralizam governança e comunicação com clientes.
 - **Scripts e diagnósticos**: diretórios `lib/`, `utils/`, `backend/scripts/` e `.docs/sql/` oferecem automações para migrações, correções e análises.

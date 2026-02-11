@@ -13,8 +13,10 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
@@ -53,7 +55,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ContactSchema = Yup.object().shape({
-	name: Yup.string()
+	name: Yup.string(() => i18n.t("validation.typeString"))
+		.transform(value => value ?? "")
 		.min(2, "Muito curto!")
 		.max(50, "Muito longo!")
 		.required("Digite um nome!"),
@@ -64,7 +67,7 @@ const FlowBuilderModal = ({ open, onClose, flowId, nameWebhook = "", initialValu
 	const isMounted = useRef(true);
 
 	const [contact, setContact] = useState({
-		name: nameWebhook,
+		name: nameWebhook ?? "",
 	});
 
 	useEffect(() => {
@@ -109,11 +112,14 @@ const FlowBuilderModal = ({ open, onClose, flowId, nameWebhook = "", initialValu
 	
 	return (
 		<div className={classes.root}>
-			<Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" scroll="paper">
+			<Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="md" scroll="paper">
 				<DialogTitle id="form-dialog-title">
-					{flowId
-						? `Editar Fluxo`
-						: `Adicionar Fluxo`}
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>{flowId ? "Editar Fluxo" : "Adicionar Fluxo"}</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<Formik
 					initialValues={contact}
@@ -127,14 +133,13 @@ const FlowBuilderModal = ({ open, onClose, flowId, nameWebhook = "", initialValu
 					}}
 				>
 					{({ values, errors, touched, isSubmitting }) => (
-						<Form>
+						<Form noValidate>
 							<DialogContent dividers>
 								<Field
 									as={TextField}
 									label={i18n.t("contactModal.form.name")}
 									name="name"
 									autoFocus
-									defaultValue={contact.name}
 									error={Boolean(errors.name)}
 									helperText={errors.name}
 									variant="outlined"

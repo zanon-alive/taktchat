@@ -30,7 +30,9 @@ import {
   AccordionDetails,
   FormControlLabel,
   Switch,
+  Box,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { makeStyles } from "@mui/styles";
 import { green } from "@mui/material/colors";
@@ -113,24 +115,24 @@ const ClampHelperText = ({ children }) => {
 };
 
 const DialogflowSchema = Yup.object().shape({
-  type: Yup.string().required(),
+  type: Yup.string().required(() => i18n.t("validation.required")),
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
   projectName: Yup.string().when('type', {
     is: (t) => t === 'dialogflow',
-    then: Yup.string().min(2, "Parâmetros incompletos!").max(100, "Parâmetros acima do esperado!").required("Required"),
+    then: Yup.string().min(2, "Parâmetros incompletos!").max(100, "Parâmetros acima do esperado!").required(() => i18n.t("validation.required")),
     otherwise: Yup.string().nullable(),
   }),
   jsonContent: Yup.string().when('type', {
     is: (t) => t === 'dialogflow',
-    then: Yup.string().min(3, "Parâmetros incompletos!").required("Required"),
+    then: Yup.string().min(3, "Parâmetros incompletos!").required(() => i18n.t("validation.required")),
     otherwise: Yup.string().nullable(),
   }),
   language: Yup.string().when('type', {
     is: (t) => t === 'dialogflow',
-    then: Yup.string().min(2, "Parâmetros incompletos!").max(50, "Parâmetros acima do esperado!").required("Required"),
+    then: Yup.string().min(2, "Parâmetros incompletos!").max(50, "Parâmetros acima do esperado!").required(() => i18n.t("validation.required")),
     otherwise: Yup.string().nullable(),
   }),
 });
@@ -509,11 +511,14 @@ const QueueIntegration = ({ open, onClose, integrationId }) => {
 
   return (
     <div className={classes.root}>
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" scroll="paper">
+      <Dialog open={open} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="md" scroll="paper">
         <DialogTitle>
-          {integrationId
-            ? `${i18n.t("queueIntegrationModal.title.edit")}`
-            : `${i18n.t("queueIntegrationModal.title.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{integrationId ? i18n.t("queueIntegrationModal.title.edit") : i18n.t("queueIntegrationModal.title.add")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={integration}
@@ -527,7 +532,7 @@ const QueueIntegration = ({ open, onClose, integrationId }) => {
           }}
         >
           {({ touched, errors, isSubmitting, values }) => (
-            <Form>
+            <Form noValidate>
               <Paper square className={classes.mainPaper} elevation={1}>
                 <DialogContent dividers>
                   <Grid container spacing={1}>

@@ -17,6 +17,9 @@ import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { i18n } from "../../translate/i18n";
 
@@ -60,9 +63,9 @@ const UserSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
   password: Yup.string().min(5, "Parâmetros incompletos!").max(50, "Parâmetros acima do esperado!"),
-  email: Yup.string().email("E-mail inválido").required("Required"),
+  email: Yup.string().email("E-mail inválido").required(() => i18n.t("validation.required")),
 });
 
 const ModalUsers = ({ open, onClose, userId, companyId }) => {
@@ -124,15 +127,18 @@ const ModalUsers = ({ open, onClose, userId, companyId }) => {
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="xs"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {userId
-            ? `${i18n.t("userModal.title.edit")}`
-            : `${i18n.t("userModal.title.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{userId ? i18n.t("userModal.title.edit") : i18n.t("userModal.title.add")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={user}
@@ -146,7 +152,7 @@ const ModalUsers = ({ open, onClose, userId, companyId }) => {
           }}
         >
           {({ touched, errors, isSubmitting }) => (
-            <Form>
+            <Form noValidate>
               <DialogContent dividers>
                 <div className={classes.multFieldLine}>
                   <Field

@@ -9,7 +9,10 @@ import {
   Button,
   Dialog,
   DialogActions,
+  DialogTitle,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { makeStyles } from "@mui/styles";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -116,7 +119,15 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
 
 
   return (
-    <Dialog maxWidth="md" onClose={handleClose} open={open}>
+    <Dialog maxWidth="md" onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} open={open}>
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>Exportar conversa</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogActions>
         <Button onClick={handleExportToPDF} color="primary">
           Exportar para PDF

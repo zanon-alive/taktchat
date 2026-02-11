@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Box,
   Button,
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   IconButton,
   Paper,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { List } from 'lucide-react';
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import api from "../../services/api";
@@ -112,9 +114,14 @@ const ListPreview = ({ titulo, descricao, textoBotao, secoes, rodape, ticketId }
       </div>
 
       {/* Modal para a lista (usando Dialog) */}
-      <Dialog open={modalAberto} onClose={fecharModal}>
+      <Dialog open={modalAberto} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") fecharModal(); }}>
         <DialogTitle style={{ backgroundColor: '#4caf50', color: 'white' }}>
-          Lista de Botões
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>Lista de Botões</span>
+            <IconButton onClick={fecharModal} size="small" aria-label="fechar" sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <DialogContent style={{ padding: "20px" }}>
           <h4>{secoes[0].titulo}</h4>

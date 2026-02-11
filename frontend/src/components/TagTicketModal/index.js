@@ -27,7 +27,8 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { IconButton, InputAdornment, FormControl } from "@mui/material";
+import { Box, IconButton, InputAdornment, FormControl } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 
 const useStyles = makeStyles(theme => ({
@@ -143,13 +144,18 @@ const handleKanbanChange = (e) => {
 		<div className={classes.root}>
 			<Dialog
 				open={open}
-				onClose={handleClose}
+				onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
 				maxWidth="xs"
 				fullWidth
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{ (tagId ? `${i18n.t("tagModal.title.edit")}` : `${i18n.t("tagModal.title.add")}`) }
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<span>{tagId ? i18n.t("tagModal.title.edit") : i18n.t("tagModal.title.add")}</span>
+						<IconButton onClick={handleClose} size="small" aria-label="fechar">
+							<CloseIcon />
+						</IconButton>
+					</Box>
 				</DialogTitle>
 				<Formik
 					initialValues={tag}
@@ -163,7 +169,7 @@ const handleKanbanChange = (e) => {
 					}}
 				>
 					{({ touched, errors, isSubmitting, values }) => (
-						<Form>
+						<Form noValidate>
 							<DialogContent dividers>
 								<div className={classes.multFieldLine}>
 									<Field

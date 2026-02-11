@@ -91,7 +91,7 @@ const CampaignSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
 });
 
 const CampaignModal = ({
@@ -889,7 +889,7 @@ const CampaignModal = ({
             assistantWhatsappIdRef.current = assistantWhatsappId || null;
 
             return (
-              <Form>
+              <Form noValidate>
                 <DialogContent dividers style={{ padding: 0, display: "flex" }}>
                   {/* Coluna esquerda - Formulário */}
                   <Box flex={1} style={{ overflowY: "auto", padding: "20px 24px" }}>

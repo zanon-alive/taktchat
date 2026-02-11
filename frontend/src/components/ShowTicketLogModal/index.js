@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+import { Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { i18n } from '../../translate/i18n';
 import { Stepper, Step, StepLabel, Typography, Paper, Grid } from '@mui/material';
 import { format, parseISO } from 'date-fns';
@@ -45,8 +46,15 @@ const ShowTicketLogModal = ({ isOpen, handleClose, ticketId }) => {
   }, [ticketId]);
 
   return (
-    <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle>{i18n.t('showTicketLogModal.title.header')}</DialogTitle>
+    <Dialog open={isOpen} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}>
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>{i18n.t('showTicketLogModal.title.header')}</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Paper>
           <DialogContentText>

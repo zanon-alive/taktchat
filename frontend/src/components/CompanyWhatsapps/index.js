@@ -377,7 +377,7 @@ const WhatsAppModalCompany = ({
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="lg"
         fullWidth
         scroll="paper"

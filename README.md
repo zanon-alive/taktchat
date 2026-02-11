@@ -15,6 +15,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Atendimento omnichannel com múltiplas filas, Kanban, tags e automações anti-ban.
 - Campanhas segmentadas, Flow Builder visual, integrações com bots/IA e controle de cadência.
 - Contatos, listas, arquivos inteligentes, dashboards e relatórios operacionais.
+- **Validação i18n**: mensagens de validação de formulários em pt-BR, en, es e tr (campo obrigatório, muito curto, etc.).
 - Multi-empresa nativa, perfis e permissões granulares, painel financeiro e billing.
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
 - **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).

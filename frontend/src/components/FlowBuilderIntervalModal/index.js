@@ -13,8 +13,10 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
@@ -108,9 +110,14 @@ const FlowBuilderIntervalModal = ({
 
   return (
     <div className={classes.root}>
-      <Dialog open={activeModal} onClose={handleClose} fullWidth maxWidth="md" scroll="paper">
+      <Dialog open={activeModal} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="md" scroll="paper">
         <DialogTitle id="form-dialog-title">
-          {open === 'create' ? `Adicionar um intervalo ao fluxo`: `Editar intervalo`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{open === 'create' ? "Adicionar um intervalo ao fluxo" : "Editar intervalo"}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>        
             <Stack>
               <DialogContent dividers>

@@ -30,8 +30,10 @@ import {
   List, 
   ListItem, 
   ListItemText, 
-  Collapse 
+  Collapse,
+  Box 
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -348,13 +350,18 @@ const OpenAIModal = ({
     <div className={classes.root}>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="lg"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {title}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{title}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={integration}
@@ -369,7 +376,7 @@ const OpenAIModal = ({
           }}
         >
           {({ touched, errors, isSubmitting, values, setFieldValue }) => (
-            <Form>
+            <Form noValidate>
               <DialogContent dividers>
                 <div className={classes.multFieldLine}>
                   <Field

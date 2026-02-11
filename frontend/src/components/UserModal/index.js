@@ -120,9 +120,9 @@ const UserSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
   password: Yup.string().min(5, "Parâmetros incompletos!").max(50, "Parâmetros acima do esperado!"),
-  email: Yup.string().email("E-mail inválido").required("Required"),
+  email: Yup.string().email("E-mail inválido").required(() => i18n.t("validation.required")),
   allHistoric: Yup.string().nullable(),
   allowedContactTags: Yup.array().of(Yup.number()).nullable(), // Adicionar validação para allowedContactTags
 });
@@ -291,7 +291,7 @@ const UserModal = ({ open, onClose, userId }) => {
           }}
         >
           {({ touched, errors, isSubmitting, setFieldValue, values }) => (
-            <Form>
+            <Form noValidate>
               <Paper className={classes.mainPaper} elevation={1}>
                 <Tabs
                   value={tab}

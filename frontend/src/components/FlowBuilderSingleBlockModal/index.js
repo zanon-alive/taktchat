@@ -43,6 +43,7 @@ import {
 } from "@mui/icons-material";
 import { capitalize } from "../../utils/capitalize";
 import { Box, Divider } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1143,10 +1144,15 @@ const FlowBuilderSingleBlockModal = ({
   };
   return (
     <div>
-      <Dialog open={activeModal} fullWidth maxWidth="md" scroll="paper">
+      <Dialog open={activeModal} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} fullWidth maxWidth="md" scroll="paper">
         {!loading && (
           <DialogTitle id="form-dialog-title">
-            Adicionar conteúdo ao fluxo
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <span>Adicionar conteúdo ao fluxo</span>
+              <IconButton onClick={handleClose} size="small" aria-label="fechar">
+                <CloseIcon />
+              </IconButton>
+            </Box>
           </DialogTitle>
         )}
         <Stack>

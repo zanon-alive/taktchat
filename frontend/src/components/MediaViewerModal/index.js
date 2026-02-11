@@ -107,7 +107,7 @@ const MediaViewerModal = ({ open, onClose, url, mediaType, name }) => {
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }}
       className={classes.modal}
       closeAfterTransition
       BackdropComponent={Backdrop}

@@ -21,7 +21,8 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { Slider, Stack } from "@mui/material";
+import { Box, Slider, Stack } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -113,15 +114,18 @@ const FlowBuilderRandomizerModal = ({
     <div className={classes.root}>
       <Dialog
         open={activeModal}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         fullWidth
         maxWidth="md"
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {open === "create"
-            ? `Adicionar um randomizador ao fluxo`
-            : `Editar randomizador`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{open === "create" ? "Adicionar um randomizador ao fluxo" : "Editar randomizador"}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Stack>
           <DialogContent dividers>

@@ -330,7 +330,7 @@ const AddManualContactsModal = ({ open, onClose, contactListId, onSuccess }) => 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
       maxWidth="md"
       fullWidth
       PaperProps={{

@@ -77,7 +77,7 @@ const ContactTagListModal = ({ open, onClose, tag }) => {
     <Modal
       className={classes.modal}
       open={open}
-      onClose={onClose}
+      onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{

@@ -13,8 +13,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { FormControl, Grid, Paper } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -50,7 +52,7 @@ const DialogflowSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Parâmetros incompletos!")
     .max(50, "Parâmetros acima do esperado!")
-    .required("Required"),
+    .required(() => i18n.t("validation.required")),
   // projectName: Yup.string()
   //   .min(3, "Parâmetros incompletos!")
   //   .max(100, "Parâmetros acima do esperado!")
@@ -135,13 +137,18 @@ const FlowBuilderTypebotModal = ({ open, onSave, data, onUpdate, close }) => {
     <div className={classes.root}>
       <Dialog
         open={activeModal}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         fullWidth
         maxWidth="md"
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {open === "create" ? `Adicionar Typebot ao fluxo` : `Editar Typebot`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{open === "create" ? "Adicionar Typebot ao fluxo" : "Editar Typebot"}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={integration}
@@ -155,7 +162,7 @@ const FlowBuilderTypebotModal = ({ open, onSave, data, onUpdate, close }) => {
           }}
         >
           {({ touched, errors, isSubmitting, values }) => (
-            <Form>
+            <Form noValidate>
               <Paper square className={classes.mainPaper} elevation={1}>
                 <DialogContent dividers>
                   <Grid container spacing={1}>

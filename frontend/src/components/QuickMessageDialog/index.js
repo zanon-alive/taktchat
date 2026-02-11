@@ -25,12 +25,14 @@ import MessageVariablesPicker from "../MessageVariablesPicker";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 
 import {
+  Box,
   FormControl,
   Grid,
   InputLabel,
   MenuItem,
   Select,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import ConfirmationModal from "../ConfirmationModal";
 
 
@@ -198,15 +200,18 @@ const QuickMessageDialog = ({ open, onClose, quickemessageId, reload }) => {
       </ConfirmationModal>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         maxWidth="xs"
         fullWidth
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {quickemessageId
-            ? `${i18n.t("quickMessages.dialog.edit")}`
-            : `${i18n.t("quickMessages.dialog.add")}`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{quickemessageId ? i18n.t("quickMessages.dialog.edit") : i18n.t("quickMessages.dialog.add")}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <div style={{ display: "none" }}>
           <input
@@ -228,7 +233,7 @@ const QuickMessageDialog = ({ open, onClose, quickemessageId, reload }) => {
           }}
         >
           {({ touched, errors, isSubmitting, setFieldValue, values }) => (
-            <Form>
+            <Form noValidate>
               <DialogContent dividers>
                 <Grid spacing={2} container>
                   <Grid xs={12} item>

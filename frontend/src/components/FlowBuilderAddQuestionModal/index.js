@@ -14,6 +14,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { i18n } from "../../translate/i18n";
 import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -149,13 +151,18 @@ const FlowBuilderAddQuestionModal = ({
     <div className={classes.root}>
       <Dialog
         open={activeModal}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         fullWidth
         maxWidth="md"
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {open === "create" ? `Adicionar Perguta ao fluxo` : `Editar Perguta`}
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{open === "create" ? "Adicionar Perguta ao fluxo" : "Editar Perguta"}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <Formik
           initialValues={integration}
@@ -168,7 +175,7 @@ const FlowBuilderAddQuestionModal = ({
           }}
         >
           {({ touched, errors, isSubmitting, values }) => (
-            <Form style={{ width: "100%" }}>
+            <Form noValidate style={{ width: "100%" }}>
               <DialogContent dividers>
                 <TextField
                   label={"Mensagem"}

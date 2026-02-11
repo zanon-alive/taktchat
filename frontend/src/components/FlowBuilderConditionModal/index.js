@@ -22,12 +22,14 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import {
+  Box,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   Stack
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -158,12 +160,19 @@ const FlowBuilderConditionModal = ({ open, onSave, onUpdate, data, close }) => {
     <div className={classes.root}>
       <Dialog
         open={activeModal}
-        onClose={handleClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }}
         fullWidth
         maxWidth="md"
         scroll="paper"
       >
-        <DialogTitle id="form-dialog-title">{labels.title}</DialogTitle>
+        <DialogTitle id="form-dialog-title">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <span>{labels.title}</span>
+            <IconButton onClick={handleClose} size="small" aria-label="fechar">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
         <Stack>
           <Stack
             dividers

@@ -481,7 +481,7 @@ const QueueTemplateGallery = ({ open, onClose, onTemplatesSelected }) => {
     <>
       <Dialog
         open={open}
-        onClose={onClose}
+        onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") onClose(); }}
         maxWidth="lg"
         fullWidth
         className={classes.setupDialog}

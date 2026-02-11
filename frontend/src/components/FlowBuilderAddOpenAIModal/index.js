@@ -24,7 +24,10 @@ import {
   ClickAwayListener,
   Popover,
   Chip,
+  Box,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -238,9 +241,14 @@ const FlowBuilderOpenAIModal = ({ open, onSave, data, onUpdate, close }) => {
   }, [selectedIntegration]);
 
   return (
-    <Dialog open={open === "create" || open === "edit"} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open={open === "create" || open === "edit"} onClose={(e, reason) => { if (reason !== "backdropClick" && reason !== "escapeKeyDown") handleClose(); }} maxWidth="md" fullWidth>
       <DialogTitle>
-        {open === "edit" ? "Editar Ação IA" : "Adicionar Ação IA"}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <span>{open === "edit" ? "Editar Ação IA" : "Adicionar Ação IA"}</span>
+          <IconButton onClick={handleClose} size="small" aria-label="fechar">
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
       <Formik
         initialValues={initialValues}
@@ -250,7 +258,7 @@ const FlowBuilderOpenAIModal = ({ open, onSave, data, onUpdate, close }) => {
         innerRef={formikRef}
       >
         {({ touched, errors, isSubmitting, values, setFieldValue }) => (
-          <Form>
+          <Form noValidate>
             <DialogContent>
               <Typography variant="body2" style={{ marginBottom: 16, color: '#666' }}>
                 Configure uma ação de IA para o FlowBuilder usando uma integração OpenAI/Gemini configurada.
