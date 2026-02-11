@@ -64,6 +64,9 @@ const App = () => {
     return pathname === '/docs' || pathname === '/docs_admin';
   };
 
+  // Não exibir prompt de instalação PWA na landing (página pública de vendas)
+  const isLandingRoute = () => window.location.pathname === '/landing';
+
   const SESSION_DISMISS_KEY = "taktchat:pwaPromptDismissedSession";
   const DAILY_SNOOZE_KEY = "taktchat:pwaPromptSnoozeUntil";
 
@@ -498,7 +501,7 @@ const App = () => {
                 </Dialog>
 
                 <Dialog
-                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute()}
+                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute() && !isLandingRoute()}
                   onClose={(event, reason) => {
                     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
                     handleRemindLaterThisSession();

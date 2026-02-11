@@ -1152,7 +1152,7 @@ const Contacts = () => {
         const hasCountryCode = cleaned.startsWith("55") && cleaned.length >= 12;
         
         if (hasCountryCode) {
-            // Formato: +55 (14) 98125-2988
+            // Formato: +55 (14) 99687-0843
             // Remove o código do país (55)
             const withoutCountryCode = cleaned.substring(2);
             
@@ -1161,7 +1161,7 @@ const Contacts = () => {
                 const phone = withoutCountryCode.substring(2);
                 
                 if (phone.length === 9) {
-                    // Celular: 9 dígitos (ex: 98125-2988)
+                    // Celular: 9 dígitos (ex: 99687-0843)
                     const prefix = phone.substring(0, 5);
                     const suffix = phone.substring(5);
                     return `+55 (${ddd}) ${prefix}-${suffix}`;
@@ -1173,7 +1173,7 @@ const Contacts = () => {
                 }
             }
         } else {
-            // Sem código do país: (14) 98125-2988
+            // Sem código do país: (14) 99687-0843
             if (cleaned.length >= 10) {
                 const ddd = cleaned.substring(0, 2);
                 const phone = cleaned.substring(2);
