@@ -22,6 +22,8 @@ module.exports = {
           useSchedules: true,
           useInternalChat: true,
           useExternalApi: true,
+          companyId: 1,
+          targetType: "direct",
           createdAt: new Date(),
           updatedAt: new Date()
         }], { transaction: t });
@@ -35,6 +37,8 @@ module.exports = {
         await queryInterface.bulkInsert("Companies", [{
           name: "Empresa 1",
           planId: 1,
+          type: "platform",
+          parentCompanyId: null,
           createdAt: new Date(),
           updatedAt: new Date()
         }], { transaction: t });

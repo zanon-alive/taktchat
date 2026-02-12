@@ -6,6 +6,7 @@ import AppError from "../../errors/AppError";
 import ShowUserService from "./ShowUserService";
 import Company from "../../models/Company";
 import User from "../../models/User";
+import { getPlatformCompanyId } from "../../config/platform";
 
 interface UserData {
   email?: string;
@@ -79,7 +80,19 @@ const UpdateUserService = async ({
   if (userData.name) { dataToUpdate.name = userData.name; }
   if (userData.password) { dataToUpdate.password = userData.password; }
   if (userData.profile) { dataToUpdate.profile = userData.profile; }
-  if (userData.super !== undefined) { dataToUpdate.super = userData.super; }
+  
+  // Validação: apenas usuários da empresa plataforma podem ter super = true
+  if (userData.super !== undefined) {
+    if (userData.super === true) {
+      const platformCompanyId = getPlatformCompanyId();
+      if (user.companyId !== platformCompanyId) {
+        throw new AppError(
+          "Apenas usuários da empresa de gestão da plataforma podem ter permissão 'super'"
+        );
+      }
+    }
+    dataToUpdate.super = userData.super;
+  }
   if (userData.startWork) { dataToUpdate.startWork = userData.startWork; }
   if (userData.endWork) { dataToUpdate.endWork = userData.endWork; }
   if (userData.farewellMessage) { dataToUpdate.farewellMessage = userData.farewellMessage; }

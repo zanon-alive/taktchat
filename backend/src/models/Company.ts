@@ -86,6 +86,25 @@ class Company extends Model<Company> {
   @Column
   updatedAtFolder: string;
 
+  @Column({
+    type: DataType.STRING,
+    defaultValue: "direct"
+  })
+  type: "platform" | "direct" | "whitelabel";
+
+  @ForeignKey(() => Company)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true
+  })
+  parentCompanyId: number | null;
+
+  @BelongsTo(() => Company, "parentCompanyId")
+  parentCompany: Company;
+
+  @HasMany(() => Company, "parentCompanyId")
+  childCompanies: Company[];
+
   @HasMany(() => User, {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",

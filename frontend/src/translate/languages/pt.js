@@ -1479,7 +1479,10 @@ const messages = {
           no: "Não",
           money: "R$",
           public: "Público",
-          amountAnnual: "Valor Anual"
+          amountAnnual: "Valor Anual",
+          targetType: "Tipo",
+          targetTypeDirect: "Cliente direto",
+          targetTypeWhitelabel: "Whitelabel"
         },
         landing: {
           or: "ou",

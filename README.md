@@ -20,9 +20,11 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
 - **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).
 - **Landing Page de Vendas**: Página pública de apresentação do produto com coleta de leads e integração WhatsApp.
+- **Governança Multi-Empresa**: Estrutura preparada para suporte whitelabel (Fase 1 concluída, Fase 2 planejada).
 
 > Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.
 > WhatsApp API Oficial: `.docs/funcionalidades/whatsapp-api-oficial/`
+> Arquitetura Whitelabel (Fase 2): `.docs/visao-geral/whitelabel-architecture.md`
 
 ### Início rápido
 
@@ -74,6 +76,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - **🚀 Guia de Onboarding:** `.docs/onboarding.md` - Documentação completa explicando todas as funcionalidades e como utilizá-las
 - **📚 Documentação Admin:** `.docs/docs_admin.md` - Guia completo para administradores (Super Admin)
 - **🗺️ Roadmap e Melhorias Futuras:** `.docs/visao-geral/roadmap.md` - Documento centralizado com todas as melhorias futuras do projeto
+- **🏢 Arquitetura Whitelabel:** `.docs/visao-geral/whitelabel-architecture.md` - Estrutura de governança multi-empresa e plano para Fase 2 (whitelabel)
 - Visão geral do produto: `.docs/visao-geral/produto.md`
 - Arquitetura e fluxos críticos: `.docs/visao-geral/arquitetura.md` e `.docs/visao-geral/fluxos-criticos.md`
 - Instalação e ambientes: `.docs/instalacao/`

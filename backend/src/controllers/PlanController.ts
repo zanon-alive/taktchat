@@ -14,6 +14,7 @@ import FindAllPlanService from "../services/PlanService/FindAllPlanService";
 import DeletePlanService from "../services/PlanService/DeletePlanService";
 import User from "../models/User";
 import Company from "../models/Company";
+import { getPlatformCompanyId } from "../config/platform";
 
 interface TokenPayload {
   id: string;
@@ -48,6 +49,8 @@ type StorePlanData = {
   useOpenAi?: boolean;
   useIntegrations?: boolean;
   isPublic?: boolean;
+  companyId?: number | null;
+  targetType?: "direct" | "whitelabel";
 };
 
 type UpdatePlanData = {
@@ -69,6 +72,8 @@ type UpdatePlanData = {
   useOpenAi?: boolean;
   useIntegrations?: boolean;
   isPublic?: boolean;
+  companyId?: number | null;
+  targetType?: "direct" | "whitelabel";
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -125,7 +130,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const plan = await CreatePlanService(newPlan);
+  const platformCompanyId = getPlatformCompanyId();
+  const planData: StorePlanData = {
+    ...newPlan,
+    companyId: newPlan.companyId ?? platformCompanyId,
+    targetType: newPlan.targetType ?? "direct"
+  };
+
+  const plan = await CreatePlanService(planData);
 
   // const io = getIO();
   // io.of(companyId.toString())
@@ -176,6 +188,13 @@ export const update = async (
     throw new AppError(err.message);
   }
 
+  const platformCompanyId = getPlatformCompanyId();
+  const dataToUpdate: UpdatePlanData = {
+    ...planData,
+    companyId: planData.companyId ?? platformCompanyId,
+    targetType: planData.targetType ?? "direct"
+  };
+
   const { id,
     //   name,
     //   users,
@@ -192,7 +211,7 @@ export const update = async (
     //   useKanban,
     //   useOpenAi,
     //   useIntegrations
-  } = planData;
+  } = dataToUpdate;
   const authHeader = req.headers.authorization;
   const [, token] = authHeader.split(" ");
   const decoded = verify(token, authConfig.secret);
@@ -202,7 +221,7 @@ export const update = async (
   const PlanCompany = company.planId;
 
   if (requestUser.super === true) {
-    const plan = await UpdatePlanService(planData
+    const plan = await UpdatePlanService(dataToUpdate
       // id,
       // name,
       // users,

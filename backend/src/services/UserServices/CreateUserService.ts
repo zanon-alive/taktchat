@@ -5,6 +5,7 @@ import { SerializeUser } from "../../helpers/SerializeUser";
 import User from "../../models/User";
 import Plan from "../../models/Plan";
 import Company from "../../models/Company";
+import { getPlatformCompanyId } from "../../config/platform";
 
 interface Request {
   email: string;
@@ -111,6 +112,16 @@ const CreateUserService = async ({
     await schema.validate({ email, password, name });
   } catch (err) {
     throw new AppError(err.message);
+  }
+
+  // Validação: apenas usuários da empresa plataforma podem ter super = true
+  if (isSuper === true && companyId !== undefined) {
+    const platformCompanyId = getPlatformCompanyId();
+    if (companyId !== platformCompanyId) {
+      throw new AppError(
+        "Apenas usuários da empresa de gestão da plataforma podem ter permissão 'super'"
+      );
+    }
   }
 
   const user = await User.create(

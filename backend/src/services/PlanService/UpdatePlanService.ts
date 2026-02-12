@@ -21,6 +21,8 @@ interface PlanData {
   useOpenAi?: boolean;
   useIntegrations?: boolean;
   isPublic?: boolean;
+  companyId?: number | null;
+  targetType?: "direct" | "whitelabel";
 }
 
 const UpdatePlanService = async (planData: PlanData): Promise<Plan> => {
