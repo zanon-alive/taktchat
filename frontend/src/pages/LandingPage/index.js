@@ -12,6 +12,7 @@ const ValueProposition = React.lazy(() => import("./components/ValueProposition"
 const Problems = React.lazy(() => import("./components/Problems"));
 const Features = React.lazy(() => import("./components/Features"));
 const Plans = React.lazy(() => import("./components/Plans"));
+const RevendedorSection = React.lazy(() => import("./components/RevendedorSection"));
 const Testimonials = React.lazy(() => import("./components/Testimonials"));
 const Contact = React.lazy(() => import("./components/Contact"));
 const LeadForm = React.lazy(() => import("./components/LeadForm"));
@@ -68,10 +69,15 @@ const LandingPage = () => {
         params: { listPublic: "false" }
       });
       if (response.data && Array.isArray(response.data)) {
-        const publicPlans = response.data.filter(plan => plan.isPublic !== false);
-        setPlans(publicPlans.length > 0 ? publicPlans : response.data);
+        const onlyDirect = response.data.filter(
+          plan => plan.isPublic !== false && (plan.targetType == null || plan.targetType === "direct")
+        );
+        setPlans(onlyDirect.length > 0 ? onlyDirect : response.data);
       } else if (response.data?.plans) {
-        setPlans(response.data.plans);
+        const onlyDirect = response.data.plans.filter(
+          plan => plan.targetType == null || plan.targetType === "direct"
+        );
+        setPlans(onlyDirect);
       }
     } catch (error) {
       console.log("Não foi possível carregar planos da API, usando planos padrão");
@@ -334,6 +340,8 @@ const LandingPage = () => {
               <Plans plans={plans} loading={loadingPlans} />
             </Container>
           </Box>
+
+          <RevendedorSection />
 
           <Box id="depoimentos" className={classes.section}>
             <Container>

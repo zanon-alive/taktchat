@@ -8,8 +8,11 @@ import {
   AutoIncrement,
   AllowNull,
   Unique,
-  Default
+  Default,
+  ForeignKey,
+  BelongsTo
 } from "sequelize-typescript";
+import Company from "./Company";
 
 @Table
 class Plan extends Model<Plan> {
@@ -87,6 +90,20 @@ class Plan extends Model<Plan> {
   @Default(true)
   @Column
   isPublic: boolean;
+
+  @ForeignKey(() => Company)
+  @Column({
+    allowNull: true
+  })
+  companyId: number | null;
+
+  @BelongsTo(() => Company)
+  company: Company;
+
+  @Column({
+    defaultValue: "direct"
+  })
+  targetType: "direct" | "whitelabel";
 }
 
 export default Plan;

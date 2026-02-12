@@ -22,6 +22,7 @@ const menuItems = [
   { label: "Problemas", id: "problemas" },
   { label: "Funcionalidades", id: "features" },
   { label: "Planos", id: "planos" },
+  { label: "Revendedor", id: "revendedor" },
   { label: "Depoimentos", id: "depoimentos" },
   { label: "FAQ", id: "faq" },
   { label: "Cadastro", id: "lead-form" },

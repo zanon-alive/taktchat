@@ -84,7 +84,9 @@ export function PlanManagerForm(props) {
         useKanban: true,
         useOpenAi: true,
         useIntegrations: true,
-        isPublic: true
+        isPublic: true,
+        targetType: 'direct',
+        companyId: 1
     });
 
     useEffect(() => {
@@ -134,6 +136,22 @@ export function PlanManagerForm(props) {
                                 >
                                     <MenuItem value={true}>Sim</MenuItem>
                                     <MenuItem value={false}>Não</MenuItem>
+                                </Field>
+                            </FormControl>
+                        </Grid>
+                        <Grid xs={12} sm={6} md={2} xl={2} item>
+                            <FormControl margin="dense" variant="outlined" fullWidth>
+                                <InputLabel htmlFor="targetType-selection">{i18n.t("plans.form.targetType")}</InputLabel>
+                                <Field
+                                    as={Select}
+                                    id="targetType-selection"
+                                    label={i18n.t("plans.form.targetType")}
+                                    labelId="targetType-selection-label"
+                                    name="targetType"
+                                    margin="dense"
+                                >
+                                    <MenuItem value="direct">{i18n.t("plans.form.targetTypeDirect")}</MenuItem>
+                                    <MenuItem value="whitelabel">{i18n.t("plans.form.targetTypeWhitelabel")}</MenuItem>
                                 </Field>
                             </FormControl>
                         </Grid>
@@ -467,6 +485,7 @@ export function PlansManagerGrid(props) {
                         <TableCell align="left">{i18n.t("plans.form.name")}</TableCell>
                         <TableCell align="center">{i18n.t("plans.form.users")}</TableCell>
                         <TableCell align="center">{i18n.t("plans.form.public")}</TableCell>
+                        <TableCell align="center">{i18n.t("plans.form.targetType")}</TableCell>
                         <TableCell align="center">{i18n.t("plans.form.connections")}</TableCell>
                         <TableCell align="center">Filas</TableCell>
                         <TableCell align="center">Valor</TableCell>
@@ -493,6 +512,7 @@ export function PlansManagerGrid(props) {
                             <TableCell align="left">{row.name || '-'}</TableCell>
                             <TableCell align="center">{row.users || '-'}</TableCell>
                             <TableCell align="center">{row.isPublic ? "Sim": "Não" || '-'}</TableCell>
+                            <TableCell align="center">{row.targetType === 'whitelabel' ? i18n.t("plans.form.targetTypeWhitelabel") : i18n.t("plans.form.targetTypeDirect")}</TableCell>
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
                             <TableCell align="center">{i18n.t("plans.form.money")} {row.amount ? row.amount.toLocaleString('pt-br', { minimumFractionDigits: 2 }) : '00.00'}</TableCell>
@@ -538,7 +558,9 @@ export default function PlansManager() {
         useKanban: true,
         useOpenAi: true,
         useIntegrations: true,
-        isPublic: true
+        isPublic: true,
+        targetType: 'direct',
+        companyId: 1
     })
 
     useEffect(() => {
@@ -562,7 +584,6 @@ export default function PlansManager() {
 
     const handleSubmit = async (data) => {
         setLoading(true)
-        console.log(data)
         try {
             if (data.id !== undefined) {
                 await update(data)
@@ -614,7 +635,9 @@ export default function PlansManager() {
             useKanban: true,
             useOpenAi: true,
             useIntegrations: true,
-            isPublic: true
+            isPublic: true,
+            targetType: 'direct',
+            companyId: 1
         })
     }
 
@@ -649,7 +672,9 @@ export default function PlansManager() {
             useKanban,
             useOpenAi,
             useIntegrations,
-            isPublic: data.isPublic
+            isPublic: data.isPublic,
+            targetType: data.targetType || 'direct',
+            companyId: data.companyId ?? 1
         })
     }
 
