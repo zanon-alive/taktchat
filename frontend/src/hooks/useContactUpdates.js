@@ -7,7 +7,7 @@ const useContactUpdates = (onContactUpdate) => {
   useEffect(() => {
     if (!socket || typeof socket.on !== 'function' || !user?.companyId) return;
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     const eventName = `company-${companyId}-contact`;
 
     const handleContactUpdate = (data) => {

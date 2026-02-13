@@ -13,7 +13,7 @@
 - ❌ **Flag registered:** `false` (nunca muda)
 - ❌ **Tentativas:** 3 vezes, sempre o mesmo resultado
 
-### Número Funcional (5514981252988)
+### Número Funcional (5514996870843)
 - ✅ **Permaneceu conectado:** 667 segundos (11 minutos)
 - ✅ **Desconectou por:** `Intentional Logout` (você desconectou manualmente)
 - ⚠️ **Flag registered:** `false` (também não muda, mas não é removido)
@@ -131,7 +131,7 @@ Execute estas verificações no WhatsApp Mobile do número problemático:
 
 **NÃO USE** o número 5514997311404 para conexões Baileys até resolver o bloqueio.
 
-**USE** o número 5514981252988 ou outro número sem restrições.
+**USE** o número 5514996870843 ou outro número sem restrições.
 
 ### Para Debug/Desenvolvimento:
 
@@ -158,7 +158,7 @@ Tentativas: 3+
 
 ### Número Funcional
 ```
-Número: 5514981252988
+Número: 5514996870843
 Device IDs testados: :27, :28
 Tempo conectado: 667s+ (11 minutos)
 Desconexão: Intentional Logout (manual)
@@ -211,14 +211,14 @@ if (statusCode === 401 && isDeviceRemoved && timeSinceOpen < 70) {
 
 - Número problema (tentativa 1): `numero_problema/baileys-debug-whatsapp-2-5514997311404:46-2025-11-21_20-47-31.log`
 - Número problema (tentativa 2): `baileys-debug-whatsapp-3-5514997311404:47-2025-11-21_21-15-21.log`
-- Número funcional (teste 1): `numero_funcional/baileys-debug-whatsapp-2-5514981252988:27-2025-11-21_20-53-55.log`
-- Número funcional (teste 2): `baileys-debug-whatsapp-3-5514981252988:28-2025-11-21_21-23-37.log`
+- Número funcional (teste 1): `numero_funcional/baileys-debug-whatsapp-2-5514996870843:27-2025-11-21_20-53-55.log`
+- Número funcional (teste 2): `baileys-debug-whatsapp-3-5514996870843:28-2025-11-21_21-23-37.log`
 
 ---
 
 ## ✅ Próximos Passos
 
-1. **IMEDIATO:** Usar número 5514981252988 para produção
+1. **IMEDIATO:** Usar número 5514996870843 para produção
 2. **24-48h:** Aguardar antes de tentar 5514997311404 novamente
 3. **1 semana:** Se não resolver, considerar resetar o número ou usar outro permanentemente
 4. **Opcional:** Implementar alerta no código para detectar este padrão

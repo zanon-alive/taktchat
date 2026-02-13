@@ -337,7 +337,7 @@ const ContactLists = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     // const socket = socketManager.GetSocket();
 
     const onContactListEvent = (data) => {

@@ -144,6 +144,18 @@ const mapDatabaseConnectionError = (
     };
   }
 
+  // Tabela/relação não existe (ex.: migration não executada)
+  if (
+    pgCode === "42P01" ||
+    (normalizedMessage.includes("relation") && normalizedMessage.includes("does not exist"))
+  ) {
+    return {
+      status: 503,
+      code: "DB_TABLE_NOT_FOUND",
+      message: "Tabela não encontrada no banco. Execute as migrations: npm run db:migrate (na pasta backend)."
+    };
+  }
+
   return {
     status: 503,
     code: "DB_CONNECTION_ERROR",

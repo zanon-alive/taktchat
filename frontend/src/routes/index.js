@@ -1,5 +1,5 @@
 import React, { useEffect, useState, lazy } from "react";
-import { BrowserRouter, Switch, Route as RouterRoute } from "react-router-dom";
+import { BrowserRouter, Switch, Route as RouterRoute, Redirect } from "react-router-dom";
 
 import LoggedInLayout from "../layout";
 import { AuthProvider } from "../context/Auth/AuthContext";
@@ -10,6 +10,7 @@ import Route from "./Route";
 // Importações diretas apenas para componentes críticos de autenticação (menor bundle inicial)
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
+import SignupPartner from "../pages/SignupPartner";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
 import LandingPage from "../pages/LandingPage";
@@ -53,6 +54,8 @@ const TagsKanban = lazy(() => import("../pages/TagsKanban"));
 const AISettings = lazy(() => import("../components/AISettings"));
 const OnboardingDocs = lazy(() => import("../pages/OnboardingDocs"));
 const AdminDocs = lazy(() => import("../pages/AdminDocs"));
+const Licenses = lazy(() => import("../pages/Licenses"));
+const PartnerBillingReport = lazy(() => import("../pages/PartnerBillingReport"));
 
 
 const Routes = () => {
@@ -75,6 +78,7 @@ const Routes = () => {
             <Route exact path="/docs_admin" component={AdminDocs} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
+            <Route exact path="/signup-partner" component={SignupPartner} />
             <Route exact path="/forgot-password" component={ForgotPassword} />
             <Route exact path="/reset-password" component={ResetPassword} />
             <WhatsAppsProvider>
@@ -82,6 +86,8 @@ const Routes = () => {
                 <Route exact path="/financeiro" component={Financeiro} isPrivate />
 
                 <Route exact path="/companies" component={Companies} isPrivate />
+                <Route exact path="/licenses" component={Licenses} isPrivate />
+                <Route exact path="/partner-billing-report" component={PartnerBillingReport} isPrivate />
                 <Route exact path="/" component={Dashboard} isPrivate />
                 <Route exact path="/tickets/:ticketId?" component={TicketResponsiveContainer} isPrivate />
                 <Route exact path="/connections" component={Connections} isPrivate />
@@ -99,6 +105,7 @@ const Routes = () => {
                 <Route exact path="/queues" component={Queues} isPrivate />
                 <Route exact path="/reports" component={Reports} isPrivate />
                 <Route exact path="/queue-integration" component={QueueIntegration} isPrivate />
+                <RouterRoute exact path="/annoucements" render={() => <Redirect to="/announcements" />} />
                 <Route exact path="/announcements" component={Annoucements} isPrivate />
                 <Route
                   exact

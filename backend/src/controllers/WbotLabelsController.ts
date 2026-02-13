@@ -3,6 +3,7 @@ import Whatsapp from "../models/Whatsapp";
 import logger from "../utils/logger";
 import { getAllChatLabels, getLabels } from "../libs/labelCache";
 import RebuildDeviceTagsService from "../services/WbotServices/RebuildDeviceTagsService";
+import { getBaileys } from "../libs/baileysLoader";
 
 export const getLabelsDebug = async (req: Request, res: Response) => {
   try {
@@ -78,7 +79,8 @@ export const forceLabelsSync = async (req: Request, res: Response) => {
     
     // Tentar resync focado em labels
     try {
-      const { ALL_WA_PATCH_NAMES } = require("@whiskeysockets/baileys");
+      const baileys = await getBaileys();
+      const { ALL_WA_PATCH_NAMES } = baileys;
       const labelPatches = (ALL_WA_PATCH_NAMES || []).filter((n: string) => /label/i.test(n));
       
       if (labelPatches.length > 0) {

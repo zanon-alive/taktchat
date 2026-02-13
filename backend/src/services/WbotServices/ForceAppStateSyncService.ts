@@ -1,7 +1,7 @@
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 import logger from "../../utils/logger";
-import { ALL_WA_PATCH_NAMES } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import { getLabels } from "../../libs/labelCache";
 
 const ForceAppStateSyncService = async (companyId: number, whatsappId?: number) => {
@@ -14,7 +14,8 @@ const ForceAppStateSyncService = async (companyId: number, whatsappId?: number) 
     throw new Error("Função resyncAppState não disponível no socket atual");
   }
 
-  await wbot.resyncAppState(ALL_WA_PATCH_NAMES as any, true);
+  const baileys = await getBaileys();
+  await wbot.resyncAppState(baileys.ALL_WA_PATCH_NAMES as any, true);
   logger.info(`[ForceAppStateSyncService] Resync solicitado com sucesso`);
 
   // Aguardar labels caírem no cache por até ~8s (polling a cada 400ms)

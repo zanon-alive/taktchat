@@ -668,7 +668,7 @@ const MessagesList = ({
 
   const { showSelectMessageCheckbox } = useContext(ForwardMessageContext);
 
-  const companyId = user.companyId;
+  const companyId = user?.companyId;
 
   const [videoDialog, setVideoDialog] = useState({ open: false, url: null });
   const [pdfDialog, setPdfDialog] = useState({ open: false, url: null });
@@ -976,11 +976,11 @@ const MessagesList = ({
     if (!socket || typeof socket.on !== "function") {
       return;
     }
-    if (!user || !user.companyId) {
+    if (!user || !user?.companyId) {
       return;
     }
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 
     const connectEventMessagesList = () => {
       try {

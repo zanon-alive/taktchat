@@ -34,7 +34,8 @@ import CompaniesSettings from "../models/CompaniesSettings";
 import { verifyMessageFace, verifyMessageMedia } from "../services/FacebookServices/facebookMessageListener";
 import EditWhatsAppMessage from "../services/MessageServices/EditWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
-import { generateWAMessageFromContent, generateWAMessageContent, proto } from "@whiskeysockets/baileys";
+import type { proto } from "@whiskeysockets/baileys";
+import { getBaileys } from "../libs/baileysLoader";
 import SendWhatsAppReaction from "../services/WbotServices/SendWhatsAppReaction";
 import TranscribeAudioMessageToText from "../services/MessageServices/TranscribeAudioMessageService";
 import ShowMessageService, { GetWhatsAppFromMessage } from "../services/MessageServices/ShowMessageService";
@@ -165,6 +166,8 @@ export const sendListMessage = async (req: Request, res: Response): Promise<Resp
 
     const botNumber = whatsapp.number;
     const wbot = await GetTicketWbot(ticket);
+    // Carregar Baileys dinamicamente
+    const baileys = await getBaileys();
     // Validações de sections e rows para evitar payload inválido
     if (!sections || !Array.isArray(sections) || sections.length === 0) {
       throw new AppError("Sections must be a non-empty array", 400);
@@ -196,7 +199,7 @@ export const sendListMessage = async (req: Request, res: Response): Promise<Resp
     const timestamp = Number(Math.round(Date.now() / 1000));
     console.debug("Timestamp:", timestamp);
 
-    const newMsg = generateWAMessageFromContent(number, listMessage, {
+    const newMsg = await baileys.generateWAMessageFromContent(number, listMessage, {
       userJid: botNumber,
     });
 
@@ -253,6 +256,8 @@ export const sendCopyMessage = async (req: Request, res: Response): Promise<Resp
 
     const botNumber = whatsapp.number;
     const wbot = await GetTicketWbot(ticket);
+    // Carregar Baileys dinamicamente
+    const baileys = await getBaileys();
     const copyMessage = {
       viewOnceMessage: {
         message: {
@@ -280,7 +285,7 @@ export const sendCopyMessage = async (req: Request, res: Response): Promise<Resp
     };
 
     const number = `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
-    const newMsg = generateWAMessageFromContent(number, copyMessage, { userJid: botNumber });
+    const newMsg = await baileys.generateWAMessageFromContent(number, copyMessage, { userJid: botNumber });
     await wbot.relayMessage(number, newMsg.message, { messageId: newMsg.key.id! });
 
     const messageBody = title || "Mensagem de cópia interativa";
@@ -334,6 +339,8 @@ export const sendCALLMessage = async (req: Request, res: Response): Promise<Resp
 
     const botNumber = whatsapp.number;
     const wbot = await GetTicketWbot(ticket);
+    // Carregar Baileys dinamicamente
+    const baileys = await getBaileys();
     const callMessage = {
       viewOnceMessage: {
         message: {
@@ -361,7 +368,7 @@ export const sendCALLMessage = async (req: Request, res: Response): Promise<Resp
     };
 
     const number = `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
-    const newMsg = generateWAMessageFromContent(number, callMessage, { userJid: botNumber });
+    const newMsg = await baileys.generateWAMessageFromContent(number, callMessage, { userJid: botNumber });
     await wbot.relayMessage(number, newMsg.message, { messageId: newMsg.key.id! });
 
     const messageBody = title || "Mensagem de chamada interativa";
@@ -415,6 +422,8 @@ export const sendURLMessage = async (req: Request, res: Response): Promise<Respo
 
     const botNumber = whatsapp.number;
     const wbot = await GetTicketWbot(ticket);
+    // Carregar Baileys dinamicamente
+    const baileys = await getBaileys();
     let urlMessage: proto.IMessage;
 
     if (image) {
@@ -422,7 +431,7 @@ export const sendURLMessage = async (req: Request, res: Response): Promise<Respo
         throw new AppError("Invalid base64 image format", 400);
       }
       const base64Image = image.split(",")[1];
-      const imageMessageContent = await generateWAMessageContent(
+      const imageMessageContent = await baileys.generateWAMessageContent(
         {
           image: {
             url: `data:image/png;base64,${base64Image}`,
@@ -489,7 +498,7 @@ export const sendURLMessage = async (req: Request, res: Response): Promise<Respo
     }
 
     const number = `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
-    const newMsg = generateWAMessageFromContent(number, urlMessage, { userJid: botNumber });
+    const newMsg = await baileys.generateWAMessageFromContent(number, urlMessage, { userJid: botNumber });
     await wbot.relayMessage(number, newMsg.message, { messageId: newMsg.key.id! });
 
     const messageBody = title || "Mensagem URL interativa";
@@ -570,6 +579,8 @@ export const sendPIXMessage = async (req: Request, res: Response): Promise<Respo
     const number = `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
     const botNumber = whatsapp.number;
     const wbot = await GetTicketWbot(ticket);
+    // Carregar Baileys dinamicamente
+    const baileys = await getBaileys();
 
     const interactiveMsg = {
       viewOnceMessage: {
@@ -597,7 +608,7 @@ export const sendPIXMessage = async (req: Request, res: Response): Promise<Respo
       },
     };
 
-    const newMsg = generateWAMessageFromContent(number, interactiveMsg, { userJid: botNumber });
+    const newMsg = await baileys.generateWAMessageFromContent(number, interactiveMsg, { userJid: botNumber });
     await wbot.relayMessage(number, newMsg.message, { messageId: newMsg.key.id! });
 
     const messageBody = title || "Mensagem PIX interativa";

@@ -180,9 +180,10 @@ const Schedules = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
+      if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-      if (!planConfigs.plan.useSchedules) {
+      if (!planConfigs?.plan?.useSchedules) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
         setTimeout(() => {
           history.push(`/`)
@@ -246,10 +247,10 @@ const Schedules = () => {
       }
     }
 
-    socket.on(`company${user.companyId}-schedule`, onCompanySchedule)
+    socket.on(`company${user?.companyId}-schedule`, onCompanySchedule)
 
     return () => {
-      socket.off(`company${user.companyId}-schedule`, onCompanySchedule)
+      socket.off(`company${user?.companyId}-schedule`, onCompanySchedule)
     };
   }, [socket]);
 

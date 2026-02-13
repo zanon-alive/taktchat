@@ -61,6 +61,15 @@ const useCompanies = () => {
         return responseData;
     }
 
+    const blockAccess = async (companyId, blocked) => {
+        const { data: responseData } = await api.request({
+            url: `/companies/${companyId}/block-access`,
+            method: 'PATCH',
+            data: { blocked }
+        });
+        return responseData;
+    }
+
     return {
         save,
         update,
@@ -68,7 +77,8 @@ const useCompanies = () => {
         list,
         find,
         findAll,
-        updateSchedules
+        updateSchedules,
+        blockAccess
     }
 }
 

@@ -1,4 +1,5 @@
-import { WAMessage, AnyMessageContent, WAPresence } from "@whiskeysockets/baileys";
+import type { WAMessage, AnyMessageContent, WAPresence } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import * as Sentry from "@sentry/node";
 import fs from "fs";
 import { exec } from "child_process";
@@ -73,7 +74,8 @@ export const typeSimulation = async (ticket: Ticket, presence: WAPresence) => {
   });
 
   await wbot.sendPresenceUpdate(presence, `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`);
-  await delay(5000);
+  const baileys = await getBaileys();
+  await baileys.delay(5000);
   await wbot.sendPresenceUpdate('paused', `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`);
 
 }

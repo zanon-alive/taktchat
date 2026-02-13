@@ -80,7 +80,7 @@ const SettingsCustom = () => {
     async function findData() {
       setLoading(true);
       try {
-        const companyId = user.companyId;
+        const companyId = user?.companyId;
         const company = await find(companyId);
 
         const settingList = await getAllSettings(companyId);
@@ -131,6 +131,14 @@ const SettingsCustom = () => {
     return currentUser.super;
   };
 
+  const isWhitelabel = () => {
+    return currentUser?.company?.type === "whitelabel";
+  };
+
+  const canManageCompaniesOrPlans = () => {
+    return isSuper() || isWhitelabel();
+  };
+
   return (
     <MainContainer useWindowScroll={true} className={classes.root}>
       {user.profile === "user" ?
@@ -152,10 +160,10 @@ const SettingsCustom = () => {
             >
               <Tab label={i18n.t("settings.tabs.options")} value={"options"} />
               {schedulesEnabled && <Tab label="Horários" value={"schedules"} />}
-              {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
-              {isSuper() ? <Tab label={i18n.t("settings.tabs.plans")} value={"plans"} /> : null}
+              {canManageCompaniesOrPlans() ? <Tab label="Empresas" value={"companies"} /> : null}
+              {canManageCompaniesOrPlans() ? <Tab label={i18n.t("settings.tabs.plans")} value={"plans"} /> : null}
               {isSuper() ? <Tab label={i18n.t("settings.tabs.helps")} value={"helps"} /> : null}
-              {isSuper() ? <Tab label="Whitelabel" value={"whitelabel"} /> : null}
+              {isSuper() ? <Tab label={i18n.t("settings.tabs.whitelabel")} value={"whitelabel"} /> : null}
             </Tabs>
             <Paper className={classes.paper} elevation={0}>
               <TabPanel
@@ -169,26 +177,28 @@ const SettingsCustom = () => {
                   initialValues={schedules}
                 />
               </TabPanel>
+              {canManageCompaniesOrPlans() && (
+                <>
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"companies"}
+                  >
+                    <CompaniesManager />
+                  </TabPanel>
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"plans"}
+                  >
+                    <PlansManager />
+                  </TabPanel>
+                </>
+              )}
               <OnlyForSuperUser
                 user={currentUser}
                 yes={() => (
                   <>
-                    <TabPanel
-                      className={classes.container}
-                      value={tab}
-                      name={"companies"}
-                    >
-                      <CompaniesManager />
-                    </TabPanel>
-
-                    <TabPanel
-                      className={classes.container}
-                      value={tab}
-                      name={"plans"}
-                    >
-                      <PlansManager />
-                    </TabPanel>
-
                     <TabPanel
                       className={classes.container}
                       value={tab}

@@ -291,9 +291,9 @@ const Invoices = () => {
   useEffect(() => {
     const fetchCompanyPlan = async () => {
       try {
-        if (user && user.companyId) {
+        if (user && user?.companyId) {
           // First get the company info to access its planId
-          const companyResponse = await api.get(`/companies/${user.companyId}`);
+          const companyResponse = await api.get(`/companies/${user?.companyId}`);
           const company = companyResponse.data;
           
           if (company && company.planId) {
@@ -335,7 +335,7 @@ const Invoices = () => {
     });
   }, []);
 
-  const isLoadingFallback = !user || !user.companyId || !companyPlan;
+  const isLoadingFallback = !user || !user?.companyId || !companyPlan;
 
   if (isLoadingFallback) {
     return (

@@ -13,6 +13,7 @@ import whatsappSessionRoutes from "./whatsappSessionRoutes";
 import queueRoutes from "./queueRoutes";
 import companyRoutes from "./companyRoutes";
 import planRoutes from "./planRoutes";
+import licenseRoutes from "./licenseRoutes";
 import ticketNoteRoutes from "./ticketNoteRoutes";
 import quickMessageRoutes from "./quickMessageRoutes";
 import helpRoutes from "./helpRoutes";
@@ -59,6 +60,8 @@ import tagRuleRoutes from "./tagRuleRoutes";
 import permissionRoutes from "./permissionRoutes";
 import auditLogRoutes from "./auditLogRoutes";
 import whatsappWebhookRoutes from "./whatsappWebhookRoutes";
+import publicRoutes from "./publicRoutes";
+import paymentGatewayRoutes from "./paymentGatewayRoutes";
 
 
 const routes = Router();
@@ -77,6 +80,8 @@ routes.use(whatsappSessionRoutes);
 routes.use(queueRoutes);
 routes.use(companyRoutes);
 routes.use(planRoutes);
+routes.use(licenseRoutes);
+routes.use(paymentGatewayRoutes);
 routes.use(ticketNoteRoutes);
 routes.use(quickMessageRoutes);
 routes.use(helpRoutes);
@@ -124,5 +129,6 @@ routes.use(tagRuleRoutes);
 routes.use(permissionRoutes);
 routes.use(auditLogRoutes);
 routes.use(whatsappWebhookRoutes);
+routes.use("/public", publicRoutes);
 
 export default routes;

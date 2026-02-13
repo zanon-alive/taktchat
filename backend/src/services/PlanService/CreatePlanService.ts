@@ -1,6 +1,8 @@
 import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import Plan from "../../models/Plan";
+import Company from "../../models/Company";
+import { getPlatformCompanyId } from "../../config/platform";
 
 interface PlanData {
   name: string;
@@ -25,10 +27,34 @@ interface PlanData {
   isPublic?: boolean;
   companyId?: number | null;
   targetType?: "direct" | "whitelabel";
+  requestUserCompanyId?: number;
+  requestUserSuper?: boolean;
 }
 
 const CreatePlanService = async (planData: PlanData): Promise<Plan> => {
-  const { name } = planData;
+  const {
+    name,
+    companyId: requestedCompanyId,
+    targetType: requestedTargetType,
+    requestUserCompanyId,
+    requestUserSuper = false
+  } = planData;
+
+  const platformCompanyId = getPlatformCompanyId();
+
+  if (!requestUserSuper && requestUserCompanyId != null) {
+    const requestCompany = await Company.findByPk(requestUserCompanyId);
+    if (!requestCompany || requestCompany.type !== "whitelabel") {
+      throw new AppError("Apenas o Dono da Plataforma ou um Whitelabel podem criar planos.");
+    }
+    planData.companyId = requestUserCompanyId;
+    planData.targetType = "whitelabel";
+  } else if (requestUserSuper) {
+    planData.companyId = requestedCompanyId ?? platformCompanyId;
+    planData.targetType = requestedTargetType ?? "direct";
+  } else {
+    throw new AppError("Apenas o Dono da Plataforma ou um Whitelabel podem criar planos.");
+  }
 
   const planSchema = Yup.object().shape({
     name: Yup.string()
@@ -70,7 +96,8 @@ const CreatePlanService = async (planData: PlanData): Promise<Plan> => {
     throw new AppError(err.message);
   }
 
-  const plan = await Plan.create(planData);
+  const { requestUserCompanyId: _uc, requestUserSuper: _us, ...dataForCreate } = planData;
+  const plan = await Plan.create(dataForCreate);
 
   return plan;
 };

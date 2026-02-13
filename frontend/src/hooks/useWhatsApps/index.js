@@ -85,11 +85,11 @@ const useWhatsApps = () => {
   }, [isAuth]);
 
   useEffect(() => {
-    if (!isAuth || !user.companyId || !socket || typeof socket.on !== 'function') {
+    if (!isAuth || !user?.companyId || !socket || typeof socket.on !== 'function') {
       return undefined;
     }
 
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
 //    const socket = socketManager.GetSocket();
 
       const onCompanyWhatsapp = (data) => {
@@ -116,7 +116,7 @@ const useWhatsApps = () => {
           socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
         }
       };
-    }, [socket, user.companyId, isAuth]);
+    }, [socket, user?.companyId, isAuth]);
 
   return { whatsApps, loading };
 };

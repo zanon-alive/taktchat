@@ -1,11 +1,9 @@
-import { proto } from "@whiskeysockets/baileys";
-import {
+import type {
   AuthenticationCreds,
   AuthenticationState,
   SignalDataTypeMap
 } from "@whiskeysockets/baileys";
-import { initAuthCreds } from "@whiskeysockets/baileys";
-import { BufferJSON } from "@whiskeysockets/baileys";
+import { getBaileys } from "../libs/baileysLoader";
 import cacheLayer from "../libs/cache";
 import Whatsapp from "../models/Whatsapp";
 import fs from "fs";
@@ -14,6 +12,9 @@ import path from "path";
 export const useMultiFileAuthState = async (
   whatsapp: Whatsapp
 ): Promise<{ state: AuthenticationState; saveCreds: () => Promise<void> }> => {
+  // Carregar Baileys dinamicamente
+  const baileys = await getBaileys();
+  const { proto, initAuthCreds, BufferJSON } = baileys;
   const driver = (process.env.SESSIONS_DRIVER || "").toLowerCase() || (process.env.REDIS_URI ? "redis" : "fs");
 
   // Base dir padrão: private/sessions/<companyId>/<whatsappId>

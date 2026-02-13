@@ -37,7 +37,7 @@ const useUserMoments = () => {
       return;
     }
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     
     const onTicketEvent = (data) => {
       if (isUpdate !== data) {
@@ -66,7 +66,7 @@ const useUserMoments = () => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id, user.companyId]); // Dependências especificadas aqui  
+  }, [user?.id, user?.companyId]); // Dependências especificadas aqui  
 
   return { users };
 };

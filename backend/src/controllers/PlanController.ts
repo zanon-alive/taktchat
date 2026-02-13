@@ -51,6 +51,8 @@ type StorePlanData = {
   isPublic?: boolean;
   companyId?: number | null;
   targetType?: "direct" | "whitelabel";
+  requestUserCompanyId?: number;
+  requestUserSuper?: boolean;
 };
 
 type UpdatePlanData = {
@@ -86,33 +88,44 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const requestUser = await User.findByPk(requestUserId);
   const company = await Company.findByPk(companyId);
   const PlanCompany = company.planId;
-  const plans = await Plan.findByPk(PlanCompany);
-  const plansName = plans.name;
+  const planCompany = await Plan.findByPk(PlanCompany);
+  const plansName = planCompany?.name ?? "";
 
-  if (requestUser.super === true) {
-    const { plans, count, hasMore } = await ListPlansService({
-      searchParam,
-      pageNumber
-    });
+  const { plans, count, hasMore } = await ListPlansService({
+    searchParam: requestUser.super ? searchParam : plansName,
+    pageNumber,
+    listPublic,
+    requestUserCompanyId: companyId,
+    requestUserSuper: requestUser.super === true
+  });
 
-    return res.json({ plans, count, hasMore });
-
-  } else {
-    const { plans, count, hasMore } = await ListPlansService({
-      searchParam: plansName,
-      pageNumber,
-      listPublic
-    });
-    return res.json({ plans, count, hasMore });
-
-  }
-
+  return res.json({ plans, count, hasMore });
 };
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
-  const {listPublic} = req.query as IndexQuery;
+  const { listPublic } = req.query as IndexQuery;
 
-  const plans: Plan[] = await FindAllPlanService(listPublic);
+  const authHeader = req.headers.authorization;
+  let requestUserCompanyId: number | undefined;
+  let requestUserSuper = false;
+  if (authHeader) {
+    const [, token] = authHeader.split(" ");
+    try {
+      const decoded = verify(token, authConfig.secret) as TokenPayload;
+      const requestUser = await User.findByPk(decoded.id);
+      if (requestUser) {
+        requestUserCompanyId = requestUser.companyId;
+        requestUserSuper = requestUser.super === true;
+      }
+    } catch {
+      // sem token ou inválido
+    }
+  }
+
+  const plans: Plan[] = await FindAllPlanService(listPublic, {
+    requestUserCompanyId,
+    requestUserSuper
+  });
 
   return res.status(200).json(plans);
 };
@@ -130,11 +143,27 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const platformCompanyId = getPlatformCompanyId();
+  const authHeader = req.headers.authorization;
+  const [, token] = (authHeader || "").split(" ");
+  let requestUserCompanyId: number | undefined;
+  let requestUserSuper = false;
+  if (token) {
+    try {
+      const decoded = verify(token, authConfig.secret) as TokenPayload;
+      const requestUser = await User.findByPk(decoded.id);
+      if (requestUser) {
+        requestUserCompanyId = requestUser.companyId;
+        requestUserSuper = requestUser.super === true;
+      }
+    } catch {
+      // token inválido
+    }
+  }
+
   const planData: StorePlanData = {
     ...newPlan,
-    companyId: newPlan.companyId ?? platformCompanyId,
-    targetType: newPlan.targetType ?? "direct"
+    requestUserCompanyId,
+    requestUserSuper
   };
 
   const plan = await CreatePlanService(planData);

@@ -183,7 +183,7 @@ export default function ChatPopover() {
       return undefined;
     }
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 //    const socket = socketManager.GetSocket();
 
     const onCompanyChatPopover = (data) => {

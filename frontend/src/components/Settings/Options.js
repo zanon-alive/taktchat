@@ -151,6 +151,12 @@ export default function Options(props) {
   const [showNotificationPending, setShowNotificationPending] = useState(false);
   const [loadingShowNotificationPending, setLoadingShowNotificationPending] = useState(false);
 
+  const [licenseWarningDays, setLicenseWarningDays] = useState(null);
+  const [loadingLicenseWarningDays, setLoadingLicenseWarningDays] = useState(false);
+
+  const [enableLandingSignup, setEnableLandingSignup] = useState(false);
+  const [loadingEnableLandingSignup, setLoadingEnableLandingSignup] = useState(false);
+
   const { update: updateUserCreation, getAll } = useSettings();
 
   const { update } = useCompanySettings();
@@ -201,6 +207,8 @@ export default function Options(props) {
       if (key === "AcceptCallWhatsappMessage") setAcceptCallWhatsappMessage(value);
       if (key === "sendQueuePositionMessage") setSendQueuePositionMessage(value);
       if (key === "showNotificationPending") setShowNotificationPending(value);
+      if (key === "licenseWarningDays") setLicenseWarningDays(value);
+      if (key === "enableLandingSignup") setEnableLandingSignup(value);
 
     }
   }, [settings]);
@@ -478,6 +486,28 @@ export default function Options(props) {
       data: value,
     });
     setLoadingDirectTicketsToWallets(false);
+  }
+
+  async function handleLicenseWarningDays(value) {
+    setLicenseWarningDays(value);
+    setLoadingLicenseWarningDays(true);
+    await update({
+      column: "licenseWarningDays",
+      data: value ? parseInt(value, 10) : null,
+    });
+    setLoadingLicenseWarningDays(false);
+  }
+
+  async function handleEnableLandingSignup(value) {
+    // Converter para boolean se necessário (Material-UI Select pode retornar string)
+    const boolValue = value === true || value === "true" || value === 1;
+    setEnableLandingSignup(boolValue);
+    setLoadingEnableLandingSignup(true);
+    await update({
+      column: "enableLandingSignup",
+      data: boolValue,
+    });
+    setLoadingEnableLandingSignup(false);
   }
 
   return (
@@ -889,6 +919,57 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+
+        {/* DIAS DE AVISO DE VENCIMENTO DE LICENÇA */}
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="licenseWarningDays"
+              name="licenseWarningDays"
+              margin="dense"
+              label="Dias de aviso de vencimento de licença"
+              type="number"
+              variant="outlined"
+              value={licenseWarningDays || ""}
+              onChange={async (e) => {
+                handleLicenseWarningDays(e.target.value);
+              }}
+              inputProps={{ min: 0 }}
+              helperText={
+                loadingLicenseWarningDays
+                  ? i18n.t("settings.settings.options.updating")
+                  : "Número de dias antes do vencimento para enviar avisos (deixe vazio para usar padrão do sistema)"
+              }
+            />
+          </FormControl>
+        </Grid>
+        
+        {/* HABILITAR CADASTRO DIRETO NA LANDING (Apenas Super) */}
+        {isSuper() && (
+          <Grid xs={12} sm={6} md={4} item>
+            <FormControl className={classes.selectContainer}>
+              <InputLabel id="enableLandingSignup-label">
+                Habilitar formulário de cadastro na landing
+              </InputLabel>
+              <Select
+                labelId="enableLandingSignup-label"
+                value={enableLandingSignup}
+                onChange={async (e) => {
+                  handleEnableLandingSignup(e.target.value);
+                }}
+              >
+                <MenuItem value={false}>Desabilitado</MenuItem>
+                <MenuItem value={true}>Habilitado</MenuItem>
+              </Select>
+              <FormHelperText>
+                {loadingEnableLandingSignup
+                  ? i18n.t("settings.settings.options.updating")
+                  : "Quando habilitado, exibe formulário de cadastro direto na página inicial (/landing)"}
+              </FormHelperText>
+            </FormControl>
+          </Grid>
+        )}
+
         {/* <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="DirectTicketsToWallets-label"> {i18n.t("settings.settings.options.DirectTicketsToWallets")}</InputLabel>

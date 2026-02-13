@@ -171,7 +171,7 @@ const Prompts = () => {
 
   const { getPlanCompany } = usePlans();
   const history = useHistory();
-  const companyId = user.companyId;
+  const companyId = user?.companyId;
   const { hasPermission } = usePermissions();
 
   const handleSort = (field) => {
@@ -185,8 +185,9 @@ const Prompts = () => {
 
   useEffect(() => {
     async function fetchData() {
+      if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-      if (!planConfigs.plan.useOpenAi) {
+      if (!planConfigs?.plan?.useOpenAi) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
         setTimeout(() => {
           history.push(`/`)

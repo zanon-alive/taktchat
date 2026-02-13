@@ -20,9 +20,39 @@ const useDashboard = () => {
         return data;
     }
 
+    const getPartnerBillingReport = async (params) => {
+        const { data } = await api.request({
+            url: `/dashboard/partner-billing-report`,
+            method: 'GET',
+            params
+        });
+        return data;
+    }
+
+    const getPartnerBillingSnapshots = async (params = {}) => {
+        const { data } = await api.request({
+            url: `/dashboard/partner-billing-snapshots`,
+            method: 'GET',
+            params
+        });
+        return data;
+    }
+
+    const calculatePartnerBilling = async (body = {}) => {
+        const { data } = await api.request({
+            url: `/dashboard/partner-billing-report/calculate`,
+            method: 'POST',
+            data: body
+        });
+        return data;
+    }
+
     return {
         find,
-        getReport
+        getReport,
+        getPartnerBillingReport,
+        getPartnerBillingSnapshots,
+        calculatePartnerBilling
     }
 }
 

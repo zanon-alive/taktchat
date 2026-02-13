@@ -9,6 +9,7 @@ import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
 import CompaniesSettings from "../../models/CompaniesSettings";
+import CompanyAccessService from "../CompanyService/CompanyAccessService";
 
 interface SerializedUser {
   id: number;
@@ -98,9 +99,10 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
-  // if (!(await user.checkPassword(password))) {
-  //   throw new AppError("ERR_INVALID_CREDENTIALS", 401);
-  // }
+  const access = await CompanyAccessService(user.companyId);
+  if (!access.allowed) {
+    throw new AppError(access.code ?? "ERR_ACCESS_BLOCKED", 403);
+  }
 
   const token = createAccessToken(user);
   const refreshToken = createRefreshToken(user);

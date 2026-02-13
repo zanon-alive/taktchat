@@ -16,6 +16,7 @@ const RevendedorSection = React.lazy(() => import("./components/RevendedorSectio
 const Testimonials = React.lazy(() => import("./components/Testimonials"));
 const Contact = React.lazy(() => import("./components/Contact"));
 const LeadForm = React.lazy(() => import("./components/LeadForm"));
+const SignupForm = React.lazy(() => import("./components/SignupForm"));
 const Footer = React.lazy(() => import("./components/Footer"));
 const FAQ = React.lazy(() => import("./components/FAQ"));
 const ChatWidget = React.lazy(() => import("./components/ChatWidget"));
@@ -338,6 +339,12 @@ const LandingPage = () => {
           <Box id="planos" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
               <Plans plans={plans} loading={loadingPlans} />
+            </Container>
+          </Box>
+
+          <Box id="cadastro" className={`${classes.section} ${classes.sectionPrimary}`}>
+            <Container>
+              <SignupForm />
             </Container>
           </Box>
 

@@ -1,4 +1,5 @@
-import { delay, WAMessage, AnyMessageContent } from "@whiskeysockets/baileys";
+import type { WAMessage, AnyMessageContent } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
@@ -41,7 +42,8 @@ const SendWhatsAppMessageLink = async ({
 
   try {
 
-    await delay(msdelay)
+    const baileys = await getBaileys();
+    await baileys.delay(msdelay)
     const sentMessage = await wbot.sendMessage(
       `${number}`,
       {

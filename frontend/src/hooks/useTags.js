@@ -18,7 +18,7 @@ const useTags = () => {
     const fetchTags = async () => {
       try {
         const { data } = await api.get(`/tags`, {
-          params: { companyId: user.companyId },
+          params: { companyId: user?.companyId },
         });
         setTags(data.tags);
         setLoading(false);

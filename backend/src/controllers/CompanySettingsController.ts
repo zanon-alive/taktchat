@@ -13,7 +13,7 @@ import FindCompanySettingOneService from "../services/CompaniesSettings/FindComp
 type IndexGetCompanySettingQuery = {
   companyId: number;
   column: string;
-  data:string;
+  data: any; // Permite qualquer tipo (string, boolean, number, null)
 };
 
 type IndexGetCompanySettingOneQuery = {

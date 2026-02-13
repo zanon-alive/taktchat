@@ -231,7 +231,7 @@ const Connections = () => {
   //   const socketManager = useContext(SocketContext);
   const { user, socket } = useContext(AuthContext);
 
-  const companyId = user.companyId;
+  const companyId = user?.companyId;
 
   const { getPlanCompany } = usePlans();
 
@@ -283,7 +283,7 @@ const Connections = () => {
 
   useEffect(() => {
     // const socket = socketManager.GetSocket();
-    socket.on(`importMessages-${user.companyId}`, (data) => {
+    socket.on(`importMessages-${user?.companyId}`, (data) => {
       if (data.action === "refresh") {
         setStatusImport([]);
         history.go(0);

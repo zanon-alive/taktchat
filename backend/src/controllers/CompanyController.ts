@@ -14,6 +14,7 @@ import UpdateSchedulesService from "../services/CompanyService/UpdateSchedulesSe
 import DeleteCompanyService from "../services/CompanyService/DeleteCompanyService";
 import FindAllCompaniesService from "../services/CompanyService/FindAllCompaniesService";
 import ShowPlanCompanyService from "../services/CompanyService/ShowPlanCompanyService";
+import BlockCompanyAccessService from "../services/CompanyService/BlockCompanyAccessService";
 import User from "../models/User";
 import ListCompaniesPlanService from "../services/CompanyService/ListCompaniesPlanService";
 
@@ -44,6 +45,8 @@ type CompanyData = {
   recurrence?: string;
   document?: string;
   paymentMethod?: string;
+  type?: "platform" | "direct" | "whitelabel";
+  parentCompanyId?: number | null;
 };
 
 type SchedulesData = {
@@ -60,22 +63,14 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const company = await Company.findByPk(companyId);
   const requestUser = await User.findByPk(id);
 
-  if (requestUser.super === true) {
-    const { companies, count, hasMore } = await ListCompaniesService({
-      searchParam,
-      pageNumber
-    });
+  const { companies, count, hasMore } = await ListCompaniesService({
+    searchParam: requestUser.super ? searchParam : (company?.name ?? ""),
+    pageNumber,
+    requestUserCompanyId: companyId,
+    requestUserSuper: requestUser.super === true
+  });
 
-    return res.json({ companies, count, hasMore });
-
-  } else {
-    const { companies, count, hasMore } = await ListCompaniesService({
-      searchParam: company.name,
-      pageNumber
-    });
-    return res.json({ companies, count, hasMore });
-
-  }
+  return res.json({ companies, count, hasMore });
 
 };
 
@@ -93,7 +88,24 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const company = await CreateCompanyService(newCompany);
+  const authHeader = req.headers.authorization;
+  const [, token] = (authHeader || "").split(" ");
+  let requestUserCompanyId: number | undefined;
+  let requestUserSuper = false;
+  if (token) {
+    const decoded = verify(token, authConfig.secret) as TokenPayload;
+    const requestUser = await User.findByPk(decoded.id);
+    if (requestUser) {
+      requestUserCompanyId = requestUser.companyId;
+      requestUserSuper = requestUser.super === true;
+    }
+  }
+
+  const company = await CreateCompanyService({
+    ...newCompany,
+    requestUserCompanyId,
+    requestUserSuper
+  });
 
   return res.status(200).json(company);
 };
@@ -126,36 +138,40 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const { id, profile, companyId } = decoded as TokenPayload;
   const requestUser = await User.findByPk(id);
 
-  if (requestUser.super === true) {
-    const companies: Company[] = await FindAllCompaniesService();
-    return res.status(200).json(companies);
-  } else {
-    const companies: Company[] = await FindAllCompaniesService();
-    let company = [];
+  const companies: Company[] = await FindAllCompaniesService({
+    requestUserCompanyId: companyId,
+    requestUserSuper: requestUser.super === true
+  });
+  return res.status(200).json(companies);
 
-    for (let i = 0; i < companies.length; i++) {
-      const id = companies[i].id;
+};
 
-      if (id === companyId) {
-        company.push(companies[i])
-        return res.status(200).json(company);
-      }
-    }
+export const blockAccess = async (req: Request, res: Response): Promise<Response> => {
+  const { id } = req.params;
+  const { blocked } = req.body as { blocked?: boolean };
+
+  const authHeader = req.headers.authorization;
+  const [, token] = (authHeader || "").split(" ");
+  const decoded = verify(token, authConfig.secret) as TokenPayload;
+  const requestUser = await User.findByPk(decoded.id);
+  if (!requestUser) {
+    throw new AppError("Usuário não encontrado.", 401);
   }
 
+  const company = await BlockCompanyAccessService({
+    companyId: id,
+    blocked: !!blocked,
+    requestUserCompanyId: requestUser.companyId,
+    requestUserSuper: requestUser.super === true,
+    requestUserId: requestUser.id
+  });
+  return res.status(200).json(company);
 };
 
 export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  console.log("[DEBUG Backend Controller] Recebida requisição PUT /companies/:id");
-  console.log("[DEBUG Backend Controller] req.params:", req.params);
-  console.log("[DEBUG Backend Controller] req.body:", req.body);
-  console.log("[DEBUG Backend Controller] req.method:", req.method);
-  console.log("[DEBUG Backend Controller] req.path:", req.path);
-  console.log("[DEBUG Backend Controller] req.url:", req.url);
-
   const companyData: CompanyData = req.body;
 
   const schema = Yup.object().shape({
@@ -164,14 +180,11 @@ export const update = async (
 
   try {
     await schema.validate(companyData);
-    console.log("[DEBUG Backend Controller] Validação do schema passou");
   } catch (err: any) {
-    console.log("[DEBUG Backend Controller] Erro na validação do schema:", err.message);
     throw new AppError(err.message);
   }
 
   const { id } = req.params;
-  console.log("[DEBUG Backend Controller] ID do parâmetro:", id);
 
   const authHeader = req.headers.authorization;
   const [, token] = authHeader.split(" ");
@@ -179,23 +192,23 @@ export const update = async (
   const { id: requestUserId, profile, companyId } = decoded as TokenPayload;
   const requestUser = await User.findByPk(requestUserId);
 
-  console.log("[DEBUG Backend Controller] requestUser.super:", requestUser?.super);
-  console.log("[DEBUG Backend Controller] companyData.id:", companyData?.id);
-  console.log("[DEBUG Backend Controller] id (params):", id);
-  console.log("[DEBUG Backend Controller] companyId (token):", companyId);
-
   if (requestUser.super === true) {
-    console.log("[DEBUG Backend Controller] Usuário é super, atualizando empresa");
-    const company = await UpdateCompanyService({ id, ...companyData });
+    const company = await UpdateCompanyService({
+      id,
+      ...companyData,
+      requestUserCompanyId: companyId,
+      requestUserSuper: true
+    });
     return res.status(200).json(company);
   } else if (String(companyData?.id) !== id || String(companyId) !== id) {
-    console.log("[DEBUG Backend Controller] Erro de permissão - IDs não correspondem");
-    console.log("[DEBUG Backend Controller] companyData.id:", companyData?.id, "!== id:", id);
-    console.log("[DEBUG Backend Controller] companyId:", companyId, "!== id:", id);
     return res.status(400).json({ error: "Você não possui permissão para acessar este recurso!" });
   } else {
-    console.log("[DEBUG Backend Controller] Usuário não é super, mas tem permissão, atualizando empresa");
-    const company = await UpdateCompanyService({ id, ...companyData });
+    const company = await UpdateCompanyService({
+      id,
+      ...companyData,
+      requestUserCompanyId: companyId,
+      requestUserSuper: false
+    });
     return res.status(200).json(company);
   }
 
@@ -273,20 +286,19 @@ export const listPlan = async (req: Request, res: Response): Promise<Response> =
 };
 
 export const indexPlan = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber } = req.query as IndexQuery;
-
   const authHeader = req.headers.authorization;
   const [, token] = authHeader.split(" ");
   const decoded = verify(token, authConfig.secret);
-  const { id, profile, companyId } = decoded as TokenPayload;
-  // const company = await Company.findByPk(companyId);
+  const { id, companyId } = decoded as TokenPayload;
   const requestUser = await User.findByPk(id);
 
   if (requestUser.super === true) {
     const companies = await ListCompaniesPlanService();
     return res.json({ companies });
-  } else {
-    return res.status(400).json({ error: "Você não possui permissão para acessar este recurso!" });
   }
-
+  const companies = await FindAllCompaniesService({
+    requestUserCompanyId: companyId,
+    requestUserSuper: false
+  });
+  return res.json({ companies });
 };

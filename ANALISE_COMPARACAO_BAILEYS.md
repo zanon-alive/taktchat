@@ -31,8 +31,8 @@
 ## ✅ Número Funcional
 
 - **WhatsApp ID:** 2
-- **Número:** 5514981252988:27
-- **Arquivo de log:** `baileys-debug-whatsapp-2-5514981252988:27-2025-11-21_20-53-55.log`
+- **Número:** 5514996870843:27
+- **Arquivo de log:** `baileys-debug-whatsapp-2-5514996870843:27-2025-11-21_20-53-55.log`
 - **Status:** Conectado (permaneceu conectado por mais de 61 segundos sem desconectar)
 - **Tipo de socket:** md (Multi-Device)
 - **Flag registered:** false ❌
@@ -57,7 +57,7 @@
 | Item | Número Problema | Número Funcional | Diferença |
 |------|----------------|------------------|-----------|
 | MeId presente | ✅ Sim | ✅ Sim | Igual |
-| MeId | 5514997311404:46@s.whatsapp.net | 5514981252988:27@s.whatsapp.net | Diferente (esperado) |
+| MeId | 5514997311404:46@s.whatsapp.net | 5514996870843:27@s.whatsapp.net | Diferente (esperado) |
 | Flag `registered` | ❌ false | ❌ false | **IGUAL - AMBOS FALSE** |
 | Socket type | md | md | Igual |
 | User.registered | ❌ false | ❌ false | **IGUAL - AMBOS FALSE** |
@@ -264,7 +264,7 @@ Criar guia de troubleshooting para este problema específico.
 ## 🔗 Arquivos de Referência
 
 - Log número problema: `backend/logs/baileys-debug/numero_problema/baileys-debug-whatsapp-2-5514997311404:46-2025-11-21_20-47-31.log`
-- Log número funcional: `backend/logs/baileys-debug/numero_funcional/baileys-debug-whatsapp-2-5514981252988:27-2025-11-21_20-53-55.log`
+- Log número funcional: `backend/logs/baileys-debug/numero_funcional/baileys-debug-whatsapp-2-5514996870843:27-2025-11-21_20-53-55.log`
 - Código principal: `backend/src/libs/wbot.ts`
 - Helper de debug: `backend/src/helpers/debugBaileysConnection.ts`
 

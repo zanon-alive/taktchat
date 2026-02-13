@@ -1,10 +1,10 @@
-import {
+import type {
   WAMessage,
-  delay,
   WAMessageContent,
   WASocket,
   proto,
 } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
@@ -131,7 +131,8 @@ const SendWhatsAppMessage = async ({
       `END:VCARD`;
 
     try {
-      await delay(msdelay);
+      const baileys = await getBaileys();
+      await baileys.delay(msdelay);
       const sentMessage = await wbot.sendMessage(
         number,
         {
@@ -157,7 +158,8 @@ const SendWhatsAppMessage = async ({
   // ✅ ENVIO DE MENSAGEM COM BOTÕES
   if (templateButtons && templateButtons.length > 0) {
     try {
-      await delay(msdelay);
+      const baileys = await getBaileys();
+      await baileys.delay(msdelay);
 
       const formattedBody = formatBody(body || "", ticket);
       const footer = messageTitle || "";
@@ -211,7 +213,8 @@ const SendWhatsAppMessage = async ({
 
   if (body) {
     try {
-      await delay(msdelay);
+      const baileys = await getBaileys();
+      await baileys.delay(msdelay);
       const sentMessage = await wbot.sendMessage(
         number,
         {

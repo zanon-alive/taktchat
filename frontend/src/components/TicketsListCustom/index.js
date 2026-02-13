@@ -236,7 +236,7 @@ const TicketsListCustom = (props) => {
     const { user, socket } = useContext(AuthContext);
 
     const { profile, queues } = user;
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 
     useEffect(() => {
         return () => {
@@ -309,7 +309,7 @@ const TicketsListCustom = (props) => {
             return;
         }
 
-        const companyId = user.companyId;
+        const companyId = user?.companyId;
         const shouldUpdateTicket = ticket => {
             return (!ticket?.userId || ticket?.userId === user?.id || showAll) &&
                 (!ticket?.queueId || selectedQueueIds.indexOf(ticket?.queueId) > -1);

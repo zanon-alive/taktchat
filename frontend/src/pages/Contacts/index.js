@@ -719,7 +719,7 @@ const Contacts = () => {
 
     useEffect(() => {
         async function fetchData() {
-            const settingList = await getAllSettings(user.companyId);
+            const settingList = await getAllSettings(user?.companyId);
             for (const [key, value] of Object.entries(settingList)) {
                 if (key === "enableLGPD") setEnableLGPD(value === "enabled");
                 if (key === "lgpdHideNumber") setHideNum(value === "enabled");
@@ -875,7 +875,7 @@ const Contacts = () => {
     }, [contacts.length]); // Executa quando contatos são carregados
 
     useEffect(() => {
-        const companyId = user.companyId;
+        const companyId = user?.companyId;
         const onContactEvent = (data) => {
             if (data.action === "update" || data.action === "create") {
                 dispatch({ type: "UPDATE_CONTACTS", payload: data.contact });

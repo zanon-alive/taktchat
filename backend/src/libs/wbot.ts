@@ -1,21 +1,16 @@
 import * as Sentry from "@sentry/node";
-import makeWASocket, {
+import type {
   AuthenticationState,
   Browsers,
   DisconnectReason,
   WAMessage,
   WAMessageKey,
   WASocket,
-  fetchLatestWaWebVersion,
-  isJidBroadcast,
-  isJidGroup,
-  jidNormalizedUser,
-  makeCacheableSignalKeyStore,
 } from "@whiskeysockets/baileys";
 import { FindOptions } from "sequelize/types";
 import Whatsapp from "../models/Whatsapp";
 import logger from "../utils/logger";
-import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
+import { getBaileys, getBaileysLogger } from "./baileysLoader";
 import { useMultiFileAuthState } from "../helpers/useMultiFileAuthState";
 import { Boom } from "@hapi/boom";
 import AppError from "../errors/AppError";
@@ -47,8 +42,8 @@ const msgCache = new NodeCache({
   useClones: false
 });
 
-const loggerBaileys = MAIN_LOGGER.child({});
-loggerBaileys.level = "error";
+// loggerBaileys será inicializado dentro de initWASocket após carregar o Baileys
+let loggerBaileys: any = null;
 
 type Session = WASocket & {
   id?: number;
@@ -156,6 +151,15 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
   return new Promise(async (resolve, reject) => {
     try {
       (async () => {
+        // Carregar Baileys dinamicamente
+        const baileys = await getBaileys();
+        const baileysLoggerModule = await getBaileysLogger();
+        const MAIN_LOGGER = baileysLoggerModule.default;
+        
+        // Inicializar loggerBaileys
+        loggerBaileys = MAIN_LOGGER.child({});
+        loggerBaileys.level = "error";
+
         const io = getIO();
 
         const whatsappUpdate = await Whatsapp.findOne({
@@ -166,12 +170,13 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { id, name, allowGroup, companyId, number: whatsappNumber } = whatsappUpdate;
 
-        const { version, isLatest } = await fetchLatestWaWebVersion({});
+        const { version, isLatest } = await baileys.fetchLatestWaWebVersion({});
         // Log com timestamp e versão do pacote Baileys instalado
         try {
-          // Evita erro de tipo em TS usando require dinâmico
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const baileysPkg = require("@whiskeysockets/baileys/package.json");
+          // Ler package.json diretamente do filesystem para evitar require do módulo ESM
+          const baileysPkgPath = path.join(process.cwd(), "node_modules", "@whiskeysockets", "baileys", "package.json");
+          const baileysPkgContent = await fs.promises.readFile(baileysPkgPath, "utf-8");
+          const baileysPkg = JSON.parse(baileysPkgContent);
           const ts = moment().format("DD-MM-YYYY HH:mm:ss");
           logger.info(`Baileys pkg v${baileysPkg?.version || "unknown"} | WA Web v${version.join(".")}, isLatest: ${isLatest}`);
         } catch (e) {
@@ -284,7 +289,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           logger.error(`[wbot] Stack: ${err?.stack}`);
         }
 
-        wsocket = makeWASocket({
+        wsocket = baileys.makeWASocket({
           version,
           logger: loggerBaileys,
           printQRInTerminal: false,
@@ -292,7 +297,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           auth: {
             creds: state.creds,
             /** caching makes the store faster to send/recv messages */
-            keys: makeCacheableSignalKeyStore(state.keys, logger),
+            keys: baileys.makeCacheableSignalKeyStore(state.keys, logger),
           },
           generateHighQualityLinkPreview: true,
           linkPreviewImageThumbnailWidth: 192,
@@ -300,9 +305,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
           shouldIgnoreJid: (jid) => {
             //   // const isGroupJid = !allowGroup && isJidGroup(jid)
-            return isJidBroadcast(jid) || (!allowGroup && isJidGroup(jid)) //|| jid.includes('newsletter')
+            return baileys.isJidBroadcast(jid) || (!allowGroup && baileys.isJidGroup(jid)) //|| jid.includes('newsletter')
           },
-          browser: Browsers.appropriate("Desktop"),
+          browser: baileys.Browsers.appropriate("Desktop"),
           // Browser config padrão do Baileys para evitar fingerprints suspeitos
           // Usar "Desktop" garante compatibilidade com Multi-Device
           defaultQueryTimeoutMs: undefined,
@@ -851,7 +856,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               
               if (
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
-                DisconnectReason.loggedOut
+                baileys.DisconnectReason.loggedOut
               ) {
                 // Salvar credenciais antes de reconectar para outros erros
                 try {
@@ -942,15 +947,16 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 logger.info(`[wbot] - Plataforma: ${platform}`);
                 logger.info(`[wbot] - Registrado (user.registered): ${isRegistered} ${isRegistered === null ? '(não definido)' : isRegistered ? '(✅ SIM)' : '(❌ NÃO)'}`);
                 // Log detalhado do browser config
-                const browserConfig = (wsocket as any).browser || Browsers.appropriate("Desktop");
+                const browserConfig = (wsocket as any).browser || baileys.Browsers.appropriate("Desktop");
                 logger.info(`[wbot] - Browser config: ${JSON.stringify(browserConfig, null, 2)}`);
                 logger.info(`[wbot] - Browser config type: ${typeof browserConfig}`);
                 logger.info(`[wbot] - User object completo: ${JSON.stringify(userObject, null, 2)}`);
                 
                 // Verificar versão do Baileys
                 try {
-                  // eslint-disable-next-line @typescript-eslint/no-var-requires
-                  const baileysPkg = require("@whiskeysockets/baileys/package.json");
+                  const baileysPkgPath = path.join(process.cwd(), "node_modules", "@whiskeysockets", "baileys", "package.json");
+                  const baileysPkgContent = await fs.promises.readFile(baileysPkgPath, "utf-8");
+                  const baileysPkg = JSON.parse(baileysPkgContent);
                   logger.info(`[wbot] - Baileys version: ${baileysPkg?.version || 'unknown'}`);
                 } catch (e) {
                   logger.warn(`[wbot] - Não foi possível ler versão do Baileys: ${(e as Error).message}`);
@@ -991,7 +997,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 retries: 0,
                 number:
                   wsocket.type === "md"
-                    ? jidNormalizedUser((wsocket as WASocket).user.id).split("@")[0]
+                    ? baileys.jidNormalizedUser((wsocket as WASocket).user.id).split("@")[0]
                     : "-"
               });
 

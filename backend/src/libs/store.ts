@@ -1,4 +1,4 @@
-import {
+import type {
   WASocket,
   BaileysEventEmitter,
   Chat,

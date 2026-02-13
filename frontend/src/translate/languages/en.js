@@ -40,6 +40,9 @@ const messages = {
 		},
 		companies: {
 		  title: "Register Company",
+		  typePartner: "Partner",
+		  typePlatform: "Platform",
+		  typeDirect: "Direct",
 		  form: {
 			name: "Company Name",
 			plan: "Plan",
@@ -883,6 +886,7 @@ const messages = {
 			tags: "Tags",
 			administration: "Administration",
 			companies: "Companies",
+			myCompanies: "My companies",
 			users: "Users",
 			settings: "Settings",
 			files: "File List",
@@ -1537,6 +1541,7 @@ const messages = {
 			options: "Options",
 			plans: "Plans",
 			helps: "Help",
+			whitelabel: "Partner",
 		  },
 		  settings: {
 			userCreation: {

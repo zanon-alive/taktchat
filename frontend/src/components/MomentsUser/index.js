@@ -121,7 +121,7 @@ const DashboardManage = () => {
   const [tickets, setTickets] = useState([]);
   const [update, setUpdate] = useState(false);
   const [ticketNot, setTicketNot] = useState(0);
-  const companyId = user.companyId;
+  const companyId = user?.companyId;
 
 
   const userQueueIds = user.queues.map((q) => q.id);
@@ -151,7 +151,7 @@ const DashboardManage = () => {
       return;
     }
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     console.log("socket painel")
     // const socket = socketManager.GetSocket();
   

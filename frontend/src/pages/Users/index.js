@@ -355,7 +355,7 @@ const Users = () => {
     if (user.id === loggedInUser.id) {
       return (
         <Avatar
-          src={`${backendUrl}/public/company${user.companyId}/user/${profileImage ? profileImage : whatsappIcon}`}
+          src={`${backendUrl}/public/company${user?.companyId}/user/${profileImage ? profileImage : whatsappIcon}`}
           alt={user.name}
           className={classes.userAvatar}
         />
@@ -364,7 +364,7 @@ const Users = () => {
     if (user.id !== loggedInUser.id) {
       return (
         <Avatar
-          src={user.profileImage ? `${backendUrl}/public/company${user.companyId}/user/${user.profileImage}` : whatsappIcon}
+          src={user.profileImage ? `${backendUrl}/public/company${user?.companyId}/user/${user.profileImage}` : whatsappIcon}
           alt={user.name}
           className={classes.userAvatar}
         />

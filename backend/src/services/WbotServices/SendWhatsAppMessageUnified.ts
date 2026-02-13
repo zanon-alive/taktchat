@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import { proto } from "@whiskeysockets/baileys";
+import type { proto } from "@whiskeysockets/baileys";
 import AppError from "../../errors/AppError";
 import { GetTicketAdapter } from "../../helpers/GetWhatsAppAdapter";
 import Message from "../../models/Message";

@@ -173,8 +173,8 @@ export default function AnnouncementsPopover() {
   }, [searchParam, pageNumber, user?.id, user?.companyId]);
 
   useEffect(() => {
-    if (user.companyId) {
-      const companyId = user.companyId;
+    if (user?.companyId) {
+      const companyId = user?.companyId;
 //    const socket = socketManager.GetSocket();
 
       const onCompanyAnnouncement = (data) => {

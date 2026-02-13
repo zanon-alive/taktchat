@@ -1,11 +1,10 @@
-import makeWASocket, {
+import type {
   WASocket,
   DisconnectReason,
   WAMessage,
   proto,
-  downloadMediaMessage,
-  isJidGroup
 } from "@whiskeysockets/baileys";
+import { getBaileys } from "../baileysLoader";
 import * as Sentry from "@sentry/node";
 import fs from "fs";
 import path from "path";
@@ -290,7 +289,7 @@ export class BaileysAdapter implements IWhatsAppAdapter {
       }
 
       // Converter para formato normalizado
-      return this.convertBaileysToNormalized(sentMsg);
+      return await this.convertBaileysToNormalized(sentMsg);
       
     } catch (error) {
       logger.error(`[BaileysAdapter] Erro ao enviar mensagem: ${error.message}`);
@@ -499,7 +498,8 @@ export class BaileysAdapter implements IWhatsAppAdapter {
   /**
    * Converte mensagem Baileys para formato normalizado
    */
-  private convertBaileysToNormalized(msg: proto.IWebMessageInfo): IWhatsAppMessage {
+  private async convertBaileysToNormalized(msg: proto.IWebMessageInfo): Promise<IWhatsAppMessage> {
+    const baileys = await getBaileys();
     const body = this.extractBodyFromMessage(msg);
     const mediaType = this.extractMediaType(msg);
     
@@ -512,7 +512,7 @@ export class BaileysAdapter implements IWhatsAppAdapter {
       fromMe: msg.key.fromMe || false,
       mediaType,
       ack: msg.status,
-      isGroup: isJidGroup(msg.key.remoteJid!),
+      isGroup: baileys.isJidGroup(msg.key.remoteJid!),
       participantJid: msg.participant
     };
   }

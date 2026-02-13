@@ -229,7 +229,7 @@ const Ticket = () => {
     if (!socket || typeof socket.on !== "function") {
       return;
     }
-    if (user.companyId) {
+    if (user?.companyId) {
       const onConnectTicket = () => {
         try {
           // Usa imediatamente o UUID presente na URL como fallback, para evitar janela sem sala

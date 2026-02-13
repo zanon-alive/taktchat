@@ -20,7 +20,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
 - **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).
 - **Landing Page de Vendas**: Página pública de apresentação do produto com coleta de leads e integração WhatsApp.
-- **Governança Multi-Empresa**: Estrutura preparada para suporte whitelabel (Fase 1 concluída, Fase 2 planejada).
+- **Governança Multi-Empresa e Whitelabel**: Hierarquia plataforma → whitelabels → clientes; visibilidade e CRUD por nível (empresas, planos, licenças); dashboards e menus por perfil; relatório de cobrança por parceiro (`/partner-billing-report`) e registro de snapshots; cadastro direto na landing e cadastro por link do parceiro (`/signup-partner`); bloqueio por cobrança (plataforma suspende parceiro; parceiro bloqueia/libera empresas-filhas). Fase 1 e Fase 2 concluídas.
 
 > Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.
 > WhatsApp API Oficial: `.docs/funcionalidades/whatsapp-api-oficial/`

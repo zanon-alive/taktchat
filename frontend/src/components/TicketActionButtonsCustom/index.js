@@ -131,9 +131,10 @@ const TicketActionButtonsCustom = ({ ticket
 
 
     const fetchData = async () => {
-        const companyId = user.companyId;
+        const companyId = user?.companyId;
+        if (!companyId) return;
         const planConfigs = await getPlanCompany(undefined, companyId);
-        setShowSchedules(planConfigs.plan.useSchedules);
+        setShowSchedules(planConfigs?.plan?.useSchedules);
         setOpenTicketMessageDialog(false);
         setDisableBot(ticket.contact.disableBot)
 

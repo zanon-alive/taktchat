@@ -5,6 +5,7 @@ import { addChatLabelAssociation, clearCache, upsertLabel } from "../../libs/lab
 import createOrUpdateBaileysService from "../BaileysServices/CreateOrUpdateBaileysService";
 import ShowBaileysService from "../BaileysServices/ShowBaileysService";
 import GetDeviceLabelsService from "./GetDeviceLabelsService";
+import { getBaileys } from "../../libs/baileysLoader";
 
 interface SyncOptions {
   companyId: number;
@@ -161,7 +162,8 @@ async function ensureResyncFromBaileys(whatsappId: number) {
     if (!wbot) return;
     const resyncable = typeof (wbot as any)?.resyncAppState === "function";
     if (!resyncable) return;
-    const { ALL_WA_PATCH_NAMES } = require("@whiskeysockets/baileys");
+    const baileys = await getBaileys();
+    const { ALL_WA_PATCH_NAMES } = baileys;
     const labelPatches = (ALL_WA_PATCH_NAMES || []).filter((n: string) => /label/i.test(n));
     if (Array.isArray(labelPatches) && labelPatches.length > 0) {
       try {
