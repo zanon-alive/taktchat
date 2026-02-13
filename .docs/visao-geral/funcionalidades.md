@@ -37,12 +37,18 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 ### 6. Dashboards, relatórios e métricas
 - **Visão executiva**: páginas `Dashboard`, `Reports`, `CampaignReport` e `CampaignDetailedReport` consolidadas com filtros por período, fila, usuário e canal.
 - **Indicadores operacionais**: componentes (`DashTickets*`, `ContactsReportService`, `Statistics/*`) fornecem métricas de atendimento, campanhas, filas, IA e uso de conexões.
+- **Relatório de cobrança por parceiro (whitelabel)**: página `/partner-billing-report` (apenas Dono da Plataforma) com resumo por whitelabel (empresas-filhas, licenças ativas, valor devido), lista de cobranças registradas (snapshots) e botão para calcular/registrar cobrança do período. Configuração `licenseWarningDays` em Options para avisos de vencimento. Endpoints: GET `/dashboard/partner-billing-report`, GET `/dashboard/partner-billing-snapshots`, POST `/dashboard/partner-billing-report/calculate`.
 - **Helps & Tutoriais**: módulo `Helps` centraliza documentação in-app (ex.: IA Tutorial, fluxos de onboarding).
 
 ### 7. Permissões, multi-empresa e planos
 - **Multi-tenant nativo**: todo recurso é segmentado por `companyId` com limites definidos em `Plan` (`users`, `connections`, `queues`, flags de recursos). `Companies` e `CompaniesManager` permitem gestão de contas.
+- **Modo Whitelabel (Fase 2)**: hierarquia de empresas (plataforma → whitelabels → clientes diretos). Dono da plataforma (`super`) cria whitelabels e vê tudo; whitelabel gerencia apenas empresas-filhas e planos próprios; cliente direto vê só a própria empresa. Modelo `License` (CRUD com filtro por nível), endpoint `/dashboard/summary` por perfil, menus e abas (Empresas, Licenças, Planos) condicionados a super/whitelabel. Ver `.docs/visao-geral/whitelabel-architecture.md`.
+  - **Relatório de cobrança**: página `/partner-billing-report` para super; snapshots de cobrança por período (`PartnerBillingSnapshot`); cálculo e registro via POST `/dashboard/partner-billing-report/calculate`; configuração `licenseWarningDays` para avisos de vencimento.
+  - **Cadastro direto na landing**: configuração `enableLandingSignup` (CompaniesSettings); formulário de cadastro na landing (`/landing`) quando habilitado; criação de empresa direct, usuário admin e licença trial (14 dias) via `DirectSignupService` e endpoints públicos `/public/direct-signup/config`, `/public/direct-signup`.
+  - **Cadastro por parceiro (signup parceiro)**: página pública `/signup-partner` com token ou ID do parceiro; criação de empresa direct filha do whitelabel com trial configurável (`trialDaysForChildCompanies`); endpoints `/public/partner-signup/config`, `/public/partner-signup`.
+  - **Bloqueio por cobrança**: plataforma pode suspender licença do parceiro (bloqueando parceiro e todas empresas-filhas); parceiro pode bloquear/liberar acesso de cada empresa-filha via PATCH `/companies/:id/block-access`. Verificação em login e refresh (`CompanyAccessService`); mensagens específicas (ERR_ACCESS_BLOCKED_*). Campo `accessBlockedByParent` em Company.
 - **Perfis e escopos**: permissões granulares (`permissions`, `roles`, middlewares `checkPermission`, `isSuper`, `isAuthCompany`). UI com `Users`, `PermissionTransferList`, `SettingsCustom`.
-- **Admin global**: usuários com `super=true` acessam módulos como `Companies`, `AuditLogs`, `AllConnections`, `Subscription` para controlar todo o tenant.
+- **Admin global**: usuários com `super=true` acessam módulos como `Companies`, `AuditLogs`, `AllConnections`, `Subscription`, `PartnerBillingReport` para controlar todo o tenant.
 
 ### 8. Financeiro e assinatura
 - **Painel Financeiro**: página `Financeiro`/`Subscription` lista invoices, limites de plano, status de pagamento, trilhas de upgrade/downgrade.

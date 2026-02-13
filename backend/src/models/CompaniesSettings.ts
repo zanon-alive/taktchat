@@ -131,6 +131,13 @@ import {
 
     @Column
     openaiModel: string;
+
+    @Column
+    licenseWarningDays: number | null;
+
+    @Default(false)
+    @Column
+    enableLandingSignup: boolean;
   }
   
   export default CompaniesSettings;

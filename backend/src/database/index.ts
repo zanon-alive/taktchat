@@ -58,6 +58,8 @@ import AIUsageLog from "../models/AIUsageLog";
 import WhatsappLabel from "../models/WhatsappLabel";
 import ContactWhatsappLabel from "../models/ContactWhatsappLabel";
 import TagRule from "../models/TagRule";
+import License from "../models/License";
+import PartnerBillingSnapshot from "../models/PartnerBillingSnapshot";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -123,7 +125,9 @@ const models = [
   AIUsageLog,
   WhatsappLabel,
   ContactWhatsappLabel,
-  TagRule
+  TagRule,
+  License,
+  PartnerBillingSnapshot
 ];
 
 sequelize.addModels(models);

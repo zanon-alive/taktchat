@@ -40,7 +40,7 @@ import CreateLogTicketService from "./services/TicketServices/CreateLogTicketSer
 import formatBody from "./helpers/Mustache";
 import TicketTag from "./models/TicketTag";
 import Tag from "./models/Tag";
-import { delay } from "@whiskeysockets/baileys";
+// delay não está sendo usado - removido
 import Plan from "./models/Plan";
 
 const connection = process.env.REDIS_URI || "";

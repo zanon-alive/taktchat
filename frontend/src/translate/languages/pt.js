@@ -64,6 +64,9 @@ const messages = {
       },
       companies: {
         title: "Cadastrar Empresa",
+        typePartner: "Parceiro",
+        typePlatform: "Plataforma",
+        typeDirect: "Direto",
         form: {
           name: "Nome da Empresa",
           plan: "Plano",
@@ -75,6 +78,12 @@ const messages = {
       auth: {
         toasts: {
           success: "Login efetuado com sucesso!",
+        },
+        errors: {
+          accessBlockedPlatform: "Acesso bloqueado pela plataforma. Entre em contato com o suporte.",
+          accessBlockedPartner: "Acesso bloqueado pelo seu parceiro. Entre em contato com seu parceiro.",
+          licenseOverdue: "Licença vencida. Entre em contato com o suporte para renovar.",
+          accessBlocked: "Acesso bloqueado. Entre em contato com o suporte.",
         },
         dueDate: {
           expiration: "Sua assinatura expira em",
@@ -920,6 +929,7 @@ const messages = {
           tags: "Tags",
           administration: "Administração",
           companies: "Empresas",
+          myCompanies: "Minhas empresas",
           users: "Usuários",
           settings: "Configurações",
           files: "Lista de arquivos",
@@ -1482,7 +1492,7 @@ const messages = {
           amountAnnual: "Valor Anual",
           targetType: "Tipo",
           targetTypeDirect: "Cliente direto",
-          targetTypeWhitelabel: "Whitelabel"
+          targetTypeWhitelabel: "Parceiro"
         },
         landing: {
           or: "ou",
@@ -1645,6 +1655,7 @@ const messages = {
           options: "Opções",
           plans: "Planos",
           helps: "Ajuda",
+          whitelabel: "Parceiro",
         },
         settings: {
           userCreation: {

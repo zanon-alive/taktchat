@@ -1,4 +1,5 @@
-import { delay, WAMessage } from "@whiskeysockets/baileys";
+import type { WAMessage } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
@@ -65,7 +66,8 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
-    await delay(msdelay)
+    const baileys = await getBaileys();
+    await baileys.delay(msdelay)
     const sentMessage = await wbot.sendMessage(
       number,
       {

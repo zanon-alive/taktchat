@@ -212,7 +212,7 @@ const Announcements = () => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up(1200));
   const history = useHistory();
-  const { user, socket } = useContext(AuthContext);
+  const { user, socket, loading: authLoading } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -258,19 +258,17 @@ const Announcements = () => {
     }
   };
 
-  // trava para nao acessar pagina que não pode  
+  // Trava para não acessar página que não pode (apenas super)
   useEffect(() => {
-    async function fetchData() {
-      if (!user.super) {
-        toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
-        setTimeout(() => {
-          history.push(`/`)
-        }, 1000);
-      }
+    if (authLoading || !user?.id) return; // Aguarda auth e user carregarem
+    const isSuper = user.super === true || user.super === 1;
+    if (!isSuper) {
+      toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
+      setTimeout(() => {
+        history.push("/");
+      }, 1000);
     }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading, user?.id, user?.super, history]);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -287,7 +285,7 @@ const Announcements = () => {
   }, [searchParam, pageNumber, itemsPerPage, sortField, sortDirection]);
 
   useEffect(() => {
-    if (user.companyId && socket && typeof socket.on === 'function') {
+    if (user?.companyId && socket && typeof socket.on === 'function') {
 //    const socket = socketManager.GetSocket();
 
       const onCompanyAnnouncement = (data) => {

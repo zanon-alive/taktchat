@@ -102,6 +102,15 @@ class Company extends Model<Company> {
   @BelongsTo(() => Company, "parentCompanyId")
   parentCompany: Company;
 
+  @Column({ defaultValue: false })
+  accessBlockedByParent: boolean;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  trialDaysForChildCompanies: number | null;
+
+  @Column({ type: DataType.STRING, allowNull: true, unique: true })
+  signupToken: string | null;
+
   @HasMany(() => Company, "parentCompanyId")
   childCompanies: Company[];
 

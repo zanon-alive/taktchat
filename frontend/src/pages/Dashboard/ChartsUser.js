@@ -80,7 +80,7 @@ export const ChatsUser = () => {
     const [ticketsData, setTicketsData] = useState({ data: [] });
     const { user } = useContext(AuthContext);
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 
     useEffect(() => {
         if (companyId) {

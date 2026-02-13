@@ -323,7 +323,7 @@ const UserModal = ({ open, onClose, userId }) => {
                         <AvatarUploader
                           setAvatar={setAvatar}
                           avatar={user.profileImage}
-                          companyId={user.companyId}
+                          companyId={user?.companyId}
                         />
                         {user.profileImage &&
                           <Button

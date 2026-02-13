@@ -86,6 +86,8 @@ import { initSavedFilterCron } from "./jobs/SavedFilterCronManager";
 import { initBackgroundJobs, startQueueProcess } from "./queues";
 import tagRulesCron from "./cron/tagRulesCron";
 import tagRulesRecentContactsCron from "./cron/tagRulesRecentContactsCron";
+import licenseBillingWarningCron from "./cron/licenseBillingWarningCron";
+import licenseOverdueCron from "./cron/licenseOverdueCron";
 
 const ENV_PROFILE = process.env.APP_ENV || process.env.NODE_ENV || "development";
 const isProduction = ENV_PROFILE === "production";
@@ -276,6 +278,8 @@ const server = app.listen(port, async () => {
     initSavedFilterCron();
     tagRulesCron(); // Executa diariamente às 2h (processamento completo)
     tagRulesRecentContactsCron(); // Executa a cada 5 minutos (apenas contatos recentes)
+    licenseBillingWarningCron(); // Executa diariamente às 9h (avisos de cobrança)
+    licenseOverdueCron(); // Executa diariamente à meia-noite (marca licenças como overdue)
     initBackgroundJobs();
   } else {
     logger.warn("Banco indisponível no startup: sessões WhatsApp, filas e crons não foram inicializados. Reinicie o backend após corrigir o banco.");

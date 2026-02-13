@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Paper,
   Grid,
@@ -13,13 +13,18 @@ import {
   TableRow,
   IconButton,
   Select,
+  Alert,
+  Box,
+  Button,
+  InputAdornment,
 } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { makeStyles } from "@mui/styles";
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ConfirmationModal from "../ConfirmationModal";
 
-import { Edit as EditIcon } from "@mui/icons-material";
+import { Edit as EditIcon, Block as BlockIcon, CheckCircle as CheckCircleIcon } from "@mui/icons-material";
 
 import { toast } from "react-toastify";
 import useCompanies from "../../hooks/useCompanies";
@@ -28,6 +33,7 @@ import ModalUsers from "../ModalUsers";
 import api from "../../services/api";
 import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
+import { AuthContext } from "../../context/Auth/AuthContext";
 
 import moment from "moment";
 import { i18n } from "../../translate/i18n";
@@ -72,7 +78,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function CompanyForm(props) {
-  const { onSubmit, onDelete, onCancel, initialValue, loading } = props;
+  const { onSubmit, onDelete, onCancel, initialValue, loading, user, whitelabelCompanies = [] } = props;
   const classes = useStyles();
   const [plans, setPlans] = useState([]);
   const [modalUser, setModalUser] = useState(false);
@@ -84,10 +90,12 @@ export function CompanyForm(props) {
     phone: "",
     planId: "",
     status: true,
-    // campaignsEnabled: false,
     dueDate: "",
     recurrence: "",
     password: "",
+    type: "direct",
+    parentCompanyId: null,
+    trialDaysForChildCompanies: null,
     ...initialValue,
   });
 
@@ -112,6 +120,7 @@ export function CompanyForm(props) {
       return {
         ...prev,
         ...initialValue,
+        trialDaysForChildCompanies: initialValue.trialDaysForChildCompanies ?? null,
       };
     });
   }, [initialValue]);
@@ -200,7 +209,7 @@ export function CompanyForm(props) {
           }, 500)
         }
       >
-        {(values, setValues) => (
+        {({ values: formValues }) => (
           <Form className={classes.fullWidth}>
             <Grid spacing={1} justifyContent="center" container>
               <Grid xs={12} sm={6} md={3} item>
@@ -307,6 +316,100 @@ export function CompanyForm(props) {
                   margin="dense"
                 />
               </Grid>
+              {user?.super && !record.id && (
+                <>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <FormControl margin="dense" variant="outlined" fullWidth>
+                      <InputLabel id="company-type-label">Tipo de empresa</InputLabel>
+                      <Field
+                        as={Select}
+                        id="company-type"
+                        labelId="company-type-label"
+                        label="Tipo de empresa"
+                        name="type"
+                        margin="dense"
+                      >
+                        <MenuItem value="direct">Direto</MenuItem>
+                        <MenuItem value="whitelabel">{i18n.t("companies.typePartner")}</MenuItem>
+                      </Field>
+                    </FormControl>
+                  </Grid>
+                  {formValues.type === "direct" && (
+                    <Grid xs={12} sm={6} md={2} item>
+                      <FormControl margin="dense" variant="outlined" fullWidth>
+                        <InputLabel id="parent-company-label">Empresa pai</InputLabel>
+                        <Field
+                          as={Select}
+                          id="parent-company"
+                          labelId="parent-company-label"
+                          label="Empresa pai"
+                          name="parentCompanyId"
+                          margin="dense"
+                          displayEmpty
+                          renderValue={(v) => {
+                            if (v == null || v === "") return " ";
+                            const c = whitelabelCompanies.find((x) => x.id === v);
+                            return c ? c.name : "";
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Nenhuma</em>
+                          </MenuItem>
+                          {whitelabelCompanies.map((c) => (
+                            <MenuItem key={c.id} value={c.id}>
+                              {c.name}
+                            </MenuItem>
+                          ))}
+                        </Field>
+                      </FormControl>
+                    </Grid>
+                  )}
+                </>
+              )}
+              {(user?.super || user?.company?.type === "whitelabel") && record.id && record.type === "whitelabel" && (
+                <Grid xs={12} sm={6} md={2} item>
+                  <Field
+                    as={TextField}
+                    label="Dias de trial para empresas-filhas"
+                    name="trialDaysForChildCompanies"
+                    type="number"
+                    variant="outlined"
+                    className={classes.fullWidth}
+                    margin="dense"
+                    inputProps={{ min: 0 }}
+                    helperText="Número de dias de trial para novas empresas que se cadastrarem"
+                  />
+                </Grid>
+              )}
+              {user?.super && record.id && (record.type === "whitelabel" || record.type === "platform") && (
+                <Grid xs={12} sm={6} md={2} item>
+                  <TextField
+                    label="Tipo"
+                    value={record.type === "platform" ? i18n.t("companies.typePlatform") : i18n.t("companies.typePartner")}
+                    variant="outlined"
+                    fullWidth
+                    margin="dense"
+                    InputProps={{ readOnly: true }}
+                  />
+                </Grid>
+              )}
+              {user?.super && record.id && record.type === "direct" && record.parentCompanyId && (
+                <Grid xs={12} sm={6} md={2} item>
+                  <TextField
+                    label="Empresa pai"
+                    value={
+                      (() => {
+                        const c = whitelabelCompanies.find((x) => x.id === record.parentCompanyId);
+                        return c ? c.name : record.parentCompanyId;
+                      })()
+                    }
+                    variant="outlined"
+                    fullWidth
+                    margin="dense"
+                    InputProps={{ readOnly: true }}
+                  />
+                </Grid>
+              )}
               {/* <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
                   <InputLabel htmlFor="status-selection">Campanhas</InputLabel>
@@ -436,9 +539,10 @@ export function CompanyForm(props) {
 }
 
 export function CompaniesManagerGrid(props) {
-  const { records, onSelect } = props;
+  const { records, onSelect, onBlockAccess } = props;
   const classes = useStyles();
   const { dateToClient, datetimeToClient } = useDate();
+  const { user } = useContext(AuthContext);
 
   const renderStatus = (row) => {
     return row.status === false ? "Não" : "Sim";
@@ -450,6 +554,13 @@ export function CompaniesManagerGrid(props) {
 
   const renderPlanValue = (row) => {
     return row.planId !== null && row.plan !== null ? row.plan.amount ? row.plan.amount.toLocaleString('pt-br', { minimumFractionDigits: 2 }) : '00.00' : "-";
+  };
+
+  const renderType = (row) => {
+    const t = row.type || "direct";
+    if (t === "platform") return i18n.t("companies.typePlatform");
+    if (t === "whitelabel") return i18n.t("companies.typePartner");
+    return i18n.t("companies.typeDirect");
   };
 
   // const renderCampaignsStatus = (row) => {
@@ -496,37 +607,61 @@ export function CompaniesManagerGrid(props) {
           <TableRow>
             <TableCell align="center" style={{ width: "1%" }}>#</TableCell>
             <TableCell align="left">{i18n.t("compaies.table.name")}</TableCell>
+            <TableCell align="center">Tipo</TableCell>
             <TableCell align="left">{i18n.t("compaies.table.email")}</TableCell>
             <TableCell align="center">{i18n.t("compaies.table.phone")}</TableCell>
             <TableCell align="center">{i18n.t("compaies.table.plan")}</TableCell>
             <TableCell align="center">{i18n.t("compaies.table.value")}</TableCell>
             {/* <TableCell align="center">Campanhas</TableCell> */}
             <TableCell align="center">{i18n.t("compaies.table.active")}</TableCell>
+            {user?.company?.type === "whitelabel" && (
+              <TableCell align="center">Acesso</TableCell>
+            )}
             <TableCell align="center">{i18n.t("compaies.table.createdAt")}</TableCell>
             <TableCell align="center">{i18n.t("compaies.table.dueDate")}</TableCell>
             <TableCell align="center">{i18n.t("compaies.table.lastLogin")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {records.map((row, key) => (
+          {records.map((row, key) => {
+            const isChildCompany = user?.company?.type === "whitelabel" && 
+                                   row.type === "direct" && 
+                                   row.parentCompanyId === user?.companyId;
+            return (
             <TableRow style={rowStyle(row)} key={key}>
               <TableCell align="center" style={{ width: "1%" }}>
-                <IconButton onClick={() => onSelect(row)} aria-label="delete">
+                <IconButton onClick={() => onSelect(row)} aria-label="edit">
                   <EditIcon />
                 </IconButton>
               </TableCell>
               <TableCell align="left">{row.name || "-"}</TableCell>
+              <TableCell align="center">{renderType(row)}</TableCell>
               <TableCell align="left" size="small">{row.email || "-"}</TableCell>
               <TableCell align="center">{row.phone || "-"}</TableCell>
               <TableCell align="center">{renderPlan(row)}</TableCell>
               <TableCell align="center">{i18n.t("compaies.table.money")} {renderPlanValue(row)}</TableCell>
               {/* <TableCell align="center">{renderCampaignsStatus(row)}</TableCell> */}
               <TableCell align="center">{renderStatus(row)}</TableCell>
+              {user?.company?.type === "whitelabel" && (
+                <TableCell align="center">
+                  {isChildCompany && onBlockAccess ? (
+                    <IconButton
+                      onClick={() => onBlockAccess(row.id, !row.accessBlockedByParent)}
+                      aria-label={row.accessBlockedByParent ? "liberar" : "bloquear"}
+                      color={row.accessBlockedByParent ? "error" : "success"}
+                    >
+                      {row.accessBlockedByParent ? <BlockIcon /> : <CheckCircleIcon />}
+                    </IconButton>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+              )}
               <TableCell align="center">{dateToClient(row.createdAt)}</TableCell>
               <TableCell align="center">{dateToClient(row.dueDate)}<br /><span>{row.recurrence}</span></TableCell>
               <TableCell align="center">{datetimeToClient(row.lastLogin)}</TableCell>
             </TableRow>
-          ))}
+          )})}
         </TableBody>
       </Table>
     </Paper>
@@ -535,7 +670,8 @@ export function CompaniesManagerGrid(props) {
 
 export default function CompaniesManager() {
   const classes = useStyles();
-  const { list, save, update, remove } = useCompanies();
+  const { user } = useContext(AuthContext);
+  const { list, save, update, remove, blockAccess } = useCompanies();
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -546,13 +682,16 @@ export default function CompaniesManager() {
     phone: "",
     planId: "",
     status: true,
-    // campaignsEnabled: false,
     dueDate: "",
     recurrence: "",
     password: "",
     document: "",
-    paymentMethod: ""
+    paymentMethod: "",
+    type: "direct",
+    parentCompanyId: null
   });
+
+  const whitelabelCompanies = (records || []).filter((c) => c.type === "whitelabel");
 
   useEffect(() => {
     loadPlans();
@@ -571,6 +710,9 @@ export default function CompaniesManager() {
   };
 
   const handleSubmit = async (data) => {
+    if (data.parentCompanyId === "" || data.type === "whitelabel") {
+      data.parentCompanyId = null;
+    }
     setLoading(true);
     try {
       if (data.id !== undefined) {
@@ -614,12 +756,14 @@ export default function CompaniesManager() {
       phone: "",
       planId: "",
       status: true,
-      // campaignsEnabled: false,
       dueDate: "",
       recurrence: "",
       password: "",
       document: "",
-      paymentMethod: ""
+      paymentMethod: "",
+      type: "direct",
+      parentCompanyId: null,
+      trialDaysForChildCompanies: null
     }));
   };
 
@@ -641,18 +785,81 @@ export default function CompaniesManager() {
       email: data.email || "",
       planId: data.planId || "",
       status: data.status === false ? false : true,
-      // campaignsEnabled,
       dueDate: data.dueDate || "",
       recurrence: data.recurrence || "",
       password: "",
       document: data.document || "",
       paymentMethod: data.paymentMethod || "",
+      type: data.type || "direct",
+      parentCompanyId: data.parentCompanyId ?? null,
+      trialDaysForChildCompanies: data.trialDaysForChildCompanies ?? null
     }));
+  };
+
+  const handleBlockAccess = async (companyId, blocked) => {
+    setLoading(true);
+    try {
+      await blockAccess(companyId, blocked);
+      await loadPlans();
+      toast.success(blocked ? "Acesso bloqueado com sucesso!" : "Acesso liberado com sucesso!");
+    } catch (e) {
+      toast.error("Não foi possível alterar o acesso da empresa.");
+    }
+    setLoading(false);
+  };
+
+  const getSignupLink = () => {
+    if (!user?.companyId) return "";
+    const baseUrl = window.location.origin;
+    const token = user?.company?.signupToken;
+    if (token) {
+      return `${baseUrl}/signup-partner?token=${encodeURIComponent(token)}`;
+    }
+    return `${baseUrl}/signup-partner?partner=${user.companyId}`;
+  };
+
+  const handleCopyLink = () => {
+    const link = getSignupLink();
+    navigator.clipboard.writeText(link).then(() => {
+      toast.success("Link copiado para a área de transferência!");
+    }).catch(() => {
+      toast.error("Não foi possível copiar o link.");
+    });
   };
 
   return (
     <Paper className={classes.mainPaper} elevation={0}>
       <Grid spacing={2} container>
+        {user?.company?.type === "whitelabel" && (
+          <Grid xs={12} item>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+                <Box sx={{ flex: 1, minWidth: 200 }}>
+                  <strong>Link de cadastro para empresas-filhas:</strong>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={getSignupLink()}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={handleCopyLink} size="small" edge="end">
+                            <ContentCopyIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{ mt: 1 }}
+                  />
+                </Box>
+                <Button variant="outlined" onClick={handleCopyLink} startIcon={<ContentCopyIcon />}>
+                  Copiar link
+                </Button>
+              </Box>
+            </Alert>
+          </Grid>
+        )}
         <Grid xs={12} item>
           <CompanyForm
             initialValue={record}
@@ -660,10 +867,12 @@ export default function CompaniesManager() {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
+            user={user}
+            whitelabelCompanies={whitelabelCompanies}
           />
         </Grid>
         <Grid xs={12} item>
-          <CompaniesManagerGrid records={records} onSelect={handleSelect} />
+          <CompaniesManagerGrid records={records} onSelect={handleSelect} onBlockAccess={handleBlockAccess} />
         </Grid>
       </Grid>
       <ConfirmationModal

@@ -8,6 +8,8 @@ import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -21,6 +23,7 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useDate } from "../../hooks/useDate";
 import usePlans from "../../hooks/usePlans";
+import useCompanies from "../../hooks/useCompanies";
 import moment from "moment";
 
 const reducer = (state, action) => {
@@ -226,6 +229,7 @@ const Companies = () => {
     const [companies, dispatch] = useReducer(reducer, []);
     const { dateToClient, datetimeToClient } = useDate();
     const { user, socket } = useContext(AuthContext);
+    const { blockAccess } = useCompanies();
 
     const totalPages = useMemo(() => {
         return totalItems === 0 ? 1 : Math.ceil(totalItems / itemsPerPage);
@@ -261,16 +265,17 @@ const Companies = () => {
 
     useEffect(() => {
         async function fetchData() {
-            if (!user.super) { //
-                toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando."); //
-                setTimeout(() => { //
-                    history.push(`/`) //
-                }, 1000); //
+            const canAccess = user.super || user.company?.type === "whitelabel";
+            if (!canAccess) {
+                toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
+                setTimeout(() => {
+                    history.push(`/`);
+                }, 1000);
             }
         }
-        fetchData(); //
+        fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); //
+    }, []);
 
     useEffect(() => {
         dispatch({ type: "RESET" }); //
@@ -352,6 +357,27 @@ const Companies = () => {
         setDeletingCompany(null);
         setSearchParam("");
         setPageNumber(1);
+    };
+
+    const handleBlockAccess = async (company, blocked) => {
+        try {
+            await blockAccess(company.id, blocked);
+            toast.success(blocked ? "Acesso bloqueado com sucesso." : "Acesso liberado com sucesso.");
+            // Recarregar empresas
+            const { data } = await api.get("/companiesPlan/", {
+                params: { 
+                    searchParam, 
+                    pageNumber,
+                    limit: itemsPerPage,
+                    orderBy: sortField || 'name',
+                    order: sortDirection
+                },
+            });
+            dispatch({ type: "SET_COMPANIES", payload: data.companies || [] });
+        } catch (err) {
+            toast.error(err?.response?.data?.message || (blocked ? "Não foi possível bloquear o acesso." : "Não foi possível liberar o acesso."));
+            toastError(err);
+        }
     };
 
     const renderStatus = (status) => { // Renomeado de 'row' para 'status' para clareza
@@ -546,6 +572,11 @@ const Companies = () => {
                                             <th scope="col" style={{ textAlign: "center", width: "150px" }}>
                                                 ULTIMO UPDATE
                                             </th>
+                                            {(user?.company?.type === "whitelabel" || user?.super) && (
+                                                <th scope="col" style={{ textAlign: "center", width: "120px" }}>
+                                                    ACESSO
+                                                </th>
+                                            )}
                                             <th scope="col" style={{ textAlign: "center", width: "120px" }}>
                                                 {i18n.t("compaies.table.actions").toUpperCase()}
                                             </th>
@@ -554,7 +585,7 @@ const Companies = () => {
                                     <tbody className={classes.tableBody}>
                                         {!loading && companies.length === 0 && (
                                             <tr>
-                                                <td colSpan={13} className={classes.emptyState}>
+                                                <td colSpan={(user?.company?.type === "whitelabel" || user?.super) ? 14 : 13} className={classes.emptyState}>
                                                     Nenhuma empresa encontrada.
                                                 </td>
                                             </tr>
@@ -581,6 +612,46 @@ const Companies = () => {
                                                 <td style={{ textAlign: "center" }}>{company.folderSize}</td>
                                                 <td style={{ textAlign: "center" }}>{company.numberFileFolder}</td>
                                                 <td style={{ textAlign: "center" }}>{datetimeToClient(company.updatedAtFolder)}</td>
+                                                {/* Coluna de bloqueio de acesso (apenas para whitelabel) */}
+                                                {(user?.company?.type === "whitelabel" || user?.super) && (
+                                                    <td style={{ textAlign: "center" }}>
+                                                        {company.type === "direct" && company.parentCompanyId === user?.companyId ? (
+                                                            company.accessBlockedByParent ? (
+                                                                <Tooltip {...CustomTooltipProps} title="Liberar acesso">
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() => handleBlockAccess(company, false)}
+                                                                        style={{
+                                                                            color: "#16a34a",
+                                                                            backgroundColor: "#ffffff",
+                                                                            border: "1px solid #d1d5db",
+                                                                            borderRadius: "8px"
+                                                                        }}
+                                                                    >
+                                                                        <CheckCircleIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            ) : (
+                                                                <Tooltip {...CustomTooltipProps} title="Bloquear acesso">
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() => handleBlockAccess(company, true)}
+                                                                        style={{
+                                                                            color: "#dc2626",
+                                                                            backgroundColor: "#ffffff",
+                                                                            border: "1px solid #d1d5db",
+                                                                            borderRadius: "8px"
+                                                                        }}
+                                                                    >
+                                                                        <BlockIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            )
+                                                        ) : (
+                                                            <span style={{ color: "#9ca3af", fontSize: "0.75rem" }}>-</span>
+                                                        )}
+                                                    </td>
+                                                )}
                                                 <td style={{ textAlign: "center" }}>
                                                     <Tooltip {...CustomTooltipProps} title="Editar">
                                     <IconButton

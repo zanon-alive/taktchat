@@ -1,10 +1,14 @@
 import { Sequelize, Op, Filterable } from "sequelize";
 import Plan from "../../models/Plan";
+import Company from "../../models/Company";
+import { getPlatformCompanyId } from "../../config/platform";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
   listPublic?: string;
+  requestUserCompanyId?: number;
+  requestUserSuper?: boolean;
 }
 
 interface Response {
@@ -16,8 +20,12 @@ interface Response {
 const ListPlansService = async ({
   searchParam = "",
   pageNumber = "1",
-  listPublic
+  listPublic,
+  requestUserCompanyId,
+  requestUserSuper = false
 }: Request): Promise<Response> => {
+  const platformCompanyId = getPlatformCompanyId();
+
   let whereCondition: Filterable["where"] = {
     [Op.or]: [
       {
@@ -29,8 +37,6 @@ const ListPlansService = async ({
       }
     ]
   };
-  const limit = 20;
-  const offset = limit * (+pageNumber - 1);
 
   if (listPublic === "false") {
     whereCondition = {
@@ -39,8 +45,27 @@ const ListPlansService = async ({
     };
   }
 
+  let levelFilter: Filterable["where"] = {};
+  if (!requestUserSuper && requestUserCompanyId != null) {
+    const requestCompany = await Company.findByPk(requestUserCompanyId);
+    if (requestCompany?.type === "whitelabel") {
+      // Whitelabel vê apenas os próprios planos (não os planos da plataforma targetType whitelabel)
+      levelFilter = { companyId: requestUserCompanyId };
+    } else {
+      levelFilter = { companyId: platformCompanyId, targetType: "direct" };
+    }
+  }
+
+  const finalWhere =
+    Object.keys(levelFilter).length > 0
+      ? { [Op.and]: [whereCondition, levelFilter] }
+      : whereCondition;
+
+  const limit = 20;
+  const offset = limit * (+pageNumber - 1);
+
   const { count, rows: plans } = await Plan.findAndCountAll({
-    where: whereCondition,
+    where: finalWhere,
     limit,
     offset,
     order: [["name", "ASC"]]

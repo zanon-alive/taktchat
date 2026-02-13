@@ -3,15 +3,14 @@ import GetWhatsappWbot from "./GetWhatsappWbot";
 import fs from "fs";
 
 import { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
-import {
+import type {
   WAMessage,
   WAMessageContent,
-  generateWAMessageContent,
-  generateWAMessageFromContent,
   AnyMessageContent,
   WASocket,
-  proto, // Certifique-se de que todas essas importações vêm de @whiskeysockets/baileys
+  proto,
 } from "@whiskeysockets/baileys";
+import { getBaileys } from "../libs/baileysLoader";
 
 export type MessageData = {
   number: number | string;
@@ -33,6 +32,8 @@ export const SendMessageFlow = async (
   isRecord: boolean = false
 ): Promise<WAMessage | proto.WebMessageInfo> => {
   try {
+    // Carregar Baileys dinamicamente
+    const baileys = await getBaileys();
     const wbot: WASocket = await GetWhatsappWbot(whatsapp);
     const chatId = `${messageData.number}@s.whatsapp.net`;
 
@@ -93,7 +94,7 @@ export const SendMessageFlow = async (
       },
     };
 
-    const generatedMessage = await generateWAMessageFromContent(
+    const generatedMessage = await baileys.generateWAMessageFromContent(
       chatId,
       messageContent,
       { userJid: wbot.user!.id }

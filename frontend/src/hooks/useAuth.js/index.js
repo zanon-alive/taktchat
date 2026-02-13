@@ -79,6 +79,22 @@ const useAuth = () => {
         } catch (e) {
           // Refresh falhou: limpar estado e redirecionar para login
           isRefreshingRef.current = false;
+          const refreshStatus = e?.response?.status;
+          const refreshErrorCode = e?.response?.data?.message || e?.response?.data?.code || "";
+          
+          // Se for 403, exibir mensagem específica
+          if (refreshStatus === 403) {
+            let message = i18n.t("auth.errors.accessBlocked");
+            if (refreshErrorCode === "ERR_ACCESS_BLOCKED_PLATFORM") {
+              message = i18n.t("auth.errors.accessBlockedPlatform");
+            } else if (refreshErrorCode === "ERR_ACCESS_BLOCKED_PARTNER") {
+              message = i18n.t("auth.errors.accessBlockedPartner");
+            } else if (refreshErrorCode === "ERR_LICENSE_OVERDUE") {
+              message = i18n.t("auth.errors.licenseOverdue");
+            }
+            toast.error(message);
+          }
+          
           localStorage.removeItem("token");
           api.defaults.headers.Authorization = undefined;
           safeSetState(setIsAuth, false);
@@ -91,6 +107,29 @@ const useAuth = () => {
       }
       
       if (status === 401) {
+        localStorage.removeItem("token");
+        api.defaults.headers.Authorization = undefined;
+        safeSetState(setIsAuth, false);
+        
+        // Redirecionar para login apenas se não estiver já na página de login
+        if (history.location.pathname !== "/login") {
+          history.push("/login");
+        }
+      }
+      
+      if (status === 403) {
+        const errorCode = error?.response?.data?.message || error?.response?.data?.code || "";
+        let message = i18n.t("auth.errors.accessBlocked");
+        
+        if (errorCode === "ERR_ACCESS_BLOCKED_PLATFORM") {
+          message = i18n.t("auth.errors.accessBlockedPlatform");
+        } else if (errorCode === "ERR_ACCESS_BLOCKED_PARTNER") {
+          message = i18n.t("auth.errors.accessBlockedPartner");
+        } else if (errorCode === "ERR_LICENSE_OVERDUE") {
+          message = i18n.t("auth.errors.licenseOverdue");
+        }
+        
+        toast.error(message);
         localStorage.removeItem("token");
         api.defaults.headers.Authorization = undefined;
         safeSetState(setIsAuth, false);
@@ -164,7 +203,7 @@ const useAuth = () => {
       }
       
       if (io && typeof io.on === 'function') {
-        io.on(`company-${user.companyId}-user`, (data) => {
+        io.on(`company-${user?.companyId}-user`, (data) => {
           if (data.action === "update" && data.user.id === user.id && isMountedRef.current) {
             safeSetState(setUser, data.user);
           }
@@ -173,7 +212,7 @@ const useAuth = () => {
         return () => {
           // console.log("desconectou o company user ", user.id)
           if (io && typeof io.off === 'function') {
-            io.off(`company-${user.companyId}-user`);
+            io.off(`company-${user?.companyId}-user`);
           }
           // io.disconnect();
         };
@@ -270,7 +309,23 @@ Entre em contato com o Suporte para mais informações! `);
 
     } catch (err) {
       if (isMountedRef.current) {
-      toastError(err);
+        const status = err?.response?.status;
+        const errorCode = err?.response?.data?.message || err?.response?.data?.code || "";
+        
+        // Se for 403, exibir mensagem específica de bloqueio
+        if (status === 403) {
+          let message = i18n.t("auth.errors.accessBlocked");
+          if (errorCode === "ERR_ACCESS_BLOCKED_PLATFORM") {
+            message = i18n.t("auth.errors.accessBlockedPlatform");
+          } else if (errorCode === "ERR_ACCESS_BLOCKED_PARTNER") {
+            message = i18n.t("auth.errors.accessBlockedPartner");
+          } else if (errorCode === "ERR_LICENSE_OVERDUE") {
+            message = i18n.t("auth.errors.licenseOverdue");
+          }
+          toast.error(message);
+        } else {
+          toastError(err);
+        }
         safeSetState(setLoading, false);
       }
     }

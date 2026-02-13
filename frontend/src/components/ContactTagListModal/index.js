@@ -66,10 +66,10 @@ const ContactTagListModal = ({ open, onClose, tag }) => {
         }
       }
     };
-    socket.on(`company${user.companyId}-tag`, onCompanyTags);
+    socket.on(`company${user?.companyId}-tag`, onCompanyTags);
 
     return () => {
-      socket.off(`company${user.companyId}-tag`, onCompanyTags);
+      socket.off(`company${user?.companyId}-tag`, onCompanyTags);
     };
   }, []); // Dependência do estado auxiliar updateFlag
 

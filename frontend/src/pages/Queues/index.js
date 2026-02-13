@@ -169,7 +169,7 @@ const Queues = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const { user, socket } = useContext(AuthContext);
   const { hasPermission } = usePermissions();
-  const companyId = user.companyId;
+  const companyId = user?.companyId;
 
   const handleSort = (field) => {
     if (sortField === field) {

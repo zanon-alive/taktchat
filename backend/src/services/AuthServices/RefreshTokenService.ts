@@ -4,6 +4,7 @@ import { Response as Res } from "express";
 import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import ShowUserService from "../UserServices/ShowUserService";
+import CompanyAccessService from "../CompanyService/CompanyAccessService";
 import authConfig from "../../config/auth";
 import {
   createAccessToken,
@@ -35,6 +36,12 @@ export const RefreshTokenService = async (
     if (user.tokenVersion !== tokenVersion) {
       res.clearCookie("jrt");
       throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    const access = await CompanyAccessService(user.companyId);
+    if (!access.allowed) {
+      res.clearCookie("jrt");
+      throw new AppError(access.code ?? "ERR_ACCESS_BLOCKED", 403);
     }
 
     const newToken = createAccessToken(user);

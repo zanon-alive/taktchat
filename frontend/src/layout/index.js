@@ -43,6 +43,7 @@ import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
 import ChatPopover from "../pages/Chat/ChatPopover";
+import LicenseExpiryWarning from "../components/LicenseExpiryWarning";
 
 import { useDate } from "../hooks/useDate";
 import UserLanguageSelector from "../components/UserLanguageSelector";
@@ -84,6 +85,11 @@ const useStyles = makeStyles((theme) => ({
   chip: {
     background: "red",
     color: "white",
+  },
+  chipProfile: {
+    marginLeft: 8,
+    color: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
   },
   avatar: {
     width: "100%",
@@ -392,14 +398,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   useEffect(() => {
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     const userId = user.id;
     if (companyId && socket && typeof socket.on === 'function') {
       //    const socket = socketManager.GetSocket();
 
       const ImageUrl = user.profileImage;
       if (ImageUrl !== undefined && ImageUrl !== null)
-      setProfileUrl(`${backendUrl}/public/company${user.companyId}/${ImageUrl}`);
+      setProfileUrl(`${backendUrl}/public/company${user?.companyId}/${ImageUrl}`);
       else setProfileUrl(`${process.env.FRONTEND_URL}/nopicture.png`);
 
       const onCompanyAuthLayout = (data) => {
@@ -589,6 +595,25 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             )}
           </Typography>
 
+          {(() => {
+            const t = user?.company?.type;
+            const label =
+              t === "platform" || user?.super
+                ? i18n.t("companies.typePlatform")
+                : t === "whitelabel"
+                  ? i18n.t("companies.typePartner")
+                  : t === "direct"
+                    ? "Cliente"
+                    : null;
+            return label ? (
+              <Chip
+                size="small"
+                label={label}
+                className={classes.chipProfile}
+              />
+            ) : null;
+          })()}
+
           {userToken === "enabled" && user?.companyId === 1 && (
             <Chip
               className={classes.chip}
@@ -686,7 +711,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       </AppBar>
       <main className={clsx(classes.content, drawerOpen ? classes.contentShift : classes.contentShiftClose)}>
         <div className={classes.appBarSpacer} />
-
+        <LicenseExpiryWarning />
         {children ? children : null}
       </main>
     </div>

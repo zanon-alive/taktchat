@@ -284,7 +284,7 @@ const Quickemessages = () => {
   }, [searchParam, pageNumber, itemsPerPage, sortField, sortDirection]);
 
   useEffect(() => {
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 
     const onQuickMessageEvent = (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -303,7 +303,7 @@ const Quickemessages = () => {
 
   const fetchQuickemessages = async () => {
     try {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
       const { data } = await api.get("/quick-messages", {
         params: { 
           searchParam, 

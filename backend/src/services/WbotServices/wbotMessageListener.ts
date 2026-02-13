@@ -7,25 +7,18 @@ import { isNil, isNull } from "lodash";
 import { REDIS_URI_MSG_CONN } from "../../config/redis";
 import axios from "axios";
 
-import {
-  downloadMediaMessage,
-  extractMessageContent,
-  getContentType,
+import type {
   GroupMetadata,
-  jidNormalizedUser,
-  delay,
   MediaType,
   MessageUpsertType,
   proto,
   WAMessage,
-  WAMessageStubType,
   WAMessageUpdate,
   WASocket,
-  downloadContentFromMessage,
   AnyMessageContent,
-  generateWAMessageContent,
-  generateWAMessageFromContent
 } from "@whiskeysockets/baileys";
+import { WAMessageStubType } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -33,6 +26,20 @@ import { Mutex } from "async-mutex";
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import logger from "../../utils/logger";
+
+// Carregar Baileys uma vez no início do módulo
+let baileysInstance: typeof import("@whiskeysockets/baileys") | null = null;
+(async () => {
+  baileysInstance = await getBaileys();
+})();
+
+// Helper para obter Baileys (aguarda carregamento se necessário)
+async function getBaileysInstance() {
+  if (!baileysInstance) {
+    baileysInstance = await getBaileys();
+  }
+  return baileysInstance;
+}
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import { safeNormalizePhoneNumber } from "../../utils/phone";
@@ -254,7 +261,12 @@ const contactsArrayMessageGet = (msg: any) => {
 };
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
-  const msgType = getContentType(msg.message);
+  if (!baileysInstance) {
+    // Se ainda não carregou, tentar carregar síncrono (não ideal, mas necessário)
+    // Em produção, o módulo já estará carregado
+    throw new Error("Baileys not loaded yet. Ensure module is initialized.");
+  }
+  const msgType = baileysInstance.getContentType(msg.message);
   if (msg.message?.extendedTextMessage && msg.message?.extendedTextMessage?.contextInfo && msg.message?.extendedTextMessage?.contextInfo?.externalAdReply) {
     return 'adMetaPreview'; // Adicionado para tratar mensagens de anúncios;
   }
@@ -526,12 +538,15 @@ const msgAdMetaPreview = (image, title, body, sourceUrl, messageUser) => {
 };
 
 export const getQuotedMessage = (msg: proto.IWebMessageInfo) => {
-  const body = extractMessageContent(msg.message)[
+  if (!baileysInstance) {
+    throw new Error("Baileys not loaded yet");
+  }
+  const body = baileysInstance.extractMessageContent(msg.message)[
     Object.keys(msg?.message).values().next().value
   ];
 
   if (!body?.contextInfo?.quotedMessage) return;
-  const quoted = extractMessageContent(
+  const quoted = baileysInstance.extractMessageContent(
     body?.contextInfo?.quotedMessage[
       Object.keys(body?.contextInfo?.quotedMessage).values().next().value
     ]
@@ -541,7 +556,10 @@ export const getQuotedMessage = (msg: proto.IWebMessageInfo) => {
 };
 
 export const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
-  const body = extractMessageContent(msg.message)[
+  if (!baileysInstance) {
+    throw new Error("Baileys not loaded yet");
+  }
+  const body = baileysInstance.extractMessageContent(msg.message)[
     Object.keys(msg?.message).values().next().value
   ];
   let reaction = msg?.message?.reactionMessage
@@ -552,8 +570,11 @@ export const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
 };
 
 const getMeSocket = (wbot: Session): IMe => {
+  if (!baileysInstance) {
+    throw new Error("Baileys not loaded yet");
+  }
   return {
-    id: jidNormalizedUser((wbot as WASocket).user.id),
+    id: baileysInstance.jidNormalizedUser((wbot as WASocket).user.id),
     name: (wbot as WASocket).user.name
   };
 };
@@ -568,7 +589,10 @@ const getSenderMessage = (
   const senderId =
     msg.participant || msg.key.participant || msg.key.remoteJid || undefined;
 
-  return senderId && jidNormalizedUser(senderId);
+  if (!baileysInstance) {
+    throw new Error("Baileys not loaded yet");
+  }
+  return senderId && baileysInstance.jidNormalizedUser(senderId);
 };
 
 const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
@@ -769,7 +793,8 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, isImported: Date = null
 
   let buffer;
   try {
-    buffer = await downloadMediaMessage(
+    const baileys = await getBaileysInstance();
+    buffer = await baileys.downloadMediaMessage(
       msg,
       "buffer",
       {},
@@ -848,7 +873,10 @@ const verifyContact = async (
   userId: number = null
 ): Promise<Contact | null> => {
   let profilePicUrl = ""; // Busca de avatar é feita por serviço dedicado, não aqui.
-  const normalizedJid = jidNormalizedUser(msgContact.id);
+  if (!baileysInstance) {
+    throw new Error("Baileys not loaded yet");
+  }
+  const normalizedJid = baileysInstance.jidNormalizedUser(msgContact.id);
   const cleaned = normalizedJid.replace(/\D/g, "");
   const isGroup = normalizedJid.includes("g.us");
   const isLinkedDevice = msgContact.id.includes("@lid");
@@ -1410,7 +1438,8 @@ const sendDialogflowAwswer = async (
   }
 
   wbot.presenceSubscribe(contact.remoteJid);
-  await delay(500);
+  const baileys = await getBaileysInstance();
+  await baileys.delay(500);
 
   let dialogFlowReply = await queryDialogFlow(
     session,
@@ -1428,7 +1457,7 @@ const sendDialogflowAwswer = async (
       `\u200e *${queueIntegration?.name}:* Não consegui entender sua dúvida.`
     );
 
-    await delay(1000);
+    await baileys.delay(1000);
 
     await wbot.sendPresenceUpdate("paused", contact.remoteJid);
 
@@ -1454,7 +1483,8 @@ const sendDialogflowAwswer = async (
   const audio = dialogFlowReply.encodedAudio.toString("base64") ?? undefined;
 
   wbot.sendPresenceUpdate("composing", contact.remoteJid);
-  await delay(500);
+  const baileys2 = await getBaileysInstance();
+  await baileys2.delay(500);
 
   let lastMessage;
 
@@ -1497,7 +1527,8 @@ async function sendDelayedMessages(
   //     );
   //   if (test) {
   //     msg.react(react);
-  //     await delay(1000);
+  //     const baileys = await getBaileysInstance();
+  //     await baileys.delay(1000);
   //   }
   // }
   const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, {
@@ -1506,11 +1537,13 @@ async function sendDelayedMessages(
 
   await verifyMessage(sentMessage, ticket, contact);
   if (message != lastMessage) {
-    await delay(500);
+    const baileys = await getBaileysInstance();
+  await baileys.delay(500);
     wbot.sendPresenceUpdate("composing", contact.remoteJid);
   } else if (audio) {
     wbot.sendPresenceUpdate("recording", contact.remoteJid);
-    await delay(500);
+    const baileys = await getBaileysInstance();
+  await baileys.delay(500);
 
     // if (audio && message === lastMessage) {
     //   const newMedia = new MessageMedia("audio/ogg", audio);
@@ -1543,7 +1576,8 @@ async function sendDelayedMessages(
     // }
 
     if (farewellMessage && message.includes(farewellMessage)) {
-      await delay(1000);
+      const baileys = await getBaileysInstance();
+    await baileys.delay(1000);
       setTimeout(async () => {
         await ticket.update({
           contactId: ticket.contact.id,
@@ -2108,7 +2142,8 @@ const verifyQueue = async (
         }
       }
 
-      await delay(4000);
+      const baileys = await getBaileysInstance();
+      await baileys.delay(4000);
 
       //se fila está parametrizada para encerrar ticket automaticamente
       if (choosenQueue.closeTicket) {
@@ -2236,7 +2271,8 @@ const verifyQueue = async (
         type: "chatBot"
       });
 
-      await delay(1000);
+      const baileys = await getBaileysInstance();
+    await baileys.delay(1000);
 
       await wbot.sendPresenceUpdate("paused", contact.remoteJid);
 
@@ -2560,7 +2596,8 @@ const verifyQueue = async (
         }
       }
 
-      await delay(4000)
+      const baileys = await getBaileysInstance();
+      await baileys.delay(4000)
 
 
       //se fila está parametrizada para encerrar ticket automaticamente
@@ -2692,7 +2729,8 @@ const verifyQueue = async (
         type: "chatBot"
       });
 
-      await delay(1000);
+      const baileys = await getBaileysInstance();
+    await baileys.delay(1000);
       const body = formatBody(
         `\u200e${greetingMessage}\n\n${options}`,
         ticket
@@ -2966,7 +3004,8 @@ const verifyQueue = async (
                 },
               };
               const jid = `${contact.number}@${ticket.isGroup ? 'g.us' : 's.whatsapp.net'}`;
-              const newMsg = generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber, });
+              const baileys = await getBaileysInstance();
+              const newMsg = await baileys.generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber, });
               await wbot.relayMessage(jid, newMsg.message!, { messageId: newMsg.key.id }
               );
               if (newMsg) {
@@ -3048,7 +3087,8 @@ const verifyQueue = async (
         }
       }
 
-      await delay(4000)
+      const baileys = await getBaileysInstance();
+      await baileys.delay(4000)
 
 
       //se fila está parametrizada para encerrar ticket automaticamente
@@ -3166,7 +3206,8 @@ const verifyQueue = async (
         type: "chatBot"
       });
 
-      await delay(1000);
+      const baileys = await getBaileysInstance();
+    await baileys.delay(1000);
 
       await wbot.sendPresenceUpdate('paused', contact.remoteJid)
 
@@ -3217,7 +3258,8 @@ const verifyQueue = async (
 
                   if (fileExists) {
                     // Carrega a imagem local
-                    const imageMessageContent = await generateWAMessageContent(
+                    const baileysLocal = await getBaileysInstance();
+                    const imageMessageContent = await baileysLocal.generateWAMessageContent(
                       { image: { url: filePath } }, // Caminho da imagem local
                       { upload: wbot.waUploadToServer! }
                     );
@@ -3248,7 +3290,7 @@ const verifyQueue = async (
                     };
 
                     const jid = `${contact.number}@${ticket.isGroup ? 'g.us' : 's.whatsapp.net'}`;
-                    const newMsg = generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber });
+                    const newMsg = await baileysLocal.generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber });
                     await wbot.relayMessage(jid, newMsg.message!, { messageId: newMsg.key.id });
 
                     if (newMsg) {
@@ -3316,7 +3358,8 @@ const verifyQueue = async (
                 };
 
                 const jid = `${contact.number}@${ticket.isGroup ? 'g.us' : 's.whatsapp.net'}`;
-                const newMsg = generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber });
+                const baileys = await getBaileysInstance();
+                const newMsg = await baileys.generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber });
                 await wbot.relayMessage(jid, newMsg.message!, { messageId: newMsg.key.id });
 
                 if (newMsg) {
@@ -3397,7 +3440,8 @@ const verifyQueue = async (
               };
 
               const jid = `${contact.number}@${ticket.isGroup ? 'g.us' : 's.whatsapp.net'}`;
-              const newMsg = generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber });
+              const baileys = await getBaileysInstance();
+              const newMsg = await baileys.generateWAMessageFromContent(jid, interactiveMsg, { userJid: botNumber });
               await wbot.relayMessage(jid, newMsg.message!, { messageId: newMsg.key.id });
 
               if (newMsg) {

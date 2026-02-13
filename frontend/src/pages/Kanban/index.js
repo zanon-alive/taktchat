@@ -261,7 +261,7 @@ const Kanban = () => {
   }, [user]);
 
   useEffect(() => {
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     const onAppMessage = (data) => {
       if (data.action === "create" || data.action === "update" || data.action === "delete") {
         fetchTickets();

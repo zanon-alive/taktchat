@@ -92,7 +92,7 @@ export default function Pricing(props) {
   const loadPlans = async () => {
     setLoading(true);
     try {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
       const _planList = await getPlanCompany(undefined, companyId);
 
       const planList = _planList.plan;

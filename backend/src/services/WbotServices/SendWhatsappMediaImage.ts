@@ -1,4 +1,5 @@
-import { delay, WAMessage } from "@whiskeysockets/baileys";
+import type { WAMessage } from "@whiskeysockets/baileys";
+import { getBaileys } from "../../libs/baileysLoader";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Message from "../../models/Message";
@@ -48,7 +49,8 @@ const SendWhatsAppMediaImage = async ({
 
     try {
         wbot.sendPresenceUpdate('available');
-        await delay(msdelay)
+        const baileys = await getBaileys();
+        await baileys.delay(msdelay)
         const sentMessage = await wbot.sendMessage(
             `${number}`,
             {

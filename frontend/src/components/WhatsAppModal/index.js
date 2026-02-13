@@ -227,11 +227,14 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
+      if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-
-      setShowOpenAi(planConfigs.plan.useOpenAi);
-      setShowIntegrations(planConfigs.plan.useIntegrations);
+      const plan = planConfigs?.plan;
+      if (plan) {
+        setShowOpenAi(plan.useOpenAi);
+        setShowIntegrations(plan.useIntegrations);
+      }
     }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -145,7 +145,7 @@ const NotificationsPopOver = (volume) => {
 			return;
 		}
 
-		const companyId = user.companyId;
+		const companyId = user?.companyId;
 		// const socket = socketManager.GetSocket();
 		const queueIds = queues.map((q) => q.id);
 

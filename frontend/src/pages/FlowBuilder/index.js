@@ -165,7 +165,7 @@ const FlowBuilder = () => {
   }, [searchParam, pageNumber, reloadData]);
 
   useEffect(() => {
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 
     const onContact = (data) => {
       if (data.action === "update" || data.action === "create") {

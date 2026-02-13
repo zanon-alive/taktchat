@@ -21,7 +21,7 @@ function CheckoutSuccess(props) {
   const { dateToClient } = useDate();
 
   useEffect(() => {
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     if (companyId) {
       // const socket = socketManager.GetSocket();
 

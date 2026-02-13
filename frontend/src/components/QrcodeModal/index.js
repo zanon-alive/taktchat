@@ -40,7 +40,7 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
       return;
     }
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     // const socket = socketConnection({ companyId, userId: user.id });
 
     const onWhatsappData = (data) => {

@@ -55,7 +55,7 @@ const Settings = () => {
   }, []);
 
   useEffect(() => {
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     // const socket = socketManager.GetSocket();
 
     const onSettingsEvent = (data) => {

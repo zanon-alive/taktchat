@@ -224,7 +224,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 			setContactsLoading(true);
 			api.get('/contacts/list', {
 				params: {
-					companyId: user.companyId,
+					companyId: user?.companyId,
 					...(contactSearchParam.trim().length >= 2 && { name: contactSearchParam.trim() })
 				}
 			})
@@ -245,7 +245,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 				});
 		}, contactSearchParam.trim().length >= 2 ? 400 : 100);
 		return () => clearTimeout(delayDebounceFn);
-	}, [open, contactSearchParam, user.companyId]);
+	}, [open, contactSearchParam, user?.companyId]);
 
 	useEffect(() => {
 		const { companyId } = user;

@@ -3,6 +3,8 @@ import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
 import User from "../../models/User";
+import { isPlatformCompany } from "../../config/platform";
+import { generateSignupToken } from "../../helpers/PartnerSignupToken";
 
 interface CompanyData {
   name: string;
@@ -17,19 +19,18 @@ interface CompanyData {
   document?: string;
   paymentMethod?: string;
   password?: string;
+  type?: "platform" | "direct" | "whitelabel";
+  parentCompanyId?: number | null;
+  trialDaysForChildCompanies?: number | null;
+  requestUserCompanyId?: number;
+  requestUserSuper?: boolean;
 }
 
 const UpdateCompanyService = async (
   companyData: CompanyData
 ): Promise<Company> => {
-  console.log("[DEBUG UpdateCompanyService] Iniciando atualização");
-  console.log("[DEBUG UpdateCompanyService] companyData recebido:", JSON.stringify(companyData, null, 2));
-  console.log("[DEBUG UpdateCompanyService] companyData.id:", companyData.id);
-  console.log("[DEBUG UpdateCompanyService] Tipo de companyData.id:", typeof companyData.id);
-
   const company = await Company.findByPk(companyData.id);
-  console.log("[DEBUG UpdateCompanyService] Empresa encontrada:", company ? `Sim (ID: ${company.id})` : "Não");
-  
+
   const {
     name,
     phone,
@@ -41,20 +42,65 @@ const UpdateCompanyService = async (
     recurrence,
     document,
     paymentMethod,
-    password
+    password,
+    type: requestedType,
+    parentCompanyId: requestedParentId,
+    trialDaysForChildCompanies,
+    requestUserCompanyId,
+    requestUserSuper
   } = companyData;
 
-  console.log("[DEBUG UpdateCompanyService] Dados extraídos:");
-  console.log("  - name:", name);
-  console.log("  - email:", email);
-  console.log("  - phone:", phone);
-  console.log("  - status:", status);
-  console.log("  - planId:", planId);
-  console.log("  - document:", document);
-
   if (!company) {
-    console.log("[DEBUG UpdateCompanyService] ERRO: Empresa não encontrada com ID:", companyData.id);
     throw new AppError("ERR_NO_COMPANY_FOUND", 404);
+  }
+
+  const isSuper = requestUserSuper === true;
+
+  // Apenas super pode alterar type e parentCompanyId
+  if (requestedType !== undefined || requestedParentId !== undefined) {
+    if (!isSuper || !requestUserCompanyId || !isPlatformCompany(requestUserCompanyId)) {
+      throw new AppError(
+        "Apenas o Dono da Plataforma pode alterar o tipo ou a empresa pai."
+      );
+    }
+  }
+
+  let type = company.type;
+  let parentCompanyId = company.parentCompanyId;
+
+  if (isSuper && requestedType !== undefined) {
+    if (requestedType === "platform") {
+      throw new AppError("Não é permitido alterar empresa para tipo Plataforma.");
+    }
+    type = requestedType;
+    // type aqui é "direct" | "whitelabel" (platform já foi rejeitado acima)
+    if (type === "whitelabel") {
+      parentCompanyId = null;
+    }
+  }
+
+  if (isSuper && requestedParentId !== undefined) {
+    if (type === "platform" || type === "whitelabel") {
+      if (requestedParentId !== null) {
+        throw new AppError("Empresas Plataforma e Whitelabel devem ter empresa pai nula.");
+      }
+      parentCompanyId = null;
+    } else {
+      parentCompanyId = requestedParentId;
+      if (parentCompanyId != null) {
+        const parent = await Company.findByPk(parentCompanyId);
+        if (!parent) throw new AppError("Empresa pai não encontrada.");
+        if (parent.type !== "whitelabel") throw new AppError("A empresa pai deve ser Whitelabel.");
+        if (parent.id === company.id) throw new AppError("Empresa não pode ser pai de si mesma.");
+        let current: Company | null = parent;
+        while (current?.parentCompanyId) {
+          current = await Company.findByPk(current.parentCompanyId);
+          if (current?.id === company.id) {
+            throw new AppError("Não é permitido criar vínculo circular (loop).");
+          }
+        }
+      }
+    }
   }
 
   // Verifica se existe outro usuário com o mesmo email em outra empresa
@@ -72,72 +118,39 @@ const UpdateCompanyService = async (
     }
   }
 
-  // Busca o usuário da empresa atual para atualizar
-  // Primeiro tenta encontrar pelo email fornecido, depois pelo email antigo da empresa,
-  // e por último busca o primeiro usuário admin da empresa
   let user = null;
-  
   if (email && email !== "") {
-    // Tenta encontrar pelo email fornecido
     user = await User.findOne({
-      where: {
-        companyId: company.id,
-        email: email
-      }
+      where: { companyId: company.id, email: email }
     });
-    console.log("[DEBUG UpdateCompanyService] Usuário encontrado pelo email fornecido:", user ? `Sim (ID: ${user.id})` : "Não");
   }
-  
   if (!user && company.email && company.email !== "") {
-    // Se não encontrou, tenta pelo email antigo da empresa
     user = await User.findOne({
-      where: {
-        companyId: company.id,
-        email: company.email
-      }
+      where: { companyId: company.id, email: company.email }
     });
-    console.log("[DEBUG UpdateCompanyService] Usuário encontrado pelo email antigo da empresa:", user ? `Sim (ID: ${user.id})` : "Não");
   }
-  
   if (!user) {
-    // Se ainda não encontrou, busca o primeiro usuário admin da empresa
     user = await User.findOne({
-      where: {
-        companyId: company.id,
-        profile: "admin"
-      },
+      where: { companyId: company.id, profile: "admin" },
       order: [["id", "ASC"]]
     });
-    console.log("[DEBUG UpdateCompanyService] Usuário admin encontrado:", user ? `Sim (ID: ${user.id})` : "Não");
   }
 
   if (!user) {
-    console.log("[DEBUG UpdateCompanyService] ERRO: Nenhum usuário encontrado para a empresa ID:", company.id);
-    throw new AppError("ERR_NO_USER_FOUND", 404)
+    throw new AppError("ERR_NO_USER_FOUND", 404);
   }
-  
-  console.log("[DEBUG UpdateCompanyService] Usuário que será atualizado - ID:", user.id, "Email atual:", user.email);
-  
-  // Atualiza o email e senha do usuário apenas se foram fornecidos
+
   const userUpdateData: { email?: string; password?: string } = {};
   if (email && email !== "" && email !== user.email) {
     userUpdateData.email = email;
-    console.log("[DEBUG UpdateCompanyService] Email do usuário será atualizado para:", email);
   }
   if (password && password !== "") {
     userUpdateData.password = password;
-    console.log("[DEBUG UpdateCompanyService] Senha do usuário será atualizada");
   }
-  
   if (Object.keys(userUpdateData).length > 0) {
-    console.log("[DEBUG UpdateCompanyService] Atualizando usuário com:", userUpdateData);
     await user.update(userUpdateData);
-  } else {
-    console.log("[DEBUG UpdateCompanyService] Nenhuma atualização necessária no usuário");
   }
 
-
-  // Prepara os dados para atualização da empresa
   const companyUpdateData: any = {
     name,
     status,
@@ -145,8 +158,23 @@ const UpdateCompanyService = async (
     dueDate,
     recurrence,
     document,
-    paymentMethod
+    paymentMethod,
+    type,
+    parentCompanyId
   };
+
+  // Apenas whitelabel pode ter trialDaysForChildCompanies
+  if (type === "whitelabel" && trialDaysForChildCompanies !== undefined) {
+    // Apenas super ou o próprio whitelabel pode alterar
+    if (isSuper || (requestUserCompanyId === company.id && company.type === "whitelabel")) {
+      companyUpdateData.trialDaysForChildCompanies = trialDaysForChildCompanies;
+    }
+  }
+
+  // Garantir signupToken para whitelabel (gera se ainda não tiver)
+  if (type === "whitelabel" && !company.signupToken) {
+    companyUpdateData.signupToken = generateSignupToken();
+  }
 
   // Inclui campos opcionais apenas se foram fornecidos
   if (phone !== undefined) {

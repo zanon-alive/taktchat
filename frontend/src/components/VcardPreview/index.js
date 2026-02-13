@@ -22,7 +22,7 @@ const VcardPreview = ({ contact, numbers, queueId, whatsappId }) => {
     const history = useHistory();
     const { user } = useContext(AuthContext);
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
 
     const [openAlert, setOpenAlert] = useState(false);
     const [userTicketOpen, setUserTicketOpen] = useState("");

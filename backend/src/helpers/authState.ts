@@ -3,7 +3,7 @@ import type {
   AuthenticationState,
   SignalDataTypeMap
 } from "@whiskeysockets/baileys";
-import { BufferJSON, initAuthCreds, proto } from "@whiskeysockets/baileys";
+import { getBaileys } from "../libs/baileysLoader";
 import Whatsapp from "../models/Whatsapp";
 
 const KEY_MAP: { [T in keyof SignalDataTypeMap]: string } = {
@@ -18,6 +18,9 @@ const KEY_MAP: { [T in keyof SignalDataTypeMap]: string } = {
 const authState = async (
   whatsapp: Whatsapp
 ): Promise<{ state: AuthenticationState; saveState: () => void }> => {
+  // Carregar Baileys dinamicamente
+  const baileys = await getBaileys();
+  const { BufferJSON, initAuthCreds, proto } = baileys;
   let creds: AuthenticationCreds;
   let keys: any = {};
 

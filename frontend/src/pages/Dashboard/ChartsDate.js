@@ -40,7 +40,7 @@ export const ChartsDate = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { user } = useContext(AuthContext);
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     const isDarkMode = theme.palette.mode === 'dark';
 
     useEffect(() => {

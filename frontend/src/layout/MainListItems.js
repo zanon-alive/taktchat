@@ -43,6 +43,7 @@ import {
   SyncAlt as SyncAltIcon,
   LocalAtm as LocalAtmIcon,
   Business as BusinessIcon,
+  Description as DescriptionIcon,
 } from "@mui/icons-material";
 
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -315,16 +316,18 @@ const MainListItems = ({ collapsed, onItemClick }) => {
       return;
     }
     async function fetchData() {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
+      if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-      
-      setShowCampaigns(planConfigs.plan.useCampaigns);
-      setShowKanban(planConfigs.plan.useKanban);
-      setShowOpenAi(planConfigs.plan.useOpenAi);
-      setShowIntegrations(planConfigs.plan.useIntegrations);
-      setShowSchedules(planConfigs.plan.useSchedules);
-      setShowInternalChat(planConfigs.plan.useInternalChat);
-      setShowExternalApi(planConfigs.plan.useExternalApi);
+      const plan = planConfigs?.plan;
+      if (!plan) return;
+      setShowCampaigns(plan.useCampaigns);
+      setShowKanban(plan.useKanban);
+      setShowOpenAi(plan.useOpenAi);
+      setShowIntegrations(plan.useIntegrations);
+      setShowSchedules(plan.useSchedules);
+      setShowInternalChat(plan.useInternalChat);
+      setShowExternalApi(plan.useExternalApi);
     }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -345,7 +348,7 @@ const MainListItems = ({ collapsed, onItemClick }) => {
 
   useEffect(() => {
     if (user.id && socket && typeof socket.on === 'function') {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
       //    const socket = socketManager.GetSocket();
       // console.log('socket nListItems')
       const onCompanyChatMainListItems = (data) => {
@@ -793,16 +796,39 @@ const MainListItems = ({ collapsed, onItemClick }) => {
         />
       )}
 
-      {/* EMPRESAS (Super) */}
-      {user.super && (
+      {/* EMPRESAS (Super ou Whitelabel) */}
+      {(user.super || user.company?.type === "whitelabel") && (
         <ListItemLink
           to="/companies"
-          primary={i18n.t("mainDrawer.listItems.companies")}
+          primary={user.company?.type === "whitelabel" ? i18n.t("mainDrawer.listItems.myCompanies") : i18n.t("mainDrawer.listItems.companies")}
           icon={<BusinessIcon />}
           tooltip={collapsed}
           onClick={onItemClick}
         />
       )}
+
+      {/* LICENÇAS (Super ou Whitelabel) */}
+      {(user.super || user.company?.type === "whitelabel") && (
+        <ListItemLink
+          to="/licenses"
+          primary="Licenças"
+          icon={<DescriptionIcon />}
+          tooltip={collapsed}
+          onClick={onItemClick}
+        />
+      )}
+
+      {/* RELATÓRIO DE COBRANÇA POR PARCEIRO (Apenas Super) */}
+      {user.super && (
+        <ListItemLink
+          to="/partner-billing-report"
+          primary="Relatório de cobrança"
+          icon={<LocalAtmIcon />}
+          tooltip={collapsed}
+          onClick={onItemClick}
+        />
+      )}
+
       {!collapsed && (
         <React.Fragment>
           <Divider />

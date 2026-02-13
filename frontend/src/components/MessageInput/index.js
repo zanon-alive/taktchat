@@ -1082,7 +1082,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
 
   useEffect(() => {
     async function fetchData() {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
       const messages = await listQuickMessages({ companyId, userId: user.id });
       const options = messages.map((m) => {
         let truncatedMessage = m.message;

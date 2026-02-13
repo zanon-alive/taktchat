@@ -96,9 +96,10 @@ const MessagesAPI = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const companyId = user.companyId;
+      const companyId = user?.companyId;
+      if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-      if (!planConfigs.plan.useExternalApi) {
+      if (!planConfigs?.plan?.useExternalApi) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
         history.push('/');
       }

@@ -208,7 +208,7 @@ function Chat() {
       return;
     }
 
-    const companyId = user.companyId;
+    const companyId = user?.companyId;
     // const socket = socketConnection({ companyId, userId: user.id });
 
     const onChatUser = (data) => {

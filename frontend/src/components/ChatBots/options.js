@@ -98,7 +98,7 @@ export default function VerticalLinearStepper(props) {
   const [userOptions, setUserOptions] = useState([]);
   const isMounted = useRef(true);
 
-  const companyId = user.companyId;
+  const companyId = user?.companyId;
 
   const handleSaveBot = async (values) => {
     try {
