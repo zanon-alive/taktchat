@@ -43,6 +43,7 @@ interface Request {
   allTicket?: string;
   sortTickets?: string;
   searchOnMessages?: string;
+  entrySources?: string[];
 }
 
 interface Response {
@@ -69,7 +70,8 @@ const ListTicketsService = async ({
   statusFilters,
   companyId,
   sortTickets = "DESC",
-  searchOnMessages = "false"
+  searchOnMessages = "false",
+  entrySources
 }: Request): Promise<Response> => {
   const user = await ShowUserService(userId, companyId);
 
@@ -239,9 +241,9 @@ const ListTicketsService = async ({
       }
 
       latestTickets = await Ticket.findAll({
-        attributes: ['companyId', 'contactId', 'whatsappId', [literal('MAX("id")'), 'id']],
+        attributes: ['companyId', 'contactId', 'whatsappId', 'entrySource', [literal('MAX("id")'), 'id']],
         where: whereCondition2,
-        group: ['companyId', 'contactId', 'whatsappId'],
+        group: ['companyId', 'contactId', 'whatsappId', 'entrySource'],
       });
 
     } else {
@@ -264,9 +266,9 @@ const ListTicketsService = async ({
       }
 
       latestTickets = await Ticket.findAll({
-        attributes: ['companyId', 'contactId', 'whatsappId', [literal('MAX("id")'), 'id']],
+        attributes: ['companyId', 'contactId', 'whatsappId', 'entrySource', [literal('MAX("id")'), 'id']],
         where: whereCondition2,
-        group: ['companyId', 'contactId', 'whatsappId'],
+        group: ['companyId', 'contactId', 'whatsappId', 'entrySource'],
       });
 
     }
@@ -286,13 +288,13 @@ const ListTicketsService = async ({
       let latestTickets;
       if (!showTicketAllQueues && user.profile === "user") {
         latestTickets = await Ticket.findAll({
-          attributes: ['companyId', 'contactId', 'whatsappId', [literal('MAX("id")'), 'id']],
+          attributes: ['companyId', 'contactId', 'whatsappId', 'entrySource', [literal('MAX("id")'), 'id']],
           where: {
             [Op.or]: [{ userId }, { status: ["pending", "closed", "group"] }],
             queueId: { [Op.or]: [...queueIds, null] },
             companyId
           },
-          group: ['companyId', 'contactId', 'whatsappId'],
+          group: ['companyId', 'contactId', 'whatsappId', 'entrySource'],
         });
       } else {
         let whereCondition2: Filterable["where"] = {
@@ -315,9 +317,9 @@ const ListTicketsService = async ({
         }
 
         latestTickets = await Ticket.findAll({
-          attributes: ['companyId', 'contactId', 'whatsappId', [literal('MAX("id")'), 'id']],
+          attributes: ['companyId', 'contactId', 'whatsappId', 'entrySource', [literal('MAX("id")'), 'id']],
           where: whereCondition2,
-          group: ['companyId', 'contactId', 'whatsappId'],
+          group: ['companyId', 'contactId', 'whatsappId', 'entrySource'],
         });
 
       }
@@ -499,6 +501,13 @@ const ListTicketsService = async ({
     ...whereCondition,
     companyId
   };
+
+  if (Array.isArray(entrySources) && entrySources.length > 0) {
+    whereCondition = {
+      ...whereCondition,
+      entrySource: { [Op.in]: entrySources }
+    };
+  }
 
   // Política de acesso hierárquica:
   // Contato deve ter PELO MENOS UMA tag pessoal (#) do usuário

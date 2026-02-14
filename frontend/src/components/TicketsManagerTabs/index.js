@@ -12,6 +12,10 @@ import {
   Grid,
   Tooltip,
   Switch,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import {
@@ -361,6 +365,7 @@ const TicketsManagerTabs = () => {
   const [forceSearch, setForceSearch] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState([]);
   const [filter, setFilter] = useState(false);
+  const [entrySourceFilter, setEntrySourceFilter] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isHoveredAll, setIsHoveredAll] = useState(false);
@@ -703,6 +708,24 @@ const TicketsManagerTabs = () => {
       <Paper square elevation={0} className={classes.ticketOptionsBox}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid item>
+            <FormControl size="small" sx={{ minWidth: 130 }} variant="outlined">
+              <InputLabel id="entry-source-label">{i18n.t("tickets.entrySource.canal")}</InputLabel>
+              <Select
+                labelId="entry-source-label"
+                value={entrySourceFilter}
+                onChange={(e) => {
+                  setEntrySourceFilter(e.target.value);
+                  setForceSearch((prev) => !prev);
+                }}
+                label={i18n.t("tickets.entrySource.canal")}
+              >
+                <MenuItem value="">{i18n.t("tickets.entrySource.all")}</MenuItem>
+                <MenuItem value="whatsapp">{i18n.t("tickets.entrySource.whatsapp")}</MenuItem>
+                <MenuItem value="lead">{i18n.t("tickets.entrySource.lead")}</MenuItem>
+                <MenuItem value="revendedor">{i18n.t("tickets.entrySource.revendedor")}</MenuItem>
+                <MenuItem value="site_chat">{i18n.t("tickets.entrySource.site")}</MenuItem>
+              </Select>
+            </FormControl>
             <Can
               role={user.allUserChat === 'enabled' && user.profile === 'user' ? 'admin' : user.profile}
               perform="tickets-manager:showall"
@@ -1149,6 +1172,7 @@ const TicketsManagerTabs = () => {
             updateCount={setOpenCount}
             style={applyPanelStyle("open")}
             setTabOpen={setTabOpen}
+            entrySource={entrySourceFilter || undefined}
           />
           <TicketsList
             key="pending"
@@ -1161,6 +1185,7 @@ const TicketsManagerTabs = () => {
             updateCount={setPendingCount}
             style={applyPanelStyle("pending")}
             setTabOpen={setTabOpen}
+            entrySource={entrySourceFilter || undefined}
           />
           {user.allowGroup && (
             <TicketsList
@@ -1174,6 +1199,7 @@ const TicketsManagerTabs = () => {
               updateCount={setGroupingCount}
               style={applyPanelStyle("group")}
               setTabOpen={setTabOpen}
+              entrySource={entrySourceFilter || undefined}
             />
           )}
           <TicketsList
@@ -1187,6 +1213,7 @@ const TicketsManagerTabs = () => {
             updateCount={setBotCount}
             style={applyPanelStyle("bot")}
             setTabOpen={setTabOpen}
+            entrySource={entrySourceFilter || undefined}
           />
         </Paper>
         ) : (
@@ -1204,6 +1231,7 @@ const TicketsManagerTabs = () => {
             queuesForUser={queuesForUser}
             showNoQueuesAssignedMessage={profile === "user" && queuesForUser.length === 0}
             setTabOpen={setTabOpen}
+            entrySource={entrySourceFilter || undefined}
           />
         ) : (
           <Paper className={classes.ticketsWrapper}>
@@ -1229,6 +1257,7 @@ const TicketsManagerTabs = () => {
               forceSearch={forceSearch}
               searchOnMessages={searchOnMessages}
               status="search"
+              entrySource={entrySourceFilter || undefined}
             />
           </>
         )}
@@ -1246,6 +1275,7 @@ const TicketsManagerTabs = () => {
             forceSearch={forceSearch}
             searchOnMessages={searchOnMessages}
             status="search"
+            entrySource={entrySourceFilter || undefined}
           />
         )}
         </>

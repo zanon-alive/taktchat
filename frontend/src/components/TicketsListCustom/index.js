@@ -225,7 +225,8 @@ const TicketsListCustom = (props) => {
         forceSearch,
         statusFilter,
         userFilter,
-        sortTickets
+        sortTickets,
+        entrySource
     } = props;
 
     const classes = useStyles();
@@ -255,7 +256,8 @@ const TicketsListCustom = (props) => {
         Array.isArray(whatsappIds) ? whatsappIds.join(",") : "",
         Array.isArray(statusFilter) ? statusFilter.join(",") : "",
         sortTickets,
-        searchOnMessages
+        searchOnMessages,
+        entrySource || ""
     ].join("|");
     useEffect(() => {
         dispatch({ type: "RESET" });
@@ -274,7 +276,8 @@ const TicketsListCustom = (props) => {
         whatsappIds: JSON.stringify(whatsappIds),
         statusFilter: JSON.stringify(statusFilter),
         userFilter,
-        sortTickets
+        sortTickets,
+        entrySource: entrySource || undefined
     });
 
 

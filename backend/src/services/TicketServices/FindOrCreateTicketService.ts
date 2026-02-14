@@ -32,7 +32,8 @@ const FindOrCreateTicketService = async (
   isForward?: boolean,
   settings?: any,
   isTransfered?: boolean,
-  isCampaign: boolean = false
+  isCampaign: boolean = false,
+  entrySource?: string
 ): Promise<Ticket> => {
   // try {
   // let isCreated = false;
@@ -52,15 +53,19 @@ const FindOrCreateTicketService = async (
 
   const DirectTicketsToWallets = settings.DirectTicketsToWallets;
 
-  let ticket = await Ticket.findOne({
-    where: {
-      status: {
-        [Op.or]: ["open", "pending", "group", "nps", "lgpd", "bot"]
-      },
-      contactId: groupContact ? groupContact.id : contact.id,
-      companyId,
-      whatsappId: whatsapp.id
+  const ticketWhere: any = {
+    status: {
+      [Op.or]: ["open", "pending", "group", "nps", "lgpd", "bot"]
     },
+    contactId: groupContact ? groupContact.id : contact.id,
+    companyId,
+    whatsappId: whatsapp.id
+  };
+  if (entrySource) {
+    ticketWhere.entrySource = entrySource;
+  }
+  let ticket = await Ticket.findOne({
+    where: ticketWhere,
     order: [["id", "DESC"]]
   });
 
@@ -111,20 +116,24 @@ const FindOrCreateTicketService = async (
 
     // @ts-ignore: Unreachable code error
     if (timeCreateNewTicket !== 0 && timeCreateNewTicket !== "0") {
-      ticket = await Ticket.findOne({
-        where: {
-          updatedAt: {
-            [Op.between]: [
-              +sub(new Date(), {
-                minutes: Number(timeCreateNewTicket)
-              }),
-              +new Date()
-            ]
-          },
-          contactId: contact.id,
-          companyId,
-          whatsappId: whatsapp.id
+      const timeTicketWhere: any = {
+        updatedAt: {
+          [Op.between]: [
+            +sub(new Date(), {
+              minutes: Number(timeCreateNewTicket)
+            }),
+            +new Date()
+          ]
         },
+        contactId: contact.id,
+        companyId,
+        whatsappId: whatsapp.id
+      };
+      if (entrySource) {
+        timeTicketWhere.entrySource = entrySource;
+      }
+      ticket = await Ticket.findOne({
+        where: timeTicketWhere,
         order: [["updatedAt", "DESC"]]
       });
     }
@@ -193,6 +202,7 @@ const FindOrCreateTicketService = async (
       isBot: initialIsBot,
       queueId: initialQueueId, // Atribui fila padrão se tem bot
       channel,
+      entrySource: entrySource || channel || "whatsapp",
       imported: isImported ? new Date() : null,
       isActiveDemand: false,
     };

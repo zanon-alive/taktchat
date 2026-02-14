@@ -845,6 +845,14 @@ const messages = {
           filterContacts: "Filtro por Contatos",
           ticketsPerPage: "Tickets por página",
         },
+        entrySource: {
+          canal: "Canal",
+          all: "Todos",
+          whatsapp: "WhatsApp",
+          lead: "Lead",
+          revendedor: "Revendedor",
+          site: "Chat do site",
+        },
         buttons: {
           showAll: "Todos",
           returnQueue: "Devolver a Fila",

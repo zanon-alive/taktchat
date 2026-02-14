@@ -122,6 +122,7 @@ const RevendedorSection = () => {
         email: form.email,
         phone: fullPhone,
         message: form.message ? `[Revendedor] ${form.message}` : "[Revendedor] Interesse em parceria.",
+        source: "revendedor",
       });
       toast.success("Enviado com sucesso! Em breve entraremos em contato.");
       handleClose();

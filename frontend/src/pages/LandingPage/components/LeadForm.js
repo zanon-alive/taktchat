@@ -318,6 +318,7 @@ ${values.message ? `\nMensagem: ${values.message}` : ""}`;
           company: values.company || null,
           message: values.message || null,
           recaptchaToken: recaptchaValue, // Send token to backend if needed
+          source: "lead",
         });
 
         if (response.data) {

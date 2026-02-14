@@ -38,6 +38,7 @@ type IndexQuery = {
   isGroup?: string;
   sortTickets?: string;
   searchOnMessages?: string;
+  entrySource?: string;
 };
 
 type IndexQueryReport = {
@@ -82,7 +83,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     whatsapps: whatsappIdsStringified,
     statusFilter: statusStringfied,
     sortTickets,
-    searchOnMessages
+    searchOnMessages,
+    entrySource: entrySourceParam
   } = req.query as IndexQuery;
 
   const userId = Number(req.user.id);
@@ -93,6 +95,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   let usersIds: number[] = [];
   let whatsappIds: number[] = [];
   let statusFilters: string[] = [];
+  let entrySources: string[] = [];
 
   if (queueIdsStringified) {
     queueIds = JSON.parse(queueIdsStringified);
@@ -114,6 +117,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     statusFilters = JSON.parse(statusStringfied);
   }
 
+  if (entrySourceParam) {
+    entrySources = typeof entrySourceParam === "string" ? [entrySourceParam] : entrySourceParam;
+  }
+
   const { tickets, count, hasMore } = await ListTicketsService({
     searchParam,
     tags: tagsIds,
@@ -132,7 +139,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     statusFilters,
     companyId,
     sortTickets,
-    searchOnMessages
+    searchOnMessages,
+    entrySources
   });
 
   return res.status(200).json({ tickets, count, hasMore });
