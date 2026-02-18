@@ -10,6 +10,8 @@ const messageRoutes = Router();
 const upload = multer(uploadConfig);
 
 messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
+// Rota só para texto (sem multer): usada ex.: mensagem de saudação ao aceitar ticket
+messageRoutes.post("/messages/:ticketId/text", isAuth, MessageController.store);
 messageRoutes.post("/messages/:ticketId", isAuth, upload.array("medias"), MessageController.store);
 // messageRoutes.post("/forwardmessage",isAuth,MessageController.forwardmessage);
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);

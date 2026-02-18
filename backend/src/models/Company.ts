@@ -111,6 +111,9 @@ class Company extends Model<Company> {
   @Column({ type: DataType.STRING, allowNull: true, unique: true })
   signupToken: string | null;
 
+  @Column({ type: DataType.STRING, allowNull: true, unique: true })
+  siteChatToken: string | null;
+
   @HasMany(() => Company, "parentCompanyId")
   childCompanies: Company[];
 

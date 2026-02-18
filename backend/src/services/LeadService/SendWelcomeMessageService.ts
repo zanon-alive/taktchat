@@ -76,7 +76,11 @@ const SendWelcomeMessageService = async ({
     // Mensagem padrão de boas-vindas
     const defaultMessage = `Olá ${contact.name}! 👋\n\nObrigado pelo seu interesse no TaktChat!\n\nNossa equipe entrará em contato em breve para apresentar todas as funcionalidades e como podemos ajudar sua empresa a transformar o atendimento via WhatsApp.\n\nEnquanto isso, sinta-se à vontade para nos enviar suas dúvidas! 😊`;
 
-    const messageToSend = welcomeMessage || defaultMessage;
+    let messageToSend = welcomeMessage || defaultMessage;
+    // Substituir placeholder {{name}} pelo nome do contato na mensagem customizada
+    if (welcomeMessage) {
+      messageToSend = messageToSend.replace(/\{\{name\}\}/g, contact.name || "");
+    }
 
     // Enviar mensagem de boas-vindas
     await SendWhatsAppMessage({

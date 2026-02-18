@@ -19,7 +19,8 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Multi-empresa nativa, perfis e permissões granulares, painel financeiro e billing.
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
 - **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).
-- **Landing Page de Vendas**: Página pública de apresentação do produto com coleta de leads e integração WhatsApp.
+- **Landing Page de Vendas**: Página pública de apresentação do produto com coleta de leads, formulário de revendedor e integração WhatsApp.
+- **EntrySource e Chat do Site**: Rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis; widget de chat embarcável para sites externos; API pública e token por empresa.
 - **Governança Multi-Empresa e Whitelabel**: Hierarquia plataforma → whitelabels → clientes; visibilidade e CRUD por nível (empresas, planos, licenças); dashboards e menus por perfil; relatório de cobrança por parceiro (`/partner-billing-report`) e registro de snapshots; cadastro direto na landing e cadastro por link do parceiro (`/signup-partner`); bloqueio por cobrança (plataforma suspende parceiro; parceiro bloqueia/libera empresas-filhas). Fase 1 e Fase 2 concluídas.
 
 > Detalhamento completo: `.docs/visao-geral/funcionalidades.md`.
@@ -57,6 +58,7 @@ A plataforma inclui uma landing page pública de vendas acessível em `/landing`
 - **Componentes essenciais**:
   - FAQ com accordion (6 perguntas frequentes)
   - ChatWidget flutuante para contato WhatsApp
+  - Widget Chat do Site (opcional, em Configurações > Opções)
   - CookieBanner para conformidade LGPD
 - **Planos dinâmicos**: Cards modernizados com destaque visual para plano recomendado
 - **Formulário de leads**: Validação aprimorada com Yup, feedback visual e máscara de telefone
@@ -85,6 +87,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Operação, monitoramento e suporte: `.docs/operacao/`
 - Funcionalidades por módulo: `.docs/funcionalidades/`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
+  - **EntrySource e Chat do Site:** `.docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` - Canais de entrada, widget e API pública
 - Procedimentos de diagnóstico: `.docs/diagnosticos/` (inclui auditoria e deduplicação de contatos: `npm run db:audit-contacts`, `npm run db:dedupe-contacts`, `npm run db:delete-contacts-without-tickets`)
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`
 - Checklists e histórico: `.docs/anexos/`

@@ -72,16 +72,17 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId, ticket })
 
 	useEffect(() => {
 		if (isMounted.current && modalOpen) {
+			setSelectedQueue(""); // evita warning MUI (valor fora da lista) enquanto filas carregam
 			const loadQueues = async () => {
 				try {
 					const list = await findAllQueues();
 					setQueues(list || []);
-					
-					// Se usuário tem apenas uma fila associada, selecionar automaticamente
-					if (user.queues && user.queues.length === 1) {
+
+					// Só definir selectedQueue se o id existir na lista (evita warning MUI out-of-range)
+					const queueIds = (list || []).map((q) => q.id);
+					if (user.queues && user.queues.length === 1 && queueIds.some((id) => id == user.queues[0].id)) {
 						setSelectedQueue(user.queues[0].id);
 					} else if (list && list.length === 1) {
-						// Se houver apenas uma fila cadastrada no total, selecionar automaticamente
 						setSelectedQueue(list[0].id);
 					}
 				} catch (err) {
@@ -139,16 +140,13 @@ const handleSendMessage = async (id) => {
 			return;
 		}
 
-		const message = {
-			read: 1,
-			fromMe: true,
-			mediaUrl: "",
-			body: msg.trim(),
-		};
+		// Usar rota /text (sem multer) para evitar 400 por body não ser lido
+		const payload = { body: msg.trim(), isPrivate: "false", read: 1, fromMe: true };
 		try {
-			await api.post(`/messages/${id}`, message);
+			await api.post(`/messages/${id}/text`, payload);
 		} catch (err) {
-			console.error("[AcceptTicketWithoutQueueModal] Erro ao enviar mensagem de saudação:", err);
+			const errMsg = err.response?.data?.error || err.message;
+			console.error("[AcceptTicketWithoutQueueModal] Erro ao enviar mensagem de saudação:", errMsg, err.response?.data);
 			toastError(err);
 		}
 	}
@@ -211,18 +209,18 @@ return (
 				<FormControl variant="outlined" className={classes.maxWidth}>
 					<InputLabel>{i18n.t("ticketsList.acceptModal.queue")}</InputLabel>
 					<Select
-						value={selectedQueue}
+						value={queues?.length && queues.some((q) => q.id == selectedQueue) ? selectedQueue : ""}
 						className={classes.autoComplete}
 						onChange={(e) => setSelectedQueue(e.target.value)}
 						label={i18n.t("ticketsList.acceptModal.queue")}
 					>
-						<MenuItem value={''}>&nbsp;</MenuItem>
+						<MenuItem value="">&nbsp;</MenuItem>
 						{queues && queues.length > 0 ? (
 							queues.map((queue) => (
 								<MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
 							))
 						) : (
-							<MenuItem value={''} disabled>Nenhuma fila cadastrada</MenuItem>
+							<MenuItem value="" disabled>Nenhuma fila cadastrada</MenuItem>
 						)}
 					</Select>
 				</FormControl>

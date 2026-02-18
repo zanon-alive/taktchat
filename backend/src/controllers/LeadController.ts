@@ -223,7 +223,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         }
         setImmediate(async () => {
           try {
-            await SendWelcomeMessageService({ contact: existingContact, companyId: company.id });
+            await SendWelcomeMessageService({
+              contact: existingContact,
+              companyId: company.id,
+              welcomeMessage: channelConfig.welcomeMessage ?? undefined
+            });
           } catch (err) {
             logger.error({ error: err, contactId: existingContact.id }, "Erro ao enviar mensagem de boas-vindas");
           }
@@ -320,7 +324,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
     setImmediate(async () => {
       try {
-        await SendWelcomeMessageService({ contact, companyId: company.id });
+        await SendWelcomeMessageService({
+          contact,
+          companyId: company.id,
+          welcomeMessage: channelConfig.welcomeMessage ?? undefined
+        });
       } catch (err) {
         logger.error({ error: err, contactId: contact.id }, "Erro ao enviar mensagem de boas-vindas");
       }

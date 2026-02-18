@@ -5,6 +5,7 @@ import UsersQueues from "../../models/UserQueue";
 import User from "../../models/User";
 import Contact from "../../models/Contact";
 import Queue from "../../models/Queue";
+import Tag from "../../models/Tag";
 
 interface Request {
   dateStart: string;
@@ -48,6 +49,12 @@ const TicketsQueuesService = async ({
     {
       association: "whatsapp",
       attributes: ["id", "name"]
+    },
+    {
+      model: Tag,
+      as: "tags",
+      attributes: ["id", "name", "color"],
+      through: { attributes: [] }
     }
   ];
   const isExistsQueues = await Queue.count({ where: { companyId } });

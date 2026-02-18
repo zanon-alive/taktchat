@@ -907,7 +907,7 @@ const verifyContact = async (
       const newContact = await CreateOrUpdateContactService(basicContactData);
       return newContact;
     }
-    logger.warn("[verifyContact] JID 1:1 sem número válido (ex.: @lid), não criando contato", {
+    logger.debug("[verifyContact] JID 1:1 sem número válido (ex.: @lid), esperado não criar contato", {
       normalizedJid,
       companyId
     });

@@ -11,7 +11,9 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `operacao/`: rotinas diárias, monitoramento, backup/restore e troubleshooting.
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
+  - **EntrySource e Chat do Site:** `branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` – Widget, API e canais de entrada.
 - `diagnosticos/`: procedimentos de investigação e correção para cenários recorrentes.
+  - **Logs WhatsApp (Baileys):** `diagnosticos/logs-whatsapp-baileys.md` – Erros esperados (decrypt, SessionError, sessões).
 - `anexos/`: checklists, templates, roteiros e notas complementares.
 - `sql/`: coleção organizada de scripts SQL (diagnósticos, correções e migrações).
 - `legacy/`: acervo histórico dos documentos anteriores à reestruturação (somente referência).

@@ -150,6 +150,26 @@ O TaktChat suporta **dois tipos de conexão WhatsApp**:
 - Permissões são granulares por recurso
 - Usuários podem ter perfis diferentes (admin, atendente, supervisor)
 
+#### 2.4. Canais de Entrada e Chat do Site
+
+O sistema rastreia a **origem** de cada ticket (EntrySource). Em **Configurações** há duas abas para configurar:
+
+**Canais de entrada:**
+1. Acesse **Configurações > Canais de entrada**
+2. Para cada canal (Lead, Revendedor, Chat do site), configure:
+   - Fila padrão
+   - Tag padrão
+   - WhatsApp (opcional)
+   - Mensagem de boas-vindas (use `{{name}}` para o nome do contato)
+
+**Widget Chat do Site:**
+1. Acesse **Configurações > Widget Chat do Site**
+2. Clique em **Obter token** para gerar o token da empresa
+3. Copie o código de integração e cole no seu site
+4. Para páginas externas, inclua `data-api-url` com a URL da API
+
+Na lista de tickets, use o filtro **Canal** para ver apenas tickets de uma origem (WhatsApp, Lead, Revendedor, Chat do site).
+
 ---
 
 ## Funcionalidades Principais
@@ -171,7 +191,7 @@ O sistema oferece diferentes visualizações:
 
 **Tickets (Padrão):**
 - Lista de tickets em colunas por status
-- Filtros por fila, usuário, tags, período
+- Filtros por fila, usuário, tags, período e **canal de origem** (WhatsApp, Lead, Revendedor, Chat do site)
 - Atualização em tempo real via Socket.IO
 
 **Kanban:**

@@ -56,6 +56,10 @@ class ChannelEntryConfig extends Model<ChannelEntryConfig> {
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
 
+  @AllowNull
+  @Column
+  welcomeMessage: string | null;
+
   @CreatedAt
   createdAt: Date;
 

@@ -6,6 +6,7 @@ export interface ChannelEntryConfigResult {
   defaultQueueId: number | null;
   defaultTagId: number | null;
   whatsappId: number | null;
+  welcomeMessage: string | null;
 }
 
 const TAG_NAMES_BY_SOURCE: Record<string, string> = {
@@ -26,7 +27,8 @@ const GetChannelEntryConfigService = async (
     return {
       defaultQueueId: config.defaultQueueId ?? null,
       defaultTagId: config.defaultTagId ?? null,
-      whatsappId: config.whatsappId ?? null
+      whatsappId: config.whatsappId ?? null,
+      welcomeMessage: config.welcomeMessage ?? null
     };
   }
 
@@ -44,7 +46,8 @@ const GetChannelEntryConfigService = async (
   return {
     defaultQueueId: queue?.id ?? null,
     defaultTagId: tag?.id ?? null,
-    whatsappId: null
+    whatsappId: null,
+    welcomeMessage: null
   };
 };
 

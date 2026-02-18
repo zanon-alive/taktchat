@@ -30,6 +30,7 @@ const Tags = lazy(() => import("../pages/Tags"));
 const MessagesAPI = lazy(() => import("../pages/MessagesAPI"));
 const Helps = lazy(() => import("../pages/Helps"));
 const AITutorial = lazy(() => import("../pages/Helps/AITutorial"));
+const EntrySourceChatSiteHelp = lazy(() => import("../pages/Helps/EntrySourceChatSiteHelp"));
 const ContactLists = lazy(() => import("../pages/ContactLists"));
 const ContactListItems = lazy(() => import("../pages/ContactListItems"));
 const Companies = lazy(() => import("../pages/Companies"));
@@ -99,6 +100,7 @@ const Routes = () => {
                 <Route exact path="/contacts/import" component={ContactImportPage} isPrivate />
                 <Route exact path="/helps" component={Helps} isPrivate />
                 <Route exact path="/helps/ai-tutorial" component={AITutorial} isPrivate />
+                <Route exact path="/helps/entrysource-chat-site" component={EntrySourceChatSiteHelp} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
                 <Route exact path="/messages-api" component={MessagesAPI} isPrivate />
                 <Route exact path="/settings" component={SettingsCustom} isPrivate />

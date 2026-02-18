@@ -11,7 +11,10 @@ const publicSettingsKeys = [
   "appLogoLight",
   "appLogoDark",
   "appLogoFavicon",
-  "appName"
+  "appName",
+  "enableSiteChatWidget",
+  "siteChatWidgetCompanyId",
+  "siteChatWidgetCompanyToken"
 ]
 
 const GetPublicSettingService = async ({

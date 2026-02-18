@@ -156,9 +156,28 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         const baileysLoggerModule = await getBaileysLogger();
         const MAIN_LOGGER = baileysLoggerModule.default;
         
-        // Inicializar loggerBaileys
-        loggerBaileys = MAIN_LOGGER.child({});
-        loggerBaileys.level = "error";
+        // Logger do Baileys: rebaixa erros esperados (decrypt/sessão) para debug para reduzir ruído
+        const baseBaileys = MAIN_LOGGER.child({});
+        baseBaileys.level = "error";
+        const downgradePattern = /failed to decrypt|SessionError|No matching sessions|Bad MAC|Closing open session|Closing session in favor/i;
+        const shouldDowngrade = (args: any[]): boolean => {
+          const first = args[0];
+          const msg = typeof first === "string" ? first : (args[1] ?? first?.msg ?? "");
+          const errMsg = first?.err?.message ?? first?.err?.name ?? "";
+          const str = `${msg} ${errMsg}`;
+          return downgradePattern.test(str);
+        };
+        loggerBaileys = {
+          trace: (...a: any[]) => { baseBaileys.trace.apply(baseBaileys, a); },
+          debug: (...a: any[]) => { baseBaileys.debug.apply(baseBaileys, a); },
+          info: (...a: any[]) => { baseBaileys.info.apply(baseBaileys, a); },
+          warn: (...a: any[]) => { (shouldDowngrade(a) ? baseBaileys.debug : baseBaileys.warn).apply(baseBaileys, a); },
+          error: (...a: any[]) => { (shouldDowngrade(a) ? baseBaileys.debug : baseBaileys.error).apply(baseBaileys, a); },
+          fatal: (...a: any[]) => { (shouldDowngrade(a) ? baseBaileys.debug : baseBaileys.fatal).apply(baseBaileys, a); },
+          child: (bindings: any) => baseBaileys.child(bindings),
+          get level() { return baseBaileys.level; },
+          set level(v: string) { baseBaileys.level = v; }
+        };
 
         const io = getIO();
 
@@ -1443,7 +1462,6 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               logger.info(`[wbot][CREDS] - Registered: ${registered} ${registered ? '(✅ SIM - DISPOSITIVO REGISTRADO!)' : '(❌ NÃO)'}`);
               logger.info(`[wbot][CREDS] - Tempo desde conexão: ${elapsed}s`);
               logger.info(`[wbot][CREDS] - Me ID: ${meId || 'N/A'}`);
-              logger.info(`[wbot][CREDS] - Update completo: ${JSON.stringify(update, null, 2)}`);
               logger.info(`[wbot][CREDS] ============================================`);
               
               // Atualizar health check para refletir novo valor de registered

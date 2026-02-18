@@ -20,6 +20,7 @@ interface PlanData {
   useKanban?: boolean;
   useOpenAi?: boolean;
   useIntegrations?: boolean;
+  useSiteChat?: boolean;
   isPublic?: boolean;
   companyId?: number | null;
   targetType?: "direct" | "whitelabel";

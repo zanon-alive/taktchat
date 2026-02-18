@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import { Link } from "react-router-dom";
 import { 
   EmojiObjects as AIIcon,
+  Chat as ChatSiteIcon,
   Dashboard,
   Assignment,
   QuestionAnswer,
@@ -227,6 +228,17 @@ const Helps = () => {
     return (
       <>
         <div className={`${classes.mainPaper} ${classes.mainPaperContainer}`}>
+          {/* Card EntrySource e Chat do Site */}
+          <Paper component={Link} to="/helps/entrysource-chat-site" className={`${classes.helpPaper} ${classes.helpPaperHover}`}>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',padding:'12px'}}>
+              <ChatSiteIcon style={{fontSize:36,color:'#4fc3f7',marginBottom:8}} />
+              <Typography variant="subtitle1" align="center" style={{fontWeight:600,marginBottom:4}}>EntrySource e Chat do Site</Typography>
+              <Typography variant="caption" align="center" className={classes.cardDescription}>
+                Canais de entrada (Lead, Revendedor, Chat do site), filtro por origem nos tickets, widget de chat embarcável e API pública.
+              </Typography>
+              <Button variant="outlined" color="primary" size="small" style={{fontSize:'0.7rem',padding:'4px 12px'}}>Acessar Manual</Button>
+            </div>
+          </Paper>
           {/* Card Manual de IA padronizado como os demais */}
           <Paper component={Link} to="/helps/ai-tutorial" className={`${classes.helpPaper} ${classes.helpPaperHover}`}>
             <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',padding:'12px'}}>

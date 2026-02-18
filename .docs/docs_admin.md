@@ -479,8 +479,12 @@ Planos definem os **limites e recursos** disponíveis para cada empresa:
 
 ### Acessar Gestão de Planos
 
-**Rota:** Configurações → Planos (via API/Backend)  
-**Nota:** A interface de gestão de planos pode estar no backend ou em uma rota específica.
+**Rota:** Configurações → Planos  
+
+**Abas em Configurações:**
+- **Opções**: Parâmetros gerais, Widget Chat do Site na Landing (`enableSiteChatWidget`)
+- **Canais de entrada**: Configure fila padrão, tag, WhatsApp e mensagem de boas-vindas para Lead, Revendedor e Chat do site
+- **Widget Chat do Site**: Obtenha o código de integração e o token para embutir o widget em sites externos
 
 ### Criar Novo Plano
 
@@ -506,6 +510,7 @@ Planos definem os **limites e recursos** disponíveis para cada empresa:
 | API Externa | Boolean | Habilita API externa |
 | Integrações | Boolean | Habilita integrações |
 | OpenAI | Boolean | Habilita IA |
+| Chat do Site | Boolean | Habilita widget e API do chat do site |
 | Público | Boolean | Aparece no signup |
 
 ### Exemplo de Plano
@@ -530,6 +535,7 @@ Planos definem os **limites e recursos** disponíveis para cada empresa:
   "useExternalApi": true,
   "useIntegrations": true,
   "useOpenAi": true,
+  "useSiteChat": true,
   "isPublic": true
 }
 ```

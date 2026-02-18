@@ -283,15 +283,11 @@ const TicketActionButtonsCustom = ({ ticket
         } catch (err) {
             toastError(err);
         }
-        const msg = `${setting.greetingAcceptedMessage}`; //`{{ms}} *{{name}}*, ${i18n.t("mainDrawer.appBar.user.myName")} *${user?.name}* ${i18n.t("mainDrawer.appBar.user.continuity")}.`;
-        const message = {
-            read: 1,
-            fromMe: true,
-            mediaUrl: "",
-            body: `${msg.trim()}`,
-        };
+        const msg = `${setting?.greetingAcceptedMessage || ""}`.trim();
+        if (!msg) return;
+        const payload = { body: msg, isPrivate: "false", read: 1, fromMe: true };
         try {
-            await api.post(`/messages/${id}`, message);
+            await api.post(`/messages/${id}/text`, payload);
         } catch (err) {
             toastError(err);
         }

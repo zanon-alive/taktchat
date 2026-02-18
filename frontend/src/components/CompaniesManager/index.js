@@ -94,7 +94,7 @@ export function CompanyForm(props) {
     recurrence: "",
     password: "",
     type: "direct",
-    parentCompanyId: null,
+    parentCompanyId: "",
     trialDaysForChildCompanies: null,
     ...initialValue,
   });
@@ -112,16 +112,18 @@ export function CompanyForm(props) {
 
   useEffect(() => {
     setRecord((prev) => {
-      if (moment(initialValue).isValid()) {
-        initialValue.dueDate = moment(initialValue.dueDate).format(
-          "YYYY-MM-DD"
-        );
-      }
-      return {
+      const next = {
         ...prev,
         ...initialValue,
         trialDaysForChildCompanies: initialValue.trialDaysForChildCompanies ?? null,
+        parentCompanyId: initialValue.parentCompanyId ?? "",
       };
+      if (initialValue.dueDate && moment(initialValue.dueDate).isValid()) {
+        next.dueDate = moment(initialValue.dueDate).format("YYYY-MM-DD");
+      } else {
+        next.dueDate = "";
+      }
+      return next;
     });
   }, [initialValue]);
 
@@ -688,7 +690,7 @@ export default function CompaniesManager() {
     document: "",
     paymentMethod: "",
     type: "direct",
-    parentCompanyId: null
+    parentCompanyId: ""
   });
 
   const whitelabelCompanies = (records || []).filter((c) => c.type === "whitelabel");
@@ -762,7 +764,7 @@ export default function CompaniesManager() {
       document: "",
       paymentMethod: "",
       type: "direct",
-      parentCompanyId: null,
+      parentCompanyId: "",
       trialDaysForChildCompanies: null
     }));
   };
@@ -777,6 +779,9 @@ export default function CompaniesManager() {
     //   campaignsEnabled = setting.value === "true" || setting.value === "enabled";
     // }
 
+    const dueDateFormatted = data.dueDate && moment(data.dueDate).isValid()
+      ? moment(data.dueDate).format("YYYY-MM-DD")
+      : "";
     setRecord((prev) => ({
       ...prev,
       id: data.id,
@@ -785,13 +790,13 @@ export default function CompaniesManager() {
       email: data.email || "",
       planId: data.planId || "",
       status: data.status === false ? false : true,
-      dueDate: data.dueDate || "",
+      dueDate: dueDateFormatted,
       recurrence: data.recurrence || "",
       password: "",
       document: data.document || "",
       paymentMethod: data.paymentMethod || "",
       type: data.type || "direct",
-      parentCompanyId: data.parentCompanyId ?? null,
+      parentCompanyId: data.parentCompanyId ?? "",
       trialDaysForChildCompanies: data.trialDaysForChildCompanies ?? null
     }));
   };

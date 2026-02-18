@@ -15,6 +15,7 @@ import DeleteCompanyService from "../services/CompanyService/DeleteCompanyServic
 import FindAllCompaniesService from "../services/CompanyService/FindAllCompaniesService";
 import ShowPlanCompanyService from "../services/CompanyService/ShowPlanCompanyService";
 import BlockCompanyAccessService from "../services/CompanyService/BlockCompanyAccessService";
+import GetOrCreateSiteChatTokenService from "../services/CompanyService/GetOrCreateSiteChatTokenService";
 import User from "../models/User";
 import ListCompaniesPlanService from "../services/CompanyService/ListCompaniesPlanService";
 
@@ -144,6 +145,16 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   });
   return res.status(200).json(companies);
 
+};
+
+export const getSiteChatToken = async (req: Request, res: Response): Promise<Response> => {
+  const authHeader = req.headers.authorization;
+  const [, token] = authHeader.split(" ");
+  const decoded = verify(token, authConfig.secret) as TokenPayload;
+  const { companyId } = decoded;
+
+  const result = await GetOrCreateSiteChatTokenService(companyId);
+  return res.status(200).json(result);
 };
 
 export const blockAccess = async (req: Request, res: Response): Promise<Response> => {
