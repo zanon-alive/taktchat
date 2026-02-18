@@ -157,6 +157,9 @@ export default function Options(props) {
   const [enableLandingSignup, setEnableLandingSignup] = useState(false);
   const [loadingEnableLandingSignup, setLoadingEnableLandingSignup] = useState(false);
 
+  const [enableSiteChatWidget, setEnableSiteChatWidget] = useState("disabled");
+  const [loadingEnableSiteChatWidget, setLoadingEnableSiteChatWidget] = useState(false);
+
   const { update: updateUserCreation, getAll } = useSettings();
 
   const { update } = useCompanySettings();
@@ -209,6 +212,7 @@ export default function Options(props) {
       if (key === "showNotificationPending") setShowNotificationPending(value);
       if (key === "licenseWarningDays") setLicenseWarningDays(value);
       if (key === "enableLandingSignup") setEnableLandingSignup(value);
+      if (key === "enableSiteChatWidget") setEnableSiteChatWidget(value || "disabled");
 
     }
   }, [settings]);
@@ -508,6 +512,16 @@ export default function Options(props) {
       data: boolValue,
     });
     setLoadingEnableLandingSignup(false);
+  }
+
+  async function handleEnableSiteChatWidget(value) {
+    setEnableSiteChatWidget(value);
+    setLoadingEnableSiteChatWidget(true);
+    await updateUserCreation({
+      key: "enableSiteChatWidget",
+      value,
+    });
+    setLoadingEnableSiteChatWidget(false);
   }
 
   return (
@@ -965,6 +979,32 @@ export default function Options(props) {
                 {loadingEnableLandingSignup
                   ? i18n.t("settings.settings.options.updating")
                   : "Quando habilitado, exibe formulário de cadastro direto na página inicial (/landing)"}
+              </FormHelperText>
+            </FormControl>
+          </Grid>
+        )}
+
+        {/* WIDGET CHAT DO SITE NA LANDING */}
+        {isSuper() && (
+          <Grid xs={12} sm={6} md={4} item>
+            <FormControl className={classes.selectContainer}>
+              <InputLabel id="enableSiteChatWidget-label">
+                {i18n.t("settings.settings.options.enableSiteChatWidget")}
+              </InputLabel>
+              <Select
+                labelId="enableSiteChatWidget-label"
+                value={enableSiteChatWidget}
+                onChange={async (e) => {
+                  handleEnableSiteChatWidget(e.target.value);
+                }}
+              >
+                <MenuItem value="disabled">{i18n.t("settings.settings.options.disabled")}</MenuItem>
+                <MenuItem value="enabled">{i18n.t("settings.settings.options.enabled")}</MenuItem>
+              </Select>
+              <FormHelperText>
+                {loadingEnableSiteChatWidget
+                  ? i18n.t("settings.settings.options.updating")
+                  : i18n.t("settings.settings.options.enableSiteChatWidgetHelp")}
               </FormHelperText>
             </FormControl>
           </Grid>

@@ -62,7 +62,7 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 - [ ] SEO avançado (Open Graph, Schema.org, sitemap.xml, robots.txt)
 - [ ] A/B Testing de variações da landing page
 - [ ] Formulário multi-etapas
-- [ ] Chat ao vivo integrado com sistema de tickets
+- [x] Chat ao vivo integrado com sistema de tickets (Chat do Site – branch `feature/entrysource-canal-e-chat-site`)
 
 ### Prioridade Baixa
 - [ ] Vídeo demonstrativo na hero section

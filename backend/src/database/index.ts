@@ -60,6 +60,7 @@ import ContactWhatsappLabel from "../models/ContactWhatsappLabel";
 import TagRule from "../models/TagRule";
 import License from "../models/License";
 import PartnerBillingSnapshot from "../models/PartnerBillingSnapshot";
+import ChannelEntryConfig from "../models/ChannelEntryConfig";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -127,7 +128,8 @@ const models = [
   ContactWhatsappLabel,
   TagRule,
   License,
-  PartnerBillingSnapshot
+  PartnerBillingSnapshot,
+  ChannelEntryConfig
 ];
 
 sequelize.addModels(models);

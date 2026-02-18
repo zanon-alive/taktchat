@@ -1407,6 +1407,27 @@ const messages = {
       },
       helps: {
         title: "Central de Ayuda",
+        entrySourceChatSite: {
+          title: "EntrySource, Canales y Chat del Sitio",
+          intro: "Esta guía describe el rastreo de origen en tickets, canales de entrada configurables (Lead, Revendedor, Chat del sitio) y el widget de chat embebible para sitios externos.",
+          entrySourceTitle: "EntrySource en Tickets",
+          entrySourceDesc: "Cada ticket tiene un campo que indica el origen del contacto: WhatsApp, Lead (formulario en landing), Revendedor (modal en landing), Chat del sitio (widget o API) o Channel (legado).",
+          entrySourceFilter: "En la lista de atendimientos, use el filtro \"Canal\" para mostrar solo tickets de un origen específico.",
+          channelsTitle: "Canales de Entrada",
+          channelsDesc: "Configure fila, etiqueta, WhatsApp y mensaje de bienvenida para cada canal.",
+          channelsStep1: "Vaya a Configuración > Canales de entrada",
+          channelsStep2: "Seleccione el canal (Lead, Revendedor, Chat del sitio)",
+          channelsStep3: "Defina fila predeterminada, etiqueta, WhatsApp (opcional) y mensaje de bienvenida. Use {{name}} para insertar el nombre del contacto.",
+          leadTitle: "Formularios Lead y Revendedor",
+          leadDesc: "En la landing page (/landing): el formulario de Lead crea contacto y ticket con entrySource 'lead'; el modal \"Sé un revendedor\" crea ticket con entrySource 'revendedor'. Si el contacto ya tiene ticket abierto, se agrega un mensaje interno en lugar de crear un nuevo ticket.",
+          chatTitle: "Chat del Sitio",
+          chatDesc: "API pública para que los visitantes inicien conversaciones desde el sitio. Endpoints: POST /public/site-chat/submit (crear ticket), POST /public/site-chat/message (enviar mensaje), GET /public/site-chat/messages (listar mensajes). Requiere companyId o companyToken en el cuerpo de la solicitud.",
+          chatConfig: "El plan de la empresa debe tener \"Chat del Sitio\" habilitado (Configuración > Planes). Las empresas tipo Plataforma no requieren plan.",
+          widgetTitle: "Widget Chat del Sitio",
+          widgetDesc: "Widget JavaScript embebible para cualquier sitio. En Configuración > Widget Chat del Sitio, obtenga el código de integración y el token (botón \"Obtener token\"). El código puede pegarse en páginas HTML externas.",
+          widgetToken: "Use data-api-url en el script cuando el widget esté en un sitio externo (ej: data-api-url=\"https://api.taktchat.com.br\").",
+          docsRef: "Documentación detallada: .docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md y passo-a-passo-testes.md",
+        },
         settings: {
           codeVideo: "Código del Video",
           description: "Descripción",
@@ -1506,7 +1527,9 @@ const messages = {
         tabs: {
           options: "Opciones",
           plans: "Planes",
-          helps: "Ayuda"
+          helps: "Ayuda",
+          channelEntry: "Canales de entrada",
+          siteChatWidget: "Widget Chat del Sitio"
         },
         settings: {
           userCreation: {
@@ -1715,6 +1738,37 @@ const messages = {
         ERR_QUEUE_COLOR_ALREADY_EXISTS: "Esta color ya está en uso, elija otra.",
         ERR_WAPP_GREETING_REQUIRED: "El mensaje de bienvenida es obligatorio cuando hay más de una cola.",
         ERR_OUT_OF_HOURS: "¡Fuera del Horario de Expediente!"
+      },
+      siteChatWidget: {
+        title: "Widget Chat del Sitio",
+        info: "Configure y obtenga el código para integrar el widget de chat del sitio en su sitio web.",
+        authMethod: "Método de autenticación",
+        useCompanyId: "Usar Company ID",
+        useCompanyToken: "Usar Company Token",
+        authMethodHelp: "Elija cómo el widget identificará su empresa (ID o Token).",
+        companyId: "Company ID",
+        companyIdHelp: "ID numérico de su empresa en el sistema.",
+        companyToken: "Company Token",
+        companyTokenHelp: "Token de autenticación de la empresa (más seguro para uso público). Haga clic en 'Obtener token' para generar.",
+        getToken: "Obtener token",
+        loadingToken: "Generando...",
+        tokenFetched: "¡Token generado con éxito!",
+        tokenError: "Error al obtener token.",
+        embedCode: "Código de Integración",
+        configureFirst: "Configure el Company ID o Token arriba para generar el código.",
+        copy: "Copiar",
+        copied: "¡Copiado!",
+        instructions: {
+          title: "Cómo integrar:",
+          step1: "Copie el código de arriba",
+          step2: "Pegue el código antes del cierre de la etiqueta </body> en todas las páginas donde desee mostrar el widget",
+          step3: "El widget aparecerá automáticamente como un botón flotante en la esquina inferior derecha",
+          step4: "Los visitantes podrán iniciar conversaciones directamente desde su sitio",
+        },
+        important: "Importante:",
+        importantNote: "Asegúrese de que el plan de la empresa tenga la funcionalidad 'Chat del Sitio' habilitada. El widget solo funcionará si esta opción está activa en el plan.",
+        apiUrl: "URL de la API",
+        widgetUrl: "URL del Widget",
       }
     }
   }

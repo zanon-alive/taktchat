@@ -711,7 +711,12 @@ function obterNomeEExtensaoDoArquivo(url: string): string {
 // Armazenar mensagem
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg, vCard, isPrivate = "false" }: MessageData = req.body;
+  const rawBody = req.body || {};
+  // body pode vir como req.body (JSON) ou req.body.body (FormData/multer)
+  const body = rawBody.body;
+  const quotedMsg = rawBody.quotedMsg;
+  const vCard = rawBody.vCard;
+  const isPrivate = rawBody.isPrivate !== undefined ? rawBody.isPrivate : "false";
   const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
 
@@ -766,9 +771,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     } else {
       // Validar se há conteúdo para enviar (body, vCard ou medias)
       if (!body && !vCard && !medias) {
-        return res.status(400).json({ error: "Nenhum conteúdo fornecido para enviar. Forneça body, vCard ou medias." });
+        const debugKeys = req.body ? Object.keys(req.body) : [];
+        return res.status(400).json({
+          error: "Nenhum conteúdo fornecido para enviar. Forneça body, vCard ou medias.",
+          debug: { receivedKeys: debugKeys }
+        });
       }
-      
+
       // Validar se body não está vazio quando fornecido
       if (body !== undefined && (!body || (typeof body === "string" && body.trim() === ""))) {
         return res.status(400).json({ error: "Mensagem não pode estar vazia." });
@@ -827,6 +836,19 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
           updatedAt: new Date(),
         };
         await CreateMessageService({ messageData, companyId: ticket.companyId });
+      } else if (ticket.channel === "site_chat" && isPrivate === "false") {
+        const messageData = {
+          wid: `site_chat_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          ticketId: ticket.id,
+          contactId: ticket.contactId,
+          body: body || "",
+          fromMe: true,
+          mediaType: !isNil(vCard) ? "contactMessage" : "extendedTextMessage",
+          read: true,
+          quotedMsgId: quotedMsg?.id || null,
+          remoteJid: ticket.contact?.remoteJid,
+        };
+        await CreateMessageService({ messageData, companyId: ticket.companyId });
       } else if (["facebook", "instagram"].includes(ticket.channel)) {
         const sendText = await sendFaceMessage({ body, ticket, quotedMsg });
 
@@ -836,9 +858,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       }
     }
     return res.status(200).json({ message: "Mensagem enviada com sucesso" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao armazenar mensagem:", error);
-    return res.status(400).json({ error: error.message });
+    const message = error?.message || String(error);
+    return res.status(400).json({ error: message });
   }
 };
 

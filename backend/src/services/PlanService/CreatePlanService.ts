@@ -24,6 +24,7 @@ interface PlanData {
   recurrence?: string;
   useOpenAi?: boolean;
   useIntegrations?: boolean;
+  useSiteChat?: boolean;
   isPublic?: boolean;
   companyId?: number | null;
   targetType?: "direct" | "whitelabel";

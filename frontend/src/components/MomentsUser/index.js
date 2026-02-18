@@ -252,6 +252,9 @@ const DashboardManage = () => {
                             </div>
                             <Badge overlap="rectangular" className={classes.connectionTag}>{ticket?.whatsapp?.name}</Badge>
                             <Badge overlap="rectangular" style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name.toUpperCase() || "SEM FILA"}</Badge>
+                            {ticket.tags && ticket.tags.length > 0 && ticket.tags.map((tag) => (
+                              <Chip key={tag.id} size="small" label={tag.name} style={{ backgroundColor: tag.color || "#9e9e9e", color: "#fff", marginRight: 2, marginTop: 2, height: 18, fontSize: "0.7rem" }} />
+                            ))}
                           </Fragment>
                         }
                       />
@@ -340,6 +343,9 @@ const DashboardManage = () => {
                             </div>
                             <Badge overlap="rectangular" className={classes.connectionTag}>{ticket?.whatsapp?.name}</Badge>
                             <Badge overlap="rectangular" style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name.toUpperCase() || "SEM FILA"}</Badge>
+                            {ticket.tags && ticket.tags.length > 0 && ticket.tags.map((tag) => (
+                              <Chip key={tag.id} size="small" label={tag.name} style={{ backgroundColor: tag.color || "#9e9e9e", color: "#fff", marginRight: 2, marginTop: 2, height: 18, fontSize: "0.7rem" }} />
+                            ))}
                           </Fragment>
                         }
                       />

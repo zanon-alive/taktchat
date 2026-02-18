@@ -61,7 +61,8 @@ const ShowUserService = async (id: string | number, companyId: string | number):
                 "useExternalApi",
                 "useIntegrations",
                 "useOpenAi",
-                "useKanban"
+                "useKanban",
+                "useSiteChat"
               ]
             },
           ]

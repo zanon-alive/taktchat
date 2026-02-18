@@ -87,6 +87,10 @@ class Plan extends Model<Plan> {
   @Column
   useIntegrations: boolean;
 
+  @Default(false)
+  @Column
+  useSiteChat: boolean;
+
   @Default(true)
   @Column
   isPublic: boolean;

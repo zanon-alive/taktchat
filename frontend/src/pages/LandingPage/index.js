@@ -20,6 +20,7 @@ const SignupForm = React.lazy(() => import("./components/SignupForm"));
 const Footer = React.lazy(() => import("./components/Footer"));
 const FAQ = React.lazy(() => import("./components/FAQ"));
 const ChatWidget = React.lazy(() => import("./components/ChatWidget"));
+const SiteChatWidget = React.lazy(() => import("./components/SiteChatWidget"));
 const CookieBanner = React.lazy(() => import("./components/CookieBanner"));
 
 const useStyles = makeStyles((theme) => ({
@@ -373,6 +374,7 @@ const LandingPage = () => {
           </Box>
 
           <Footer />
+          <SiteChatWidget />
           <ChatWidget />
           <CookieBanner />
         </Suspense>

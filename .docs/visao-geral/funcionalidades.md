@@ -3,7 +3,8 @@
 Este documento consolida as principais capacidades da plataforma considerando o código atual (frontend React, backend Node/TypeScript) e os fluxos descritos nos demais arquivos de `.docs/`.
 
 ### 1. Atendimento omnichannel
-- **Tickets em tempo real**: interface de múltiplas colunas (`Tickets`, `TicketsAdvanced`, `TicketsCustom`, `TicketResponsiveContainer`) com suporte a filtros por status, fila, tags, responsável e SLA.
+- **Tickets em tempo real**: interface de múltiplas colunas (`Tickets`, `TicketsAdvanced`, `TicketsCustom`, `TicketResponsiveContainer`) com suporte a filtros por status, fila, tags, responsável, SLA e **canal de origem (entrySource)**.
+- **EntrySource e canais de entrada**: tickets possuem `entrySource` (whatsapp, lead, revendedor, site_chat, channel). Canais configuráveis em **Configurações > Canais de entrada** (fila, tag, WhatsApp, mensagem de boas-vindas). Formulários Lead e Revendedor na landing; chat do site via API e widget embarcável.
 - **Chat unificado**: visualização de mensagens, anexos, notas internas, widgets de informações do contato e histórico completo por `companyId`.
 - **Transferências e roteamento**: mudança manual ou automática entre filas/atendentes, com modais personalizados (`TransferTicketModalCustom`, `TicketActionButtonsCustom`).
 - **Kanban & Backlog**: painéis `Kanban` e `TagsKanban` para organizar tickets por estágio, prioridade e tags.
@@ -55,6 +56,7 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 - **Planos e billing**: APIs `PlanController`, `InvoicesService`, `FindAllPlanService` mantêm catálogo e associação aos `companyId`, suportando trials, recorrência e quotas automáticas.
 
 ### 9. Integrações e APIs externas
+- **Chat do site e widget**: API pública `/public/site-chat/submit`, `/message`, `/messages` para criar tickets e trocar mensagens. Widget JavaScript (`widget.js`) embarcável em qualquer site; suporte a `companyId`, `companyToken` (signupToken ou siteChatToken) e `data-api-url` para páginas externas. Configuração em **Configurações > Widget Chat do Site** e **Canais de entrada**. Ver `.docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md`.
 - **Webhooks e APIs**: `WebhookService`, `External API`, `MessagesAPI` expõem eventos e endpoints REST para CRM/ERP.
 - **Queue Integration / Typebot / FlowBuilder**: conectores prontos para bots externos, automações RPA e pipelines customizados.
 - **Monitoramento programático**: serviços `QueueMonitor`, `SavedFilterCronManager`, `TagRulesCron` e hooks de auditoria facilitam integrações com ferramentas de observabilidade.

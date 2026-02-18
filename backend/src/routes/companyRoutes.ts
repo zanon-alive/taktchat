@@ -7,6 +7,7 @@ const companyRoutes = express.Router();
 
 companyRoutes.get("/companies/list", isAuth, CompanyController.list);
 companyRoutes.get("/companies", isAuth, CompanyController.index);
+companyRoutes.get("/companies/site-chat-token", isAuth, CompanyController.getSiteChatToken);
 companyRoutes.get("/companies/:id", isAuth, CompanyController.show);
 companyRoutes.patch("/companies/:id/block-access", isAuth, CompanyController.blockAccess);
 companyRoutes.post("/companies", isAuth, CompanyController.store);

@@ -84,13 +84,18 @@ export function PlanManagerForm(props) {
         useKanban: true,
         useOpenAi: true,
         useIntegrations: true,
+        useSiteChat: true,
         isPublic: true,
         targetType: 'direct',
         companyId: 1
     });
 
     useEffect(() => {
-        setRecord(initialValue)
+        setRecord((prev) => ({
+            ...prev,
+            ...initialValue,
+            useSiteChat: initialValue?.useSiteChat ?? prev?.useSiteChat ?? true
+        }))
     }, [initialValue])
 
     const handleSubmit = async (data) => {
@@ -400,6 +405,24 @@ export function PlanManagerForm(props) {
                                 </Field>
                             </FormControl>
                         </Grid>
+
+                        {/* CHAT DO SITE */}
+                        <Grid xs={12} sm={8} md={2} item>
+                            <FormControl margin="dense" variant="outlined" fullWidth>
+                                <InputLabel htmlFor="useSiteChat-selection">Chat do site</InputLabel>
+                                <Field
+                                    as={Select}
+                                    id="useSiteChat-selection"
+                                    label="Chat do site"
+                                    labelId="useSiteChat-selection-label"
+                                    name="useSiteChat"
+                                    margin="dense"
+                                >
+                                    <MenuItem value={true}>{i18n.t("plans.form.enabled")}</MenuItem>
+                                    <MenuItem value={false}>{i18n.t("plans.form.disabled")}</MenuItem>
+                                </Field>
+                            </FormControl>
+                        </Grid>
                     </Grid>
                     <Grid spacing={2} justifyContent="flex-end" container>
 
@@ -471,6 +494,10 @@ export function PlansManagerGrid(props) {
         return row.useIntegrations === false ? `${i18n.t("plans.form.no")}` : `${i18n.t("plans.form.yes")}`;
     };
 
+    const renderSiteChat = (row) => {
+        return row.useSiteChat === false ? `${i18n.t("plans.form.no")}` : `${i18n.t("plans.form.yes")}`;
+    };
+
     return (
         <Paper className={classes.tableContainer}>
             <Table
@@ -499,6 +526,7 @@ export function PlansManagerGrid(props) {
                         <TableCell align="center">Kanban</TableCell>
                         <TableCell align="center">Talk.Ai</TableCell>
                         <TableCell align="center">Integrações</TableCell>
+                        <TableCell align="center">Chat do site</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -526,6 +554,7 @@ export function PlansManagerGrid(props) {
                             <TableCell align="center">{renderKanban(row)}</TableCell>
                             <TableCell align="center">{renderOpenAi(row)}</TableCell>
                             <TableCell align="center">{renderIntegrations(row)}</TableCell>
+                            <TableCell align="center">{renderSiteChat(row)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -558,6 +587,7 @@ export default function PlansManager() {
         useKanban: true,
         useOpenAi: true,
         useIntegrations: true,
+        useSiteChat: true,
         isPublic: true,
         targetType: 'direct',
         companyId: 1
@@ -635,6 +665,7 @@ export default function PlansManager() {
             useKanban: true,
             useOpenAi: true,
             useIntegrations: true,
+            useSiteChat: true,
             isPublic: true,
             targetType: 'direct',
             companyId: 1
@@ -653,6 +684,7 @@ export default function PlansManager() {
         let useKanban = data.useKanban === false ? false : true
         let useOpenAi = data.useOpenAi === false ? false : true
         let useIntegrations = data.useIntegrations === false ? false : true
+        let useSiteChat = data.useSiteChat === false ? false : true
 
         setRecord({
             id: data.id,
@@ -672,6 +704,7 @@ export default function PlansManager() {
             useKanban,
             useOpenAi,
             useIntegrations,
+            useSiteChat,
             isPublic: data.isPublic,
             targetType: data.targetType || 'direct',
             companyId: data.companyId ?? 1

@@ -127,6 +127,10 @@ class Ticket extends Model<Ticket> {
   @Column
   channel: string;
 
+  @Default("whatsapp")
+  @Column
+  entrySource: string;
+
   @AllowNull(false)
   @Default(0)
   @Column

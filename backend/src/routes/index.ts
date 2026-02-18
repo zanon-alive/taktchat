@@ -40,6 +40,7 @@ import apiCompanyRoutes from "./api/apiCompanyRoutes";
 import apiContactRoutes from "./api/apiContactRoutes";
 import apiMessageRoutes from "./api/apiMessageRoutes";
 import companySettingsRoutes from "./companySettingsRoutes";
+import channelEntryConfigRoutes from "./channelEntryConfigRoutes";
 
 import promptRoutes from "./promptRouter";
 import statisticsRoutes from "./statisticsRoutes";
@@ -116,6 +117,7 @@ routes.use(flowCampaignRoutes)
 routes.use(promptRoutes);
 routes.use(statisticsRoutes);
 routes.use(companySettingsRoutes);
+routes.use(channelEntryConfigRoutes);
 routes.use(scheduleMessageRoutes);
 routes.use(aiRoutes);
 routes.use(maintenanceRoutes);
