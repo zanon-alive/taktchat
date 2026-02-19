@@ -25,6 +25,7 @@
 | --- | --- |
 | `SOCKET_FALLBACK_NS_BROADCAST` | Ativa broadcast de fallback em produção (`true`). |
 | `SOCKET_DEBUG` | Verbosidade de logs de socket. |
+| `SUPPRESS_BAILEYS_DECRYPT_LOGS` | `1` para suprimir do console erros esperados de decriptação do Baileys/libsignal ("Failed to decrypt", "Bad MAC", "Session error"). Ver [diagnosticos/logs-whatsapp-baileys.md](../diagnosticos/logs-whatsapp-baileys.md). |
 | `REDIS_SECRET_KEY` | Chave para criptografar payloads armazenados. |
 | `REDIS_OPT_LIMITER_MAX` / `REDIS_OPT_LIMITER_DURATION` | Limites de rate para filas Bull. |
 | `DB_SSL` / `DB_SSL_REJECT_UNAUTHORIZED` | Ativa TLS com banco gerenciado. |

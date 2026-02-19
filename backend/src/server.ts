@@ -1,5 +1,7 @@
 /// <reference path="./@types/express.d.ts" />
 import 'dotenv/config';
+import { installSuppressBaileysDecryptLogs } from "./utils/suppressBaileysDecryptLogs";
+installSuppressBaileysDecryptLogs();
 import gracefulShutdown from "http-graceful-shutdown";
 import http from "http";
 

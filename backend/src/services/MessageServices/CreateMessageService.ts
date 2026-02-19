@@ -27,6 +27,7 @@ export interface MessageData {
   remoteJid?: string;
   participant?: string;
   dataJson?: string;
+  isFromMobileDevice?: boolean;
 }
 interface Request {
   messageData: MessageData;

@@ -48,6 +48,9 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { QueueSelectedContext } from "../../context/QueuesSelected/QueuesSelectedContext";
 import AudioModal from "../AudioModal";
 import AdMetaPreview from "../AdMetaPreview";
+import { parseInteractiveBody } from "./parseListAndButtonMessage";
+import ButtonMessagePreview from "./ButtonMessagePreview";
+import ListMessagePreview from "./ListMessagePreview";
 // import PdfModal from "../PdfModal";
 // import LinkPreview from "../LinkPreview";
 
@@ -580,8 +583,12 @@ const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
     const messages = action.payload;
     const newMessages = [];
+    const seenIds = new Set();
 
     messages.forEach((message) => {
+      if (!message?.id) return;
+      if (seenIds.has(message.id)) return;
+      seenIds.add(message.id);
 
       const messageIndex = state.findIndex((m) => m.id === message.id);
       if (messageIndex !== -1) {
@@ -591,15 +598,28 @@ const reducer = (state, action) => {
       }
     });
 
-    return [...newMessages, ...state];
+    const merged = [...newMessages, ...state];
+    const seenInMerged = new Set();
+    const deduped = merged.filter((m) => {
+      if (!m?.id) return false;
+      if (seenInMerged.has(m.id)) return false;
+      seenInMerged.add(m.id);
+      return true;
+    });
+    return deduped;
   }
 
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
-    const messageIndex = state.findIndex((m) => m.id === newMessage.id);
+    const byId = state.findIndex((m) => m.id === newMessage.id);
+    const byWid = newMessage.wid
+      ? state.findIndex((m) => m.wid === newMessage.wid && (m.ticketId === newMessage.ticketId || m.ticket?.id === newMessage.ticket?.id))
+      : -1;
 
-    if (messageIndex !== -1) {
-      state[messageIndex] = newMessage;
+    if (byId !== -1) {
+      state[byId] = newMessage;
+    } else if (byWid !== -1) {
+      state[byWid] = newMessage;
     } else {
       state.push(newMessage);
     }
@@ -1146,6 +1166,20 @@ const MessagesList = ({
     setReplyingMessage(message);
   };
 
+  const handleSendQuickReply = async (bodyText) => {
+    if (!ticketId || !bodyText || !bodyText.trim()) return;
+    try {
+      await api.post(`/messages/${ticketId}/text`, {
+        body: bodyText.trim(),
+        read: 1,
+        fromMe: true,
+        isPrivate: "false",
+      });
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   const checkMessageMedia = (message) => {
     if (message.mediaType === "locationMessage" && message.body.split('|').length >= 2) {
       let locationParts = message.body.split('|')
@@ -1514,6 +1548,8 @@ const MessagesList = ({
         { [isLeft ? classes.messageLeftAudio : classes.messageRightAudio]: message.mediaType === "audio" }
       );
 
+      const parsedInteractive = parseInteractiveBody(message.body || "");
+
       return (
         <React.Fragment key={message.id}>
           {renderDailyTimestamps(message, index)}
@@ -1538,6 +1574,23 @@ const MessagesList = ({
 
             {(message.mediaUrl || message.mediaType === "locationMessage" || message.mediaType === "contactMessage" || message.mediaType === "template" || message.mediaType === "adMetaPreview") && checkMessageMedia(message)}
 
+            {parsedInteractive?.type === "button" && (
+              <ButtonMessagePreview
+                contentText={parsedInteractive.contentText}
+                buttons={parsedInteractive.buttons}
+                onSelectOption={handleSendQuickReply}
+              />
+            )}
+            {parsedInteractive?.type === "list" && (
+              <ListMessagePreview
+                title={parsedInteractive.title}
+                description={parsedInteractive.description}
+                footer={parsedInteractive.footer}
+                sections={parsedInteractive.sections}
+                onSelectOption={handleSendQuickReply}
+              />
+            )}
+
             <div className={clsx(
               classes.textContentItem,
               {
@@ -1556,7 +1609,12 @@ const MessagesList = ({
               }
             )}>
               {message.quotedMsg && renderQuotedMessage(message)}
-              {message.mediaType !== "adMetaPreview" && (
+              {message.fromMe && message.isFromMobileDevice && (
+                <span style={{ display: "block", marginBottom: 2, opacity: 0.9, fontSize: "0.85rem", fontWeight: 600 }}>
+                  📱 [Dispositivo móvel]
+                </span>
+              )}
+              {message.mediaType !== "adMetaPreview" && !parsedInteractive && (
                 (
                   ((message.mediaType === "image" || message.mediaType === "video") && (getFileNameFromUrl(message.mediaUrl) || "").trim() !== (message.body || "").trim()) ||
                   (

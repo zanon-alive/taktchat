@@ -135,6 +135,10 @@ class Message extends Model<Message> {
   @Default(false)
   @Column
   isForwarded: boolean;
+
+  @Default(false)
+  @Column
+  isFromMobileDevice: boolean;
 }
 
 export default Message;
