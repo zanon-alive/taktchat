@@ -85,22 +85,27 @@ const QueueSelectSingle = ({ selectedQueueId, onChange, label }) => {
                             ))}
                         </Select>
                     ) : (
-                        <Field
-                            as={Select}
-                            label={labelText}
-                            name="queueId"
-                            labelId="queue-selection-label"
-                            id="queue-selection"
-                            fullWidth
-                        >
-                            <MenuItem value="">
-                                <em>Selecione uma fila</em>
-                            </MenuItem>
-                            {queues.map(queue => (
-                                <MenuItem key={queue.id} value={queue.id}>
-                                    {queue.name}
-                                </MenuItem>
-                            ))}
+                        <Field name="queueId">
+                            {({ field, form }) => (
+                                <Select
+                                    {...field}
+                                    label={labelText}
+                                    labelId="queue-selection-label"
+                                    id="queue-selection"
+                                    fullWidth
+                                    value={queues.length > 0 && queues.some(q => q.id === field.value) ? field.value : ""}
+                                    onChange={(e) => form.setFieldValue("queueId", e.target.value)}
+                                >
+                                    <MenuItem value="">
+                                        <em>Selecione uma fila</em>
+                                    </MenuItem>
+                                    {queues.map(queue => (
+                                        <MenuItem key={queue.id} value={queue.id}>
+                                            {queue.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            )}
                         </Field>
                     )}
                 </div>

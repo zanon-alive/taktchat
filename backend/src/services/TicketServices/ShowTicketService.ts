@@ -19,11 +19,13 @@ const ShowTicketService = async (
   id: string | number,
   companyId: number
 ): Promise<Ticket> => {
+  const isNumericId = !isNaN(Number(id));
+  const whereClause = isNumericId
+    ? { id, companyId }
+    : { uuid: id, companyId };
+
   const ticket = await Ticket.findOne({
-    where: {
-      id,
-      companyId
-    },
+    where: whereClause,
     attributes: [
       "id",
       "uuid",

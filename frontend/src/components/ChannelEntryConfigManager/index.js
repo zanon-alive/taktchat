@@ -172,7 +172,7 @@ function ChannelEntryConfigForm({ entrySource, label, config, queues, tags, what
               <InputLabel id={`queue-${entrySource}`}>{i18n.t("channelEntryConfig.defaultQueue")}</InputLabel>
               <Select
                 labelId={`queue-${entrySource}`}
-                value={defaultQueueId}
+                value={defaultQueueId != null && queues.some((q) => q.id === defaultQueueId) ? defaultQueueId : ""}
                 onChange={(e) => setDefaultQueueId(e.target.value)}
                 label={i18n.t("channelEntryConfig.defaultQueue")}
               >
@@ -190,7 +190,7 @@ function ChannelEntryConfigForm({ entrySource, label, config, queues, tags, what
               <InputLabel id={`tag-${entrySource}`}>{i18n.t("channelEntryConfig.defaultTag")}</InputLabel>
               <Select
                 labelId={`tag-${entrySource}`}
-                value={defaultTagId}
+                value={defaultTagId != null && tags.some((t) => t.id === defaultTagId) ? defaultTagId : ""}
                 onChange={(e) => setDefaultTagId(e.target.value)}
                 label={i18n.t("channelEntryConfig.defaultTag")}
               >
@@ -208,7 +208,7 @@ function ChannelEntryConfigForm({ entrySource, label, config, queues, tags, what
               <InputLabel id={`whatsapp-${entrySource}`}>{i18n.t("channelEntryConfig.whatsapp")}</InputLabel>
               <Select
                 labelId={`whatsapp-${entrySource}`}
-                value={whatsappId}
+                value={whatsappId != null && whatsApps.some((w) => w.id === whatsappId) ? whatsappId : ""}
                 onChange={(e) => setWhatsappId(e.target.value)}
                 label={i18n.t("channelEntryConfig.whatsapp")}
               >

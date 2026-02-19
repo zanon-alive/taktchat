@@ -168,11 +168,13 @@ const handleUpdateTicketStatus = async (queueId) => {
 			queueId: queueId
 		});
 
+		if (!isMounted.current) return;
+
 		if (otherTicket.data.id !== ticket?.id) {
 			if (otherTicket.data.userId !== user?.id) {
-				setOpenAlert(true)
-				setUserTicketOpen(otherTicket.data.user.name)
-				setQueueTicketOpen(otherTicket.data.queue.name)
+				setOpenAlert(true);
+				setUserTicketOpen(otherTicket.data.user.name);
+				setQueueTicketOpen(otherTicket.data.queue.name);
 			} else {
 				setLoading(false);
 				setTabOpen(otherTicket.data.isGroup ? "group" : "open");
@@ -182,15 +184,18 @@ const handleUpdateTicketStatus = async (queueId) => {
 			// Enviar mensagem de saudação se necessário (usar ticketId atualizado)
 			const updatedTicketId = otherTicket.data.id || ticketId;
 			await handleSendMessage(updatedTicketId);
+			if (!isMounted.current) return;
 			setLoading(false);
 			setTabOpen(otherTicket.data.isGroup ? "group" : "open");
 			history.push(`/tickets/${otherTicket.data.uuid}`);
 			handleClose();
 		}
 	} catch (err) {
-		setLoading(false);
 		console.error("[AcceptTicketWithoutQueueModal] Erro ao atualizar status do ticket:", err);
-		toastError(err);
+		if (isMounted.current) {
+			setLoading(false);
+			toastError(err);
+		}
 	}
 };
 
