@@ -119,7 +119,7 @@ const CreateWhatsAppService = async ({
     include: [{ model: Plan, as: "plan" }]
   });
 
-  if (company !== null) {
+  if (company !== null && company.type !== "platform") {
     const whatsappCount = await Whatsapp.count({
       where: {
         companyId,

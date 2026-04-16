@@ -315,6 +315,17 @@ const MainListItems = ({ collapsed, onItemClick }) => {
       setShowExternalApi(false);
       return;
     }
+
+    if (user?.company?.type === "platform") {
+      setShowCampaigns(true);
+      setShowKanban(true);
+      setShowOpenAi(true);
+      setShowIntegrations(true);
+      setShowSchedules(true);
+      setShowInternalChat(true);
+      setShowExternalApi(true);
+      return;
+    }
     async function fetchData() {
       const companyId = user?.companyId;
       if (!companyId) return;

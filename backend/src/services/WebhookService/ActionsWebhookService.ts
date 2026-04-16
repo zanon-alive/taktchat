@@ -421,8 +421,10 @@ export const ActionsWebhookService = async (
 
           // Lógica para enviar posição da fila de atendimento
           const qtd = count.count === 0 ? 1 : count.count;
-
-          const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
+          const queuePositionLabel = (settings.sendQueuePositionMessage?.trim?.() || "").length > 0
+            ? settings.sendQueuePositionMessage
+            : "{{ms}} *{{name}}*, sua posição na fila de atendimento é";
+          const msgFila = `${queuePositionLabel} *${qtd}*`;
 
           const ticketDetails = await ShowTicketService(ticket.id, companyId);
 

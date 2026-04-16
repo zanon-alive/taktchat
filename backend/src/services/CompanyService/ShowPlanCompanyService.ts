@@ -4,7 +4,7 @@ import Plan from "../../models/Plan";
 const ShowPlanCompanyService = async (id: string | number): Promise<Company> => {
     const companies = await Company.findOne({
         where: { id },
-        attributes: ["id", "name", "email", "status", "dueDate", "createdAt", "phone", "document", "lastLogin"],
+        attributes: ["id", "name", "email", "status", "dueDate", "createdAt", "phone", "document", "lastLogin", "type"],
         order: [["name", "ASC"]],
         include: [
             {

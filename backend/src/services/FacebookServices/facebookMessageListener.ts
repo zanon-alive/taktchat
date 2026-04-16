@@ -574,7 +574,7 @@ export const handleMessage = async (
       let nextTag;
       let ticketTag = undefined;
       // console.log(ticket.id)
-      if (ticket?.company?.plan?.useKanban) {
+      if (ticket?.company?.plan?.useKanban || ticket?.company?.type === "platform") {
         ticketTag = await TicketTag.findOne({
           where: {
             ticketId: ticket.id

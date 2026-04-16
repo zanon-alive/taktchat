@@ -1167,8 +1167,10 @@ const FlowBuilderSingleBlockModal = ({
               display: loading && "none",
             }}
           >
-            {elements.map((item) => (
-              <>{item}</>
+            {elements.map((item, index) => (
+              <React.Fragment key={elementsSeq[index] ?? `element-${index}`}>
+                {item}
+              </React.Fragment>
             ))}
             <Stack direction={"row"} gap={1}>
               <Button
@@ -1319,9 +1321,7 @@ const FlowBuilderSingleBlockModal = ({
               {variables && (
                 <>
                   {variables.map((item) => (
-                    <>
-                      <Typography>{variableFormatter(item)}</Typography>
-                    </>
+                    <Typography key={item}>{variableFormatter(item)}</Typography>
                   ))}
                 </>
               )}

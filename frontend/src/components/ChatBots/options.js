@@ -66,6 +66,29 @@ function getStepContent(step) {
   return <VerticalLinearStepper chatBotId={step} />;
 }
 
+const VALID_QUEUE_TYPES = ["text", "attendent", "queue", "integration", "file"];
+
+function normalizeStepsForForm(data) {
+  if (!data) return { name: "", greetingMessage: "", options: [], closeTicket: false, optQueueId: "" };
+  const options = (data.options || []).map((opt) => ({
+    ...opt,
+    name: opt.name ?? "",
+    greetingMessage: opt.greetingMessage ?? "",
+    queueType: opt.queueType && VALID_QUEUE_TYPES.includes(opt.queueType) ? opt.queueType : "text",
+    optQueueId: opt.optQueueId ?? "",
+    optIntegrationId: opt.optIntegrationId ?? "",
+    optFileId: opt.optFileId ?? "",
+    closeTicket: !!opt.closeTicket,
+  }));
+  return {
+    name: data.name ?? "",
+    greetingMessage: data.greetingMessage ?? "",
+    options,
+    closeTicket: !!data.closeTicket,
+    optQueueId: data.optQueueId ?? "",
+  };
+}
+
 export default function VerticalLinearStepper(props) {
   const initialState = {
     name: "",
@@ -102,33 +125,37 @@ export default function VerticalLinearStepper(props) {
 
   const handleSaveBot = async (values) => {
     try {
+      let res;
       if (props.chatBotId) {
-        await api.put(`/chatbot/${props.chatBotId}`, values);
+        res = await api.put(`/chatbot/${props.chatBotId}`, values);
       } else {
-        await api.post("/chatbot", values);
+        res = await api.post("/chatbot", values);
       }
       toast.success("Bot saved successfully");
-      // setActiveStep(-1)
-      const { data } = await api.get(`/chatbot/${props.chatBotId}`);
-
-      setSteps(initialState);
-      setSteps(data);
+      const id = res?.data?.id ?? props.chatBotId;
+      if (!id) return;
+      const { data } = await api.get(`/chatbot/${id}`);
+      if (!isMounted.current) return;
+      setSteps(normalizeStepsForForm(data));
       setIsNamedEdit(null);
       setGreetingMessageEdit(null);
-
-      setSteps(data);
     } catch (err) {
       toastError(err);
     }
   };
 
   useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
+
+  useEffect(() => {
     if (isMounted.current) {
       const loadQueues = async () => {
         const list = await findAllQueues();
-        setAllQueues(list);
-        setQueues(list);
-
+        if (isMounted.current) {
+          setAllQueues(list);
+          setQueues(list);
+        }
       };
       loadQueues();
     }
@@ -141,8 +168,7 @@ export default function VerticalLinearStepper(props) {
         const { data } = await api.get("/files/", {
           params: { companyId }
         });
-
-        setFile(data.files);
+        if (isMounted.current) setFile(data.files ?? []);
       } catch (err) {
         toastError(err);
       }
@@ -156,14 +182,15 @@ export default function VerticalLinearStepper(props) {
       return;
     }
     const delayDebounceFn = setTimeout(() => {
-      //setLoading(true);
       const fetchUsers = async () => {
         try {
           const { data } = await api.get("/users/");
-          setUserOptions(data.users);
-          setLoading(false);
+          if (isMounted.current) {
+            setUserOptions(data.users ?? []);
+          }
+          if (isMounted.current) setLoading(false);
         } catch (err) {
-          setLoading(false);
+          if (isMounted.current) setLoading(false);
           toastError(err);
         }
       };
@@ -179,8 +206,7 @@ export default function VerticalLinearStepper(props) {
         const { data } = await api.get("/queueIntegration", {
           params: { companyId }
         });
-
-        setIntegrations(data.queueIntegrations);
+        if (isMounted.current) setIntegrations(data.queueIntegrations ?? []);
       } catch (err) {
         toastError(err);
       }
@@ -188,22 +214,21 @@ export default function VerticalLinearStepper(props) {
   }, []);
 
   useEffect(() => {
+    if (!props.chatBotId) return;
     setLoading(true);
 
     const delayDebounceFn = setTimeout(() => {
       const fetchList = async () => {
         try {
           const { data } = await api.get(`/chatbot/${props.chatBotId}`);
-
-          if (data?.user)
-            setSelectedUser(data.user);
-
+          if (!isMounted.current) return;
+          if (data?.user) setSelectedUser(data.user);
           if (data.optQueueId !== null && data.optQueueId !== undefined)
-            setSelectedQueueOption(data.optQueueId)
-
-          setSteps(data);
+            setSelectedQueueOption(data.optQueueId);
+          setSteps(normalizeStepsForForm(data) ?? initialState);
           setLoading(false);
         } catch (err) {
+          if (isMounted.current) setLoading(false);
           console.log(err);
         }
       };
@@ -270,7 +295,8 @@ export default function VerticalLinearStepper(props) {
             validateOnChange={false}
             enableReinitialize={true}
             validationSchema={QueueSchema}
-            render={({
+          >
+            {({
               touched,
               errors,
               isSubmitting,
@@ -349,25 +375,26 @@ export default function VerticalLinearStepper(props) {
                                       fullWidth
                                     >
                                       <InputLabel id="queueType-selection-label">{i18n.t("queueModal.form.queueType")}</InputLabel>
-                                      <Field
-                                        as={Select}
-                                        name={`options[${index}].queueType`}
-                                        variant="outlined"
-                                        margin="dense"
-                                        fullWidth
-                                        labelId="queueType-selection-label"
-                                        label={i18n.t("queueModal.form.queueType")}
-                                        error={touched?.options?.[index]?.queueType &&
-                                          Boolean(errors?.options?.[index]?.queueType)}
-                                      // helpertext={touched?.options?.[index]?.queueType && errors?.options?.[index]?.queueType}
-                                      // value={`chatbots[${index}].queueType`}
-                                      //className={classes.textField1}
-                                      >
-                                        <MenuItem value={"text"}>Texto</MenuItem>
-                                        <MenuItem value={"attendent"}>Atendente</MenuItem>
-                                        <MenuItem value={"queue"}>Fila</MenuItem>
-                                        <MenuItem value={"integration"}>Integração</MenuItem>
-                                        <MenuItem value={"file"}>Arquivo</MenuItem>
+                                      <Field name={`options[${index}].queueType`}>
+                                        {({ field }) => (
+                                          <Select
+                                            {...field}
+                                            value={field.value ?? "text"}
+                                            variant="outlined"
+                                            margin="dense"
+                                            fullWidth
+                                            labelId="queueType-selection-label"
+                                            label={i18n.t("queueModal.form.queueType")}
+                                            error={touched?.options?.[index]?.queueType &&
+                                              Boolean(errors?.options?.[index]?.queueType)}
+                                          >
+                                            <MenuItem value={"text"}>Texto</MenuItem>
+                                            <MenuItem value={"attendent"}>Atendente</MenuItem>
+                                            <MenuItem value={"queue"}>Fila</MenuItem>
+                                            <MenuItem value={"integration"}>Integração</MenuItem>
+                                            <MenuItem value={"file"}>Arquivo</MenuItem>
+                                          </Select>
+                                        )}
                                       </Field>
                                     </FormControl>
                                   </Grid>
@@ -767,8 +794,9 @@ export default function VerticalLinearStepper(props) {
                         <StepLabel
                           onClick={() =>
                             push({
-                              name: undefined,
-                              greetingMessage: undefined,
+                              name: "",
+                              greetingMessage: "",
+                              queueType: "text",
                             })
                           }
                         >
@@ -780,7 +808,7 @@ export default function VerticalLinearStepper(props) {
                 )}
               </FieldArray>
             )}
-          />
+          </Formik>
         </div>
       )
       }

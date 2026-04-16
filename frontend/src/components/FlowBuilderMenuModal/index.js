@@ -177,7 +177,7 @@ const FlowBuilderMenuModal = ({ open, onSave, onUpdate, data, close }) => {
           </Box>
         </DialogTitle>
         <Stack>
-          <Stack dividers style={{ gap: "8px", padding: "16px" }}>
+          <Stack style={{ gap: "8px", padding: "16px" }}>
             <TextField
               label={"Mensagem de explicação do menu"}
               minRows={4}

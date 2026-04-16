@@ -73,7 +73,7 @@ const CreateUserService = async ({
       include: [{ model: Plan, as: "plan" }]
     });
 
-    if (company !== null) {
+    if (company !== null && company.type !== "platform") {
       const usersCount = await User.count({
         where: {
           companyId

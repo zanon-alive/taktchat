@@ -187,7 +187,7 @@ const Prompts = () => {
     async function fetchData() {
       if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-      if (!planConfigs?.plan?.useOpenAi) {
+      if (!planConfigs?.plan?.useOpenAi && user?.company?.type !== "platform") {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
         setTimeout(() => {
           history.push(`/`)

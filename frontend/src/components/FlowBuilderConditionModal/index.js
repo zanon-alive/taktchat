@@ -175,7 +175,6 @@ const FlowBuilderConditionModal = ({ open, onSave, onUpdate, data, close }) => {
         </DialogTitle>
         <Stack>
           <Stack
-            dividers
             style={{ height: "250px", gap: "8px", padding: "16px" }}
           >
             <TextField

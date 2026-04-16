@@ -100,6 +100,7 @@ export default memo(({ data, isConnectable, id }) => {
       <div style={{ color: "#232323", fontSize: "12px", width: 180 }}>
         {data.seq.map(item => (
           <div
+            key={item}
             style={{
               backgroundColor: "#F6EEEE",
               marginBottom: "3px",

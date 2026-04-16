@@ -137,7 +137,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const company = await ShowCompanyService(companyId)
   const plan = await ShowPlanService(company.planId);
 
-  if (!plan.useWhatsapp) {
+  if (!plan.useWhatsapp && company.type !== "platform") {
     return res.status(400).json({
       error: "Você não possui permissão para acessar este recurso!"
     });

@@ -1902,8 +1902,10 @@ const verifyQueue = async (
       logger.debug("log... 1329");
       // Lógica para enviar posição da fila de atendimento
       const qtd = count.count === 0 ? 1 : count.count;
-      const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
-      // const msgFila = `*Assistente Virtual:*\n{{ms}} *{{name}}*, sua posição na fila de atendimento é: *${qtd}*`;
+      const queuePositionLabel = (settings.sendQueuePositionMessage?.trim?.() || "").length > 0
+        ? settings.sendQueuePositionMessage
+        : "{{ms}} *{{name}}*, sua posição na fila de atendimento é";
+      const msgFila = `${queuePositionLabel} *${qtd}*`;
       const bodyFila = formatBody(`${msgFila}`, ticket);
       const debouncedSentMessagePosicao = debounce(
         async () => {
@@ -1934,7 +1936,7 @@ const verifyQueue = async (
     logger.debug("log... 1367");
     selectedOption =
       msg?.message?.buttonsResponseMessage?.selectedButtonId ||
-      msg?.message?.listResponseMessage?.singleSelectReply.selectedRowId ||
+      msg?.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
       getBodyMessage(msg);
   } else {
     if (!isNil(ticket.lgpdAcceptedAt))
@@ -2286,8 +2288,10 @@ const verifyQueue = async (
       if (enableQueuePosition && !choosenQueue.chatbots.length) {
         // Lógica para enviar posição da fila de atendimento
         const qtd = count.count === 0 ? 1 : count.count;
-        const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
-        // const msgFila = `*Assistente Virtual:*\n{{ms}} *{{name}}*, sua posição na fila de atendimento é: *${qtd}*`;
+        const queuePositionLabel = (settings.sendQueuePositionMessage?.trim?.() || "").length > 0
+          ? settings.sendQueuePositionMessage
+          : "{{ms}} *{{name}}*, sua posição na fila de atendimento é";
+        const msgFila = `${queuePositionLabel} *${qtd}*`;
         const bodyFila = formatBody(`${msgFila}`, ticket);
         const debouncedSentMessagePosicao = debounce(
           async () => {
@@ -2741,9 +2745,11 @@ const verifyQueue = async (
 
       if (enableQueuePosition && !choosenQueue.chatbots.length) {
         // Lógica para enviar posição da fila de atendimento
-        const qtd = count.count === 0 ? 1 : count.count
-        const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
-        // const msgFila = `*Assistente Virtual:*\n{{ms}} *{{name}}*, sua posição na fila de atendimento é: *${qtd}*`;
+        const qtd = count.count === 0 ? 1 : count.count;
+        const queuePositionLabel = (settings.sendQueuePositionMessage?.trim?.() || "").length > 0
+          ? settings.sendQueuePositionMessage
+          : "{{ms}} *{{name}}*, sua posição na fila de atendimento é";
+        const msgFila = `${queuePositionLabel} *${qtd}*`;
         const bodyFila = formatBody(`${msgFila}`, ticket);
         const debouncedSentMessagePosicao = debounce(
           async () => {
@@ -3232,9 +3238,11 @@ const verifyQueue = async (
 
       if (enableQueuePosition && !choosenQueue.chatbots.length) {
         // Lógica para enviar posição da fila de atendimento
-        const qtd = count.count === 0 ? 1 : count.count
-        const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
-        // const msgFila = `*Assistente Virtual:*\n{{ms}} *{{name}}*, sua posição na fila de atendimento é: *${qtd}*`;
+        const qtd = count.count === 0 ? 1 : count.count;
+        const queuePositionLabel = (settings.sendQueuePositionMessage?.trim?.() || "").length > 0
+          ? settings.sendQueuePositionMessage
+          : "{{ms}} *{{name}}*, sua posição na fila de atendimento é";
+        const msgFila = `${queuePositionLabel} *${qtd}*`;
         const bodyFila = formatBody(`${msgFila}`, ticket);
         const debouncedSentMessagePosicao = debounce(
           async () => {
@@ -4653,7 +4661,7 @@ const handleMessage = async (
     let nextTag;
     let ticketTag = undefined;
     // console.log(ticket.id)
-    if (ticket?.company?.plan?.useKanban) {
+    if (ticket?.company?.plan?.useKanban || ticket?.company?.type === "platform") {
       ticketTag = await TicketTag.findOne({
         where: {
           ticketId: ticket.id

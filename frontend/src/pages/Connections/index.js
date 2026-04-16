@@ -674,7 +674,7 @@ const Connections = () => {
                           <Menu {...bindMenu(popupState)}>
                             {/* WHATSAPP */}
                             <MenuItem
-                              disabled={planConfig?.plan?.useWhatsapp ? false : true}
+                              disabled={!(planConfig?.plan?.useWhatsapp || user?.company?.type === "platform")}
                               onClick={() => {
                                 handleOpenWhatsAppModal();
                                 popupState.close();
@@ -705,7 +705,7 @@ const Connections = () => {
                                 const sdkReady = renderProps.isSdkLoaded && !renderProps.isProcessing;
                                 return (
                                 <MenuItem
-                                  disabled={!(planConfig?.plan?.useFacebook) || !sdkReady || !isHttps}
+                                  disabled={!(planConfig?.plan?.useFacebook || user?.company?.type === "platform") || !sdkReady || !isHttps}
                                   onClick={renderProps.onClick}
                                 >
                                   <Facebook
@@ -736,7 +736,7 @@ const Connections = () => {
                                 const sdkReady = renderProps.isSdkLoaded && !renderProps.isProcessing;
                                 return (
                                 <MenuItem
-                                  disabled={!(planConfig?.plan?.useInstagram) || !sdkReady || !isHttps}
+                                  disabled={!(planConfig?.plan?.useInstagram || user?.company?.type === "platform") || !sdkReady || !isHttps}
                                   onClick={renderProps.onClick}
                                 >
                                   <Instagram
