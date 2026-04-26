@@ -147,6 +147,37 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
     ragCollection: ""
   };
 
+  const validQueueTypes = ["text", "attendent", "queue", "integration", "file"];
+  const normalizeQueueForForm = (data) => {
+    if (!data) return initialState;
+    const chatbots = (data.chatbots || []).map((bot) => ({
+      ...bot,
+      name: bot.name ?? "",
+      greetingMessage: bot.greetingMessage ?? "",
+      queueType: bot.queueType && validQueueTypes.includes(bot.queueType) ? bot.queueType : "text",
+      optQueueId: bot.optQueueId ?? "",
+      optUserId: bot.optUserId ?? null,
+      optIntegrationId: bot.optIntegrationId ?? "",
+      optFileId: bot.optFileId ?? "",
+      closeTicket: !!bot.closeTicket,
+    }));
+    return {
+      ...initialState,
+      ...data,
+      name: data.name ?? "",
+      color: data.color ?? "",
+      greetingMessage: data.greetingMessage ?? "",
+      outOfHoursMessage: data.outOfHoursMessage ?? "",
+      confirmationTemplate: data.confirmationTemplate ?? "",
+      ragCollection: data.ragCollection ?? "",
+      autoSendStrategy: data.autoSendStrategy ?? "none",
+      orderQueue: data.orderQueue ?? 1,
+      tempoRoteador: data.tempoRoteador ?? 0,
+      maxFilesPerSession: data.maxFilesPerSession ?? 3,
+      chatbots,
+    };
+  };
+
   const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
   const [queue, setQueue] = useState(initialState);
   const greetingRef = useRef();
@@ -198,8 +229,9 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
       const planConfigs = await getPlanCompany(undefined, companyId);
       const plan = planConfigs?.plan;
       if (plan) {
-        setShowOpenAi(plan.useOpenAi);
-        setShowIntegrations(plan.useIntegrations);
+        const isPlatform = user?.company?.type === "platform";
+        setShowOpenAi(!!plan.useOpenAi || isPlatform);
+        setShowIntegrations(!!plan.useIntegrations || isPlatform);
       }
     }
     fetchData();
@@ -237,10 +269,17 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
       try {
         const { data } = await api.get(`/queue/${queueId}`);
 
+        const validQueueTypes = ["text", "attendent", "queue", "integration", "file"];
+        const chatbots = (data.chatbots || []).map((bot) => ({
+          ...bot,
+          queueType: bot.queueType && validQueueTypes.includes(bot.queueType) ? bot.queueType : "text",
+        }));
+
         setQueue((prevState) => {
-          return { 
-            ...prevState, 
+          return {
+            ...prevState,
             ...data,
+            chatbots,
             orderQueue: data.orderQueue || 1,
             tempoRoteador: data.tempoRoteador || 0,
             maxFilesPerSession: data.maxFilesPerSession || 3,
@@ -393,25 +432,24 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
   };
 
   const handleSaveBot = async (values) => {
-    console.log(values)
     try {
       if (queueId) {
         const { data } = await api.put(`/queue/${queueId}`, values);
         if (data.chatbots && data.chatbots.length) {
           onEdit(data);
-          setQueue(data);
+          setQueue(normalizeQueueForForm(data));
         }
       } else {
         const { data } = await api.post("/queue", values);
         if (data.chatbots && data.chatbots.length) {
-          setQueue(data);
+          setQueue(normalizeQueueForForm(data));
           onEdit(data);
           handleClose();
         }
       }
 
-      setIsNamedEdit(null)
-      setGreetingMessageEdit(null)
+      setIsNamedEdit(null);
+      setGreetingMessageEdit(null);
       toast.success(`${i18n.t("queues.toasts.success")}`);
 
     } catch (err) {
@@ -946,10 +984,10 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                               values.chatbots.length > 0 &&
                               values.chatbots.map((info, index) => (
                                 <Step
-                                  key={`${info.id ? info.id : index}-chatbots`}
+                                  key={`chatbot-step-${index}`}
                                   onClick={() => setActiveStep(index)}
                                 >
-                                  <StepLabel key={`${info.id}-chatbots`}>
+                                  <StepLabel key={`chatbot-step-label-${index}`}>
                                     {isNameEdit !== index &&
                                       queue.chatbots[index]?.name ? (
                                       <div
@@ -1011,24 +1049,26 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                                           >
                                             <InputLabel id="queueType-selection-label">{i18n.t("queueModal.form.queueType")}</InputLabel>
 
-                                            <Field
-                                              as={Select}
-                                              name={`chatbots[${index}].queueType`}
-                                              variant="outlined"
-                                              margin="dense"
-                                              fullWidth
-                                              labelId="queueType-selection-label"
-                                              label={i18n.t("queueModal.form.queueType")}
-                                              error={touched?.chatbots?.[index]?.queueType &&
-                                                Boolean(errors?.chatbots?.[index]?.queueType)}
-                                            // helpertext={touched?.chatbots?.[index]?.queueType && errors?.chatbots?.[index]?.queueType}
-                                            // value={`chatbots[${index}].queueType`}
-                                            >
-                                              <MenuItem value={"text"}>{i18n.t("queueModal.bot.text")}</MenuItem>
-                                              <MenuItem value={"attendent"}>{i18n.t("queueModal.bot.attendent")}</MenuItem>
-                                              <MenuItem value={"queue"}>{i18n.t("queueModal.bot.queue")}</MenuItem>
-                                              <MenuItem value={"integration"}>{i18n.t("queueModal.bot.integration")}</MenuItem>
-                                              <MenuItem value={"file"}>{i18n.t("queueModal.bot.file")}</MenuItem>
+                                            <Field name={`chatbots[${index}].queueType`}>
+                                              {({ field }) => (
+                                                <Select
+                                                  {...field}
+                                                  value={field.value ?? "text"}
+                                                  variant="outlined"
+                                                  margin="dense"
+                                                  fullWidth
+                                                  labelId="queueType-selection-label"
+                                                  label={i18n.t("queueModal.form.queueType")}
+                                                  error={touched?.chatbots?.[index]?.queueType &&
+                                                    Boolean(errors?.chatbots?.[index]?.queueType)}
+                                                >
+                                                  <MenuItem value={"text"}>{i18n.t("queueModal.bot.text")}</MenuItem>
+                                                  <MenuItem value={"attendent"}>{i18n.t("queueModal.bot.attendent")}</MenuItem>
+                                                  <MenuItem value={"queue"}>{i18n.t("queueModal.bot.queue")}</MenuItem>
+                                                  <MenuItem value={"integration"}>{i18n.t("queueModal.bot.integration")}</MenuItem>
+                                                  <MenuItem value={"file"}>{i18n.t("queueModal.bot.file")}</MenuItem>
+                                                </Select>
+                                              )}
                                             </Field>
                                           </FormControl>
                                         </Grid>
@@ -1172,9 +1212,8 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                                                     fullWidth
                                                   >
                                                     <InputLabel id="queue-selection-label">{i18n.t("queueModal.form.queue")}</InputLabel>
-                                                    <Field
-                                                      name={`chatbots[${index}].optQueueId`}
-                                                      render={({ field }) => (
+                                                    <Field name={`chatbots[${index}].optQueueId`}>
+                                                      {({ field }) => (
                                                         <Select
                                                           {...field}
                                                           value={field.value ?? ""}
@@ -1195,7 +1234,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
                                                           ))}
                                                         </Select>
                                                       )}
-                                                    />
+                                                    </Field>
                                                   </FormControl>
                                                 </Grid>
                                               </>
@@ -1420,7 +1459,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
 
                             <Step>
                               <StepLabel
-                                onClick={() => push({ name: "", value: "" })}
+                                onClick={() => push({ name: "", value: "", queueType: "text" })}
                               >
                                 {i18n.t("queueModal.bot.addOptions")}
                               </StepLabel>

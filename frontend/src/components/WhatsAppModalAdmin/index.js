@@ -283,6 +283,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       token: autoToken ? autoToken : null, schedules,
       promptId: selectedPrompt ? selectedPrompt : null
     };
+    // Evita violação de FK: 0 ou vazio deve ser null (fila não existe no BD)
+    const numOrNull = (v) => (v && Number(v)) || null;
+    whatsappData.queueIdImportMessages = numOrNull(whatsappData.queueIdImportMessages);
+    whatsappData.sendIdQueue = numOrNull(whatsappData.sendIdQueue);
     delete whatsappData["queues"];
     delete whatsappData["session"];
 

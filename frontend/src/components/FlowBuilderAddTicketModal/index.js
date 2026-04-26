@@ -65,7 +65,7 @@ const FlowBuilderTicketModal = ({
     const isMounted = useRef(true);
     const [activeModal, setActiveModal] = useState(false)
     const [queues, setQueues] = useState([])
-    const [selectedQueue, setQueueSelected] = useState()
+    const [selectedQueue, setQueueSelected] = useState('')
 
     useEffect(() => {
         isMounted.current = true;

@@ -313,6 +313,12 @@ class Contact extends Model<Contact> {
     // Executa de forma assíncrona sem bloquear
     setImmediate(async () => {
       try {
+        // Verifica se companyId está disponível
+        if (!contact.companyId) {
+          console.warn(`[Hook] Não foi possível aplicar regras de tags: contato ${contact.id} sem companyId`);
+          return;
+        }
+
         const ApplyTagRulesService = (await import("../services/TagServices/ApplyTagRulesService")).default;
         await ApplyTagRulesService({ 
           companyId: contact.companyId,
@@ -330,10 +336,21 @@ class Contact extends Model<Contact> {
     // Executa de forma assíncrona sem bloquear
     setImmediate(async () => {
       try {
+        // Recarrega o contato para garantir que companyId esteja disponível
+        // O hook pode receber uma instância sem todos os campos carregados
+        const reloadedContact = await Contact.findByPk(contact.id, {
+          attributes: ['id', 'companyId']
+        });
+
+        if (!reloadedContact || !reloadedContact.companyId) {
+          console.warn(`[Hook] Não foi possível aplicar regras de tags: contato ${contact.id} sem companyId`);
+          return;
+        }
+
         const ApplyTagRulesService = (await import("../services/TagServices/ApplyTagRulesService")).default;
         await ApplyTagRulesService({ 
-          companyId: contact.companyId,
-          contactId: contact.id 
+          companyId: reloadedContact.companyId,
+          contactId: reloadedContact.id 
         });
       } catch (err) {
         console.error(`[Hook] Erro ao aplicar regras de tags no contato ${contact.id}:`, err);

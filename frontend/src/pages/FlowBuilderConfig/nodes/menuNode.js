@@ -111,6 +111,7 @@ export default memo(({ data, isConnectable, id }) => {
       </div>
       {data.arrayOption.map(option => (
         <div
+          key={option.number}
           style={{
             marginBottom: "9px",
             justifyContent: "end",

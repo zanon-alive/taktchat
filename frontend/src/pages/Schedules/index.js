@@ -183,7 +183,7 @@ const Schedules = () => {
       const companyId = user?.companyId;
       if (!companyId) return;
       const planConfigs = await getPlanCompany(undefined, companyId);
-      if (!planConfigs?.plan?.useSchedules) {
+      if (!planConfigs?.plan?.useSchedules && user?.company?.type !== "platform") {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
         setTimeout(() => {
           history.push(`/`)

@@ -86,15 +86,28 @@ const UpdateQueueService = async (
   }
 
   if (chatbots) {
+    const toNumOrNull = (v: any) => (v === "" || v === undefined || v === null ? null : Number(v));
     await Promise.all(
-      chatbots.map(async bot => {
-        await Chatbot.upsert({ ...bot, queueId: queue.id });
+      chatbots.map(async (bot: any) => {
+        const payload = {
+          ...(bot.id ? { id: bot.id } : {}),
+          name: bot.name ?? "",
+          greetingMessage: bot.greetingMessage ?? null,
+          queueId: queue.id,
+          queueType: bot.queueType ?? "text",
+          optQueueId: toNumOrNull(bot.optQueueId),
+          optUserId: toNumOrNull(bot.optUserId),
+          optIntegrationId: toNumOrNull(bot.optIntegrationId),
+          optFileId: toNumOrNull(bot.optFileId),
+          closeTicket: !!bot.closeTicket,
+        };
+        await Chatbot.upsert(payload);
       })
     );
 
     await Promise.all(
       queue.chatbots.map(async oldBot => {
-        const stillExists = chatbots.findIndex(bot => bot.id === oldBot.id);
+        const stillExists = chatbots.findIndex((bot: any) => bot.id === oldBot.id);
 
         if (stillExists === -1) {
           await Chatbot.destroy({ where: { id: oldBot.id } });
@@ -102,7 +115,9 @@ const UpdateQueueService = async (
       })
     );
   }
-  await queue.update(queueData);
+
+  const { chatbots: _chatbots, ...queueUpdatePayload } = queueData;
+  await queue.update(queueUpdatePayload);
 
   await queue.reload({
     include: [

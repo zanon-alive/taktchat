@@ -99,27 +99,37 @@ export const update = async (
     outOfHoursMessage,
     schedules,
     chatbots,
-    orderQueue, 
-    tempoRoteador, 
+    orderQueue,
+    tempoRoteador,
     ativarRoteador,
     integrationId,
     fileListId,
-    closeTicket
+    closeTicket,
+    autoSendStrategy,
+    confirmationTemplate,
+    maxFilesPerSession,
+    ragCollection
   } = req.body;
 
-  const queue = await UpdateQueueService(queueId, 
-    {name,
-    color,
-    greetingMessage,
-    outOfHoursMessage, 
-    tempoRoteador: tempoRoteador ===""? 0 : tempoRoteador, 
-    ativarRoteador,
-    schedules,
-    chatbots, 
-    orderQueue: orderQueue === "" ? null : orderQueue,
-    integrationId: integrationId === "" ? null : integrationId,
-    fileListId: fileListId === "" ? null : fileListId,
-    closeTicket},
+  const queue = await UpdateQueueService(queueId,
+    {
+      name,
+      color,
+      greetingMessage,
+      outOfHoursMessage,
+      tempoRoteador: tempoRoteador === "" ? 0 : tempoRoteador,
+      ativarRoteador,
+      schedules,
+      chatbots,
+      orderQueue: orderQueue === "" ? null : orderQueue,
+      integrationId: integrationId === "" ? null : integrationId,
+      fileListId: fileListId === "" ? null : fileListId,
+      closeTicket,
+      autoSendStrategy: autoSendStrategy || "none",
+      confirmationTemplate: confirmationTemplate || null,
+      maxFilesPerSession: maxFilesPerSession ?? 3,
+      ragCollection: ragCollection || null
+    },
     companyId);
 
   const io = getIO();

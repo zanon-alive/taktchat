@@ -134,7 +134,7 @@ const TicketActionButtonsCustom = ({ ticket
         const companyId = user?.companyId;
         if (!companyId) return;
         const planConfigs = await getPlanCompany(undefined, companyId);
-        setShowSchedules(planConfigs?.plan?.useSchedules);
+        setShowSchedules(!!planConfigs?.plan?.useSchedules || user?.company?.type === "platform");
         setOpenTicketMessageDialog(false);
         setDisableBot(ticket.contact.disableBot)
 

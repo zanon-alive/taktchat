@@ -1039,7 +1039,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
     const companyId = whatsapp.companyId;
     const company = await ShowPlanCompanyService(companyId);
-    const sendMessageWithExternalApi = company.plan.useExternalApi;
+    const sendMessageWithExternalApi = company?.plan?.useExternalApi || company?.type === "platform";
 
     if (!sendMessageWithExternalApi) {
       throw new AppError(

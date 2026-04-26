@@ -232,8 +232,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       const planConfigs = await getPlanCompany(undefined, companyId);
       const plan = planConfigs?.plan;
       if (plan) {
-        setShowOpenAi(plan.useOpenAi);
-        setShowIntegrations(plan.useIntegrations);
+        const isPlatform = user?.company?.type === "platform";
+        setShowOpenAi(!!plan.useOpenAi || isPlatform);
+        setShowIntegrations(!!plan.useIntegrations || isPlatform);
       }
     }
     fetchData();
@@ -415,7 +416,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       promptId: selectedPrompt ? selectedPrompt : null
     };
 
-    console.dir(whatsappData)
+    // Evita violação de FK: 0 ou vazio deve ser null (fila não existe no BD)
+    const numOrNull = (v) => (v && Number(v)) || null;
+    whatsappData.queueIdImportMessages = numOrNull(whatsappData.queueIdImportMessages);
+    whatsappData.sendIdQueue = numOrNull(whatsappData.sendIdQueue);
 
     delete whatsappData["queues"];
     delete whatsappData["session"];

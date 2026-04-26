@@ -36,7 +36,7 @@ const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
     include: [{ model: Plan, as: "plan" }]
   });
 
-  if (company !== null) {
+  if (company !== null && company.type !== "platform") {
     const queuesCount = await Queue.count({
       where: {
         companyId
