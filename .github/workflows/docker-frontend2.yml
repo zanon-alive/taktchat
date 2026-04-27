@@ -1,8 +1,10 @@
 name: Build and Push Frontend Docker image
 
 on:
-  push:
-    branches: [ main ]
+  # Workflow legado (DockerHub). Mantido apenas para execução manual.
+  # O deploy recomendado agora é via GHCR:
+  # - .github/workflows/build-taktchat-frontend-ghcr.yml
+  workflow_dispatch:
 
 jobs:
   build:

@@ -123,7 +123,7 @@ const FlowBuilderSingleBlockModal = ({
 
   const [loading, setLoading] = useState(false);
 
-  const [previewImg, setPreviewImg] = useState([]);
+  const [, setPreviewImg] = useState([]);
 
   const [previewAudios, setPreviewAudios] = useState([]);
 
