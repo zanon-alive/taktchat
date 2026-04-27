@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import logger from "../utils/logger";
 import RebuildDeviceTagsService from "../services/WbotServices/RebuildDeviceTagsService";
 import LabelSyncService from "../services/WbotServices/LabelSyncService";
+import { internalFullLabelSync, internalGetDeviceLabels, isLabelSyncProxyEnabled } from "../internal/labelSyncClient";
 
 export const getDeviceLabelsWWeb = async (req: Request, res: Response) => {
   try {
@@ -10,9 +11,14 @@ export const getDeviceLabelsWWeb = async (req: Request, res: Response) => {
 
     logger.info(`[getDeviceLabelsWWeb] Buscando labels via WhatsApp-Web.js para company=${companyId}, whatsappId=${whatsappId}`);
 
+    if (isLabelSyncProxyEnabled()) {
+      const proxied = await internalGetDeviceLabels({ companyId, whatsappId });
+      return res.json(proxied);
+    }
+
     // Importar o service dinamicamente para evitar erros de compilação
     const whatsAppWebLabelsService = require("../services/WbotServices/WhatsAppWebLabelsService").default;
-    
+
     const labels = await whatsAppWebLabelsService.getDeviceLabels(companyId, whatsappId);
 
     logger.info(`[getDeviceLabelsWWeb] Encontradas ${labels.length} labels via WhatsApp-Web.js`);
@@ -42,6 +48,10 @@ export const fullLabelSync = async (req: Request, res: Response) => {
   }
 
   try {
+    if (isLabelSyncProxyEnabled()) {
+      const proxied = await internalFullLabelSync({ companyId, whatsappId });
+      return res.status(200).json(proxied);
+    }
     const rebuild = await RebuildDeviceTagsService(companyId, whatsappId);
     const syncResult = await LabelSyncService.sync({ companyId, whatsappId, force: true, useWebClient: true });
     return res.status(200).json({ success: true, rebuild, sync: syncResult });

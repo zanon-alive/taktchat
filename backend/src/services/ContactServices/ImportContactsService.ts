@@ -12,6 +12,7 @@ import ContactTagImportPreset from "../../models/ContactTagImportPreset";
 // Removido: importações de cache/baileys
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import WhatsAppWebLabelsService from "../WbotServices/WhatsAppWebLabelsService";
+import { internalGetDeviceLabels, isLabelSyncProxyEnabled } from "../../internal/labelSyncClient";
 
 // import CheckContactNumber from "../WbotServices/CheckNumber";
 
@@ -76,7 +77,14 @@ export async function ImportContactsService(
     const effectiveWhatsAppId = defWpp.id;
 
     // Obter inventário de labels para mapear id -> name
-    const deviceLabels = await WhatsAppWebLabelsService.getDeviceLabels(companyId, effectiveWhatsAppId);
+    const deviceLabelsResponse = isLabelSyncProxyEnabled()
+      ? await internalGetDeviceLabels({ companyId, whatsappId: effectiveWhatsAppId })
+      : await (async () => {
+          const labels = await WhatsAppWebLabelsService.getDeviceLabels(companyId, effectiveWhatsAppId);
+          return { success: true, labels };
+        })();
+
+    const deviceLabels = Array.isArray(deviceLabelsResponse?.labels) ? deviceLabelsResponse.labels : [];
     const labelNameMap = new Map<string, string>(
       deviceLabels.map(l => [String(l.id), String(l.name)])
     );
