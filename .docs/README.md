@@ -9,6 +9,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.
 - `configuracao/`: variáveis de ambiente, parâmetros sensíveis e políticas de segurança.
 - `operacao/`: rotinas diárias, monitoramento, backup/restore e troubleshooting.
+  - **Drift Sequelize / Postgres:** `operacao/recuperacao-migrations-banco.md` — quando `SequelizeMeta` não reflete o schema real.
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
   - **EntrySource e Chat do Site:** `branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` – Widget, API e canais de entrada.
