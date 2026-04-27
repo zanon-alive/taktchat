@@ -2,19 +2,19 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   up: (queryInterface: QueryInterface) => {
-    return queryInterface.addColumn("Tickets", "useIntegration", {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: true,
-
-    }),
-     queryInterface.addColumn("Tickets", "integrationId", {
-      references: { model: "QueueIntegrations", key: "id" },
+    return Promise.all([
+      queryInterface.addColumn("Tickets", "useIntegration", {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: true
+      }),
+      queryInterface.addColumn("Tickets", "integrationId", {
+        references: { model: "QueueIntegrations", key: "id" },
         type: DataTypes.INTEGER,
         defaultValue: null,
-        allowNull: true,
-  
-      });
+        allowNull: true
+      })
+    ]);
   },
 
   down: (queryInterface: QueryInterface) => {
