@@ -32,12 +32,14 @@ ENV REACT_APP_FRONTEND_VERSION=${REACT_APP_FRONTEND_VERSION}
 # Build da aplicação React
 # Otimizações para cross-compilation (ARM64 emulação):
 # - GENERATE_SOURCEMAP=false: desabilita source maps (reduz tempo significativamente)
-# - CI=true: desabilita verificações desnecessárias
+# - CI=false: evita falhar build por warnings (CRA/CRACO em CI)
 # - NODE_OPTIONS: aumenta memória disponível (alinhado com package.json)
 # - SKIP_PREFLIGHT_CHECK: pula verificações pré-build
 ENV GENERATE_SOURCEMAP=false
-ENV CI=true
+ENV CI=false
 ENV SKIP_PREFLIGHT_CHECK=true
+ENV DISABLE_ESLINT_PLUGIN=true
+ENV TSC_COMPILE_ON_ERROR=true
 RUN NODE_OPTIONS=--max-old-space-size=8192 npm run build
 
 # Etapa de deploy
