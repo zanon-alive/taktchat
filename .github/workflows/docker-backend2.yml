@@ -1,9 +1,10 @@
 name: Build and Push Backend Docker image
 
 on:
-  push:
-    branches: [ main ]  # ou o branch que quiser monitorar
   workflow_dispatch:
+    # Workflow legado (DockerHub). Mantido apenas para execução manual.
+    # O deploy recomendado agora é via GHCR:
+    # - .github/workflows/build-taktchat-backend-ghcr.yml
 
 jobs:
   build:
