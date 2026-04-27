@@ -2,7 +2,7 @@
 
 **Base sugerida:** `main`  
 **Branch:** `fix/migrations-idempotent-accessBlockedByParent`  
-**Commit:** `947c2e1` — *fix(db): migration idempotente accessBlockedByParent e doc de recuperação*
+**Tip da branch** (último commit na publicação da PR): `256fa7a` — inclui migration + docs + este arquivo de PR (`947c2e1` é o commit principal da correção).
 
 ## Resumo
 
