@@ -1,0 +1,48 @@
+name: build-taktchat-frontend (GHCR)
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/build-taktchat-frontend-ghcr.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/taktchat-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/taktchat-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            REACT_APP_BACKEND_URL=https://api.taktchat.com.br
+            REACT_APP_SOCKET_URL=https://api.taktchat.com.br
+            PUBLIC_URL=https://taktchat.com.br
+            REACT_APP_FRONTEND_VERSION=${{ github.sha }}
+

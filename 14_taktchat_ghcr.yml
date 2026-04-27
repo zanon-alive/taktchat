@@ -1,0 +1,193 @@
+version: "3.8"
+
+# Stack TaktChat — Deploy por imagens no GHCR (recomendado por SHA)
+#
+# Imagens publicadas pelo GitHub Actions:
+# - ghcr.io/<owner>/taktchat-backend:<sha>
+# - ghcr.io/<owner>/taktchat-backend-browser:<sha>
+# - ghcr.io/<owner>/taktchat-frontend:<sha>
+#
+# Sugestão: no Portainer, defina as variáveis:
+# - TAKTCHAT_OWNER=zanon-alive
+# - TAKTCHAT_IMAGE_TAG=<sha>   (ou latest)
+# - LABEL_SYNC_INTERNAL_TOKEN=<token forte>
+#
+# Observação: o serviço `taktchat-label-sync` NÃO deve ser exposto no Traefik.
+
+services:
+  # Migrações (executa uma vez)
+  taktchat-migrate:
+    image: ghcr.io/${TAKTCHAT_OWNER:-zanon-alive}/taktchat-backend:${TAKTCHAT_IMAGE_TAG:-latest}
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - app_network
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres_postgres
+      - DB_PORT=5432
+      - DB_NAME=taktchat_database
+      - DB_USER=taktchat_user
+      - DB_PASS=${DB_PASS:-}
+      - DB_DIALECT=postgres
+    command: ["sh", "-c", "npx sequelize db:migrate"]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 512M
+
+  # Backend principal (lean, sem Chromium) — exposto via Traefik
+  taktchat-backend:
+    image: ghcr.io/${TAKTCHAT_OWNER:-zanon-alive}/taktchat-backend:${TAKTCHAT_IMAGE_TAG:-latest}
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - app_network
+      - traefik_public
+    volumes:
+      - taktchat_media:/app/public
+      - taktchat_private:/app/private
+    environment:
+      - NODE_ENV=production
+      - BACKEND_URL=https://api.taktchat.com.br
+      - FRONTEND_URL=https://taktchat.com.br
+      - DB_HOST=postgres_postgres
+      - DB_PORT=5432
+      - DB_NAME=taktchat_database
+      - DB_USER=taktchat_user
+      - DB_PASS=${DB_PASS:-}
+      - DB_DIALECT=postgres
+      - JWT_SECRET=${JWT_SECRET:-}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-}
+      - REDIS_URI=${REDIS_URI:-}
+      - REDIS_URI_ACK=${REDIS_URI_ACK:-}
+      - REDIS_URI_MSG_CONN=${REDIS_URI_MSG_CONN:-}
+      - SOCKET_FALLBACK_NS_BROADCAST=true
+      # Proxy interno para label sync (fallback via whatsapp-web.js + chromium)
+      - LABEL_SYNC_INTERNAL_URL=http://taktchat-label-sync:8080
+      - LABEL_SYNC_INTERNAL_TOKEN=${LABEL_SYNC_INTERNAL_TOKEN:-}
+      # Sessões filesystem (Baileys + whatsapp-web.js LocalAuth) dentro do volume /app/private
+      - SESSIONS_DRIVER=fs
+      - SESSIONS_DIR=private/sessions
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 1024M
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: stop-first
+        failure_action: pause
+        monitor: 60s
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 2
+        window: 180s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik_public"
+        - "traefik.http.routers.taktchat-api.rule=Host(`api.taktchat.com.br`)"
+        - "traefik.http.routers.taktchat-api.entrypoints=websecure"
+        - "traefik.http.routers.taktchat-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.taktchat-api.loadbalancer.server.port=8080"
+        - "traefik.http.services.taktchat-api.loadbalancer.passHostHeader=true"
+
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const http = require('http'); const req = http.get('http://localhost:8080/health', (res) => { let data = ''; res.on('data', (chunk) => { data += chunk; }); res.on('end', () => { try { const json = JSON.parse(data); if (json.status === 'ok' && json.api && json.api.status === 'ok' && json.database && json.database.status === 'ok') { process.exit(0); } else { process.exit(1); } } catch (e) { process.exit(1); } }); }); req.on('error', () => process.exit(1)); req.setTimeout(8000, () => { req.destroy(); process.exit(1); });\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # Serviço interno (browser) — NÃO exposto no Traefik
+  taktchat-label-sync:
+    image: ghcr.io/${TAKTCHAT_OWNER:-zanon-alive}/taktchat-backend-browser:${TAKTCHAT_IMAGE_TAG:-latest}
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - app_network
+    volumes:
+      - taktchat_media:/app/public
+      - taktchat_private:/app/private
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - LABEL_SYNC_INTERNAL_TOKEN=${LABEL_SYNC_INTERNAL_TOKEN:-}
+      - SESSIONS_DRIVER=fs
+      - SESSIONS_DIR=private/sessions
+    command: ["node", "dist/internal/label-sync-server.js"]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 2
+        window: 180s
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 768M
+
+  taktchat-frontend:
+    image: ghcr.io/${TAKTCHAT_OWNER:-zanon-alive}/taktchat-frontend:${TAKTCHAT_IMAGE_TAG:-latest}
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - traefik_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+        failure_action: pause
+        monitor: 60s
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 2
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik_public"
+        - "traefik.http.routers.taktchat-app.rule=Host(`taktchat.com.br`)"
+        - "traefik.http.routers.taktchat-app.entrypoints=websecure"
+        - "traefik.http.routers.taktchat-app.tls.certresolver=letsencrypt"
+        - "traefik.http.services.taktchat-app.loadbalancer.server.port=80"
+        - "traefik.http.services.taktchat-app.loadbalancer.passHostHeader=true"
+
+networks:
+  app_network:
+    external: true
+  traefik_public:
+    external: true
+
+volumes:
+  taktchat_media:
+    driver: local
+  taktchat_private:
+    driver: local
+

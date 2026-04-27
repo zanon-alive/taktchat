@@ -37,6 +37,10 @@
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM` | Notificações por email. |
 | `STORAGE_PROVIDER`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET` | Upload externo opcional. |
 | `PUPPETEER_EXECUTABLE_PATH` | Customização do binário do Chromium. |
+| `SESSIONS_DRIVER` | Persistência de credenciais do Baileys (`fs` ou `redis`). |
+| `SESSIONS_DIR` | Diretório base para sessões quando `SESSIONS_DRIVER=fs` (ex.: `private/sessions`). |
+| `LABEL_SYNC_INTERNAL_URL` | URL interna do serviço `taktchat-label-sync` (ex.: `http://taktchat-label-sync:8080`). Se definida, o backend faz proxy interno para o fallback via WhatsApp Web. |
+| `LABEL_SYNC_INTERNAL_TOKEN` | Token interno (enviado no header `X-Internal-Token`) para proteger o serviço `taktchat-label-sync`. |
 
 ### Frontend
 

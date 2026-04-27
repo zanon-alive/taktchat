@@ -10,6 +10,8 @@ A stack utilizada em produção usa **volumes montados** para permitir atualiza�
 
 > **Nota:** Este guia é específico para a stack com volumes montados. Se você estiver usando a stack com build de imagens Docker, consulte a seção "Método Alternativo: Atualização com Build de Imagens" ao final deste documento.
 
+> **Atualização (GHCR / recomendado):** o projeto também suporta deploy por **imagens no GHCR com tag imutável por SHA** (build via CI), reduzindo o update do servidor para **pull + redeploy** no Portainer/Swarm. Ver seção **"Método Alternativo: Atualização via GHCR (por SHA)"** ao final.
+
 O processo inclui:
 
 1. Atualização do código no servidor
@@ -214,6 +216,39 @@ docker service ps taktchat_taktchat-backend
 docker service ps taktchat_taktchat-frontend
 docker service ps taktchat_taktchat-migrate
 ```
+
+---
+
+## 🐳 Método Alternativo: Atualização via GHCR (por SHA) — Recomendado para Produção Estável
+
+Este método tira o build do servidor e coloca no CI (GitHub Actions), publicando imagens no GHCR.
+
+### Pré-requisitos
+
+- Stack de produção baseada em imagens GHCR (ex.: `14_taktchat_ghcr.yml`)
+- O Portainer/Swarm consegue fazer pull do GHCR (login/registry auth)
+- Variáveis configuradas na stack:
+  - `TAKTCHAT_OWNER` (ex.: `zanon-alive`)
+  - `TAKTCHAT_IMAGE_TAG` (SHA do commit)
+  - `LABEL_SYNC_INTERNAL_TOKEN` (token forte)
+
+### Passo a passo (update)
+
+1) **Merge na `main`**
+- Faça merge normalmente.
+
+2) **Aguardar CI publicar as imagens**
+- Backend: `taktchat-backend:<sha>` e `taktchat-backend-browser:<sha>`
+- Frontend: `taktchat-frontend:<sha>`
+
+3) **Atualizar a stack no Portainer**
+- Troque `TAKTCHAT_IMAGE_TAG` para o SHA desejado
+- Clique em **"Update the stack"** (pull + redeploy)
+
+### Observação sobre label sync
+
+- O serviço `taktchat-label-sync` roda internamente (sem Traefik) e é protegido por `X-Internal-Token`.
+- O backend principal faz proxy interno via `LABEL_SYNC_INTERNAL_URL=http://taktchat-label-sync:8080`.
 
 #### 4.2. Verificar logs
 

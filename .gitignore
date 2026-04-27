@@ -171,3 +171,6 @@ commit-msg.txt
 .docs/branchs/
 
 backend/private/sessions/
+
+# Propostas/rascunhos locais (não versionar)
+taktchat-alteracoes/

@@ -62,31 +62,28 @@ RUN npm prune --omit=dev \
   && npm cache clean --force
 
 # --- Runtime ---
-FROM node:20-bullseye-slim AS runner
+FROM node:20-bullseye-slim AS runtime-base
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Dependências de runtime necessárias
 # FFmpeg para processamento/conversão de mídia
-# Chromium para Puppeteer
 # Consolidado em um único RUN para reduzir layers e melhorar cache
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
   apt-get update \
   && apt-get install -y --no-install-recommends \
        ffmpeg \
-       chromium \
   && rm -rf /var/lib/apt/lists/*
 
-# Build info injection
+# Build info injection (comum a todos runtimes)
 ARG BUILD_DATE
 ARG GIT_COMMIT
 ARG BACKEND_VERSION
 ENV BUILD_DATE=$BUILD_DATE
 ENV GIT_COMMIT=$GIT_COMMIT
 ENV BACKEND_VERSION=$BACKEND_VERSION
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copia manifestos, dependências já instaladas e artefatos compilados
 # Consolidado em grupos lógicos para otimizar layers
@@ -106,5 +103,27 @@ RUN mkdir -p ./private
 
 EXPOSE 8080
 
+# --- Runtime (lean) ---
+# Sem Chromium: imagem principal menor e com menor superfície de ataque.
+FROM runtime-base AS runtime-lean
+
 # Executa o servidor compilado (sem nodemon em produção)
 CMD ["node", "dist/server.js"]
+
+# --- Runtime (browser) ---
+# Inclui Chromium para o fluxo interno de label sync (whatsapp-web.js + puppeteer).
+FROM runtime-base AS runtime-browser
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  apt-get update \
+  && apt-get install -y --no-install-recommends \
+       chromium \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+CMD ["node", "dist/server.js"]
+
+# Compatibilidade: se nenhum target for especificado, usar runtime lean por padrão.
+FROM runtime-lean AS runner
