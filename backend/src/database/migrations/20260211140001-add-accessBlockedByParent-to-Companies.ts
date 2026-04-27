@@ -1,7 +1,11 @@
 import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
-  up: (queryInterface: QueryInterface) => {
+  up: async (queryInterface: QueryInterface) => {
+    const table = (await queryInterface.describeTable("Companies")) as Record<string, unknown>;
+    if ("accessBlockedByParent" in table) {
+      return;
+    }
     return queryInterface.addColumn("Companies", "accessBlockedByParent", {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -9,7 +13,11 @@ module.exports = {
     });
   },
 
-  down: (queryInterface: QueryInterface) => {
+  down: async (queryInterface: QueryInterface) => {
+    const table = (await queryInterface.describeTable("Companies")) as Record<string, unknown>;
+    if (!("accessBlockedByParent" in table)) {
+      return;
+    }
     return queryInterface.removeColumn("Companies", "accessBlockedByParent");
   }
 };

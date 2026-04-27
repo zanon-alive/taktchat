@@ -90,6 +90,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
   - **EntrySource e Chat do Site:** `.docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` - Canais de entrada, widget e API pública
 - Procedimentos de diagnóstico: `.docs/diagnosticos/` (inclui auditoria e deduplicação de contatos: `npm run db:audit-contacts`, `npm run db:dedupe-contacts`, `npm run db:delete-contacts-without-tickets`)
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`
+- Recuperação quando migrations falham ou há drift (`SequelizeMeta` vs schema): `.docs/operacao/recuperacao-migrations-banco.md`
 - Checklists e histórico: `.docs/anexos/`
 - Scripts SQL organizados: `.docs/sql/`
 - Build/publicação de imagens Docker: `.docs/DOCKER_BUILD_E_DEPLOY.md` (guia completo passo a passo)
