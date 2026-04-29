@@ -32,7 +32,9 @@ export default function ContactNotesDialogListItem(props) {
     return (
         <ListItem alignItems="flex-start">
             <ListItemAvatar>
-                <Avatar alt={note.user.name} src="/static/images/avatar/1.jpg" />
+                <Avatar alt={note.user.name}>
+                    {note.user.name ? note.user.name.charAt(0).toUpperCase() : "?"}
+                </Avatar>
             </ListItemAvatar>
             <ListItemText
                 primary={

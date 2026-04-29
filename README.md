@@ -86,6 +86,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Infraestrutura e stack de produção: `.docs/infraestrutura/` (inclui stack Docker Swarm em produção)
 - Operação, monitoramento e suporte: `.docs/operacao/`
 - Funcionalidades por módulo: `.docs/funcionalidades/`
+  - **Assets estáticos (public vs src, evitar 404 em produção):** `.docs/funcionalidades/frontend-assets-estaticos.md`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
   - **EntrySource e Chat do Site:** `.docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` - Canais de entrada, widget e API pública
 - Procedimentos de diagnóstico: `.docs/diagnosticos/` (inclui auditoria e deduplicação de contatos: `npm run db:audit-contacts`, `npm run db:dedupe-contacts`, `npm run db:delete-contacts-without-tickets`)
