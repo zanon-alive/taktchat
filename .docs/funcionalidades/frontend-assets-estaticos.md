@@ -23,3 +23,7 @@ O build do CRA **copia** o conteúdo de `public/` para a raiz de `build/`. A ima
 ## Nginx (imagem `taktchat-frontend`)
 
 Ficheiros com extensão conhecida (`.png`, etc.) são servidos com `try_files $uri =404` — se o ficheiro não estiver no build, a resposta é 404 (não é fallback para `index.html`).
+
+## Conteúdo atual em `frontend/public/` (versionado)
+
+Além de ícones e `logo_quadrado.png`, o repositório inclui variantes de marca (`TaktChat*.png`, `taktchat-logo_150x150.png`), `robots.txt`, `sitemap.xml` e a pasta `originais/` (cópias de referência). Evite nomes com espaços em novos ficheiros na raiz (`logo quadrado.png` existe por histórico local — preferir `logo_quadrado.png`).
