@@ -23,7 +23,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     });
 
     if (!platformSettings || !platformSettings.enableLandingSignup) {
-      return res.status(403).json({ 
+      return res.status(200).json({
         enabled: false,
         error: "Cadastro direto não está disponível no momento." 
       });
