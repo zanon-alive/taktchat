@@ -1,7 +1,12 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Grid, Box, Card, CardContent, Button } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ForumIcon from "@mui/icons-material/Forum";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import GppMaybeIcon from "@mui/icons-material/GppMaybe";
+import InsightsIcon from "@mui/icons-material/Insights";
+import CampaignIcon from "@mui/icons-material/Campaign";
+import GroupsIcon from "@mui/icons-material/Groups";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const useStyles = makeStyles((theme) => ({
@@ -79,26 +84,32 @@ const problems = [
   {
     title: "Atendimento Desorganizado",
     description: "Múltiplas conversas espalhadas, sem organização centralizada. Dificuldade em rastrear histórico e contexto das interações.",
+    icon: ForumIcon,
   },
   {
     title: "Falta de Automação",
     description: "Respostas manuais consomem tempo da equipe. Sem automação inteligente para triagem e respostas frequentes.",
+    icon: SmartToyIcon,
   },
   {
     title: "Risco de Banimento",
     description: "Envio de mensagens em massa pode resultar em bloqueio permanente da conta WhatsApp. Sem proteção anti-ban.",
+    icon: GppMaybeIcon,
   },
   {
     title: "Ausência de Métricas",
     description: "Sem relatórios e dashboards para acompanhar performance, tempo de resposta e satisfação dos clientes.",
+    icon: InsightsIcon,
   },
   {
     title: "Campanhas Limitadas",
     description: "Dificuldade em criar e gerenciar campanhas segmentadas com controle de cadência e personalização.",
+    icon: CampaignIcon,
   },
   {
     title: "Multi-Atendente Problemático",
     description: "Conflitos quando múltiplos atendentes trabalham na mesma conversa. Sem sistema de filas e roteamento.",
+    icon: GroupsIcon,
   },
 ];
 
@@ -122,6 +133,7 @@ const Problems = () => {
       </Typography>
       <Grid container spacing={4}>
         {problems.map((problem, index) => {
+          const ProblemIcon = problem.icon;
           return (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card 
@@ -130,7 +142,7 @@ const Problems = () => {
                 style={{ transitionDelay: `${index * 0.1}s` }}
               >
                 <CardContent>
-                  <ErrorOutlineIcon className={classes.problemIcon} />
+                  <ProblemIcon className={classes.problemIcon} />
                   <Typography variant="h5" className={classes.problemTitle}>
                     {problem.title}
                   </Typography>
