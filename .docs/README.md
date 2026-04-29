@@ -12,6 +12,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
   - **Drift Sequelize / Postgres:** `operacao/recuperacao-migrations-banco.md` — quando `SequelizeMeta` não reflete o schema real.
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
+  - **Frontend — assets em `public/` vs imports:** `funcionalidades/frontend-assets-estaticos.md`
   - **EntrySource e Chat do Site:** `branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` – Widget, API e canais de entrada.
 - `diagnosticos/`: procedimentos de investigação e correção para cenários recorrentes.
   - **Logs WhatsApp (Baileys):** `diagnosticos/logs-whatsapp-baileys.md` – Erros esperados (decrypt, SessionError, sessões).

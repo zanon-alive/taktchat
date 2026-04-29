@@ -81,7 +81,9 @@ dist
 
 # Gatsby files
 .cache/
-public
+# Não usar a regra genérica "public" — ela ignora frontend/public (CRA) e impede
+# versionar assets servidos em /. Use caminho explícito para artefatos de upload.
+backend/public
 
 # vuepress build output
 .vuepress/dist
