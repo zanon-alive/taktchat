@@ -1,0 +1,110 @@
+---
+steering-version: 2026-08-21-v1
+description: Log Activity — Fallback Local
+globs: 
+alwaysApply: false
+---
+
+# Log Activity — Fallback Local
+
+## Quando usar
+
+Use este template quando o MCP `telecontrol-docs` estiver **indisponivel** e voce precisar registrar uma atividade operacional (troubleshooting, config, validacao, seguranca).
+
+Com MCP disponivel, prefira `log_activity` — ele persiste no Cerebro e permite buscas futuras.
+
+## Fluxo de decisao
+
+```
+MCP disponivel? ─── SIM ──→ Chamar log_activity (fluxo normal)
+       │
+      NAO
+       │
+       ▼
+Registrar localmente (este template)
+       │
+       ▼
+Adicionar a .telecontrol/sync-queue.json (se existir)
+       │
+       ▼
+Informar usuario: "Atividade registrada localmente. Sync pendente."
+```
+
+## Template de registro local
+
+Gerar em `.telecontrol/activities/<YYYY-MM-DD>-<slug-title>.md`:
+
+```markdown
+# Atividade: <title>
+
+**Data:** <YYYY-MM-DD HH:mm>
+**Categoria:** <category>
+**Servidor:** <server ou "(local)">
+**Projeto:** <project ou "(geral)">
+**Status:** <status>
+
+## Descricao
+<o que estava acontecendo, como foi identificado>
+
+## Causa Raiz
+<causa raiz identificada ou "(em investigacao)">
+
+## Resolucao
+<o que foi feito para resolver>
+
+## Tags
+<palavras-chave separadas por virgula>
+
+---
+
+> SYNC PENDENTE: Registrar no Cerebro via log_activity quando MCP reconectar.
+```
+
+## Campos obrigatorios
+
+| Campo | Valores |
+|-------|---------|
+| title | Resumo em 1 linha (max 80 chars) |
+| category | troubleshooting, config, deploy, validation, infra, monitoring, security, other |
+| status | resolved, pending, monitoring, delegated, wont_fix |
+
+## Campos recomendados
+
+| Campo | Descricao |
+|-------|-----------|
+| server | Hostname ou alias do servidor afetado |
+| project | Repositorio relacionado |
+| description | Contexto completo |
+| root_cause | Causa raiz (se identificada) |
+| resolution | Acao tomada |
+| tags | Palavras-chave para busca |
+
+## Enfileirar na sync queue
+
+Alem de salvar o arquivo .md, adicionar item na sync queue:
+
+```json
+{
+  "id": "<timestamp>",
+  "tool": "log_activity",
+  "params": {
+    "title": "...",
+    "category": "...",
+    "server": "...",
+    "project": "...",
+    "description": "...",
+    "root_cause": "...",
+    "resolution": "...",
+    "status": "...",
+    "tags": ["..."]
+  },
+  "created_at": "<ISO date>",
+  "status": "pending",
+  "error": null
+}
+```
+
+## Mensagem para o usuario
+
+> "Atividade registrada localmente em `.telecontrol/activities/<arquivo>.md`.
+> MCP indisponivel — sync pendente. Sera sincronizado na proxima sessao com MCP ativo."

@@ -1,0 +1,308 @@
+---
+steering-version: 1.0.0
+description: Documentacao de Branch — Ciclo de Vida Completo
+globs: **/.docs/**,**/CHANGELOG.md,**/README.md
+alwaysApply: false
+---
+
+# Documentacao de Branch — Ciclo de Vida Completo
+
+Define a estrutura obrigatoria de documentacao para cada branch de trabalho.
+Os documentos ficam em `.docs/branchs/<tipo>/<nome>/` e sao gitignored (uso local do agente).
+
+---
+
+## Principio
+
+> Toda branch deve ter documentacao que registre: o que foi analisado, o que foi planejado, o que foi implementado, e o que foi validado. Esses docs sao a memoria de trabalho do agente e servem como insumo para analises futuras.
+
+---
+
+## Aplicabilidade
+
+Esta regra aplica-se a **TODOS os projetos** do ecossistema Telecontrol, sem excecao.
+Independente de linguagem (Node, PHP, Python), framework (NestJS, Lumen, Vue), ou tipo
+de projeto (API, frontend, infra, MCP, dev-standards).
+
+| Tipo de projeto | Aplica? | Exemplo |
+|-----------------|---------|---------|
+| APIs backend | Sim | api-helpdesk, api-callcenter-lumen, omni-chatbot-api |
+| Frontends | Sim | painel-telezap, telebots-frontend |
+| Infraestrutura | Sim | telecontrol-mcp, telecontrol-dev-standards |
+| Bibliotecas/pacotes | Sim | qualquer lib interna |
+| Scripts/automacoes | Sim (se branch) | scripts que viram PR |
+
+**Excecoes:** Apenas hotfixes criticos (producao fora do ar) e quick scope (< 5 linhas)
+podem pular a documentacao de branch, conforme definido em `infra/fluxo-contribuicao.md`.
+
+---
+
+## Ciclo de Vida
+
+```
+Branch criada
+    ↓
+01-analise.md        ← ANTES de implementar (obrigatorio)
+    ↓
+02-plano.md          ← Apos validacao do usuario (obrigatorio)
+    ↓
+[implementacao]
+    ↓
+03-resumo-final.md   ← Apos implementar (obrigatorio)
+    ↓
+PR_DESCRIPTION.md    ← Pre-pronto para o PR (obrigatorio)
+    ↓
+COMMIT_MSG.md        ← Mensagem de commit formatada (opcional, util para multi-commit)
+```
+
+---
+
+## Estrutura de Pastas
+
+```
+.docs/branchs/<tipo>/<nome-da-branch>/
+├── 01-analise.md
+├── 02-plano.md
+├── 03-resumo-final.md
+├── PR_DESCRIPTION.md
+├── COMMIT_MSG.md          (opcional)
+└── extras/                (opcional: diagramas, screenshots, logs)
+```
+
+Onde:
+- `<tipo>` = prefixo da branch: `feat`, `fix`, `refactor`, `improvement`, `chore`, `perf`
+- `<nome-da-branch>` = nome apos o prefixo (ex: branch `feat/health-check` → pasta `feat/health-check/`)
+
+### Gitignore Obrigatorio
+
+A pasta `.docs/branchs/` DEVE estar no `.gitignore` do projeto. Os docs sao locais (memoria de trabalho do agente) e nao devem ser versionados no repositorio remoto.
+
+Ao configurar a estrutura base de um projeto pela primeira vez, o agente DEVE:
+1. Criar a pasta `.docs/branchs/`
+2. Adicionar a regra no `.gitignore`:
+   ```
+   # Documentacao local por branch (nao enviar ao repositorio)
+   .docs/branchs/
+   ```
+3. **Commitar o `.gitignore` atualizado** — este e o unico arquivo que vai para o repositorio. Os docs dentro de `.docs/branchs/` nao entram no commit (estao gitignored).
+
+---
+
+## Quando Criar Cada Documento
+
+| Documento | Momento | Gatilho |
+|-----------|---------|---------|
+| `01-analise.md` | Imediatamente apos criar a branch | Etapa 2 (INVESTIGAR) do fluxo |
+| `02-plano.md` | Apos usuario aprovar o plano | Etapa 4 (VALIDAR) do fluxo |
+| `03-resumo-final.md` | Apos implementacao + testes passando | Etapa 6 (VERIFICAR) do fluxo |
+| `PR_DESCRIPTION.md` | Antes de criar o PR | Etapa 7 (FINALIZAR) do fluxo |
+
+---
+
+## Templates
+
+### 01-analise.md
+
+```markdown
+# Analise: [nome da demanda]
+
+**Branch:** `<tipo>/<nome>`
+**Data:** YYYY-MM-DD
+**Solicitante:** [usuario ou contexto]
+
+## Demanda
+
+[O que foi pedido, em 2-3 frases claras]
+
+## Contexto
+
+[Qual e o estado atual do codigo/feature. O que ja existe.]
+
+## Arquivos Relevantes
+
+- `src/modulo/arquivo.ts` — [o que faz, por que e relevante]
+- `src/modulo/outro.ts` — [dependencia, caller, etc.]
+
+## Dependencias Identificadas
+
+- [O que esse codigo afeta? Quem consome?]
+- [Existem testes cobrindo essa area?]
+
+## Riscos
+
+- [O que pode quebrar]
+- [O que precisa de atencao especial]
+
+## Criterios de Sucesso
+
+- [ ] [criterio 1]
+- [ ] [criterio 2]
+```
+
+### 02-plano.md
+
+```markdown
+# Plano de Implementacao: [nome da demanda]
+
+**Branch:** `<tipo>/<nome>`
+**Aprovado por:** [usuario] em YYYY-MM-DD
+
+## Abordagem
+
+[Resumo da solucao escolhida. Alternativas descartadas brevemente.]
+
+## Arquivos Afetados
+
+- [criar] `src/modulo/novo.ts` — [o que vai fazer]
+- [alterar] `src/modulo/existente.ts` — [o que muda]
+- [criar] `src/modulo/novo.spec.ts` — [testes]
+
+## Ordem de Implementacao
+
+1. [primeiro passo]
+2. [segundo passo]
+3. [testes]
+
+## Testes a Escrever
+
+- [ ] [cenario 1 — happy path]
+- [ ] [cenario 2 — edge case]
+- [ ] [cenario 3 — erro esperado]
+
+## Riscos e Mitigacao
+
+| Risco | Mitigacao |
+|-------|-----------|
+| [risco] | [como mitigar] |
+```
+
+### 03-resumo-final.md
+
+```markdown
+# Resumo Final: [nome da demanda]
+
+**Branch:** `<tipo>/<nome>`
+**Data conclusao:** YYYY-MM-DD
+
+## O que foi implementado
+
+- `src/modulo/arquivo.ts` — [descricao do que faz]
+- `src/modulo/arquivo.spec.ts` — N testes (X cenarios)
+
+## Testes
+
+- **Automatizados:** X passando (Y suites, 0 falhas)
+- **Manuais:** [lista de cenarios validados manualmente, se aplicavel]
+
+## Desvios do Plano Original
+
+- [O que mudou vs plano e por que. Se nao houve: "Nenhum desvio."]
+
+## Decisoes Tecnicas
+
+- [DT-01: decisao tomada e motivo]
+
+## Melhorias Identificadas (nao implementadas)
+
+- [melhoria 1 — para futuro]
+- [melhoria 2 — para futuro]
+```
+
+### PR_DESCRIPTION.md
+
+```markdown
+## Problema
+
+[O que motivou esta mudanca. Cenario anterior.]
+
+## Decisao
+
+[Abordagem escolhida, validada com o solicitante.]
+
+## O que foi implementado
+
+- `arquivo.ts` — descricao
+- `arquivo.spec.ts` — N testes cobrindo X cenarios
+
+## Plano de testes
+
+- Testes automatizados: X unit, Y e2e
+- Cenarios testados manualmente
+- Como o revisor pode validar
+
+## Reutilizacao
+
+| Campo | Valor |
+|-------|-------|
+| Dominio | [area-de-negocio] |
+| Capacidade | [descricao generica] |
+| Reutilizavel | [cliente/projeto/ambos/nao] |
+| Pre-requisitos | [libs, servicos, infra] |
+| Adaptacoes | [o que precisaria mudar] |
+| Tags | [palavras-chave] |
+
+## Proximos passos
+
+- [ ] [tarefa futura]
+
+## Notas para o revisor
+
+- [pontos de atencao, trade-offs]
+```
+
+---
+
+## Regra de Atualizacao Continua
+
+- Se a branch receber novos commits apos o resumo final (correcoes pos-review, ajustes):
+  - Atualizar `03-resumo-final.md` com secao "Atualizacoes pos-review"
+  - Atualizar `PR_DESCRIPTION.md` se o escopo/descricao do PR mudou
+- Se o escopo mudar durante implementacao:
+  - Atualizar `01-analise.md` com nota: "Escopo alterado em YYYY-MM-DD: [o que mudou]"
+  - Atualizar `02-plano.md` com o novo plano aprovado
+
+---
+
+## Checklist Pre-PR (OBRIGATORIO antes de criar o PR)
+
+Antes de criar ou atualizar um PR, o agente DEVE validar:
+
+- [ ] **Testes:** `npm test` executado e passando (0 falhas)
+- [ ] **Compilacao:** projeto compila sem erros
+- [ ] **Docs de branch:** todos os 4 documentos obrigatorios existem em `.docs/branchs/<tipo>/<nome>/`
+- [ ] **CHANGELOG:** entrada adicionada em `[Unreleased]`
+- [ ] **README:** atualizado se houve nova env var, endpoint ou dependencia
+- [ ] **NEXT_PROMPT.md:** atualizado com estado final
+- [ ] **Swagger/OpenAPI:** decorators atualizados se endpoint novo/alterado
+- [ ] **Commit:** mensagem no formato padrao com metadados (dominio, capacidade, tags)
+
+Se algum item falhar: corrigir ANTES de criar/atualizar o PR.
+
+---
+
+## Validacao Final — Fallback de Criacao
+
+**REGRA CRITICA:** Se no momento de criar o PR o agente identificar que a documentacao de branch NAO existe (pasta `.docs/branchs/<tipo>/<nome>/` ausente ou incompleta):
+
+1. **NAO crie o PR ainda.**
+2. Informe o usuario: "A documentacao de branch esta ausente/incompleta. Vou criar agora antes de abrir o PR."
+3. Crie os documentos retroativamente:
+   - `01-analise.md` — reconstruir a analise com base no que foi implementado (git diff, commits, codigo atual)
+   - `02-plano.md` — reconstruir o plano a partir do que foi feito (pode ser simplificado se ja implementou)
+   - `03-resumo-final.md` — criar normalmente com base no estado atual
+   - `PR_DESCRIPTION.md` — criar normalmente
+4. Somente apos a documentacao completa: prossiga com a criacao do PR.
+
+**Motivacao:** Esses documentos servem como insumo para analises futuras (historico de decisoes, base de conhecimento, e eventual persistencia em banco). Nenhum PR deve ser criado sem que a branch tenha seu registro documental completo.
+
+---
+
+## Integracao com Persistencia (futuro)
+
+Os documentos de `.docs/branchs/` sao candidatos a persistencia no Cerebro (Postgres) para:
+- Busca semantica de decisoes tecnicas passadas
+- Analise de padrao de trabalho por projeto/desenvolvedor
+- Insumo para o analista de PR (contexto de por que algo foi feito)
+- Rastreabilidade: qual branch gerou qual mudanca, com qual justificativa
+
+Quando a tool `persist_branch_docs` estiver disponivel no MCP, o agente deve chamar automaticamente apos criar o PR com sucesso.

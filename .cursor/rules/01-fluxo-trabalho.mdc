@@ -1,0 +1,638 @@
+---
+steering-version: 1.2.0
+description: Fluxo de Trabalho — Etapas de Pensamento
+globs: 
+alwaysApply: false
+---
+
+# Fluxo de Trabalho — Etapas de Pensamento
+
+Fluxo estruturado que o agente DEVE seguir para toda demanda. Nunca pule etapas.
+Para regras especificas de commits, testes e UI, consulte os steerings tematicos.
+
+**Contexto do projeto:** Consulte SEMPRE `00-contexto-projeto.md` no steering local.
+
+---
+
+## Fluxo Obrigatorio (para TODA demanda)
+
+### Etapa 1: ENTENDER — O que foi pedido?
+
+Antes de qualquer ação:
+- Reescreva a demanda com suas palavras (1-2 frases)
+- Identifique: é feature nova? bug fix? refactor? melhoria de performance?
+- Identifique os critérios de sucesso (como saber se está pronto?)
+- Se algo não está claro: PARE e pergunte. Não assuma.
+
+**Output:** Exibir no chat: "Entendi que preciso [X]. O critério de sucesso é [Y]. Correto?"
+
+### Etapa 2: INVESTIGAR — O que já existe?
+
+Antes de planejar:
+- Ler os arquivos relevantes (não adivinhe — leia o código)
+- Verificar se já existe algo parecido no projeto (não reinvente)
+- **Buscar funcionalidades semelhantes (OBRIGATORIO):**
+  - Executar `search_similar` com titulo/descricao da feature solicitada
+  - Executar `search_cerebro` com palavras-chave relevantes
+  - Se encontrar algo semelhante: informar ao usuario ANTES de prosseguir
+  - Documentar resultado da busca em `.docs/branchs/` (secao "Analise do que ja existe")
+  - NAO usar grep amplo em projetos grandes (custo de tokens). Apenas grep pontual se precisar confirmar algo especifico
+- **Principio de Implementacao Incremental:**
+  - Se encontrar funcionalidade existente semelhante ao solicitado:
+    1. Informar ao usuario: "Encontrei [X] que faz algo parecido com [Y]. Arquivo: [Z], funciona assim: [descricao]"
+    2. Perguntar: "Deseja que eu adapte/estenda isso? Ou prefere uma nova abordagem?"
+    3. AGUARDAR resposta do usuario antes de prosseguir
+    4. Se usuario aprovar reuso: implementar de forma INCREMENTAL (extends, wrapper, parametro adicional)
+    5. Se usuario preferir novo: prosseguir normalmente, documentando o motivo
+  - Se NAO encontrar nada similar: documentar "Busca realizada, nenhum similar encontrado" e prosseguir
+  - NUNCA implementar do zero sem antes verificar se ja existe algo aproveitavel
+  - NUNCA modificar funcionalidade existente sem autorizacao explicita do usuario
+- Verificar documentação em `.docs/` (decisões, contratos, schema)
+- Entender as dependências (o que esse código afeta? quem chama ele?)
+- Verificar se há testes existentes que cobrem a área afetada
+- **Verificar `00-contexto-projeto.md`:** Se o arquivo contém `[A PREENCHER]`:
+  - Informar o usuario: "O arquivo `00-contexto-projeto.md` tem campos pendentes: [listar campos]. Desejo analisar o projeto e preencher agora?"
+  - Se usuario responde "sim" → analisar (package.json, .env.example, Dockerfile, estrutura de pastas, banco) e preencher
+  - Se usuario responde "não" ou "depois" → seguir com a demanda normalmente
+  - **NAO bloquear** — a demanda pode ser atendida mesmo sem o contexto completo
+- **Verificar estrutura base do projeto:** Se algum dos arquivos abaixo NAO existir, informar o usuario e perguntar se deseja criar:
+  - `.ai/NEXT_PROMPT.md` — continuidade entre sessoes
+  - `.ai/steering/00-contexto-projeto.md` — contexto do projeto (criar do template se ausente)
+  - `.docs/branchs/` — pasta para documentacao de branches (gitignored)
+  - Regra no `.gitignore`: `.docs/branchs/` e `.ai/*.lock`
+  - Formato: "Identifiquei que faltam [arquivos]. Deseja que eu crie a estrutura base agora?"
+- **Para telas/frontend:** Consultar OBRIGATORIAMENTE:
+  - `telecontrol-dev-standards/padroes-ui-telecx.md` — tokens visuais (cores, radius, tipografia)
+  - `telecontrol-dev-standards/diretrizes-ui-comportamento.md` — posições, interações, grids, fluxos
+  - **Tema TeleCX:** Ao iniciar a fase de frontend, PERGUNTE ao usuario: "Este projeto deve usar o tema visual TeleCX (`VITE_UI_THEME=telecx`)?" Se sim, configurar `.env.example` com a variavel e importar tokens conforme secao 13 do `padroes-ui-telecx.md`. Se o doc de fases ja define o uso do tema, nao precisa perguntar novamente.
+
+**Output mental (não precisa exibir tudo):** Mapa mental de: onde mexer, o que depende, o que pode quebrar.
+
+### Etapa 3: PLANEJAR — Como resolver?
+
+Antes de implementar:
+- Definir a abordagem (qual a solução?)
+- Listar os arquivos que serão criados/alterados
+- Identificar riscos (o que pode dar errado? o que pode quebrar?)
+- Definir a ordem de implementação (o que fazer primeiro?)
+- Definir que testes escrever
+
+**Output:** Exibir no chat um mini-plano:
+```
+## Plano de Implementacao
+
+**Abordagem:** [resumo da solucao]
+
+**Arquivos afetados:**
+- [criar] src/modulo/novo-arquivo.ts
+- [alterar] src/modulo/existente.ts
+- [criar] src/modulo/novo-arquivo.spec.ts
+
+**Ordem:**
+1. [primeiro passo]
+2. [segundo passo]
+3. [testes]
+
+**Riscos:**
+- [risco e como mitigar]
+```
+
+### Etapa 4: VALIDAR — O usuario concorda? (BLOQUEANTE)
+
+**REGRA CRITICA:** Esta etapa e BLOQUEANTE. O agente NAO PODE escrever, criar ou alterar nenhum arquivo de codigo antes de receber aprovacao explicita do usuario. Ignorar esta etapa e violacao grave.
+
+PARE e pergunte:
+- "Este plano faz sentido? Posso prosseguir?"
+- Se o usuario corrigir algo: ajuste o plano e pergunte novamente
+- Só avance quando receber confirmação EXPLICITA ("OK", "pode seguir", "aprovado", "sim")
+- Respostas ambiguas (emoji, "hmm", "talvez"): pergunte novamente para confirmar
+
+**Para alterações de tela/frontend:**
+- Exibir a estrutura proposta da tela (layout, posição dos botões, campos)
+- Descrever o comportamento (click na linha faz X, botão Y fica em Z)
+- Aguardar confirmação explícita antes de implementar
+- Se houver dúvidas sobre UX: perguntar ANTES, mostrando alternativas
+
+**Excecao UNICA:** Para fixes triviais (typo, import errado, lint fix) que nao alteram logica de negocio, pode pular esta etapa. Na duvida se e trivial: pergunte.
+
+### Etapa 5: IMPLEMENTAR — Executar o plano
+
+Agora sim, escreva código:
+- **Criar branch** antes de qualquer alteracao: `git checkout -b feat/nome-da-tarefa`
+- Siga o plano definido na Etapa 3 (não desvie)
+- Implemente na ordem definida
+- Escreva testes unitarios/E2E junto com a implementação (não "depois")
+- **Crie script de teste manual** em `.docs/testes-manuais/` para validacao da funcionalidade em producao (bash com curl, indicadores ✅/❌, BASE_URL configuravel)
+- Rode os testes frequentemente (a cada arquivo concluído)
+- Se encontrar algo inesperado: PARE, informe o usuario, ajuste o plano
+
+**Regras durante implementação:**
+- Leia o arquivo antes de alterá-lo (nunca edite sem ver o estado atual)
+- Mantenha o estilo do código existente (não mude patterns por preferência pessoal)
+- Não faça mudanças fora do escopo do plano (se identificar melhorias extras, anote e sugira depois)
+
+**Mudanca de escopo durante implementacao:**
+- Se a demanda sofrer alteracao (usuario pede algo diferente, ou voce identifica que o escopo original nao cobre um cenario):
+  1. PARE a implementacao
+  2. Notifique o usuario: "Identifiquei uma mudanca no escopo original:"
+  3. Mostre o diff claro: **Antes:** [o que era] → **Depois:** [o que passou a ser]
+  4. Aguarde confirmacao explicita ("OK", "pode seguir", "aprovado")
+  5. So apos o OK: atualize o arquivo de analise da branch (`.docs/branchs/...`) refletindo a mudanca
+  6. Continue a implementacao com o escopo atualizado
+- NUNCA altere o escopo silenciosamente. Toda mudanca deve ser visivel e aprovada.
+
+**Debug em erros repetidos:**
+- Se o usuario reportar 2 ou mais erros sequenciais no mesmo ponto/funcionalidade:
+  1. NAO tente corrigir cegamente pela terceira vez
+  2. Crie pontos de debug/log auxiliares para diagnosticar a causa raiz
+  3. Apresente ao usuario: "Estou adicionando logs de debug para entender o que esta acontecendo em [area]. Execute e me envie o output."
+  4. Sugira quais informacoes coletar (output do console, status HTTP, payload, estado do banco)
+  5. Com base no output de debug, diagnostique a causa raiz antes de tentar nova correcao
+- Remova os debugs/logs temporarios apos resolver o problema
+
+### Etapa 6: VERIFICAR — Funciona?
+
+Após implementar:
+- Rodar TODOS os testes (não só os novos)
+- Verificar se compila sem erros
+- Verificar se os testes existentes continuam passando
+- Se algo falhou: corrigir ANTES de informar que terminou
+
+**Validacao local com o usuario:**
+
+Apos testes automatizados passarem, envie ao usuario os comandos para executar o projeto localmente:
+
+```
+## Como executar localmente
+
+# Backend
+cd backend
+npm install  (se necessario)
+npm run start:dev
+
+# Frontend (se aplicavel)
+cd frontend
+npm install  (se necessario)
+npm run dev
+```
+
+Em seguida, PERGUNTE: "Quer que eu envie a lista de testes manuais e como executar (incluindo curls)?"
+
+Se o usuario aceitar, gere os curls e instrucoes de teste:
+- Listar cada cenario a validar (happy path + edge cases)
+- Incluir `curl` completo para cada endpoint afetado (com headers, body, URL local)
+- Indicar o resultado esperado (status code, campos no response)
+- Se envolver UI: descrever o passo-a-passo (clicar em X, preencher Y, verificar Z)
+
+**Exemplo de bloco de testes:**
+```bash
+# 1. Login
+curl -X POST http://localhost:3040/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "senha"}' 
+# Esperado: 200, retorna { "access_token": "...", "refresh_token": "..." }
+
+# 2. Listar recursos (autenticado)
+curl http://localhost:3040/api/recursos \
+  -H "Authorization: Bearer TOKEN_DO_PASSO_1"
+# Esperado: 200, retorna array com recursos cadastrados
+```
+
+- Fazer o commit com mensagem descritiva que represente a funcionalidade
+- Criar PR com descricao estruturada (ver formato abaixo)
+- **Vincular commit à demanda (OBRIGATORIO):** Se esta implementacao resolve uma demanda
+  registrada no Cerebro, executar `update_demand` com:
+  - `id`: ID da demanda
+  - `commit_hash`: hash do commit principal (ex: `a2b4919`)
+  - `branch`: nome da branch (ex: `feat/nome-da-tarefa`)
+  - `pr_url`: URL do PR (apos criar)
+  - `status`: `done` (marca como resolvida, preenche resolved_at automaticamente)
+  Isso garante rastreabilidade: demanda → commit → PR → deploy.
+
+**Formato do commit (PT-BR):**
+```
+feat(modulo): descricao da funcionalidade implementada
+
+dominio: [area-de-negocio]
+capacidade: [o-que-entrega-genericamente]
+reusavel: [cliente|projeto|ambos|nao]
+tags: [palavras-chave separadas por virgula]
+```
+
+**Campos obrigatorios no corpo do commit:**
+- `dominio`: area de negocio (ex: `atendimento`, `monitoramento`, `cobranca`, `comunicacao`, `autenticacao`, `infra`)
+- `capacidade`: descricao generica do que a feature faz, sem mencionar o projeto (ex: `alerta-threshold-com-cooldown`, `crud-com-soft-delete`, `fila-com-prioridade`, `probe-http-com-retry`)
+- `reusavel`: classificacao de reutilizacao:
+  - `cliente`: pode ser aplicado para outros clientes/fabricas no mesmo projeto (ex: regra hoje especifica do cliente X que serve para Y)
+  - `projeto`: pode ser reaproveitado em outro projeto/codebase (ex: modulo generico de notificacao)
+  - `ambos`: reutilizavel tanto por outros clientes quanto por outros projetos
+  - `nao`: implementacao especifica, sem potencial de reuso
+- `tags`: palavras-chave para busca semantica (ex: `telegram, cooldown, regras-configuraveis`)
+
+**Campo opcional — BREAKING (quando aplicavel):**
+
+Se o commit quebra compatibilidade (schema migration destrutiva, contrato de API alterado, env var renomeada, comportamento existente alterado), adicionar `BREAKING:` no corpo do commit:
+
+```
+feat(modulo): descricao da funcionalidade
+
+BREAKING: descricao do que mudou e impacto para quem consome
+- [antes]: comportamento antigo
+- [depois]: comportamento novo
+- [migracao]: o que precisa ser feito (rodar migration, atualizar env, etc)
+
+dominio: [area]
+capacidade: [capacidade]
+reusavel: [cliente|projeto|ambos|nao]
+tags: [tags]
+```
+
+**Quando marcar BREAKING:**
+- Migration que remove/renomeia coluna ou tabela
+- Endpoint que muda payload de request/response
+- Variavel de ambiente renomeada ou removida
+- Comportamento de regra de negocio alterado (ex: cooldown que antes era 5min agora e 10min)
+- Dependencia de versao major atualizada (ex: Prisma 5 → 6)
+
+**Quando NAO marcar BREAKING:**
+- Migration que apenas adiciona coluna (compativel)
+- Endpoint novo (nao afeta existentes)
+- Fix de bug (correcao, nao mudanca de contrato)
+- Refactor interno sem mudanca de interface
+
+A primeira linha deve representar O QUE a funcionalidade faz. SEMPRE em portugues.
+
+**Exemplos:**
+```
+feat(alertas): regras de alerta com cooldown por canal de notificacao
+
+dominio: monitoramento
+capacidade: alerta-threshold-com-cooldown
+reusavel: ambos
+tags: telegram, cooldown, regras-configuraveis, bullmq
+```
+
+```
+fix(auth): corrige refresh token expirado retornando 401
+
+dominio: autenticacao
+capacidade: jwt-refresh-token
+reusavel: projeto
+tags: jwt, refresh, interceptor
+```
+
+```
+feat(whatsapp): coletor de saude dos numeros Meta
+
+dominio: comunicacao
+capacidade: coletor-saude-whatsapp-meta
+reusavel: cliente
+tags: meta, graph-api, whatsapp, health-check
+```
+
+**Formato da descricao do PR (PT-BR, Markdown formatado):**
+
+Cada secao deve ter linha em branco entre titulo e conteudo (para renderizar no GitHub):
+
+```markdown
+## Problema
+
+O que motivou esta mudanca. Qual era o cenario antes.
+
+## Decisao
+
+Abordagem escolhida, validada com o solicitante. Alternativas descartadas brevemente.
+
+## O que foi implementado
+
+- `arquivo.ts` — descricao do que faz
+- `arquivo.spec.ts` — N testes cobrindo X cenarios
+
+## Plano de testes
+
+- Testes automatizados: X unit, Y e2e
+- Cenarios testados manualmente
+- Como o revisor pode validar
+
+## Reutilizacao
+
+| Campo | Valor |
+|-------|-------|
+| Dominio | [area-de-negocio: atendimento, monitoramento, cobranca, comunicacao, etc.] |
+| Capacidade | [descricao generica do que a feature entrega, sem mencionar o projeto] |
+| Reutilizavel | [cliente (outro tenant) / projeto (outra codebase) / ambos / nao] |
+| Pre-requisitos para reutilizar | [libs, servicos, infra necessaria. Ex: BullMQ, Redis, servico de notificacao] |
+| Adaptacoes necessarias | [o que precisaria mudar para usar em outro contexto] |
+| Tags | [palavras-chave para busca semantica] |
+
+## Proximos passos
+
+- [ ] Tarefa futura identificada
+- [ ] Melhoria para depois
+
+## Notas para o revisor
+
+- Pontos de atencao
+- Trade-offs aceitos e motivo
+```
+
+**Output:** Exibir no chat:
+- O que foi implementado
+- Quantos testes passaram
+- Se algo precisou de ajuste vs plano original
+
+### Etapa 7: FINALIZAR — Deixar pronto para o proximo
+
+Após commit:
+- Atualizar documentação se necessário
+- **Documentacao obrigatoria (sempre verificar):**
+  - `README.md` do projeto: manter atualizado com setup, variaveis de ambiente, comandos de execucao
+  - Swagger/OpenAPI: se a feature adicionou/alterou endpoints, DEVE atualizar decorators do Swagger (NestJS: `@ApiTags`, `@ApiOperation`, `@ApiResponse`) ou arquivo OpenAPI manual
+  - `.docs/` do projeto: atualizar docs afetados (schema, contratos, fases)
+  - Se criou modulo novo: adicionar secao no README com descricao do modulo
+  - `CHANGELOG.md`: adicionar entrada para cada PR/merge (ver formato abaixo)
+
+**Formato do CHANGELOG.md:**
+
+```markdown
+# Changelog
+
+## [Unreleased]
+
+### Adicionado (feat)
+- descricao da feature (#PR)
+
+### Corrigido (fix)
+- descricao do fix (#PR)
+
+### Alterado (refactor/chore)
+- descricao da alteracao (#PR)
+
+### Quebra de compatibilidade (BREAKING)
+- descricao do que mudou e impacto (#PR)
+
+---
+
+## [YYYY-MM-DD] - vX.Y.Z
+
+### Adicionado
+- ...
+```
+
+**Regras do CHANGELOG:**
+- Manter secao `[Unreleased]` no topo com tudo que ainda nao foi para producao
+- Ao fazer deploy/release: mover itens de `[Unreleased]` para nova secao com data e versao
+- Cada entrada deve ser 1 linha descritiva (o que muda para o usuario/sistema, nao detalhes tecnicos)
+- Agrupar por tipo: Adicionado, Corrigido, Alterado, Quebra de compatibilidade
+- Se o projeto nao tem `CHANGELOG.md`, criar na primeira entrega
+
+**Versionamento semantico (semver):**
+- Ao criar release, usar formato `vMAJOR.MINOR.PATCH`:
+  - **MAJOR** (v2.0.0): quando tem BREAKING change (incompatível com versao anterior)
+  - **MINOR** (v1.1.0): quando adiciona funcionalidade nova (feat) sem quebrar compatibilidade
+  - **PATCH** (v1.0.1): quando corrige bug (fix) sem adicionar funcionalidade
+- Primeira release de um projeto: `v1.0.0`
+- Exemplo de secao ao fazer release:
+  ```
+  ## [2026-07-29] - v1.2.0
+  ### Adicionado
+  - Alerta por squad com cooldown configuravel
+  ### Corrigido
+  - Refresh token nao renovava apos expirar
+  ```
+- Se houver BREAKING no release: bumpar MAJOR independente de quantos feats/fixes acompanham
+- Consultar `telecontrol-dev-standards/glossario-dominios.md` para padronizar descricoes
+- **Atualizar `14-fases-desenvolvimento.md`:** marcar checkboxes `[ ]` → `[x]` para cada entrega concluida. Se a fase inteira esta completa, adicionar nota "✅ Fase N concluida em [data]" abaixo do titulo da fase.
+- **Criar scripts de teste manual** em `.docs/testes-manuais/` (se ainda nao criou na Etapa 5). Scripts devem:
+   - Usar `BASE_URL` configuravel (local ou producao)
+   - Para envio de mensagens WhatsApp, usar numero: `5514981812988`
+   - Indicar claramente: "Rode da sua maquina local: `BASE_URL=https://omni-communicator.telecontrol.com.br/api sh SCRIPT.sh`"
+- **OBRIGATORIO: Atualizar `.ai/NEXT_PROMPT.md`** com estado completo (o que foi feito, o que falta, prompt para o proximo agente). NUNCA pule este passo.
+- **Verificar `00-contexto-projeto.md`:** Se a implementacao adicionou ou alterou algo que afeta o contexto do projeto, atualizar:
+  - Nova variavel de ambiente → atualizar secao de env vars
+  - Nova dependencia instalada → atualizar secao de stack/deps
+  - Novo endpoint → atualizar secao de rotas (ou confirmar que Swagger cobre)
+  - Mudanca de porta/URL/servidor → atualizar secao de deploy
+  - Se identificou campos desatualizados: informar o usuario "Atualizei o `00-contexto-projeto.md` com [X]" (ou perguntar se deseja)
+- Remover lockfile (se criou)
+- Informar o usuario: "Fase N concluida. Proximos passos: [lista]"
+- Se o proximo passo envolve testes em producao: perguntar "Quer que eu envie os comandos/scripts de teste para voce executar?"
+- Se o usuario confirmar que os testes passaram: perguntar "Testes OK. Quer seguir para a Fase N+1?"
+- **Sugestao de melhorias:** Apos finalizar, PERGUNTE: "Deseja que eu apresente sugestoes de melhorias relacionadas ao que foi desenvolvido?" Se aceitar: liste ate 5 melhorias (impacto + esforco). Se quiser aplicar: pergunte quais e implemente seguindo o fluxo normal.
+
+**DEPLOY:** O agente NUNCA executa deploy no servidor. Apenas sugere os comandos para o usuario executar manualmente.
+
+**Log de Deploy (projetos com CI/CD):**
+
+Para projetos com CI/CD automatico (deploy apos merge na master):
+
+1. **Ao mergear o PR** (imediatamente apos merge confirmado):
+   - Executar `log_deploy` com:
+     - `server`: servidor de producao do projeto
+     - `project`: nome do projeto
+     - `branch`: master
+     - `method`: ci-cd
+     - `status`: success
+     - `notes`: descricao breve do que foi deployado (titulo do PR)
+   - O status `success` assume que o CI vai funcionar (e o padrao para CI confiavel)
+
+2. **Se o CI falhar** (usuario reportar erro):
+   - Logar novo deploy com `status: failed` e `notes` explicando a falha
+   - Corrigir, commitar na branch, mergear novamente, logar novo deploy com `status: success`
+
+3. **NAO esperar validacao manual** para logar — o deploy acontece automaticamente pelo CI.
+   O log deve refletir o momento do merge, nao o momento em que alguem valida depois.
+
+---
+
+## Quando NÃO seguir este fluxo completo
+
+| Situacao | O que fazer |
+|---|---|
+| Pergunta de consulta (sem código) | Responder diretamente |
+| Fix trivial (typo, import) | Etapas 1+5+6 (pular 2-4) |
+| Continuação de tarefa já planejada | Etapas 5+6+7 (plano já existe) |
+
+---
+
+## Fluxo: Analise de Chamado Helpdesk
+
+Quando o desenvolvedor solicitar "analise o chamado X" ou "analise este chamado 15849284":
+
+### 1. Buscar dados do chamado
+- Executar `get_helpdesk_ticket(ticket_id)` com o ID informado
+- Apresentar o resumo formatado ao desenvolvedor
+
+### 2. Analisar contexto
+- Identificar: qual e o problema? qual sistema afeta?
+- Verificar se a tool detectou projeto (hint fraco): confirmar com o dev
+- Buscar similares: `search_similar` com titulo/descricao do chamado
+- Se encontrar similar: informar ao desenvolvedor
+
+### 3. Sugerir abordagem (SEM PRESUMIR)
+- Apresentar sugestao: "Com base no chamado, sugiro [abordagem]"
+- Listar perguntas que precisam de resposta antes de codar:
+  - "Qual projeto e afetado? (confirma [sugestao]?)"
+  - "O comportamento esperado e [X]? Confirma?"
+  - "Existe alguma regra de negocio que eu deva considerar?"
+  - "Precisa consultar alguem antes de implementar?"
+  - "Ha anexos no chamado que devo analisar?"
+- Se o chamado for ambiguo: dizer "O chamado nao esta claro sobre [X]. Sugiro perguntar [Y] no chamado"
+
+### 4. Aguardar respostas
+- O desenvolvedor pode:
+  a. Responder diretamente
+  b. Interagir no chamado (HD) para obter mais info do solicitante
+  c. Consultar outros desenvolvedores ou admin
+  d. Pedir para analisar anexos (`get_helpdesk_attachment`)
+- **AGUARDAR** — nao prosseguir sem respostas
+
+### 5. Criar branch vinculada
+- Apos ter informacao suficiente: `git checkout -b feat/HD-{id}-descricao-curta`
+- Criar `.docs/branchs/` com analise completa
+
+### 6. Registrar como demanda (perguntar)
+- Perguntar: "Deseja registrar como demanda no Cerebro? (vincula ticket HD-{id})"
+- Se sim: executar `analyze_demand` com ticket, titulo, descricao do chamado
+- Se nao: prosseguir apenas com a analise local
+
+### 7. Validar plano e obter permissao
+- Apresentar plano de implementacao ao desenvolvedor
+- **Somente com permissao explicita:** iniciar codigo (Etapa 5 do fluxo principal)
+
+### Regras CRITICAS do fluxo de chamado:
+- **NUNCA presumir** o que deve ser feito — perguntar
+- **NUNCA iniciar codigo** sem permissao explicita do desenvolvedor
+- **NUNCA ler projeto inteiro** (projetos grandes) — focar no que o chamado indica
+- Se faltam informacoes: listar perguntas e aguardar
+- O desenvolvedor pode precisar de DIAS para obter respostas — nao pressionar
+- A branch `HD-{id}` permite retornar ao contexto depois
+
+---
+
+## Sinais de Alerta (PARE e pergunte)
+
+- A demanda parece contradizer uma decisão documentada
+- O código que precisa alterar está no lockfile de outro agente
+- A mudança afeta mais de 5 arquivos (pode ser um redesign, não um fix)
+- Não encontrou testes para a área que vai alterar (risco de regressão)
+- A solução que pensou precisa de uma nova dependência
+- Precisa mudar o schema do banco
+- Precisa mudar um contrato de API existente
+
+Em qualquer desses casos: explique a situação e pergunte como proceder.
+
+---
+
+## Protecao contra Operacoes Destrutivas (CRITICO)
+
+**Contexto:** Muitos desenvolvedores apontam o `.env` local diretamente para o banco de producao. Qualquer comando que altere ou apague dados pode causar dano irreversivel.
+
+**REGRAS ABSOLUTAS:**
+
+1. **NUNCA execute comandos que apaguem ou resetem banco de dados:**
+   - `prisma migrate reset` — PROIBIDO
+   - `prisma db push --force-reset` — PROIBIDO
+   - `DROP TABLE`, `TRUNCATE`, `DELETE FROM` sem WHERE — PROIBIDO
+   - `npx prisma db seed` sem confirmacao — PROIBIDO (pode sobrescrever dados reais)
+
+2. **Antes de qualquer migration ou seed**, PERGUNTE:
+   > "Seu .env esta apontando para o banco local ou de producao? Confirme antes de eu executar migrations."
+
+3. **Prefira comandos seguros:**
+   - `prisma migrate dev` — seguro (cria migration, nao destroi dados)
+   - `prisma migrate deploy` — seguro (aplica migrations pendentes)
+   - `prisma db pull` — seguro (apenas leitura)
+   - `prisma generate` — seguro (apenas gera client)
+
+4. **Para seeds/dados de teste:** sempre verificar se o ambiente e local antes de executar. Sugerir ao usuario:
+   ```
+   # Verifique se esta apontando para o banco LOCAL antes de rodar:
+   grep DATABASE_URL .env
+   # Se contiver "localhost" ou "127.0.0.1", esta seguro.
+   ```
+
+5. **Scripts de teste manual (.docs/testes-manuais/):** sempre usar `BASE_URL` configuravel e NUNCA incluir comandos destrutivos (DELETE, TRUNCATE) sem alerta explicito.
+
+6. **Se o usuario pedir para rodar algo destrutivo:** informar o risco, perguntar se tem backup, e so executar apos confirmacao explicita.
+
+---
+
+## Padrao de Resposta ao Finalizar
+
+```
+## Concluido
+
+**Implementado:** [resumo]
+
+**Arquivos criados/alterados:**
+- `src/x/y.ts` — [o que faz]
+- `src/x/y.spec.ts` — [N testes]
+
+**Testes:** X passando (Y suites, 0 falhas)
+
+**Commit:** `feat(modulo): descricao`
+
+**Notas:** [se algo precisou mudar vs plano original]
+```
+
+---
+
+## Sugestao de Melhorias (apos concluir)
+
+Apos finalizar a entrega e apresentar o "Padrao de Resposta ao Finalizar", PERGUNTE ao usuario:
+
+> "Deseja que eu apresente sugestoes de melhorias relacionadas ao que foi desenvolvido?"
+
+**Se o usuario aceitar:**
+- Liste as melhorias identificadas durante a implementacao (maximo 5)
+- Formato de cada sugestao:
+
+```
+| # | Melhoria | Impacto | Esforco |
+|---|----------|---------|---------|
+| 1 | [descricao curta] | [alto/medio/baixo] | [alto/medio/baixo] |
+| 2 | ... | ... | ... |
+```
+
+- Inclua melhorias de: performance, seguranca, UX, cobertura de testes, observabilidade, reutilizacao
+- NAO inclua melhorias que contradizem decisoes ja documentadas
+- NAO inclua refactors cosmeticos (renomear variavel, reordenar imports)
+
+**Se o usuario quiser aplicar:**
+- Pergunte: "Quais melhorias deseja aplicar? (informe os numeros, ex: 1, 3)"
+- Para cada melhoria selecionada: siga o fluxo normal (Planejar → Validar → Implementar → Verificar)
+- Commite cada melhoria separadamente com tipo `refactor` ou `feat` conforme adequado
+
+**Se o usuario recusar:**
+- Registre as melhorias identificadas na secao "Proximos passos" do PR (se ainda nao criou) ou no `NEXT_PROMPT.md` para referencia futura
+- Siga em frente normalmente
+
+---
+
+## Sugestoes de Melhoria para o Agente (agent-suggestion)
+
+Quando o usuario sugerir uma acao que possa melhorar o comportamento do agente,
+as regras de desenvolvimento, ou as ferramentas MCP, o agente DEVE registrar
+formalmente como demanda para analise do admin.
+
+**Gatilhos (quando o agente deve reconhecer como sugestao):**
+- Usuario diz algo como: "seria bom se o agente fizesse X"
+- Usuario sugere nova regra de steering ou workflow
+- Usuario identifica limitacao que poderia ser resolvida no MCP ou dev-standards
+- Usuario propoe melhoria em tool existente
+
+**Comportamento obrigatorio:**
+
+1. Reconhecer: "Isso parece uma boa melhoria para o workflow/agente"
+2. Criar demanda via `analyze_demand` com:
+   - `project`: `telecontrol-mcp` ou `telecontrol-dev-standards` (conforme escopo)
+   - `type`: `improvement`
+   - `tags`: `["agent-suggestion"]`
+   - `ticket_channel`: `agente`
+   - `description`: descricao clara da sugestao e contexto
+3. Informar ao usuario: "Registrei como demanda #X para analise do admin"
+4. **NAO implementar diretamente** — apenas admin pode modificar telecontrol-mcp e telecontrol-dev-standards
+
+**Restricao absoluta:** Agentes NAO podem modificar codigo do `telecontrol-mcp` ou
+`telecontrol-dev-standards`. Apenas o admin, via PR aprovado, pode alterar esses projetos.

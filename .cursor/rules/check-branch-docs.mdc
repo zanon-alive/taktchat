@@ -1,0 +1,21 @@
+---
+template_version: 2026-08-20-v1
+description: Verifica se a branch atual possui documentacao obrigatoria em .docs/branchs/. Se nao existir, avisa o agente para criar antes de implementar.
+globs: 
+alwaysApply: true
+---
+
+# Verificar documentacao de branch
+
+## Documentacao de Branch
+
+Ao iniciar qualquer conversa sobre implementacao:
+
+1. Verifique a branch atual com `git rev-parse --abbrev-ref HEAD`
+2. Se NAO for `main`/`master`, verifique se existe `.docs/branchs/<tipo>/<nome>/`
+3. Se a pasta NAO existir, ANTES de implementar codigo:
+   - Informe: "A branch atual nao tem documentacao obrigatoria em .docs/branchs/"
+   - Pergunte o contexto da demanda ao usuario
+   - Crie a pasta e `00-RESUMO.md` seguindo o padrao de documentacao de branch
+
+Branches `main`, `master`, `HEAD` (detached) sao isentas.

@@ -1,0 +1,18 @@
+---
+template_version: 2026-08-20-v1
+description: Sync Hooks from Dev Standards
+globs: 
+alwaysApply: true
+---
+
+# Sync Hooks from Dev Standards
+
+## Sincronizacao de Regras
+
+Se o MCP telecontrol-docs estiver disponivel e este for um projeto Telecontrol:
+
+1. Chame `check_workspace_health(ide: "cursor")` para verificar estado das rules
+2. Se houver itens faltando ou desatualizados, informe o usuario
+3. Com permissao, chame `get_workspace_setup(ide: "cursor")` e crie/atualize os arquivos
+
+Esta regra e um lembrete — nao execute sem permissao do usuario.

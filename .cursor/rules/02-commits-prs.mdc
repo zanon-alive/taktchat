@@ -1,0 +1,157 @@
+---
+steering-version: 1.0.0
+description: Commits, PRs e Versionamento
+globs: 
+alwaysApply: false
+---
+
+# Commits, PRs e Versionamento
+
+Regras para commits, pull requests, CHANGELOG e versionamento semantico.
+
+---
+
+## Formato de Commit (PT-BR)
+
+```
+feat(modulo): descricao da funcionalidade implementada
+
+dominio: [area-de-negocio]
+capacidade: [o-que-entrega-genericamente]
+reusavel: [cliente|projeto|ambos|nao]
+tags: [palavras-chave separadas por virgula]
+```
+
+### Campos obrigatorios no corpo:
+- `dominio`: area de negocio (atendimento, monitoramento, comunicacao, autenticacao, infra)
+- `capacidade`: descricao generica sem mencionar o projeto
+- `reusavel`: cliente | projeto | ambos | nao
+- `tags`: palavras-chave para busca semantica
+
+### Prefixos:
+- `feat(modulo):` — funcionalidade nova
+- `fix(modulo):` — correcao de bug
+- `refactor(modulo):` — refatoracao sem mudar comportamento
+- `test(modulo):` — testes adicionados
+- `chore(modulo):` — infraestrutura, config, docs
+- `wip(modulo):` — trabalho em progresso (sessao encerrada antes de concluir)
+
+### BREAKING (quando aplicavel):
+
+```
+feat(modulo): descricao
+
+BREAKING: descricao do que mudou e impacto
+- [antes]: comportamento antigo
+- [depois]: comportamento novo
+- [migracao]: o que precisa ser feito
+
+dominio: [area]
+capacidade: [capacidade]
+reusavel: [tipo]
+tags: [tags]
+```
+
+**Quando marcar BREAKING:**
+- Migration que remove/renomeia coluna
+- Endpoint que muda payload
+- Variavel de ambiente renomeada/removida
+- Comportamento de regra de negocio alterado
+
+---
+
+## Descricao do PR (PT-BR, Markdown)
+
+```markdown
+## Problema
+
+O que motivou esta mudanca.
+
+## Decisao
+
+Abordagem escolhida. Alternativas descartadas.
+
+## O que foi implementado
+
+- `arquivo.ts` — descricao
+- `arquivo.spec.ts` — N testes
+
+## Reutilizacao
+
+| Campo | Valor |
+|-------|-------|
+| Dominio | [area] |
+| Capacidade | [descricao generica] |
+| Reutilizavel | [tipo] |
+| Pre-requisitos | [deps necessarias] |
+| Tags | [palavras-chave] |
+
+## Plano de testes
+
+- Testes automatizados: X unit, Y e2e
+- Como o revisor pode validar
+
+## Proximos passos
+
+- [ ] Tarefa futura
+
+## Notas para o revisor
+
+- Trade-offs aceitos
+```
+
+---
+
+## CHANGELOG
+
+Manter `CHANGELOG.md` na raiz do projeto:
+
+```markdown
+# Changelog
+
+## [Unreleased]
+
+### Adicionado (feat)
+- descricao (#PR)
+
+### Corrigido (fix)
+- descricao (#PR)
+
+### Alterado (refactor/chore)
+- descricao (#PR)
+
+### Quebra de compatibilidade (BREAKING)
+- descricao e impacto (#PR)
+
+---
+
+## [YYYY-MM-DD] - vX.Y.Z
+
+### Adicionado
+- ...
+```
+
+---
+
+## Versionamento Semantico
+
+- **MAJOR** (v2.0.0): BREAKING change
+- **MINOR** (v1.1.0): feat sem quebrar compatibilidade
+- **PATCH** (v1.0.1): fix sem adicionar funcionalidade
+- Primeira release: `v1.0.0`
+- Se BREAKING no release: bumpar MAJOR
+
+---
+
+## Regras de Branches
+
+- Criar branch ao iniciar: `git checkout -b feat/nome-da-tarefa`
+- Nunca trabalhar na master
+- **NUNCA criar PR automaticamente.** Apos push, PERGUNTE: "Commit e push feitos. Deseja que eu crie o PR agora?" So criar apos confirmacao explicita.
+- Formato: `feat/`, `fix/`, `refactor/`, `chore/`, `test/`
+
+## Regras de Commit
+
+- Commitar a cada modulo funcional (nao acumular fase inteira)
+- Nunca commitar com testes falhando
+- Ao encerrar sessao: commitar tudo (wip se incompleto)

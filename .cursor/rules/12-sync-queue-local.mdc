@@ -1,0 +1,104 @@
+---
+steering-version: 2026-08-21-v1
+description: Sync Queue Local — Registros Pendentes Offline
+globs: 
+alwaysApply: true
+---
+
+# Sync Queue Local — Registros Pendentes Offline
+
+## Objetivo
+
+Quando o MCP esta indisponivel, acumular registros pendentes (analyze_demand, log_activity, log_deploy) em um arquivo local. Na proxima sessao com MCP disponivel, drenar a fila automaticamente (com permissao do usuario).
+
+## Arquivo de controle
+
+Localizado em `.telecontrol/sync-queue.json` na raiz do projeto:
+
+```json
+{
+  "auto_sync": true,
+  "items": []
+}
+```
+
+### Opcao opt-out
+
+Se `"auto_sync": false`, o agente NAO deve sincronizar automaticamente. Apenas informar:
+"Existem X registros pendentes na sync queue. Sync automatico esta desabilitado. Use /sync-queue para sincronizar manualmente."
+
+O usuario pode alterar `auto_sync` a qualquer momento editando o arquivo.
+
+## Formato dos itens
+
+Cada item na fila segue:
+
+```json
+{
+  "id": "<uuid-v4 ou timestamp>",
+  "tool": "analyze_demand | log_activity | log_deploy",
+  "params": { ... },
+  "created_at": "2026-08-21T10:30:00Z",
+  "status": "pending | synced | failed",
+  "error": null
+}
+```
+
+## Fluxo do agente
+
+### Ao tentar chamar um tool de escrita e MCP falhar:
+
+1. Verificar se `.telecontrol/sync-queue.json` existe
+2. Se nao existir, criar com `auto_sync: true` e `items: []`
+3. Adicionar o item com status `pending`
+4. Informar usuario: "MCP indisponivel. Registro salvo na sync queue local (X itens pendentes)."
+
+### Ao iniciar sessao com MCP disponivel:
+
+1. Verificar se `.telecontrol/sync-queue.json` existe e tem itens `pending`
+2. Se `auto_sync: true`:
+   - Informar: "Encontrei X registros pendentes. Sincronizando..."
+   - Para cada item pending, chamar o tool correspondente
+   - Marcar como `synced` (ou `failed` com erro)
+   - Reportar resultado: "Sincronizados: X. Falhas: Y."
+3. Se `auto_sync: false`:
+   - Informar: "Existem X registros pendentes na sync queue. Sync automatico desabilitado."
+   - NAO sincronizar sem permissao explicita
+
+### Tools que usam a queue:
+
+| Tool | Quando enfileirar |
+|------|------------------|
+| `analyze_demand` | MCP offline ao tentar registrar demanda |
+| `log_activity` | MCP offline ao tentar registrar atividade operacional |
+| `log_deploy` | MCP offline ao tentar registrar deploy |
+
+### Tools que NAO usam a queue (somente leitura):
+
+- `search_docs`, `get_ui_patterns`, `get_security_rules` — sem queue (nao faz sentido)
+- `list_demands`, `search_similar` — consultas que dependem do servidor
+
+## Limpeza
+
+Itens com status `synced` podem ser removidos apos confirmacao:
+- Manter por 7 dias para referencia
+- Ou limpar quando o arquivo ultrapassar 50 itens synced
+
+## Criacao do arquivo
+
+Se o projeto nao tem `.telecontrol/`, o agente deve:
+1. Criar a pasta `.telecontrol/`
+2. Criar `sync-queue.json` com conteudo inicial
+3. Adicionar `.telecontrol/` ao `.gitignore` (dados locais, nao commitados)
+
+## Mensagens padrao
+
+**Ao enfileirar:**
+> "MCP indisponivel. Registro salvo na sync queue local (agora com X itens pendentes)."
+
+**Ao drenar (auto_sync: true):**
+> "Sync queue: X registros pendentes encontrados. Sincronizando com o Cerebro..."
+> "Sync completo: X sincronizados, Y falhas."
+
+**Ao drenar (auto_sync: false):**
+> "Sync queue: X registros pendentes. Auto-sync esta desabilitado neste projeto. Deseja sincronizar agora?"
