@@ -174,6 +174,9 @@ commit-msg.txt
 # Documentação local por branch (não versionar)
 .docs/branchs/
 
+# Locks de sessão do agente (não versionar)
+.ai/*.lock
+
 backend/private/sessions/
 
 # Propostas/rascunhos locais (não versionar)

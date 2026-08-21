@@ -1,0 +1,23 @@
+---
+template_version: 2026-08-20-v1
+description: Bloqueia comandos destrutivos de banco
+globs: 
+alwaysApply: true
+---
+
+# Bloqueia comandos destrutivos de banco
+
+## Regra de Seguranca (Obrigatoria)
+
+ANTES de executar qualquer comando bash, verifique se o comando contem padroes destrutivos de banco de dados:
+
+**Padroes BLOQUEADOS — peca confirmacao ao usuario antes de executar:**
+- `DROP TABLE`, `DROP DATABASE`, `TRUNCATE`
+- `DELETE FROM` (sem clausula WHERE)
+- `prisma migrate reset`, `db push --force-reset`
+- `prisma db seed`, `sequelize db:seed:all` (em ambiente de producao)
+
+Se o `.env` do projeto apontar para banco de producao (verifique DB_HOST/DATABASE_URL),
+SEMPRE peca confirmacao explicita do usuario antes de executar estes comandos.
+
+**Prioridade:** OBRIGATORIA — nao ignore esta regra.

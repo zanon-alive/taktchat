@@ -1,0 +1,103 @@
+---
+steering-version: 1.0.0
+description: Testes, Validacao e Deploy
+globs: 
+alwaysApply: false
+---
+
+# Testes, Validacao e Deploy
+
+Regras para testes automatizados, validacao local com usuario e deploy.
+
+---
+
+## Testes Automatizados
+
+### OBRIGATORIO:
+- Toda funcionalidade DEVE ter testes unitarios
+- Nunca remover testes existentes
+- Rodar `npm test` antes de cada commit
+
+### Padrao de teste:
+```typescript
+describe('NomeDoService', () => {
+  describe('nomeDoMetodo', () => {
+    it('deve fazer X quando Y', async () => { ... });
+    it('deve retornar erro quando Z', async () => { ... });
+  });
+});
+```
+
+### Mockagem:
+- Unit tests: mock do banco, Redis, filas
+- E2E tests: banco/Redis reais (container de teste)
+
+---
+
+## Validacao Local com Usuario
+
+Apos testes automatizados passarem:
+
+1. Enviar comandos para executar localmente:
+```
+## Como executar localmente
+cd backend && npm run start:dev
+cd frontend && npm run dev
+```
+
+2. Perguntar: "Quer que eu envie a lista de testes manuais?"
+
+3. Se sim, gerar curls e instrucoes:
+```bash
+# 1. Login
+curl -X POST http://localhost:3040/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "senha"}'
+# Esperado: 200, { "access_token": "..." }
+```
+
+---
+
+## Finalizacao de Fase
+
+Sequencia obrigatoria:
+1. Commitar todo o codigo
+2. Push da branch
+3. **NAO criar PR ainda** — enviar scripts de teste
+4. Informar: "Fase N implementada. Execute os testes:"
+5. Enviar comandos de teste
+6. **Aguardar confirmacao** ("OK" ou "testes passaram")
+7. **So apos OK:** criar PR
+8. Atualizar docs (fases, CHANGELOG)
+9. Atualizar NEXT_PROMPT.md
+10. Perguntar: "Quer seguir para a Fase N+1?"
+
+---
+
+## Deploy
+
+### REGRA: O agente NUNCA executa deploy.
+
+Apenas sugerir comandos:
+```
+Para atualizar producao:
+ssh apia
+cd ~/projeto
+bash deploy.sh
+```
+
+### Ambiente Local vs Producao:
+- **Local:** Prefixar com "Na sua maquina:"
+- **Producao:** Prefixar com "No servidor (nome):" — agente NAO executa
+
+---
+
+## Scripts de Teste Manual
+
+Criar em `.docs/testes-manuais/` para cada funcionalidade testavel:
+- Usar `BASE_URL` configuravel (local ou producao)
+- **Curls devem usar URLs LOCAIS por padrao** (nunca URLs de producao nos exemplos)
+- Indicar: "Rode local: `BASE_URL=http://localhost:3040/api sh SCRIPT.sh`"
+- Indicadores ✅/❌ para cada validacao
+- Queries SQL para verificar no banco
+- Informar pre-requisitos (token salvo, servidor rodando)

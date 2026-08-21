@@ -1,0 +1,27 @@
+---
+template_version: 2026-08-20-v1
+description: Security Pattern Check
+globs: 
+alwaysApply: true
+---
+
+# Security Pattern Check
+
+## Regra de Seguranca (Obrigatoria)
+
+ANTES de escrever ou modificar qualquer arquivo de codigo, verifique se o conteudo contem padroes inseguros:
+
+**Padroes BLOQUEADOS — nao escreva codigo com estes padroes:**
+- Secrets/senhas hardcoded (ex: `password = "abc123"`, `sk-...`, `ghp_...`, `AKIA...`)
+- SQL injection por concatenacao (ex: `"SELECT * FROM " + userId`)
+- `eval()` ou `Function()` com input do usuario
+
+**Padroes que exigem confirmacao do usuario:**
+- `console.log` com dados sensiveis (CPF, token, senha)
+- URLs HTTP sem HTTPS para hosts externos
+- Escrita em `.env` (nao `.env.example`) com valores reais
+- CORS aberto (`origin: "*"`)
+
+**Ignorar em:** arquivos de teste (`.test.`, `.spec.`), fixtures, mocks, arquivos `.md`.
+
+**Prioridade:** OBRIGATORIA — nao ignore esta regra.

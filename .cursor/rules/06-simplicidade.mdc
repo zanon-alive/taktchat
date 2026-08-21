@@ -1,0 +1,31 @@
+---
+steering-version: 1.0.0
+description: Simplicidade de Codigo — Resumo Rapido
+globs: 
+alwaysApply: false
+---
+
+# Simplicidade de Codigo — Resumo Rapido
+
+Consultar ao refatorar, criar funcoes complexas ou revisar legibilidade.
+Documento completo: `telecontrol-dev-standards/simplicidade-codigo.md`
+
+---
+
+## Principios (OBRIGATORIO)
+
+1. **Nomes que explicam.** Variavel responde "o que contem?", funcao responde "o que faz?"
+2. **Funcoes pequenas.** Max 20-30 linhas. Se precisa de comentario explicativo, extraia funcao.
+3. **Early return.** Tratar casos de erro/edge no inicio, codigo feliz no final.
+4. **Sem abreviacao obscura.** `usr`, `mgr`, `hdl` → `user`, `manager`, `handler`.
+5. **Um nivel de abstracao por funcao.** Nao misture orquestracao com detalhe.
+6. **Sem over-engineering.** Interface so se tiver 2+ implementacoes. Factory so se criacao for complexa.
+7. **Codigo morto = deletar.** Codigo comentado ou nao chamado deve ser removido.
+
+## Quando este steering e relevante
+
+- Refatoracao de codigo existente
+- Funcao com mais de 40 linhas
+- Variavel com nome generico (data, result, temp, item)
+- Nesting profundo (3+ niveis de if/for)
+- Codigo que precisa de comentario para ser entendido

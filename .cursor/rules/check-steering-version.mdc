@@ -1,0 +1,18 @@
+---
+template_version: 2026-08-20-v1
+description: Ao iniciar sessao, compara steerings locais com os padroes em telecontrol-dev-standards.
+globs: 
+alwaysApply: true
+---
+
+# Verificar versao dos steerings locais
+
+## Verificacao de Regras Atualizadas
+
+Ao iniciar uma sessao em projeto Telecontrol:
+
+1. Verifique se `.cursor/rules/` possui as regras padrao
+2. Se o MCP telecontrol-docs estiver conectado, chame `check_workspace_health(ide: "cursor")`
+3. Se houver regras faltando ou desatualizadas, informe o usuario e ofereca para atualizar
+
+Frequencia: uma vez por sessao e suficiente.

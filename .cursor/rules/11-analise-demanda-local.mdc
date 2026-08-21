@@ -1,0 +1,139 @@
+---
+steering-version: 2026-08-21-v1
+description: Analise de Demanda — Fallback Local
+globs: 
+alwaysApply: false
+---
+
+# Analise de Demanda — Fallback Local
+
+## Quando usar
+
+Use este template quando o MCP `telecontrol-docs` estiver **indisponivel** (desconectado, timeout, servidor fora).
+Com MCP disponivel, prefira `analyze_demand` — ele persiste no Cerebro e busca similares.
+
+## Fluxo de decisao
+
+```
+MCP disponivel? ─── SIM ──→ Chamar analyze_demand (fluxo normal)
+       │
+      NAO
+       │
+       ▼
+Classificar localmente (este template)
+       │
+       ▼
+Salvar em .docs/branchs/<tipo>/<nome>/01-analise.md
+       │
+       ▼
+Informar usuario: "Analise local salva. Registro no Cerebro pendente (MCP indisponivel)."
+```
+
+## Template de classificacao
+
+Ao receber uma demanda do usuario, preencha os campos abaixo seguindo as regras de classificacao:
+
+### Campos obrigatorios
+
+| Campo | Como preencher |
+|-------|---------------|
+| **project** | Nome do repositorio (ex: `telecontrol-mcp`, `api-helpdesk`) |
+| **title** | Resumo da demanda em 1 linha (max 80 chars) |
+| **type** | `feature` (funcionalidade nova), `fix` (correcao), `refactor` (refatoracao), `improvement` (melhoria existente) |
+| **scope** | Classificar automaticamente (ver regras abaixo) |
+
+### Campos recomendados
+
+| Campo | Como preencher |
+|-------|---------------|
+| **description** | Descricao completa da demanda (contexto, motivacao, comportamento esperado) |
+| **domain** | Dominio do glossario: `agente-workflow`, `omni-chat`, `omni-posvendas`, `infra`, `seguranca`, `callcenter`, `helpdesk`, `telezap`, `telebots`, `autocredenciamento` |
+| **capability** | Capacidade especifica dentro do dominio (ex: `sync-workspace-config`, `ticket-chain`, `calendar-integration`) |
+| **reusable** | `cliente` (so 1 cliente usa), `projeto` (so 1 projeto), `ambos` (reutilizavel), `nao` |
+| **tags** | Lista de palavras-chave relevantes |
+| **ticket** | Numero do chamado helpdesk se aplicavel (HD-XXXX) |
+
+### Regras de classificacao de scope
+
+```
+SE type == "fix" E description < 100 chars → scope = "minor"
+SE type == "fix" E description >= 100 chars → scope = "standard"
+SE description < 50 chars → scope = "minor"
+SE description < 200 chars → scope = "standard"
+SE description >= 200 chars → scope = "major"
+```
+
+Excecao: se o usuario disser "rapido", "simples", "so ajustar" → scope = "quick" (sem doc formal).
+
+## Formato do documento de saida
+
+Gerar em `.docs/branchs/<tipo>/<nome>/01-analise.md`:
+
+```markdown
+# Demanda: <title>
+
+**Projeto:** <project>
+**Tipo:** <type>
+**Escopo:** <scope>
+**Status:** draft
+**Data:** <YYYY-MM-DD>
+**Criado por:** agent
+
+## Origem
+- **Chamado:** <ticket ou "(nao informado)">
+- **Solicitante:** <nome se conhecido>
+- **Canal:** <verbal, chat, helpdesk, email>
+
+## Descricao
+<descricao completa>
+
+## Criterios de Aceite
+- [ ] <criterio 1>
+- [ ] <criterio 2>
+- [ ] (definir com usuario)
+
+## Analise de Impacto
+<arquivos afetados, dependencias, riscos de regressao>
+
+## Riscos
+<o que pode dar errado, complexidade oculta>
+
+## Perguntas Pendentes
+<duvidas que precisam de resposta antes de implementar>
+
+## Classificacao
+- **Dominio:** <domain>
+- **Capacidade:** <capability>
+- **Reutilizavel:** <reusable>
+- **Tags:** <tags separadas por virgula>
+
+## Implementacao
+- **Branch:** <tipo>/<nome-descritivo>
+
+## Decisao
+(pendente de revisao)
+
+---
+
+> ⚠️ **REGISTRO PENDENTE:** Esta analise foi gerada localmente (MCP indisponivel).
+> Quando o MCP reconectar, registre no Cerebro com `analyze_demand` usando os dados acima.
+```
+
+## Mensagem para o usuario
+
+Apos gerar a analise local, informe:
+
+> "Analise de demanda gerada localmente em `.docs/branchs/<tipo>/<nome>/01-analise.md`.
+> O MCP esta indisponivel no momento — nao foi possivel:
+> - Buscar demandas similares
+> - Registrar no Cerebro (ID pendente)
+> - Verificar duplicidade
+>
+> Quando o MCP reconectar, posso registrar automaticamente. Deseja prosseguir com a implementacao?"
+
+## Sync posterior (quando MCP voltar)
+
+Se o agente detectar que existem analises locais com a nota "REGISTRO PENDENTE":
+1. Oferecer ao usuario: "Encontrei X analises locais sem registro no Cerebro. Deseja sincronizar?"
+2. Com permissao, chamar `analyze_demand` para cada uma com os dados do arquivo local
+3. Atualizar o arquivo local removendo a nota de pendencia e adicionando o ID do Cerebro

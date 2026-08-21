@@ -1,0 +1,82 @@
+---
+steering-version: 1.3.0
+description: Regras Criticas — Telecontrol (Onboarding Rapido)
+globs: 
+alwaysApply: true
+---
+
+# Regras Criticas — Telecontrol (Onboarding Rapido)
+
+Regras OBRIGATORIAS que se aplicam a toda interacao. Violacao de qualquer item abaixo e inaceitavel.
+
+---
+
+## OBRIGATORIO (nunca violar)
+
+1. **Sempre responder em portugues brasileiro.** Toda comunicacao, analise, comentario e documentacao DEVE ser em PT-BR. Nunca mude para outro idioma, mesmo que o prompt venha em ingles.
+2. **Ler antes de alterar.** Nunca edite um arquivo sem ler o conteudo atual.
+3. **Testes passando antes de commit.** Rode `npm test` — se falhar, corrija antes.
+4. **Nunca deploy automatico.** O agente NUNCA executa deploy. Apenas sugere comandos.
+5. **Commits em PT-BR.** Formato: `feat(modulo): descricao` — sempre portugues.
+6. **Nunca push direto na master.** Use branches (`feat/`, `fix/`, `refactor/`).
+7. **Perguntar antes de assumir.** Se algo nao esta claro, PARE e pergunte.
+8. **Nunca contradiga decisao documentada.** Se precisa mudar um requisito: explique e pergunte.
+9. **Atualizar NEXT_PROMPT.md ao encerrar.** OBRIGATORIO — nunca pule.
+10. **Documentar branch.** Criar pasta em `.docs/branchs/<tipo>/<nome>/README.md`.
+11. **Aguardar confirmacao para telas.** Exibir proposta de UI e esperar OK antes de implementar.
+12. **Nunca criar PR automaticamente.** Apos push, PERGUNTE: "Deseja que eu crie o PR agora?"
+13. **Protecao contra operacoes destrutivas:**
+    - NUNCA execute: `prisma migrate reset`, `DROP TABLE`, `TRUNCATE`, `DELETE FROM` sem WHERE
+    - Antes de migration ou seed, PERGUNTE: "Seu .env aponta para banco local ou producao?"
+    - Seeds: sempre verificar se ambiente e local antes de executar
+14. **NUNCA iniciar codigo sem aprovacao do usuario.** Para QUALQUER demanda que envolva criar ou alterar codigo:
+    - PRIMEIRO: analise o que foi pedido, investigue o codigo existente, e apresente um plano
+    - SEGUNDO: aguarde confirmacao explicita do usuario ("OK", "pode seguir", "aprovado")
+    - TERCEIRO: so entao inicie a implementacao
+    - A UNICA excecao: fix trivial (typo, import errado) que nao altera logica
+    - Se o usuario disser "faca direto" ou "nao precisa perguntar": respeite, mas apenas para aquela demanda especifica
+
+## CONTEXTO DO PROJETO
+
+Consulte SEMPRE o arquivo `00-contexto-projeto.md` no steering local do projeto.
+- Se nao existir: informar usuario e oferecer criar
+- Se contiver `[A PREENCHER]`: informar campos pendentes e perguntar se preenche agora
+
+## USO EFICIENTE DO MCP (economizar tokens)
+
+- **Prefira `get_quick_reference`** para consultas rapidas (commit, cores, radius, seguranca basica)
+- **Sempre use o parametro `section`** ao chamar tools que suportam (get_ui_patterns, get_ui_behavior, get_security_rules). NUNCA peca o documento inteiro se precisa apenas de uma secao.
+- **Nao repita chamadas** — se ja chamou uma tool nesta sessao e a informacao esta no contexto, nao chame novamente.
+- **search_docs** e para buscar coisas especificas. Se sabe qual doc precisa, chame a tool direta.
+
+## VERIFICAR ESTRUTURA BASE
+
+Na primeira interacao, verificar se existem:
+- `.ai/NEXT_PROMPT.md` (continuidade entre sessoes)
+- `.ai/steering/00-contexto-projeto.md` (contexto)
+- `.docs/branchs/` (documentacao de branches)
+- `.gitignore` com `.docs/branchs/` e `.ai/*.lock`
+
+Se faltar algo: "Identifiquei que faltam [X]. Deseja que eu crie agora?"
+
+## VERIFICAR WORKSPACE HEALTH (hooks e steerings)
+
+Se o workspace NAO tem hooks de seguranca configurados (`.kiro/hooks/` vazio ou inexistente),
+chame `check_workspace_health` para verificar o que falta. Se houver hooks obrigatorios
+faltando (ex: check-destructive-db, check-security-patterns), ofereça ao usuario:
+"Faltam hooks de seguranca no workspace. Posso instalar agora?"
+
+Use `get_workspace_setup` para obter o conteudo dos templates e criar os arquivos com permissao.
+
+## ARQUIVOS DETALHADOS (consultar quando necessario)
+
+Para detalhes completos, consulte os outros steerings em `telecontrol-dev-standards/agente-desenvolvedor/`:
+- `01-fluxo-trabalho.md` — etapas de pensamento (ENTENDER → FINALIZAR)
+- `02-commits-prs.md` — formato de commit, PR, CHANGELOG, semver
+- `03-testes-deploy.md` — regras de teste, validacao local, deploy
+- `04-ui-frontend.md` — regras de UI/UX (carrega automaticamente ao editar .vue/.css)
+- `05-seguranca.md` — seguranca de codigo (carrega automaticamente ao editar auth/env/token)
+- `06-simplicidade.md` — legibilidade e simplicidade (consultar ao refatorar)
+
+Para fluxo completo de contribuicao (branch protection, merge strategy, quem pode mergear):
+- `infra/fluxo-contribuicao.md` — regras de PR, merge, CI obrigatorio

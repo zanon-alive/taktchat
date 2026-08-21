@@ -1,0 +1,37 @@
+---
+steering-version: 1.0.0
+description: Seguranca de Codigo — Regras Ativadas
+globs: **/.env,**/.env.*,**/auth/**,**/middleware/auth*,**/security/**,**/credentials*
+alwaysApply: false
+---
+
+# Seguranca de Codigo — Regras Ativadas
+
+Este steering carrega automaticamente ao editar arquivos relacionados a autenticacao, tokens, senhas, criptografia ou variaveis de ambiente.
+
+---
+
+## Regras Obrigatorias
+
+1. **Nunca hardcodar secrets.** Credenciais vao em variaveis de ambiente (.env), NUNCA no codigo.
+2. **Nunca logar dados sensiveis.** Tokens, senhas, CPF, cartoes NUNCA em console.log ou logger.
+3. **Criptografar dados em repouso.** Tokens de terceiros (Meta, Zenvia) devem ser criptografados no banco (AES-256-GCM).
+4. **Validar input.** Todo dado externo (request body, query params, headers) deve ser validado antes de usar.
+5. **Usar queries parametrizadas.** Nunca concatenar SQL com dados de usuario.
+6. **HMAC para webhooks.** Validar assinatura de todo webhook recebido (timing-safe comparison).
+7. **Expirar tokens.** JWT com expiracao definida. Refresh tokens com rotacao.
+8. **Minimo privilegio.** Cada consumer/service so acessa o que precisa.
+
+## Referencia Completa
+
+Para diretrizes detalhadas (classificacao de dados, LGPD, logs seguros, backup):
+→ Consulte `telecontrol-dev-standards/seguranca-protecao-dados.md`
+
+## Checklist Rapido (antes de commitar)
+
+- [ ] Nenhum secret hardcoded no codigo?
+- [ ] Logs nao expõem dados pessoais (CPF, telefone, token completo)?
+- [ ] Inputs validados (tipo, tamanho, formato)?
+- [ ] Queries parametrizadas (sem concatenacao)?
+- [ ] Tokens com expiracao configurada?
+- [ ] Webhook com validacao HMAC?
