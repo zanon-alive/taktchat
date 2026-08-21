@@ -1,6 +1,9 @@
 version: "3.8"
 
-# Stack TaktChat — Deploy por imagens no GHCR (recomendado por SHA)
+# Stack TaktChat — alternativa GHCR (NÃO é a stack em uso na VPS hoje).
+# Produção atual: 14_taktchat.yml (volumes montados no servidor).
+# No repositório de stacks existe 15_taktchat_prod_ghcr.yml como caminho futuro.
+
 #
 # Imagens publicadas pelo GitHub Actions:
 # - ghcr.io/<owner>/taktchat-backend:<sha>

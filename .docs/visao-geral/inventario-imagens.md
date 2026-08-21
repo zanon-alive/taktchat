@@ -1,59 +1,46 @@
 # Inventário de imagens (assets)
 
-Este documento lista **todas as imagens versionadas no repositório** e os dados necessários para o time de design refatorar/substituir os arquivos (melhor resolução/qualidade e logos novos) **sem quebrar imports/uso no frontend**.
+Este documento lista imagens versionadas no repositório para o time de design substituir arquivos sem quebrar o frontend.
 
-## Escopo e observações
+## Escopo
 
-- **Escopo**: arquivos com extensões `svg`, `png`, `jpg/jpeg`, `webp`, `gif`, `ico` dentro do repositório.
-- **Resultado atual**: foram encontrados **4 arquivos**, todos em `frontend/src/assets/` e todos com extensão `.svg`.
-- **Referências no código**: não foi encontrada referência direta aos nomes desses arquivos nos fontes do `frontend` (pode indicar que estão **não utilizados** ou que são carregados por outro caminho).
+- Extensões: `svg`, `png`, `jpg/jpeg`, `webp`, `gif`, `ico`.
+- **`frontend/public/`** — servido na raiz do site em produção (`/logo.png`, `/favicon.ico`, etc.). Estes são os arquivos que importam para a VPS.
+- **`frontend/src/assets/`** — só entram no bundle se forem importados no JS.
 
-## Tabela de imagens
+Guia de uso: `funcionalidades/frontend-assets-estaticos.md`.
 
-> Convenções:
-> - **Peso**: tamanho do arquivo em bytes (e aproximado em KB).
-> - **Dimensões**: em SVG, é preferível usar `viewBox` como referência principal; `width/height` pode existir como sugestão de render.
+## `frontend/public/` (produção)
 
-| ID | Arquivo | Localização | Formato | Peso | Dimensões (width/height) | `viewBox` | Uso no código | Notas |
-|---:|---|---|---|---:|---|---|---|---|
-| 1 | `google-calendar-96.svg` | `frontend/src/assets/google-calendar-96.svg` | SVG* | 3759 B (~3.7 KB) | `96px` / `96px`* | `0 0 48 48`* | **Não encontrado** por nome | *O conteúdo está em formato de **módulo JS gerado por SVGR** (não é um XML SVG “cru”). Os atributos acima aparecem no `React.createElement(\"svg\", ...)`. Recomenda-se substituir por um SVG padrão (XML) para simplificar manutenção.* |
-| 2 | `bg.svg` | `frontend/src/assets/bg.svg` | SVG | 25892 B (~25.3 KB) | `1009.54` / `839.64` | `0 0 1009.54 839.64` | **Não encontrado** por nome | Indício de ser background/ilustração. |
-| 3 | `togitalk.svg` | `frontend/src/assets/togitalk.svg` | SVG | 310639 B (~303.4 KB) | `1500px` / `1200px` | *(ausente)* | **Não encontrado** por nome | Arquivo grande para SVG; provável logo/ilustração com muitos pontos. Recomenda-se otimização agressiva (SVGO). |
-| 4 | `avatar.svg` | `frontend/src/assets/avatar.svg` | SVG | 2255 B (~2.2 KB) | `698` / `698` | `0 0 698 698` | **Não encontrado** por nome | Possível avatar padrão. |
+| Arquivo | Peso aprox. | Notas |
+|---|---:|---|
+| `TaktChat.png` | 696 KB | Logo grande; evitar na UI crítica (peso). |
+| `TaktChat - recortada.png` | 190 KB | Nome com espaços — preferir sem espaços em arquivos novos. |
+| `TaktChat_logo.png` | 121 KB | |
+| `logo quadrado.png` / `logo_quadrado.png` | 123 KB cada | Duplicata; usar `logo_quadrado.png`. |
+| `taktchat-logo_150x150.png` / `logo.png` | 62 KB | |
+| `TaktChat_logo_sem_fundo.png` | 24 KB | |
+| `TaktChat_logo_sem_fundo.ico` | 46 KB | |
+| `android-chrome-192x192.png` | 32 KB | PWA / atalho. |
+| `apple-touch-icon.png` | 29 KB | |
+| `favicon.png` / `favicon-32x32.png` | 2.5 KB | |
+| `favicon-16x16.png` | 1.4 KB | |
+| `favicon.ico` | 4.4 KB | |
+| `nopicture.png` | 4.1 KB | Fallback de avatar. |
+| `originais/` | vários | Cópias de referência; não usar na UI. |
 
-## Especificações para o design (para substituir sem quebrar o projeto)
+## `frontend/src/assets/` (bundle)
 
-### Requisitos gerais (obrigatórios)
+| Arquivo | Peso | Uso no código |
+|---|---:|---|
+| `google-calendar-96.svg` | ~3.7 KB | Não encontrado por nome (módulo SVGR). |
+| `bg.svg` | ~25 KB | Não encontrado por nome. |
+| `togitalk.svg` | ~303 KB | Logo legado; otimizar ou remover se morto. |
+| `avatar.svg` | ~2.2 KB | Não encontrado por nome. |
 
-- **Manter nomes e caminhos**: entregar os arquivos finais com **o mesmo nome** e no **mesmo caminho** (ex.: `frontend/src/assets/avatar.svg`), para evitar ajustes no código.
-- **Não depender de raster dentro do SVG**: evitar `<image href="data:...">` dentro do SVG (isso aumenta peso e perde escalabilidade).
-- **Otimização**: rodar otimização tipo **SVGO** (ou ferramenta equivalente) antes de entregar.
-- **Cores e temas**:
-  - Se o SVG precisa funcionar em tema claro/escuro, preferir **`currentColor`** (quando aplicável) ou entregar variações (ex.: `logo-light.svg`/`logo-dark.svg`) — *neste projeto ainda não há variações nomeadas, então só faça isso se você também for ajustar o código*.
-- **Compatibilidade**: garantir que os SVGs renderizam corretamente em navegadores modernos (Chrome/Edge/Firefox) e em React.
+## Especificações para o design
 
-### Requisitos de layout/tamanho (para não “estourar” o UI)
-
-- **`viewBox` deve ser preservado**:
-  - `google-calendar-96.svg`: `viewBox="0 0 48 48"`
-  - `bg.svg`: `viewBox="0 0 1009.54 839.64"`
-  - `avatar.svg`: `viewBox="0 0 698 698"`
-  - `togitalk.svg`: **não possui** `viewBox` hoje (recomendado adicionar mantendo o enquadramento visual).
-- **`width/height`**:
-  - Preferível **remover** `width/height` fixos e deixar o dimensionamento por CSS quando possível; se mantiver, garantir que combina com o `viewBox`.
-  - Se o componente/uso atual esperar um tamanho específico (ex.: “96px”), manter essa proporção visual.
-
-### Entregáveis recomendados (se o objetivo é “melhor resolução/qualidade”)
-
-Como estes assets são SVG (vetoriais), “melhor resolução” costuma significar:
-- **Melhor desenho/traço**, alinhamento, consistência de grid.
-- **Menor peso** sem perder fidelidade (otimização).
-
-Ainda assim, caso você precise de assets raster (para outros canais), pedir ao design também:
-- **PNG @2x e @3x** com fundo transparente (quando fizer sentido) e tamanho alvo definido por tela/uso.
-- **Versões de logo**: horizontal, vertical, ícone quadrado, monocromático.
-
-## Pendências / pontos para confirmar
-
-- **Mapeamento de uso**: não foi localizado uso direto desses nomes no código do `frontend`. Se você me indicar **em quais telas** essas imagens aparecem (logo, background, avatar etc.), eu consigo rastrear o ponto exato e adicionar na coluna “Uso no código” com precisão.
-
+- Manter **nomes e caminhos** dos arquivos em `public/` que o HTML/`index.html` já referencia.
+- Não criar novos nomes com espaços.
+- Otimizar PNG grandes (`TaktChat.png`) e o SVG `togitalk.svg`.
+- Preferir SVG XML padrão (não módulo JS) para novos ícones em `src/assets/`.

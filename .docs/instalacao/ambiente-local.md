@@ -21,27 +21,17 @@ docker compose ps
 
 ### 2. Configurar variáveis de ambiente
 
-Crie um arquivo `.env` na pasta `backend/` usando `.env.example` (se disponível) ou o template abaixo:
+Crie um arquivo `.env` na pasta `backend/` a partir de `backend/.env.example`:
 
+```bash
+cp backend/.env.example backend/.env
+# Ajuste DB_PASS, JWT_SECRET e DB_PORT (5433 se usou POSTGRES_HOST_PORT=5433)
 ```
-NODE_ENV=development
-PORT=8080
-BACKEND_URL=http://localhost:8080
-FRONTEND_URL=http://localhost:3000
 
-DB_DIALECT=postgres
-DB_HOST=localhost
-DB_PORT=5432   # Ajuste para 5433 se tiver usado POSTGRES_HOST_PORT=5433
-DB_NAME=taktchat_database
-DB_USER=postgres
-DB_PASS=<senha>
+No frontend:
 
-REDIS_URI=redis://localhost:6379/0
-REDIS_URI_ACK=redis://localhost:6379/1
-SOCKET_FALLBACK_NS_BROADCAST=true
-
-JWT_SECRET=<gera-um-secret>
-JWT_REFRESH_SECRET=<gera-outro-secret>
+```bash
+cp frontend/.env.example frontend/.env
 ```
 
 > Ajuste credenciais conforme sua infraestrutura. Consulte `configuracao/variaveis-ambiente.md` para a lista completa.

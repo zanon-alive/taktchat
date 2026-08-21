@@ -4,6 +4,8 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-21 | 2.2.2v-26 | Documentação alinhada à stack da VPS (`14_taktchat.yml` volumes); widget versionado; `.env.example`; onboarding/admin/roadmap atualizados. GHCR documentado como alternativa. | Equipe Dev |
+| 2026-04-29 | 2.2.2v-26 | Landing: 403 no config de direct signup; ícones da seção de problemas; assets estáticos em `frontend/public`. | Equipe Dev |
 | 2026-02-17 | 2.2.2v-26 | EntrySource e Chat do Site: rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis em Configurações; formulários Lead/Revendedor na landing; API pública e widget embarcável; siteChatToken para empresas não-whitelabel; card na Central de Ajuda (/helps). | Equipe Dev |
 | 2025-02-06 | 2.2.2v-26 | Internacionalização de mensagens de validação: namespace `validation` (required, tooShort, emailInvalid, arrayRequired) em pt, en, es, tr; substituição de "Required" e "too short" hardcoded por i18n nos schemas Yup; `noValidate` em formulários Formik para evitar "Please fill out this field."; tradução pt-BR do checkoutFormModel; correção de LeadForm e outros. | Equipe Dev |
 | 2025-02-05 | 2.2.2v-26 | Correção de aninhamento DOM inválido em skeletons de loading: remove TableRowSkeleton de dentro de td/div, cria CardSkeleton para views mobile, melhora TableRowSkeleton com default columns e PropTypes. | Equipe Dev |

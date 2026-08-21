@@ -1,6 +1,8 @@
 # ✅ O Que Falta Para Finalizar o Projeto
 
-## 📊 Status Atual: 80% Completo
+> Snapshot histórico da implementação da API Oficial. O **deploy da VPS já existe** (`14_taktchat.yml`, volumes). Itens abaixo de “Deploy 0%” não refletem o estado atual da infraestrutura.
+
+## 📊 Status Atual: 80% Completo (histórico)
 
 ```
 ████████████████████████████████░░░░░░░░░░ 80%

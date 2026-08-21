@@ -9,11 +9,12 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.
 - `configuracao/`: variáveis de ambiente, parâmetros sensíveis e políticas de segurança.
 - `operacao/`: rotinas diárias, monitoramento, backup/restore e troubleshooting.
+  - **Atualizar a VPS:** `operacao/como-atualizar-vps.md` — git pull + `update-taktchat.sh` (stack volumes).
   - **Drift Sequelize / Postgres:** `operacao/recuperacao-migrations-banco.md` — quando `SequelizeMeta` não reflete o schema real.
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
   - **Frontend — assets em `public/` vs imports:** `funcionalidades/frontend-assets-estaticos.md`
-  - **EntrySource e Chat do Site:** `branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` – Widget, API e canais de entrada.
+  - **EntrySource e Chat do Site:** `funcionalidades/widget-chat-site.md` – Widget, API e canais de entrada.
 - `diagnosticos/`: procedimentos de investigação e correção para cenários recorrentes.
   - **Logs WhatsApp (Baileys):** `diagnosticos/logs-whatsapp-baileys.md` – Erros esperados (decrypt, SessionError, sessões).
 - `anexos/`: checklists, templates, roteiros e notas complementares.
@@ -32,9 +33,10 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 
 ### Para desenvolvedores
 
-- **🔄 Atualização do servidor:** `ATUALIZACAO_SERVIDOR.md` - **SEMPRE consulte este guia após fazer PR e merge na branch `main`**
-- **📦 Build e deploy Docker:** `DOCKER_BUILD_E_DEPLOY.md` - Guia completo para build e publicação de imagens
-- **🏗️ Stack de produção:** `infraestrutura/stack-producao.md` - Configuração completa da stack Docker Swarm
+- **🔄 Atualização do servidor:** `ATUALIZACAO_SERVIDOR.md` - stack atual da VPS (volumes, `14_taktchat.yml`)
+- **📦 Stack de produção (VPS):** `infraestrutura/stack-producao.md` e `../14_taktchat.yml`
+- **🏗️ Stack GHCR (alternativa):** `infraestrutura/stack-producao-ghcr.md`
+- **⚙️ PM2 híbrido (exemplo, não é a VPS):** `infraestrutura/pm2-hibrido.md`
 
 ### Para operação
 

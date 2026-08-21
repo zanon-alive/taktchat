@@ -1,7 +1,7 @@
 # Documentação do Administrador - TaktChat
 
-**Versão:** 1.0  
-**Data:** 2025-01-27  
+**Versão:** 1.1  
+**Data:** 2026-08-21  
 **Público:** Administradores da Plataforma (Super Admin)
 
 ---
@@ -460,7 +460,25 @@ io.of(`/workspace-${companyId}`).emit(`company-${companyId}-ticket`, data);
 - **Modelo Company:** `backend/src/models/Company.ts`
 - **Socket.IO Namespace:** `backend/src/libs/socket.ts` (linha 10: `ALLOWED_NAMESPACES = /^\/workspace-\d+$/`)
 - **Frontend Connection:** `frontend/src/services/SocketWorker.js` (linha 47: `workspace-${companyId}`)
-- **Documentação Completa:** `.docs/branchs/main/arquitetura-multi-tenant.md`
+- **Documentação Completa:** `.docs/visao-geral/whitelabel-architecture.md` e `.docs/visao-geral/arquitetura.md`
+
+---
+
+## Governança Whitelabel
+
+Além do Super Admin global, a plataforma opera em hierarquia:
+
+| Nível | Quem é | O que vê |
+|-------|--------|----------|
+| Plataforma | Empresa `type = platform`, usuários `super` | Todas as empresas, planos, licenças, relatório de cobrança |
+| Whitelabel | Parceiro revendedor | Só empresas-filhas, planos próprios, bloqueio das filhas |
+| Cliente direto | Empresa final | A própria empresa |
+
+- Relatório de cobrança: `/partner-billing-report` (apenas super).
+- Cadastro na landing e cadastro por link `/signup-partner`.
+- Bloqueio: plataforma suspende parceiro; parceiro bloqueia/libera filhas (`accessBlockedByParent`).
+
+Documentação: `.docs/visao-geral/whitelabel-architecture.md`.
 
 ---
 

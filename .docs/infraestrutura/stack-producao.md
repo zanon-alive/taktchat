@@ -9,7 +9,13 @@ A stack utiliza volumes montados para permitir atualizações rápidas sem neces
 ### Arquivo da Stack
 
 A stack final utilizada em produção está disponível em:
-- **`.docs/branchs/main/stack_final_producao.yml`** - Arquivo completo da stack
+- **`14_taktchat.yml`** (raiz deste repositório) — cópia da stack da VPS (`stacks_producao-main-server/14_taktchat.yml`): volumes montados, imagem local `taktchat-backend:latest`, frontend `node:20-bookworm-slim`.
+
+Alternativas (não usadas na VPS hoje):
+- `14_taktchat_ghcr.yml` — imagens GHCR + serviço `taktchat-label-sync`
+- `14_taktchat_rapido.yml` — variante histórica (URLs alivesolucoes / porta 3000)
+
+Exemplo **PM2 no host** (Postgres/Redis no Docker, Node fora do Swarm): `.docs/infraestrutura/pm2-hibrido.md` e `ecosystem.config.cjs`. Não substitui a stack da VPS.
 
 ## ⚠️ Pré-requisitos no Servidor VPS
 
@@ -122,8 +128,8 @@ docker service update --force taktchat_taktchat-frontend  # Se houver mudanças 
 - `DB_PORT=5432`
 - `DB_NAME=taktchat_database`
 - `DB_USER=taktchat_user`
-- `DB_PASS=T4ktch4tUs3r@2025`
-- `JWT_SECRET` e `JWT_REFRESH_SECRET` - Secrets de autenticação
+- `DB_PASS` — senha do banco (não versionar o valor real; na VPS está no YAML da stack)
+- `JWT_SECRET` e `JWT_REFRESH_SECRET` - Secrets de autenticação (na VPS, no YAML da stack)
 - `REDIS_URI` - Conexão Redis para filas e Socket.IO
 
 ### Frontend
@@ -169,7 +175,6 @@ O healthcheck executa a cada 30 segundos com timeout de 10 segundos e 5 retries.
 
 - **Scripts de Startup:** `.docs/SCRIPTS_STARTUP_EXEMPLO.md`
 - **Atualização no Servidor:** `.docs/ATUALIZACAO_SERVIDOR.md`
-- **Build e Deploy Docker:** `.docs/DOCKER_BUILD_E_DEPLOY.md`
+- **Build e Deploy Docker (legado Docker Hub):** `.docs/DOCKER_BUILD_E_DEPLOY.md`
 - **Comparação de Stacks:** `.docs/COMPARACAO_STACKS.md`
-- **Deploy via Portainer/GitHub:** `.docs/PORTAINER_GITHUB_DEPLOY.md`
-- **Melhorias da Stack Rápida:** `.docs/MELHORIAS_FRONTEND_STACK_RAPIDA.md`
+- **Stack GHCR (alternativa):** `.docs/infraestrutura/stack-producao-ghcr.md`

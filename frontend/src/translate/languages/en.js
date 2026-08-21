@@ -1460,7 +1460,7 @@ const messages = {
 			widgetTitle: "Site Chat Widget",
 			widgetDesc: "Embeddable JavaScript widget for any website. In Settings > Site Chat Widget, get the integration code and token (\"Get token\" button). The code can be pasted into external HTML pages.",
 			widgetToken: "Use data-api-url in the script when the widget is on an external site (e.g. data-api-url=\"https://api.taktchat.com.br\").",
-			docsRef: "Detailed documentation: .docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md and passo-a-passo-testes.md",
+			docsRef: "Detailed documentation: .docs/funcionalidades/widget-chat-site.md",
 		  },
 		  settings: {
 			codeVideo: "Video Code",

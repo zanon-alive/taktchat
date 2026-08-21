@@ -660,7 +660,7 @@ io.of(\`/workspace-\${companyId}\`).emit(\`company-\${companyId}-ticket\`, data)
 - **Modelo Company:** \`backend/src/models/Company.ts\`
 - **Socket.IO Namespace:** \`backend/src/libs/socket.ts\` (linha 10: \`ALLOWED_NAMESPACES = /^\/workspace-\\d+$/\`)
 - **Frontend Connection:** \`frontend/src/services/SocketWorker.js\` (linha 47: \`workspace-\${companyId}\`)
-- **Documentação Completa:** \`.docs/branchs/main/arquitetura-multi-tenant.md\`
+- **Documentação Completa:** \`.docs/visao-geral/whitelabel-architecture.md\`
 
 ---
 

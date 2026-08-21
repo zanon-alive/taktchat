@@ -1,54 +1,58 @@
 version: "3.8"
 
-# Stack TaktChat com BUILD NATIVO no servidor ARM64
+# Stack TaktChat em PRODUÇÃO ATUAL (VPS) — volumes montados
+#
+# Fonte operacional: stacks_producao-main-server/14_taktchat.yml
+# (cópia versionada neste repositório para a documentação e PRs permanecerem alinhadas).
+#
+# Esta stack monta o código via volumes, permitindo atualizações rápidas
+# apenas com git pull + reiniciar serviço (sem build de imagem Docker).
+#
+# Alternativas (ainda NÃO são o processo da VPS atual):
+# - 14_taktchat_ghcr.yml — imagens GHCR + label-sync
+# - 14_taktchat_rapido.yml — variante histórica (node:20 puro / URLs alivesolucoes)
+#
+# ⚠️ PRÉ-REQUISITO OBRIGATÓRIO no servidor VPS:
+# 1. Clonar repositório completo:
+#    git clone https://github.com/zanon-alive/taktchat.git /root/taktchat
 # 
-# Esta stack usa imagens Docker pré-construídas que devem ser buildadas NATIVAMENTE no servidor
-# Build nativo é 5-10x mais rápido que cross-compilation (30-60min -> 8-15min)
+# 2. Instalar dependências do backend:
+#    cd /root/taktchat/backend
+#    npm install --legacy-peer-deps
 #
-# ⚠️ PROCESSO DE BUILD E DEPLOY:
-# 
-# 1. BUILD NATIVO (executar no servidor VPS ARM64):
-#    cd /root/taktchat  # ou /home/zanonr/desenvolvimento/taktchat
-#    git pull origin main
-#    ./scripts/deploy-vps-server.sh latest main
+# 3. Instalar dependências do frontend (opcional - será feito automaticamente):
+#    cd /root/taktchat/frontend
+#    npm install --legacy-peer-deps
 #
-#    O script deploy-vps-server.sh irá:
-#    - Atualizar código do Git
-#    - Fazer build NATIVO das imagens Docker (ARM64)
-#    - Fazer push para Docker Hub
-#    - Atualizar a stack Docker Swarm
+# 4. Verificar estrutura:
+#    ls -la /root/taktchat/backend/package.json
+#    ls -la /root/taktchat/frontend/package.json
 #
-# 2. OU BUILD MANUAL:
-#    # Configurar variáveis de ambiente
-#    export FRONT_BACKEND_URL="https://api.taktchat.com.br"
-#    export FRONT_PUBLIC_URL="https://taktchat.com.br"
-#    export DOCKER_PLATFORM="linux/arm64"
-#    export BUILD_MODE="load"  # nativo, não precisa push durante build
+# ⚠️ ATUALIZAÇÕES RÁPIDAS:
+# cd /root/taktchat
+# git pull origin main
+# cd backend && npm install --legacy-peer-deps  # Se houver novas dependências
+# docker service update --force taktchat_taktchat-backend
+# docker service update --force taktchat_taktchat-frontend  # Se houver mudanças no frontend
 #
-#    # Build das imagens
-#    ./scripts/build-docker-optimized.sh latest all
-#
-#    # Push para Docker Hub
-#    docker push zanonalivesolucoes/taktchat-frontend:latest
-#    docker push zanonalivesolucoes/taktchat-backend:latest
-#
-# 3. ATUALIZAR STACK (se não foi feito pelo script):
-#    docker stack deploy -c 14_taktchat.yml --with-registry-auth taktchat
-#
-# BENEFÍCIOS DO BUILD NATIVO:
-# - Build 5-10x mais rápido (8-15 minutos vs 30-60 minutos)
-# - Sem emulação QEMU (cross-compilation)
-# - Menor uso de recursos do servidor
-# - Imagens otimizadas para ARM64
+# BENEFÍCIOS:
+# - Atualização em segundos (apenas git pull + restart)
+# - Não precisa fazer build de imagem Docker
+# - Ideal para desenvolvimento e atualizações frequentes
 
 services:
   # Serviço de migração e seed do banco de dados (executa uma vez)
-  # Usa a mesma imagem do backend, executando migrations via sequelize
+  # Executa migrações primeiro, depois os seeds iniciais
   taktchat-migrate:
-    image: zanonalivesolucoes/taktchat-backend:latest
+    image: taktchat-backend:latest
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     networks:
       - app_network
+    volumes:
+      - /root/taktchat/backend:/usr/src/app:ro  # Código do backend (read-only)
+      - taktchat_node_modules:/usr/src/app/node_modules  # Dependências isoladas
+      - /root/stacks/scripts/taktchat-migrate-startup.sh:/usr/local/bin/taktchat-migrate-startup.sh:ro  # Script de startup
+    working_dir: /usr/src/app
     environment:
       - NODE_ENV=production
       - DB_HOST=postgres_postgres
@@ -57,7 +61,11 @@ services:
       - DB_USER=taktchat_user
       - DB_PASS=T4ktch4tUs3r@2025
       - DB_DIALECT=postgres
-    command: ["sh", "-c", "npx sequelize db:migrate"]
+      - PUPPETEER_SKIP_DOWNLOAD=true  # Pular download do Chromium (servidor ARM64)
+      - NODE_OPTIONS=--max-old-space-size=512
+    command:
+      - /bin/sh
+      - /usr/local/bin/taktchat-migrate-startup.sh
     deploy:
       mode: replicated
       replicas: 1
@@ -69,20 +77,25 @@ services:
       resources:
         limits:
           cpus: "0.25"
-          memory: 512M
+          memory: 768M
 
   taktchat-backend:
-    image: zanonalivesolucoes/taktchat-backend:latest
+    image: taktchat-backend:latest
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     networks:
       - app_network
       - traefik_public
     volumes:
+      - /root/taktchat/backend:/usr/src/app  # Código do backend (read-write necessário para montar public/)
+      - taktchat_node_modules:/usr/src/app/node_modules  # Dependências isoladas
       - taktchat_media:/usr/src/app/public  # Uploads e arquivos públicos
+      - taktchat_tsc_cache:/tmp  # Cache de compilação TypeScript
+      - /root/stacks/scripts/taktchat-backend-startup.sh:/usr/local/bin/taktchat-backend-startup.sh:ro  # Script de startup
+    working_dir: /usr/src/app
     environment:
       - NODE_ENV=production
-      - BACKEND_URL=https://taktchat-api.alivesolucoes.com.br
-      - FRONTEND_URL=https://taktchat.alivesolucoes.com.br,https://taktchat.com.br
+      - BACKEND_URL=https://api.taktchat.com.br
+      - FRONTEND_URL=https://taktchat.com.br
       - DB_HOST=postgres_postgres
       - DB_PORT=5432
       - DB_NAME=taktchat_database
@@ -95,6 +108,11 @@ services:
       - REDIS_URI_ACK=redis://:z9w5TbZ1mZUHtAfzkbBi@redis_redis:6379
       - REDIS_URI_MSG_CONN=redis://:z9w5TbZ1mZUHtAfzkbBi@redis_redis:6379
       - SOCKET_FALLBACK_NS_BROADCAST=true
+      - PUPPETEER_SKIP_DOWNLOAD=true  # Pular download do Chromium (servidor ARM64)
+      - NODE_OPTIONS=--max-old-space-size=768  # Heap do Node.js para compilação TypeScript
+    command:
+      - /bin/sh
+      - /usr/local/bin/taktchat-backend-startup.sh
     deploy:
       mode: replicated
       replicas: 1
@@ -104,7 +122,7 @@ services:
       resources:
         limits:
           cpus: "0.75"
-          memory: 1024M  # Reduzido (não precisa compilar TypeScript, já está compilado na imagem)
+          memory: 1536M  # Precisa compilar TypeScript em runtime
         # Reservations comentadas temporariamente para evitar 'task has not been scheduled'
         # Se houver recursos suficientes, descomente:
         # reservations:
@@ -127,7 +145,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.swarm.network=traefik_public"
-        - "traefik.http.routers.taktchat-api.rule=Host(`api.taktchat.com.br`) || Host(`taktchat-api.alivesolucoes.com.br`)"
+        - "traefik.http.routers.taktchat-api.rule=Host(`api.taktchat.com.br`)"
         - "traefik.http.routers.taktchat-api.entrypoints=websecure"
         - "traefik.http.routers.taktchat-api.tls.certresolver=letsencrypt"
         - "traefik.http.services.taktchat-api.loadbalancer.server.port=8080"
@@ -142,16 +160,29 @@ services:
       start_period: 90s
 
   taktchat-frontend:
-    image: zanonalivesolucoes/taktchat-frontend:latest
+    image: node:20-bookworm-slim
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     networks:
       - traefik_public
+    volumes:
+      - /root/taktchat/frontend:/usr/src/app  # Código do frontend
+      - taktchat_frontend_node_modules:/usr/src/app/node_modules  # Dependências isoladas
+      - /root/stacks/scripts/taktchat-frontend-startup.sh:/usr/local/bin/taktchat-frontend-startup.sh:ro  # Script de startup
+    working_dir: /usr/src/app
     environment:
+      - NODE_ENV=production
       - REACT_APP_BACKEND_URL=https://api.taktchat.com.br
       - REACT_APP_SOCKET_URL=https://api.taktchat.com.br
       - REACT_APP_PRIMARY_COLOR=#2563EB
       - REACT_APP_PRIMARY_DARK=#1E3A8A
       - PUBLIC_URL=https://taktchat.com.br
+      - PUPPETEER_SKIP_DOWNLOAD=true  # Pular download do Chromium (servidor ARM64)
+      - TSC_COMPILE_ON_ERROR=true  # Desabilita fork-ts-checker para reduzir uso de memória
+      - GENERATE_SOURCEMAP=false  # Desabilita geração de source maps para reduzir memória
+      - DISABLE_ESLINT_PLUGIN=true  # Evita falha de memória/ESLint no build React da VPS
+    command:
+      - /bin/sh
+      - /usr/local/bin/taktchat-frontend-startup.sh
     deploy:
       mode: replicated
       replicas: 1
@@ -160,8 +191,8 @@ services:
           - node.role == manager
       resources:
         limits:
-          cpus: "0.25"
-          memory: 256M
+          cpus: "1.0"  # Aumentado para compilação React
+          memory: 4096M  # Aumentado para 4GB para compilação React (build precisa de mais memória)
 
       update_config:
         parallelism: 1
@@ -179,7 +210,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.swarm.network=traefik_public"
-        - "traefik.http.routers.taktchat-app.rule=Host(`taktchat.com.br`) || Host(`taktchat.alivesolucoes.com.br`)"
+        - "traefik.http.routers.taktchat-app.rule=Host(`taktchat.com.br`)"
         - "traefik.http.routers.taktchat-app.entrypoints=websecure"
         - "traefik.http.routers.taktchat-app.tls.certresolver=letsencrypt"
         - "traefik.http.services.taktchat-app.loadbalancer.server.port=80"
@@ -194,4 +225,9 @@ networks:
 volumes:
   taktchat_media:
     driver: local  # Uploads e arquivos públicos do backend
-
+  taktchat_node_modules:
+    driver: local  # Dependências do backend (isoladas)
+  taktchat_tsc_cache:
+    driver: local  # Cache de compilação TypeScript (hash-based)
+  taktchat_frontend_node_modules:
+    driver: local  # Dependências do frontend (isoladas)

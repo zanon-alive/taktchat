@@ -1,4 +1,6 @@
-# Build e Deploy de Imagens Docker - TaktChat
+# Build e Deploy de Imagens Docker - TaktChat (legado Docker Hub)
+
+> **Produção atual da VPS não usa este fluxo.** A VPS sobe com volumes (`14_taktchat.yml`). Este guia permanece para build/push opcional no Docker Hub.
 
 Este documento descreve o processo completo para construir e publicar as imagens Docker do TaktChat no Docker Hub.
 
@@ -293,6 +295,6 @@ docker images | grep taktchat
 
 ## 📚 Documentação Adicional
 
-- [Configuração de Variáveis de Ambiente](.docs/configuracao/variaveis-ambiente.md)
-- [Deploy no Servidor VPS](.docs/branchs/feature/build-arm64-support/DEPLOY_VPS_SERVER.md)
-- [Troubleshooting Traefik](.docs/branchs/feature/build-arm64-support/TROUBLESHOOTING_TRAEFIK.md)
+- [Configuração de Variáveis de Ambiente](configuracao/variaveis-ambiente.md)
+- [Stack de produção atual (volumes)](infraestrutura/stack-producao.md)
+- [Stack GHCR (alternativa)](infraestrutura/stack-producao-ghcr.md)

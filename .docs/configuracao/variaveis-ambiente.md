@@ -55,7 +55,7 @@
 
 ### Boas práticas
 
-- Versione arquivos `.env.example` com placeholders.
+- Templates versionados: `backend/.env.example` e `frontend/.env.example`.
 - Nunca commite `.env` reais; confirme se `.gitignore` está configurado.
 - Em produção, prefira secrets do provedor (Docker Swarm, Kubernetes, etc.).
 - Registre mudanças relevantes em `anexos/notas-de-versao.md`.
