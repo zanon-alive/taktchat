@@ -1,16 +1,14 @@
 # Guia Completo: Atualização do TaktChat no Servidor
 
-## Data: 2026-01-18
+## Data: 2026-08-21
 
 ## Visão Geral
 
-Este documento descreve o processo para atualizar o TaktChat no servidor de produção após o código ter sido commitado, enviado ao repositório e feito merge na branch `main`. 
+Este documento descreve o processo para atualizar o TaktChat no servidor de produção após o código ter sido commitado, enviado ao repositório e feito merge na branch `main`.
 
-A stack utilizada em produção usa **volumes montados** para permitir atualizações rápidas sem necessidade de rebuild das imagens Docker. O código é montado diretamente do repositório clonado no servidor, permitindo atualizações em segundos com apenas `git pull` + restart dos serviços.
+**Produção atual (VPS):** stack com **volumes montados** (`14_taktchat.yml` neste repositório e em `stacks_producao-main-server`). O código fica em `/root/taktchat`. Atualização: `git pull` + `./update-taktchat.sh` (ou `docker service update --force`).
 
-> **Nota:** Este guia é específico para a stack com volumes montados. Se você estiver usando a stack com build de imagens Docker, consulte a seção "Método Alternativo: Atualização com Build de Imagens" ao final deste documento.
-
-> **Atualização (GHCR / recomendado):** o projeto também suporta deploy por **imagens no GHCR com tag imutável por SHA** (build via CI), reduzindo o update do servidor para **pull + redeploy** no Portainer/Swarm. Ver seção **"Método Alternativo: Atualização via GHCR (por SHA)"** ao final.
+> **Alternativas (não usadas na VPS hoje):** imagens GHCR (`14_taktchat_ghcr.yml` / `15_taktchat_prod_ghcr.yml` nas stacks) e build/push Docker Hub. Ver seções ao final.
 
 O processo inclui:
 
@@ -219,7 +217,9 @@ docker service ps taktchat_taktchat-migrate
 
 ---
 
-## 🐳 Método Alternativo: Atualização via GHCR (por SHA) — Recomendado para Produção Estável
+## 🐳 Alternativa: Atualização via GHCR (por SHA)
+
+Este método **não é o processo da VPS atual**. A VPS usa `14_taktchat.yml` com volumes. GHCR está preparado em `14_taktchat_ghcr.yml` (este repo) e `15_taktchat_prod_ghcr.yml` (stacks).
 
 Este método tira o build do servidor e coloca no CI (GitHub Actions), publicando imagens no GHCR.
 
@@ -462,13 +462,12 @@ Use este checklist para garantir que nada foi esquecido:
 
 ## 📚 Documentação Relacionada
 
-- **Build do Frontend Fora do Container:** `.docs/branchs/master/22_build_frontend_fora_container.md`
-- **Como Atualizar TaktChat:** `14_taktchat_como_atualizar.md`
-- **Script de Atualização:** `update-taktchat.sh`
-- **Stack de Produção:** `.docs/infraestrutura/stack-producao.md` - Configuração completa da stack Docker Swarm
-- **Scripts de Startup:** `.docs/SCRIPTS_STARTUP_EXEMPLO.md` - Exemplos de scripts de inicialização
-- **Melhorias da Stack Rápida:** `.docs/MELHORIAS_FRONTEND_STACK_RAPIDA.md` - Detalhes das melhorias implementadas
-- **Comparação de Stacks:** `.docs/COMPARACAO_STACKS.md` - Comparação entre stack com imagens e stack com volumes
+- **Stack de Produção (VPS atual):** `14_taktchat.yml` e `.docs/infraestrutura/stack-producao.md`
+- **Como atualizar na VPS (repo de stacks):** `stacks_producao-main-server/14_taktchat_como_atualizar.md`
+- **Script de Atualização:** `update-taktchat.sh` em `/root/stacks`
+- **Scripts de Startup:** `.docs/SCRIPTS_STARTUP_EXEMPLO.md`
+- **Stack GHCR (alternativa):** `.docs/infraestrutura/stack-producao-ghcr.md`
+- **Comparação de Stacks:** `.docs/COMPARACAO_STACKS.md`
 
 ---
 
@@ -523,4 +522,4 @@ Em caso de problemas:
 
 ---
 
-**Última atualização:** 2026-01-18
+**Última atualização:** 2026-08-21

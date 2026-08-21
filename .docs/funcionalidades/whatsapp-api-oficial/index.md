@@ -44,7 +44,7 @@ Passo a passo detalhado de como configurar a conta Meta Business e integrar com 
 
 1. Leia o **[Quick Start](./WHATSAPP_API_QUICKSTART.md)** (30 minutos)
 2. Siga o **[Tutorial Completo](./tutorial-integracao-meta.md)** para configuração detalhada
-3. Configure variáveis de ambiente usando o **[arquivo de exemplo](../configuracao/whatsapp-api-oficial.env.example)**
+3. Configure variáveis de ambiente usando o **[arquivo de exemplo](../../configuracao/whatsapp-api-oficial.env.example)**
 
 ---
 
@@ -92,13 +92,12 @@ Checklist de tarefas pendentes (testes e deploy).
 
 ## Documentação de Desenvolvimento
 
-Para entender como foi desenvolvido, consulte os documentos na pasta `.docs/branchs/main/`:
+O histórico de implementação da API Oficial está **nesta pasta** (versionado):
 
-- **FASE1_MUDANCAS_APLICADAS.md** - Preparação e Migration
-- **FASE2_CAMADA_ABSTRACAO_COMPLETA.md** - Camada de Abstração
-- **FASE3_FASE4_INTEGRACAO_WEBHOOKS.md** - Integração e Webhooks
-- **FASE6_FRONTEND_COMPLETO.md** - Interface Frontend
-- **resumo-novas-funcionalidades-main.md** - Resumo completo das novas funcionalidades
+- [status-completo.md](./status-completo.md)
+- [progresso.md](./progresso.md)
+- [sessao-final.md](./sessao-final.md)
+- [WHATSAPP_API_OFICIAL_PLANO.md](./WHATSAPP_API_OFICIAL_PLANO.md)
 
 ---
 
@@ -106,7 +105,7 @@ Para entender como foi desenvolvido, consulte os documentos na pasta `.docs/bran
 
 ### Arquivo de Exemplo
 
-📄 **[whatsapp-api-oficial.env.example](../configuracao/whatsapp-api-oficial.env.example)**  
+📄 **[whatsapp-api-oficial.env.example](../../configuracao/whatsapp-api-oficial.env.example)**  
 Template com todas as variáveis de ambiente necessárias.
 
 ### Variáveis Necessárias
@@ -249,7 +248,7 @@ WhatsAppFactory (Factory Pattern)
 Para questões técnicas, consulte:
 - `.docs/configuracao/` - Configurações avançadas
 - `.docs/operacao/troubleshooting.md` - Resolução de problemas
-- Documentação de desenvolvimento em `.docs/branchs/main/`
+- Histórico da API Oficial nesta pasta (`status-completo.md`, `progresso.md`)
 
 ---
 

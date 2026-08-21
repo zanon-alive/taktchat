@@ -3,7 +3,7 @@
 ### Camadas
 
 1. **Interface (Frontend)**
-   - React 17, Material UI, CRACO.
+   - React 17, Material UI v5, CRACO.
    - Consome REST (`/api`) e Socket.IO (`/socket.io/`), com autenticação JWT.
    - Build distribuído via nginx em produção (ver `frontend/Dockerfile`).
 
@@ -11,7 +11,7 @@
    - Node.js 22, TypeScript, Express.
    - Sequelize + PostgreSQL como fonte primária de dados.
    - Bull/Redis para filas de envio de mensagens, sincronização de contatos e processamento pesado.
-   - Serviços auxiliares: Baileys (WhatsApp), Puppeteer, ffmpeg, conversão de mídia, reconhecimento OCR, integrações com Gateways de pagamento.
+   - Serviços auxiliares: Baileys e WhatsApp Business API Oficial (adapters), Puppeteer/ffmpeg, OCR, gateways de pagamento.
 
 3. **Infraestrutura compartilhada**
    - PostgreSQL 15 (Docker ou serviço gerenciado).
@@ -22,8 +22,10 @@
 
 ```mermaid
 flowchart LR
-  Cliente[Cliente via WhatsApp] -->|Baileys| Sessao(Serviço de Sessão WhatsApp)
-  Sessao --> Backend[API Backend]
+  ClienteWA[Cliente WhatsApp] -->|Baileys ou API Oficial| Canal[Adapter de canal]
+  ClienteSite[Visitante do site] -->|widget.js| SiteChat[API publica site-chat]
+  Canal --> Backend[API Backend]
+  SiteChat --> Backend
   Backend --> RedisFilas[Filas Bull]
   RedisFilas --> Workers[Workers/Jobs]
   Workers --> Postgres[(PostgreSQL)]
@@ -32,9 +34,12 @@ flowchart LR
   Frontend --> Usuario[Equipe de Atendimento]
 ```
 
+Produção atual (VPS): Swarm com volumes (`14_taktchat.yml`). Serviço `taktchat-label-sync` existe só na stack GHCR alternativa.
+
 ### Integrações essenciais
 
 - **Baileys**: gerencia sessões WhatsApp, eventos de mensagens e QRCode.
+- **WhatsApp Business API Oficial**: webhooks Meta (`/webhooks/whatsapp`) e templates.
 - **Socket.IO**: comunicação em tempo real com front (namespaces `workspace-<companyId>`).
 - **Redis**: adapter Socket.IO, filas Bull e cache de sessões.
 - **ffmpeg**: transcodificação de mídia (áudio, vídeo, imagens).

@@ -1,18 +1,13 @@
-## Implantação com Docker
+## Implantação com Docker (desenvolvimento local)
 
-### Perfis suportados
-
-- `default`: sobe somente PostgreSQL e Redis (suporta desenvolvimento local).
-- `production`: sobe backend, frontend, Redis e PostgreSQL dentro do compose.
-
-### Comandos essenciais
+O `docker-compose.yml` da raiz **não usa profiles**. Os serviços `postgres`, `redis`, `backend` e `frontend` sobem com `docker compose up`. Para desenvolver com API/UI no host, suba só banco e cache:
 
 ```bash
-# Subir infraestrutura básica
+# Infraestrutura local (recomendado para `npm run dev` / `npm start`)
 docker compose up -d postgres redis
 
-# Subir stack completa (produção)
-docker compose --profile production up -d
+# Stack compose completa (backend + frontend em container — não é a stack da VPS)
+docker compose up -d
 
 # Verificar saúde dos serviços
 docker compose ps
@@ -30,29 +25,31 @@ docker compose down
 docker compose down -v
 ```
 
+Produção na VPS usa Docker Swarm (`14_taktchat.yml`), não este compose.
+
 ### Variáveis para produção
 
-- Configure arquivos `.env` específicos para backend e frontend antes do build.
-- Utilize secrets para credenciais sensíveis (PostgreSQL, JWT, provedores externos).
+- Configure arquivos `.env` a partir de `backend/.env.example` e `frontend/.env.example`.
+- Utilize secrets para credenciais sensíveis (PostgreSQL, JWT, provedores externos). Na VPS os valores ficam no YAML da stack / Portainer.
 
 ### Volumes críticos
 
 | Volume | Uso | Observações |
 | --- | --- | --- |
-| `taktchat_postgres_data` | Base de dados | Backup periódico obrigatório |
-| `taktchat_redis-data` | Cache/filas | Pode ser recriado, mas impacta jobs em andamento |
-| `taktchat_backend-private` | Sessões WhatsApp (Baileys) | Necessário para manter conexões ativas |
-| `taktchat_backend-public` | Uploads e mídias públicas | Sincronizar com storage externo, se houver |
+| `postgres-data` | Base de dados | Backup periódico obrigatório |
+| `redis-data` | Cache/filas | Pode ser recriado, mas impacta jobs em andamento |
+| `backend-private` | Sessões WhatsApp (Baileys) | Necessário para manter conexões ativas |
+| `backend-public` | Uploads e mídias públicas | Sincronizar com storage externo, se houver |
 
 ### Ajustes comuns
 
 - **ffmpeg**: já incluído na imagem do backend; instale manualmente se rodar fora dos containers.
-- **Rede externa**: crie a rede `nobreluminarias` (ou ajuste no compose) antes de subir os containers.
-- **Reinício automático**: habilite `restart: always` para backend, frontend e Redis.
+- **Rede**: o compose cria a rede `nobreluminarias`.
+- **Reinício automático**: `restart: always` já está nos serviços do compose.
+- **Porta do Postgres no host**: `POSTGRES_HOST_PORT=5433 docker compose up -d postgres redis` se 5432 estiver ocupada.
 
 ### Monitoramento pós-deploy
 
-- Validar readiness do backend com `curl http://localhost:8080/health` (implemente endpoint se necessário).
+- Validar readiness do backend com `curl http://localhost:8080/health`.
 - Conferir que sockets respondem em `/socket.io/`.
 - Disparar campanha de teste para garantir filas e notificações funcionando.
-

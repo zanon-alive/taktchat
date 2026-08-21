@@ -1,4 +1,6 @@
-## Stack de Produção (GHCR + tag por SHA)
+## Stack de Produção (GHCR + tag por SHA) — alternativa
+
+> **Não é a stack em uso na VPS hoje.** Produção atual: `14_taktchat.yml` (volumes). Este guia descreve o caminho futuro/alternativa com imagens no GHCR (`14_taktchat_ghcr.yml` neste repo; `15_taktchat_prod_ghcr.yml` no repo de stacks).
 
 Este guia descreve o deploy recomendado para produção estável: **imagens Docker publicadas no GHCR** (GitHub Container Registry), com **tags imutáveis por SHA**, e update via Portainer/Swarm por pull + redeploy.
 

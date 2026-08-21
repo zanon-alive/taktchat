@@ -2,7 +2,7 @@
 
 - **Data**: 2025-11-14  
 - **Branch**: `main`  
-- **Objetivo**: reproduzir em um único comando toda a preparação do ambiente local descrita em `.docs/branchs/main/configuracao-projeto.md`.
+- **Objetivo**: reproduzir em um único comando a preparação de ambiente local (`instalacao/passo-a-passo-local.md` e `instalacao/ambiente-local.md`).
 
 ## Pré-requisitos mínimos
 
@@ -54,6 +54,6 @@ O script é idempotente: pode ser executado novamente para garantir que dependê
 
 ## Referências
 
-- `.docs/branchs/main/configuracao-projeto.md` — histórico detalhado da configuração manual.
+- `.docs/instalacao/ambiente-local.md` — variáveis e `backend/.env.example`.
 - `.docs/instalacao/passo-a-passo-local.md` — roteiro completo caso seja necessário validar cada comando individual.
 

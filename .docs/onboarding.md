@@ -113,9 +113,9 @@ O TaktChat suporta **dois tipos de conexão WhatsApp**:
 - **1.000 primeiras conversas/mês GRÁTIS**
 
 **Documentação Completa:**
-- 📘 [Guia Completo WhatsApp API Oficial](../funcionalidades/whatsapp-api-oficial/index.md)
-- ⚡ [Quick Start (30 min)](../funcionalidades/whatsapp-api-oficial/WHATSAPP_API_QUICKSTART.md)
-- 📚 [Tutorial de Integração Meta](../funcionalidades/whatsapp-api-oficial/tutorial-integracao-meta.md)
+- 📘 [Guia Completo WhatsApp API Oficial](funcionalidades/whatsapp-api-oficial/index.md)
+- ⚡ [Quick Start (30 min)](funcionalidades/whatsapp-api-oficial/WHATSAPP_API_QUICKSTART.md)
+- 📚 [Tutorial de Integração Meta](funcionalidades/whatsapp-api-oficial/tutorial-integracao-meta.md)
 
 **Quando usar cada opção:**
 - **Baileys:** Pequenas empresas, baixo volume, custo zero importante
@@ -169,6 +169,21 @@ O sistema rastreia a **origem** de cada ticket (EntrySource). Em **Configuraçõ
 4. Para páginas externas, inclua `data-api-url` com a URL da API
 
 Na lista de tickets, use o filtro **Canal** para ver apenas tickets de uma origem (WhatsApp, Lead, Revendedor, Chat do site).
+
+Guia de integração do widget: `.docs/funcionalidades/widget-chat-site.md`.
+
+#### 2.5. Governança Whitelabel (plataforma, parceiros e clientes)
+
+O TaktChat tem três níveis de empresa:
+
+- **Plataforma** (`type = platform`): dono do produto; usuários `super` veem tudo.
+- **Whitelabel**: parceiro revendedor; gerencia só empresas-filhas, planos próprios e cobrança das filhas.
+- **Cliente direto** (`type = direct`): empresa final, da plataforma ou de um parceiro.
+
+Cadastros públicos: landing (`/landing`, se `enableLandingSignup`) e link do parceiro (`/signup-partner`).  
+Cobrança: relatório `/partner-billing-report` (super); bloqueio de acesso por licença/parceiro.
+
+Detalhes: `.docs/visao-geral/whitelabel-architecture.md`.
 
 ---
 

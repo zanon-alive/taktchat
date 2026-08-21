@@ -160,7 +160,7 @@ O Dono da Plataforma cobra whitelabels baseado na **quantidade de planos ativos*
   - Etapa 7: Cadastro direto na landing (`enableLandingSignup`, DirectSignupService, SignupForm em `/landing`; endpoints `/public/direct-signup/*`).
   - Etapa 8: Cobrança persistida (modelo `PartnerBillingSnapshot`, migration, CalculateAndStorePartnerBillingService; GET `/dashboard/partner-billing-snapshots`, POST `/dashboard/partner-billing-report/calculate`; UI de cobranças registradas).
   - Bloqueio por cobrança: CompanyAccessService, BlockCompanyAccessService, PATCH `/companies/:id/block-access`; suspensão de licença; mensagens no login/refresh (ERR_ACCESS_BLOCKED_*). Cadastro por parceiro: `/signup-partner`, PartnerSignupService, `trialDaysForChildCompanies`.
-  - Detalhes: `.docs/branchs/feature/fase2-whitelabel/analise-fase2-whitelabel.md` e `analise-bloqueio-cobranca-whitelabel.md`
+  - Detalhes: este documento e `.docs/visao-geral/funcionalidades.md` (seção 7). Análises da branch `feature/fase2-whitelabel` ficam só na máquina de desenvolvimento (`.docs/branchs/`, gitignore).
 
 ## Referências
 

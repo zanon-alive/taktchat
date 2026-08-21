@@ -1,6 +1,6 @@
 # 🗺️ Roadmap e Melhorias Futuras - TaktChat
 
-**Última atualização:** 2025-01-27  
+**Última atualização:** 2026-08-21  
 **Status:** Documento centralizado de melhorias futuras do projeto
 
 ---
@@ -9,7 +9,7 @@
 
 Este documento centraliza todas as melhorias futuras, funcionalidades pendentes e itens de roadmap do projeto TaktChat. As melhorias estão organizadas por área/módulo e prioridade.
 
-> **Nota:** Melhorias específicas de cada branch podem ser encontradas em `.docs/branchs/<nome-da-branch>/melhorias-futuras.md`
+> **Nota:** Análises por branch ficam em `.docs/branchs/<nome-da-branch>/` **nesta máquina** (pasta no gitignore; não vai no clone). O roadmap versionado é este arquivo.
 
 ---
 
@@ -37,7 +37,7 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 - [x] Remoção de dependências não usadas (socket.io/admin-ui)
 - [x] Migração de ícones Font Awesome para lucide-react
 - [x] Lazy load de react-pdf e html2pdf (carregamento sob demanda)
-- [ ] Migração Material-UI v4 para MUI v5 (opcional, alto esforço)
+- [x] Migração Material-UI v4 para MUI v5 (opcional, alto esforço)
 - [ ] Substituição gradual de lodash/moment por alternativas leves
 
 ### Otimizações de Infraestrutura
@@ -51,15 +51,15 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ## 📱 Landing Page de Vendas
 
-**Documentação completa:** `.docs/branchs/landing-page-vendas/melhorias-futuras.md`
+**Documentação completa:** este roadmap (seção Landing) e `.docs/funcionalidades/widget-chat-site.md`.
 
 ### Prioridade Alta
-- [ ] LGPD Compliance (banner de cookies, política de privacidade, termos de uso)
-- [ ] Proteção contra Spam (CAPTCHA - reCAPTCHA v3 ou hCaptcha)
+- [x] LGPD Compliance (banner de cookies, política de privacidade, termos de uso)
+- [x] Proteção contra Spam (CAPTCHA - reCAPTCHA v3 ou hCaptcha)
 
 ### Prioridade Média
 - [ ] Integração com Google Analytics
-- [ ] SEO avançado (Open Graph, Schema.org, sitemap.xml, robots.txt)
+- [x] SEO avançado (Open Graph, Schema.org, sitemap.xml, robots.txt)
 - [ ] A/B Testing de variações da landing page
 - [ ] Formulário multi-etapas
 - [x] Chat ao vivo integrado com sistema de tickets (Chat do Site – branch `feature/entrysource-canal-e-chat-site`)
@@ -128,7 +128,7 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ## 📊 Campanhas
 
-**Documentação:** `MELHORIAS_CAMPANHAS_IMPLEMENTACAO.md`, `RESUMO_MELHORIAS_CAMPANHAS.md`, `RESPOSTAS_CAMPANHAS_API_OFICIAL.md`
+**Documentação:** `.docs/legacy/raiz/MELHORIAS_CAMPANHAS_IMPLEMENTACAO.md`, `.docs/legacy/raiz/RESUMO_MELHORIAS_CAMPANHAS.md`
 
 ### Validação e Economia (🔴 ALTA PRIORIDADE)
 - [ ] Validação de números antes do envio usando API Meta (economia de R$ 500+ por campanha)
@@ -392,7 +392,8 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
    - Pode ser uma nova funcionalidade, correção ou otimização
 
 2. **Criar análise:**
-   - Criar arquivo em `.docs/branchs/<nome-da-branch>/analise.md`
+   - Criar arquivo em `.docs/branchs/<nome-da-branch>/analise.md` (local, gitignore)
+   - Atualizar também o documento versionado correspondente em `.docs/` (este roadmap, `funcionalidades/`, etc.)
    - Descrever o problema/necessidade
    - Propor solução
    - Estimar complexidade e tempo
@@ -416,7 +417,7 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ## 📝 Histórico de Atualizações
 
-- **2025-01-27:** Adicionada funcionalidade "Formulário de Leads" ao roadmap
+- **2026-08-21:** Revisão: CookieBanner, reCAPTCHA, SEO da landing, MUI v5 e Chat do Site marcados como feitos; GHCR deixou de ser descrito como deploy atual (VPS usa volumes).
   - Funcionalidade para ser embedada ou usada por empresas clientes
   - Integração com backend `/leads` e geração automática de Contacts
   - Baseada na implementação existente em `/landing` do TaktChat
@@ -435,10 +436,10 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ## 🔗 Referências
 
-- **Landing Page:** `.docs/branchs/landing-page-vendas/melhorias-futuras.md`
+- **Landing Page:** landing em `/landing` (cookies, reCAPTCHA, SEO). Widget: `.docs/funcionalidades/widget-chat-site.md`
 - **WhatsApp API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/status-completo.md`
-- **Campanhas:** `MELHORIAS_CAMPANHAS_IMPLEMENTACAO.md`, `RESUMO_MELHORIAS_CAMPANHAS.md`
-- **Branch Main:** `.docs/branchs/main/melhorias-pendentes-sugestoes.md`
+- **Campanhas:** `.docs/legacy/raiz/MELHORIAS_CAMPANHAS_IMPLEMENTACAO.md`, `.docs/legacy/raiz/RESUMO_MELHORIAS_CAMPANHAS.md`
+- **Pendências gerais:** este arquivo (`visao-geral/roadmap.md`)
 - **Visão Geral do Produto:** `.docs/visao-geral/produto.md`
 
 ---

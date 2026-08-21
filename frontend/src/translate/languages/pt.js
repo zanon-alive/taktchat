@@ -1546,7 +1546,7 @@ const messages = {
           widgetTitle: "Widget Chat do Site",
           widgetDesc: "Widget JavaScript embarcável em qualquer site. Em Configurações > Widget Chat do Site, obtenha o código de integração e o token (botão \"Obter token\"). O código pode ser colado em páginas HTML externas.",
           widgetToken: "Use data-api-url no script quando o widget estiver em site externo (ex.: data-api-url=\"https://api.taktchat.com.br\").",
-          docsRef: "Documentação detalhada: .docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md e passo-a-passo-testes.md",
+          docsRef: "Documentação detalhada: .docs/funcionalidades/widget-chat-site.md",
         },
         settings: {
           codeVideo: "Código do Video",

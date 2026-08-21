@@ -56,7 +56,7 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 - **Planos e billing**: APIs `PlanController`, `InvoicesService`, `FindAllPlanService` mantêm catálogo e associação aos `companyId`, suportando trials, recorrência e quotas automáticas.
 
 ### 9. Integrações e APIs externas
-- **Chat do site e widget**: API pública `/public/site-chat/submit`, `/message`, `/messages` para criar tickets e trocar mensagens. Widget JavaScript (`widget.js`) embarcável em qualquer site; suporte a `companyId`, `companyToken` (signupToken ou siteChatToken) e `data-api-url` para páginas externas. Configuração em **Configurações > Widget Chat do Site** e **Canais de entrada**. Ver `.docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md`.
+- **Chat do site e widget**: API pública `/public/site-chat/submit`, `/message`, `/messages` para criar tickets e trocar mensagens. Widget JavaScript (`widget.js`) embarcável em qualquer site; suporte a `companyId`, `companyToken` (signupToken ou siteChatToken) e `data-api-url` para páginas externas. Configuração em **Configurações > Widget Chat do Site** e **Canais de entrada**. Ver `.docs/funcionalidades/widget-chat-site.md`.
 - **Webhooks e APIs**: `WebhookService`, `External API`, `MessagesAPI` expõem eventos e endpoints REST para CRM/ERP.
 - **Queue Integration / Typebot / FlowBuilder**: conectores prontos para bots externos, automações RPA e pipelines customizados.
 - **Monitoramento programático**: serviços `QueueMonitor`, `SavedFilterCronManager`, `TagRulesCron` e hooks de auditoria facilitam integrações com ferramentas de observabilidade.
@@ -78,9 +78,8 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 - **Scripts e diagnósticos**: diretórios `lib/`, `utils/`, `backend/scripts/` e `.docs/sql/` oferecem automações para migrações, correções e análises.
 
 ### 13. Próximas evoluções (relacionadas)
-- **Auto-onboarding SaaS** conforme análise em `.docs/branchs/main/auto-onboarding-saas.md`.
-- **Console de administração SaaS** (`.docs/branchs/main/admin-saas-console.md`) para consolidar gestão de empresas, planos e billing.
-- **Otimizações de build** (docker multi-stage, Buildx, `.dockerignore`) já implementadas e documentadas em `.docs/docker-build.md`.
+- Melhorias futuras: `.docs/visao-geral/roadmap.md`.
+- **Otimizações de build** (docker multi-stage, Buildx, `.dockerignore`) documentadas em `.docs/docker-build.md` (fluxo legado Docker Hub).
 
 > Atualize este documento sempre que uma nova funcionalidade chegar ao repositório ou quando fluxos existentes forem alterados significativamente.
 

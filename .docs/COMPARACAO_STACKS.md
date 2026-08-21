@@ -1,10 +1,13 @@
 # Comparação: Stack com Imagens Docker vs Stack com Volumes Montados
 
+> **Produção atual (VPS):** volumes montados no arquivo **`14_taktchat.yml`** (imagem local `taktchat-backend:latest` + frontend `node:20`).  
+> A coluna "Imagens Docker" abaixo descreve o fluxo legado (Docker Hub). GHCR está em `14_taktchat_ghcr.yml`.
+
 Este documento compara as duas abordagens de deploy do TaktChat no servidor.
 
 ## 📊 Comparação Geral
 
-| Característica | Imagens Docker (`14_taktchat.yml`) | Volumes Montados (`14_taktchat_rapido.yml`) |
+| Característica | Imagens Docker (legado Hub / alternativa GHCR) | Volumes montados (`14_taktchat.yml` — VPS atual) |
 |----------------|-------------------------------------|----------------------------------------------|
 | **Tempo de atualização** | 8-15 minutos (build necessário) | 10-30 segundos (apenas git pull) |
 | **Isolamento** | ✅ Alto (tudo na imagem) | ⚠️ Médio (código no servidor) |
@@ -15,7 +18,7 @@ Este documento compara as duas abordagens de deploy do TaktChat no servidor.
 
 ---
 
-## 🚀 Stack 1: Imagens Docker (`14_taktchat.yml`)
+## 🚀 Stack 1: Imagens Docker (legado Hub / alternativa GHCR)
 
 ### Características
 

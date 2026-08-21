@@ -1,8 +1,10 @@
 # WhatsApp Business API Oficial
 
+> Guia canônico: pasta [whatsapp-api-oficial/](whatsapp-api-oficial/index.md). Este arquivo é um resumo.
+
 **Versão:** 1.0  
 **Data:** 2025-01-27  
-**Status:** ✅ Implementado (Backend e Frontend completos, aguardando testes)
+**Status:** ✅ Implementado (Backend e Frontend). Deploy da VPS segue `14_taktchat.yml` (volumes), independente deste canal.
 
 ---
 

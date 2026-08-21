@@ -1,4 +1,6 @@
-# Guia: Build e Publicação dos Dockerfiles
+# Guia: Build e Publicação dos Dockerfiles (legado)
+
+> Produção atual da VPS usa volumes (`14_taktchat.yml`), não este fluxo Docker Hub.
 
 Este documento descreve como gerar as imagens Docker do Taktchat (frontend e backend) e publicá-las no Docker Hub utilizando os artefatos existentes no repositório.
 

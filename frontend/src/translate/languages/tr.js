@@ -1452,7 +1452,7 @@ const messages = {
           widgetTitle: "Site Chat Widget",
           widgetDesc: "Herhangi bir web sitesi için gömülebilir JavaScript widget. Ayarlar > Site Chat Widget'da entegrasyon kodunu ve token'ı (\"Token al\" düğmesi) alın. Kod harici HTML sayfalarına yapıştırılabilir.",
           widgetToken: "Widget harici bir sitede olduğunda script'te data-api-url kullanın (örn: data-api-url=\"https://api.taktchat.com.br\").",
-          docsRef: "Ayrıntılı dokümantasyon: .docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md ve passo-a-passo-testes.md",
+          docsRef: "Ayrıntılı dokümantasyon: .docs/funcionalidades/widget-chat-site.md",
         },
         settings: {
           codeVideo: "Video Kodu",

@@ -1,5 +1,10 @@
 version: "3.8"
 
+# HISTÓRICO — não é a stack da VPS atual.
+# Produção atual: 14_taktchat.yml (volumes + imagem local taktchat-backend:latest).
+# Esta variante usa node:20-bookworm-slim no backend, URLs alivesolucoes.com.br
+# e Traefik do frontend na porta 3000 (a VPS usa porta 80).
+#
 # Stack TaktChat com ATUALIZAÇÕES RÁPIDAS (volumes montados)
 # 
 # Esta stack monta o código via volumes, permitindo atualizações rápidas

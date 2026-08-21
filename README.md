@@ -36,6 +36,8 @@ cd taktchat
 # Subir banco e cache (caso já exista Postgres local, use POSTGRES_HOST_PORT=5433)
 docker compose up -d postgres redis
 
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 # Ajuste DB_PORT no backend/.env se usar porta alternativa
 
 # Backend
@@ -69,7 +71,7 @@ A plataforma inclui uma landing page pública de vendas acessível em `/landing`
 - **Performance**: Code splitting, lazy load de componentes pesados (PDF) e carregamento sob demanda
 - **Responsivo**: Design adaptado para todos os dispositivos
 
-> Detalhes da implementação: `.docs/branchs/feature/melhorias-pagina-vendas/`
+> Detalhes da implementação da landing: `.docs/visao-geral/funcionalidades.md` (seção Landing).
 
 ### Documentação
 
@@ -78,7 +80,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - **🚀 Guia de Onboarding:** `.docs/onboarding.md` - Documentação completa explicando todas as funcionalidades e como utilizá-las
 - **📚 Documentação Admin:** `.docs/docs_admin.md` - Guia completo para administradores (Super Admin)
 - **🗺️ Roadmap e Melhorias Futuras:** `.docs/visao-geral/roadmap.md` - Documento centralizado com todas as melhorias futuras do projeto
-- **🏢 Arquitetura Whitelabel:** `.docs/visao-geral/whitelabel-architecture.md` - Estrutura de governança multi-empresa e plano para Fase 2 (whitelabel)
+- **🏢 Arquitetura Whitelabel:** `.docs/visao-geral/whitelabel-architecture.md` - Hierarquia plataforma → parceiros → clientes (Fases 1 e 2 concluídas)
 - Visão geral do produto: `.docs/visao-geral/produto.md`
 - Arquitetura e fluxos críticos: `.docs/visao-geral/arquitetura.md` e `.docs/visao-geral/fluxos-criticos.md`
 - Instalação e ambientes: `.docs/instalacao/`
@@ -88,17 +90,17 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Funcionalidades por módulo: `.docs/funcionalidades/`
   - **Assets estáticos (public vs src, evitar 404 em produção):** `.docs/funcionalidades/frontend-assets-estaticos.md`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
-  - **EntrySource e Chat do Site:** `.docs/branchs/feature-entrysource-canal-e-chat-site/widget-chat-site.md` - Canais de entrada, widget e API pública
+  - **EntrySource e Chat do Site:** `.docs/funcionalidades/widget-chat-site.md` - Canais de entrada, widget e API pública
 - Procedimentos de diagnóstico: `.docs/diagnosticos/` (inclui auditoria e deduplicação de contatos: `npm run db:audit-contacts`, `npm run db:dedupe-contacts`, `npm run db:delete-contacts-without-tickets`)
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`
 - Recuperação quando migrations falham ou há drift (`SequelizeMeta` vs schema): `.docs/operacao/recuperacao-migrations-banco.md`
 - Checklists e histórico: `.docs/anexos/`
 - Scripts SQL organizados: `.docs/sql/`
 - Build/publicação de imagens Docker: `.docs/DOCKER_BUILD_E_DEPLOY.md` (guia completo passo a passo)
-- **🔄 Atualização do servidor de produção:** `.docs/ATUALIZACAO_SERVIDOR.md` - **GUIA OBRIGATÓRIO para atualizar o servidor após PR/merge na branch `main`**
-- Stack de produção: `.docs/infraestrutura/stack-producao.md` (configuração da stack Docker Swarm em produção)
-- Script rápido para publicar imagens na VPS: `scripts/publish-vps.sh` (detalhes em `.docs/DOCKER_BUILD_E_DEPLOY.md`)
-- Documentação legada: `.docs/docker-build.md` (referência)
+- **🔄 Atualização do servidor de produção:** `.docs/ATUALIZACAO_SERVIDOR.md` - **GUIA OBRIGATÓRIO para atualizar o servidor após PR/merge na branch `main`** (stack atual: volumes em `14_taktchat.yml`)
+- Stack de produção (VPS atual): `.docs/infraestrutura/stack-producao.md` e `14_taktchat.yml`
+- Stack GHCR (alternativa): `.docs/infraestrutura/stack-producao-ghcr.md` e `14_taktchat_ghcr.yml`
+- PM2 híbrido (exemplo, não é a VPS): `.docs/infraestrutura/pm2-hibrido.md` e `ecosystem.config.cjs`
 
 Documentos anteriores permanecem disponíveis como referência em `.docs/legacy/`.
 
