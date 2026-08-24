@@ -14,6 +14,8 @@ import SignupPartner from "../pages/SignupPartner";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
 import LandingPage from "../pages/LandingPage";
+import ApresentacoesHub from "../pages/Apresentacoes";
+import ApresentacaoDeck from "../pages/Apresentacoes/Deck";
 
 // Lazy loading para todas as outras páginas (code splitting automático)
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -73,6 +75,8 @@ const Routes = () => {
     <BrowserRouter>
       <Switch>
         <RouterRoute exact path="/landing" component={LandingPage} />
+        <RouterRoute exact path="/apresentacoes" component={ApresentacoesHub} />
+        <RouterRoute exact path="/apresentacoes/:deckId" component={ApresentacaoDeck} />
         <AuthProvider>
           <TicketsContextProvider>
             <Route exact path="/docs" component={OnboardingDocs} />

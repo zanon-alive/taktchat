@@ -1,12 +1,20 @@
 # Taktchat — continuidade de sessão
 
-**Projeto:** Taktchat  
-**Repositório:** https://github.com/zanon-alive/taktchat.git
+**Branch:** `docs/kit-documentacao-produto`
 
-## Estado atual
+## Estado
 
-Branch `chore/cursor-telecontrol-workspace`: rules Cursor/Telecontrol e estrutura `.ai/` prontas para commit.
+Lote do kit **fechado (v1.4)**. Fonte versionável: `.docs/kit-produto/`.
 
-## Próximo passo
+Commit desta leva **feito**. PR e deploy só se você pedir.
 
-Aguardar confirmação se a demanda está finalizada (PR) ou nova demanda.
+Prints de signup **reais** em `frontend/public/kit-apresentacoes/`. Celular: ilustração de IA.
+
+`Route.js` só redireciona rota privada quando o path casa. Token local do parceiro 4 começa com letra.
+
+## Aberto
+
+- Captura real do celular
+- Copy dos slides (login comercial)
+- Migration Sequelize `.ts` do seed
+- Demanda 16 (A/B), Kanban (`15`) e parseInt do signupToken — outras branches

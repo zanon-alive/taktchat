@@ -26,4 +26,4 @@ Ficheiros com extensão conhecida (`.png`, etc.) são servidos com `try_files $u
 
 ## Conteúdo atual em `frontend/public/` (versionado)
 
-Além de ícones e `logo_quadrado.png`, o repositório inclui variantes de marca (`TaktChat*.png`, `taktchat-logo_150x150.png`), `robots.txt`, `sitemap.xml` e a pasta `originais/` (cópias de referência). Evite nomes com espaços em novos ficheiros na raiz (`logo quadrado.png` existe por histórico local — preferir `logo_quadrado.png`).
+Além de ícones e `logo_quadrado.png`, o repositório inclui variantes de marca (`TaktChat*.png`, `taktchat-logo_150x150.png`), `robots.txt`, `sitemap.xml`, a pasta `originais/` (cópias de referência) e `kit-apresentacoes/` (prints do player `/apresentacoes`). Evite nomes com espaços em novos ficheiros na raiz (`logo quadrado.png` existe por histórico local — preferir `logo_quadrado.png`).

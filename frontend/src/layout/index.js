@@ -305,7 +305,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
 
   // Rotas públicas que não devem mostrar os menus
-  const publicRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
+  const publicRoutes = ["/login", "/signup", "/signup-partner", "/forgot-password", "/reset-password"];
   const isPublicRoute = publicRoutes.includes(location.pathname);
   
   // Só mostrar menus se estiver autenticado e não estiver em rota pública

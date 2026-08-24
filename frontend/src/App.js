@@ -67,6 +67,8 @@ const App = () => {
   // Não exibir prompt de instalação PWA na landing (página pública de vendas)
   const isLandingRoute = () => window.location.pathname === '/landing';
 
+  const isApresentacoesRoute = () => window.location.pathname.startsWith("/apresentacoes");
+
   const SESSION_DISMISS_KEY = "taktchat:pwaPromptDismissedSession";
   const DAILY_SNOOZE_KEY = "taktchat:pwaPromptSnoozeUntil";
 
@@ -210,7 +212,7 @@ const App = () => {
   // Detecta quando o navegador está pronto para mostrar o prompt de instalação do PWA
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      if (shouldSkipInstallPrompt() || isDocumentationRoute()) {
+      if (shouldSkipInstallPrompt() || isDocumentationRoute() || isApresentacoesRoute()) {
         return;
       }
 
@@ -434,10 +436,10 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <ActiveMenuProvider>
               <div style={{ position: "relative", overflow: "visible", zIndex: 0, minHeight: "100vh" }}>
-                {apiStatus === "online" && <Routes />}
+                {(apiStatus === "online" || isApresentacoesRoute()) && <Routes />}
 
                 <Dialog
-                  open={showApiStatusDialog}
+                  open={showApiStatusDialog && !isApresentacoesRoute()}
                   aria-labelledby="api-offline-dialog-title"
                   onClose={(_, reason) => {
                     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
@@ -501,7 +503,7 @@ const App = () => {
                 </Dialog>
 
                 <Dialog
-                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute() && !isLandingRoute()}
+                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute() && !isLandingRoute() && !isApresentacoesRoute()}
                   onClose={(event, reason) => {
                     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
                     handleRemindLaterThisSession();

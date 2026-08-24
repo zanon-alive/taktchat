@@ -4,6 +4,10 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-24 | 2.2.2v-26 | Prints reais de `/signup-partner`; `Route.js` não redireciona rotas privadas que não casam com a URL. Token hex com dígito inicial continua bug de produto. | Equipe Dev |
+| 2026-08-24 | 2.2.2v-26 | Player: ilustração de IA só no celular (`pendente-whatsapp-celular.png`). | Equipe Dev |
+| 2026-08-24 | 2.2.2v-26 | Kit v1.4: WhatsApp CONNECTED, prints do player, transferência persistida; restam captura real do celular/signup. | Equipe Dev |
+| 2026-08-22 | 2.2.2v-26 | Kit de produto: player `/apresentacoes`; prints canônicos em `frontend/public/kit-apresentacoes/`. Prints pendentes e QR Baileys no roadmap. | Equipe Dev |
 | 2026-08-21 | 2.2.2v-26 | Documentação alinhada à stack da VPS (`14_taktchat.yml` volumes); widget versionado; `.env.example`; onboarding/admin/roadmap atualizados. GHCR documentado como alternativa. | Equipe Dev |
 | 2026-04-29 | 2.2.2v-26 | Landing: 403 no config de direct signup; ícones da seção de problemas; assets estáticos em `frontend/public`. | Equipe Dev |
 | 2026-02-17 | 2.2.2v-26 | EntrySource e Chat do Site: rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis em Configurações; formulários Lead/Revendedor na landing; API pública e widget embarcável; siteChatToken para empresas não-whitelabel; card na Central de Ajuda (/helps). | Equipe Dev |
