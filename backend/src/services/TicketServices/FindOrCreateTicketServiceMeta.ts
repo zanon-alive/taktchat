@@ -5,6 +5,8 @@ import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import Setting from "../../models/Setting";
+import { applyDefaultKanbanLane } from "../../helpers/kanbanTicketTags";
+import logger from "../../utils/logger";
 
 interface TicketData {
   status?: string;
@@ -112,6 +114,12 @@ const FindOrCreateTicketServiceMeta = async (
       whatsappId,
       userId: ticket.userId
     });
+
+    try {
+      await applyDefaultKanbanLane(ticket.id, companyId);
+    } catch (err) {
+      logger.error({ err, ticketId: ticket.id }, "Falha ao aplicar lane Kanban padrão");
+    }
 
   } else {
     await ticket.update({ whatsappId });

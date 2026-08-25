@@ -1,6 +1,6 @@
 # 🗺️ Roadmap e Melhorias Futuras - TaktChat
 
-**Última atualização:** 2026-08-21  
+**Última atualização:** 2026-08-25  
 **Status:** Documento centralizado de melhorias futuras do projeto
 
 ---
@@ -164,6 +164,7 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 ## 🎫 Tickets e Atendimento
 
 ### Melhorias de Interface
+- [x] Lanes automáticas (entrada + Encerrar no funil; uma tag kanban por ticket) — ver `.docs/funcionalidades/kanban-lanes.md`
 - [ ] Kanban mais intuitivo
 - [ ] Drag and drop entre colunas
 - [ ] Atalhos de teclado

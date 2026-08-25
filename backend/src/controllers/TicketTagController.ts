@@ -5,13 +5,29 @@ import Tag from '../models/Tag'
 import { getIO } from "../libs/socket";
 import Ticket from "../models/Ticket";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
+import { replaceKanbanLane } from "../helpers/kanbanTicketTags";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId, tagId } = req.params;
   const { companyId } = req.user;
 
   try {
-    const ticketTag = await TicketTag.create({ ticketId, tagId });
+    const parsedTicketId = Number(ticketId);
+    const parsedTagId = Number(tagId);
+    const tag = await Tag.findOne({ where: { id: parsedTagId, companyId } });
+    if (!tag) {
+      return res.status(404).json({ error: "Tag not found." });
+    }
+
+    if (tag.kanban === 1) {
+      await replaceKanbanLane(parsedTicketId, companyId, tag.id);
+    } else {
+      await TicketTag.create({ ticketId: parsedTicketId, tagId: tag.id });
+    }
+
+    const ticketTag = await TicketTag.findOne({
+      where: { ticketId: parsedTicketId, tagId: tag.id }
+    });
 
     const ticket = await ShowTicketService(ticketId, companyId);
 

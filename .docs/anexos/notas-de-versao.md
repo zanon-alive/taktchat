@@ -4,6 +4,7 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-25 | 2.2.2v-26 | Kanban: lane de entrada e lane ao encerrar (settings por empresa); uma tag kanban por ticket; Encerrar mantém o card no funil. | Equipe Dev |
 | 2026-08-21 | 2.2.2v-26 | Documentação alinhada à stack da VPS (`14_taktchat.yml` volumes); widget versionado; `.env.example`; onboarding/admin/roadmap atualizados. GHCR documentado como alternativa. | Equipe Dev |
 | 2026-04-29 | 2.2.2v-26 | Landing: 403 no config de direct signup; ícones da seção de problemas; assets estáticos em `frontend/public`. | Equipe Dev |
 | 2026-02-17 | 2.2.2v-26 | EntrySource e Chat do Site: rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis em Configurações; formulários Lead/Revendedor na landing; API pública e widget embarcável; siteChatToken para empresas não-whitelabel; card na Central de Ajuda (/helps). | Equipe Dev |

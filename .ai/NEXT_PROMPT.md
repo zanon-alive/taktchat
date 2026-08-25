@@ -1,12 +1,13 @@
 # Taktchat — continuidade de sessão
 
 **Projeto:** Taktchat  
-**Repositório:** https://github.com/zanon-alive/taktchat.git
+**Repositório:** https://github.com/zanon-alive/taktchat.git  
+**Branch atual:** `feat/kanban-lanes` (base `main`)
 
 ## Estado atual
 
-Branch `chore/cursor-telecontrol-workspace`: rules Cursor/Telecontrol e estrutura `.ai/` prontas para commit.
+Demanda de lanes Kanban **finalizada**, com texto na tela Tags Kanban explicando o que é uma lane (coluna do quadro; um ticket por vez).
 
 ## Próximo passo
 
-Aguardar confirmação se a demanda está finalizada (PR) ou nova demanda.
+Commit/push dessa copy se o usuário pedir. Push de `feat/kanban-lanes` e confirmação para abrir o PR (não misturar com o kit).

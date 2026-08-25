@@ -13,6 +13,7 @@ import CompaniesSettings from "../../models/CompaniesSettings";
 import CreateLogTicketService from "./CreateLogTicketService";
 import AppError from "../../errors/AppError";
 import UpdateTicketService from "./UpdateTicketService";
+import { applyDefaultKanbanLane } from "../../helpers/kanbanTicketTags";
 
 // interface Response {
 //   ticket: Ticket;
@@ -224,6 +225,12 @@ const FindOrCreateTicketService = async (
     ticket = await Ticket.create(
       ticketData
     );
+
+    try {
+      await applyDefaultKanbanLane(ticket.id, companyId);
+    } catch (err) {
+      logger.error({ err, ticketId: ticket.id }, "Falha ao aplicar lane Kanban padrão");
+    }
 
     // await FindOrCreateATicketTrakingService({
     //   ticketId: ticket.id,

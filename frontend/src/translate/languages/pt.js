@@ -1618,6 +1618,15 @@ const messages = {
         toasts: {
           deleted: "Lane excluída com sucesso.",
         },
+        settings: {
+          whatIsTitle: "O que é uma lane",
+          whatIs: "Uma lane é uma coluna do quadro Kanban — por exemplo Lead, Qualificado ou Fechado ganho. Cada ticket (atendimento) fica em uma lane por vez: ao arrastar o card, ele sai de uma coluna e entra na outra.",
+          title: "Lanes automáticas",
+          hint: "Aqui você define o que acontece sozinho: ticket novo entra na lane de entrada; ao Encerrar, o card permanece no funil na lane escolhida (não some do quadro).",
+          entryLane: "Lane de entrada",
+          closedLane: "Ao encerrar, mover para",
+          none: "Não definido",
+        },
       },
       kanban: {
         unread: "não lidas",

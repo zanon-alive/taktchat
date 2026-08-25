@@ -7,7 +7,7 @@ Este documento consolida as principais capacidades da plataforma considerando o 
 - **EntrySource e canais de entrada**: tickets possuem `entrySource` (whatsapp, lead, revendedor, site_chat, channel). Canais configuráveis em **Configurações > Canais de entrada** (fila, tag, WhatsApp, mensagem de boas-vindas). Formulários Lead e Revendedor na landing; chat do site via API e widget embarcável.
 - **Chat unificado**: visualização de mensagens, anexos, notas internas, widgets de informações do contato e histórico completo por `companyId`.
 - **Transferências e roteamento**: mudança manual ou automática entre filas/atendentes, com modais personalizados (`TransferTicketModalCustom`, `TicketActionButtonsCustom`).
-- **Kanban & Backlog**: painéis `Kanban` e `TagsKanban` para organizar tickets por estágio, prioridade e tags.
+- **Kanban & Backlog**: painéis `Kanban` e `TagsKanban` para organizar tickets por estágio, prioridade e tags. Lanes automáticas: ticket novo na coluna de entrada; Encerrar move para a lane configurada (o card não some do funil). Uma tag `kanban=1` por ticket. Detalhe: `.docs/funcionalidades/kanban-lanes.md`.
 
 ### 2. Conexões e sessões WhatsApp
 - **Múltiplas conexões**: gerenciamento de dispositivos via páginas `Connections`, `WhatsAppModal`, `WhatsAppModalAdmin` e jobs `WbotServices`.
