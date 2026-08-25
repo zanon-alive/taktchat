@@ -363,4 +363,30 @@ WHERE NOT EXISTS (
   WHERE c.name = 'Cliente Demo Kit' AND qm.shortcode = '/aguardar'
 );
 
+-- Tag pessoal da Beatriz (hierarquia #). Sem ela a lista de contatos da atendente fica vazia.
+INSERT INTO "Tags" (name, color, "companyId", kanban, "timeLane", "rollbackLaneId", "createdAt", "updatedAt")
+SELECT '#Beatriz', '#AD1457', c.id, 0, 0, 0, NOW(), NOW()
+FROM "Companies" c
+WHERE c.name = 'Cliente Demo Kit'
+  AND NOT EXISTS (
+    SELECT 1 FROM "Tags" t WHERE t."companyId" = c.id AND t.name = '#Beatriz'
+  );
+
+UPDATE "Users" u
+SET "allowedContactTags" = ARRAY[t.id]::integer[]
+FROM "Tags" t
+JOIN "Companies" c ON c.id = t."companyId" AND c.name = 'Cliente Demo Kit'
+WHERE u.email = 'atendente@taktchat.local'
+  AND t.name = '#Beatriz';
+
+INSERT INTO "ContactTags" ("contactId", "tagId", "createdAt", "updatedAt")
+SELECT ct.id, t.id, NOW(), NOW()
+FROM "Contacts" ct
+JOIN "Companies" c ON c.id = ct."companyId" AND c.name = 'Cliente Demo Kit'
+JOIN "Tags" t ON t."companyId" = c.id AND t.name = '#Beatriz'
+WHERE ct.number IN ('5511900001001', '5511900001006')
+  AND NOT EXISTS (
+    SELECT 1 FROM "ContactTags" x WHERE x."contactId" = ct.id AND x."tagId" = t.id
+  );
+
 COMMIT;

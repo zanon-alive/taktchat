@@ -453,6 +453,10 @@ const messages = {
           title: "Filtrar Contatos",
           close: "Fechar",
         },
+        empty: {
+          noResults: "Nenhum contato encontrado com os filtros selecionados.",
+          needsPersonalTag: "Nenhum contato visível. Peça ao administrador uma tag pessoal (#SeuNome) e que ela esteja nos seus contatos.",
+        },
       },
       forwardMessage: {
         text: "Encaminhada",
