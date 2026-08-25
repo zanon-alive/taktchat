@@ -1525,8 +1525,10 @@ const messages = {
           deleted: "Şerit başarıyla silindi.",
         },
         settings: {
+          whatIsTitle: "Şerit nedir",
+          whatIs: "Şerit, Kanban tahtasındaki bir sütundur — örneğin Lead, Nitelikli veya Kazanıldı. Her ticket aynı anda yalnızca bir şeritte durur: kartı sürükleyince bir sütundan çıkar, diğerine girer.",
           title: "Otomatik şeritler",
-          hint: "Yeni ticket ilk sütuna gider. Kapatınca kart seçilen şeride taşınır.",
+          hint: "Burada otomatik davranışı seçersiniz: yeni ticket giriş şeridine gider; kapatınca kart hunide kalır ve seçilen şeride taşınır (tahtadan silinmez).",
           entryLane: "Giriş şeridi",
           closedLane: "Kapatınca taşı",
           none: "Tanımsız",

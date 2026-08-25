@@ -1533,8 +1533,10 @@ const messages = {
 			deleted: "Lane deleted successfully.",
 		  },
 		  settings: {
+			whatIsTitle: "What is a lane",
+			whatIs: "A lane is a column on the Kanban board — for example Lead, Qualified, or Closed won. Each ticket sits in one lane at a time: dragging the card moves it out of one column and into another.",
 			title: "Automatic lanes",
-			hint: "New tickets start in the first column. Closing a ticket moves the card to the selected lane.",
+			hint: "Set what happens on its own: a new ticket enters the entry lane; when you close it, the card stays on the board in the selected lane (it does not disappear from the funnel).",
 			entryLane: "Entry lane",
 			closedLane: "On close, move to",
 			none: "Not set",

@@ -391,6 +391,12 @@ const Tags = () => {
       </MainHeader>
           <Paper className={classes.settingsPaper} variant="outlined">
             <Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 4 }}>
+              {i18n.t("tagsKanban.settings.whatIsTitle")}
+            </Typography>
+            <Typography variant="body2" className={classes.settingsHint}>
+              {i18n.t("tagsKanban.settings.whatIs")}
+            </Typography>
+            <Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 4 }}>
               {i18n.t("tagsKanban.settings.title")}
             </Typography>
             <Typography variant="body2" className={classes.settingsHint}>

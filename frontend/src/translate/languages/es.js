@@ -1499,8 +1499,10 @@ const messages = {
           deleted: "Lane excluida con éxito."
         },
         settings: {
+          whatIsTitle: "Qué es una lane",
+          whatIs: "Una lane es una columna del tablero Kanban — por ejemplo Lead, Calificado o Cerrado ganado. Cada ticket (atención) está en una sola lane: al arrastrar el card, sale de una columna y entra en otra.",
           title: "Lanes automáticas",
-          hint: "El ticket nuevo entra en la primera columna. Al cerrar, el card se mueve a la lane elegida.",
+          hint: "Aquí defines lo que ocurre solo: el ticket nuevo entra en la lane de entrada; al cerrar, el card permanece en el funnel en la lane elegida (no desaparece del tablero).",
           entryLane: "Lane de entrada",
           closedLane: "Al cerrar, mover a",
           none: "No definido"

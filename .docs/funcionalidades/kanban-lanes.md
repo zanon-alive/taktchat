@@ -1,8 +1,12 @@
 # Kanban: lanes de entrada e encerramento
 
+## O que é uma lane
+
+Uma **lane** é uma **coluna do quadro Kanban** — por exemplo Lead, Qualificado ou Fechado ganho. Cada ticket (atendimento) fica em **uma lane por vez**: ao arrastar o card, ele sai de uma coluna e entra na outra.
+
 ## Objetivo
 
-Organizar o funil comercial no quadro Kanban: ticket novo entra numa coluna configurada; ao encerrar, o card **permanece no funil** na lane escolhida (ex.: Fechado ganho). Uma tag de lane (`kanban=1`) por ticket.
+Organizar o funil comercial nesse quadro: ticket novo entra na coluna configurada; ao encerrar, o card **permanece no funil** na lane escolhida (ex.: Fechado ganho). Uma tag de lane (`kanban=1`) por ticket.
 
 ## Onde configurar
 

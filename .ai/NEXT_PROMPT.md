@@ -6,10 +6,8 @@
 
 ## Estado atual
 
-Demanda de lanes Kanban **finalizada**: código, testes do helper, documentação de produto (`.docs/funcionalidades/kanban-lanes.md`) e commit local.
-
-Kit/player permanece em `docs/kit-documentacao-produto` (já no GitHub). PR do kit ainda não foi criado.
+Demanda de lanes Kanban **finalizada**, com texto na tela Tags Kanban explicando o que é uma lane (coluna do quadro; um ticket por vez).
 
 ## Próximo passo
 
-Push de `feat/kanban-lanes` e confirmação para abrir o PR da funcionalidade (não misturar com o kit).
+Commit/push dessa copy se o usuário pedir. Push de `feat/kanban-lanes` e confirmação para abrir o PR (não misturar com o kit).
