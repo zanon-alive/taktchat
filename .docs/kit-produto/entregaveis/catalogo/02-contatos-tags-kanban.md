@@ -23,7 +23,7 @@ Atendente (ver/editar o básico), admin (importação, regras, lanes).
 ## Comportamento atual (PR #21)
 
 - Ticket novo recebe a lane de entrada, se a empresa usa Kanban.
-- Encerrar aplica a lane de encerrar no ticket. A tela `/kanban` ainda lista só `open`/`pending` — o card `closed` pode não aparecer.
+- Encerrar aplica a lane de encerrar no ticket. A tela `/kanban` lista `closed` quando o ticket tem lane (`kanban=1`).
 - Uma tag `kanban=1` por ticket; arrastar substitui a coluna.
 - Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 

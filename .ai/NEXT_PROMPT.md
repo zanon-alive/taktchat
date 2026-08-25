@@ -6,13 +6,13 @@
 
 ## Estado
 
-Kit **v1.5** fechado nesta branch: Kanban #21, overlay/token, login comercial, 6 colunas, deck técnico com CONNECTED e prints `shot`.
+Kit **v1.5** + item **2b**: o quadro `/kanban` lista tickets `closed` que têm tag `kanban=1`. Verificado no browser (Carlos Admin / Cliente Demo Kit): Pedro em Fechado perdido.
 
 Este repositório **não** é projeto Telecontrol.
 
 ## Ainda aberto (outras demandas)
 
-Captura real do celular; quadro listar `closed` (2b); A6–A9 e caminho B da demanda 16; aviso de 8 colunas; contatos `#`.
+Captura real do celular; A6–A9 e caminho B da demanda 16; aviso de 8 colunas; contatos `#`.
 
 ## Próximo passo
 

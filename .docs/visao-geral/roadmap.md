@@ -357,7 +357,7 @@ Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma 
 - [x] **Copy dos slides (login comercial + 6 colunas)** — logins `@taktchat.local` na capa; funil Lead → … → Fechado ganho/perdido no player.
 - [x] **Deck técnico** — QR da demo CONNECTED; prints `pendente-*` já gravados (sem caixa “a gravar”).
 
-Pendências 1–5, 8 e 10: resolvidas. Restam captura real do celular, demanda 16 (A6–A9 / B) e quadro listar `closed` (2b). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
+Pendências 1–5, 8, 10 e 2b: resolvidas. Restam captura real do celular e demanda 16 (A6–A9 / B). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 
 ## 🎫 Tickets, tags e Kanban
 
@@ -365,6 +365,7 @@ Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do 
 
 - [x] Ticket novo recebe lane de entrada (`defaultKanbanTagId`) — PR #21
 - [x] Encerrar move o card para a lane configurada (`closedKanbanTagId`) — PR #21
+- [x] Quadro `/kanban` lista `closed` com lane Kanban — 2b nesta branch
 - [x] Cron `timeLane` usa `updatedAt` (sem exigir `fromMe`) — PR #21
 - [x] Uma tag `kanban=1` por ticket (arrastar substitui) — PR #21
 - [x] Ticket novo pós-`closed` não herda rollback da conversa encerrada — PR #21

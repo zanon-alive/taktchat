@@ -105,3 +105,43 @@ export function isTerminalKanbanLane(
   if (closedTagId && tag.id === closedTagId) return true;
   return /fechado/i.test(tag.name || "");
 }
+
+/**
+ * Tickets `closed` só entram no quadro se tiverem lane (`kanban=1`).
+ * Sem isso, Encerrar some o card e a lane0 encheria de histórico.
+ */
+export function kanbanBoardStatusWhere(ticketIdsWithKanbanLane: number[]) {
+  const closedIds =
+    ticketIdsWithKanbanLane.length > 0 ? ticketIdsWithKanbanLane : [0];
+
+  return {
+    [Op.or]: [
+      { status: { [Op.in]: ["pending", "open"] } },
+      { status: "closed", id: { [Op.in]: closedIds } }
+    ]
+  };
+}
+
+export async function findTicketIdsWithKanbanLane(
+  companyId: number
+): Promise<number[]> {
+  const rows = await TicketTag.findAll({
+    attributes: ["ticketId"],
+    include: [
+      {
+        model: Tag,
+        as: "tag",
+        attributes: [],
+        required: true,
+        where: { kanban: 1, companyId }
+      }
+    ],
+    raw: true
+  });
+
+  const ids = rows
+    .map((row: { ticketId?: number }) => Number(row.ticketId))
+    .filter(id => Number.isInteger(id) && id > 0);
+
+  return [...new Set(ids)];
+}

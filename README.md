@@ -12,7 +12,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 
 ### Funcionalidades em alto nível
 
-- Atendimento omnichannel com múltiplas filas, Kanban (lane de entrada e lane ao encerrar), tags e automações anti-ban.
+- Atendimento omnichannel com múltiplas filas, Kanban (lane de entrada, lane ao encerrar e cards `closed` visíveis na coluna), tags e automações anti-ban.
 - Campanhas segmentadas, Flow Builder visual, integrações com bots/IA e controle de cadência.
 - Contatos, listas, arquivos inteligentes, dashboards e relatórios operacionais.
 - **Validação i18n**: mensagens de validação de formulários em pt-BR, en, es e tr (campo obrigatório, muito curto, etc.).

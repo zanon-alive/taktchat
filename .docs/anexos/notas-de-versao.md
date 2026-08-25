@@ -4,6 +4,7 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-25 | 2.2.2v-26 | Kanban: quadro `/kanban` lista tickets `closed` que têm lane (`kanban=1`). | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Kit: deck técnico alinhado ao WhatsApp CONNECTED; prints `pendente-*` passam a `shot`. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Kanban: lane de entrada e lane ao encerrar (settings por empresa); uma tag kanban por ticket; Encerrar mantém o card no funil. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Overlay de API não bloqueia o first paint; token de signup hex resolve pelo `signupToken` primeiro. | Equipe Dev |

@@ -1,8 +1,11 @@
+import { Op } from "sequelize";
 import {
   applyDefaultKanbanLane,
   applyClosedKanbanLane,
+  findTicketIdsWithKanbanLane,
   getKanbanLaneSettings,
   isTerminalKanbanLane,
+  kanbanBoardStatusWhere,
   replaceKanbanLane
 } from "../kanbanTicketTags";
 import Setting from "../../models/Setting";
@@ -93,5 +96,42 @@ describe("kanbanTicketTags", () => {
     expect(isTerminalKanbanLane({ id: 20, name: "Negociação" }, 20)).toBe(true);
     expect(isTerminalKanbanLane({ id: 7, name: "Fechado ganho" }, 20)).toBe(true);
     expect(isTerminalKanbanLane({ id: 7, name: "Qualificado" }, 20)).toBe(false);
+  });
+
+  it("inclui closed só quando o ticket tem lane kanban", () => {
+    const where = kanbanBoardStatusWhere([42]);
+    expect(where[Op.or]).toEqual([
+      { status: { [Op.in]: ["pending", "open"] } },
+      { status: "closed", id: { [Op.in]: [42] } }
+    ]);
+  });
+
+  it("não abre o filtro de closed para todos os ids quando a lista está vazia", () => {
+    const where = kanbanBoardStatusWhere([]);
+    expect(where[Op.or][1]).toEqual({
+      status: "closed",
+      id: { [Op.in]: [0] }
+    });
+  });
+
+  it("lista ids de tickets com tag kanban=1 da empresa", async () => {
+    (TicketTag.findAll as jest.Mock).mockResolvedValue([
+      { ticketId: 12 },
+      { ticketId: 12 },
+      { ticketId: 15 }
+    ]);
+
+    await expect(findTicketIdsWithKanbanLane(3)).resolves.toEqual([12, 15]);
+    expect(TicketTag.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: ["ticketId"],
+        include: [
+          expect.objectContaining({
+            as: "tag",
+            where: { kanban: 1, companyId: 3 }
+          })
+        ]
+      })
+    );
   });
 });

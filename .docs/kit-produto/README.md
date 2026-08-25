@@ -44,7 +44,7 @@ Fonte da verdade desta demanda. Se algo divergir da pasta gitignored `.docs/bran
 | [12-glossario.md](12-glossario.md) | Termos — começar na Fase 1 |
 | [13-o-que-o-produto-nao-faz.md](13-o-que-o-produto-nao-faz.md) | Limites e honestidade comercial |
 | [14-roadmap-execucao.md](14-roadmap-execucao.md) | O que esta branch entregou |
-| [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) | Kanban 1–5 / overlay / token: resolvidos; restam CRM e 2b |
+| [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) | Kanban 1–5 / 2b / overlay / token: resolvidos; restam CRM nativo e A6–A9 |
 | [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md) | Demanda (draft): CRM de conversa vs. CRM de mercado |
 
 ## Entregáveis finais (v1)

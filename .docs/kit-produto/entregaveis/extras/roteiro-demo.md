@@ -11,4 +11,4 @@ Ambiente: local, logins em `../../09-logins-locais.md`.
 7. **Dono ou parceiro** — hierarquia empresas (2 min) *melhor na rodada parceiro*.
 8. **Fecho** — próximo passo é WhatsApp real (QR).
 
-Não prometer pipeline de oportunidade. Encerrar aplica a lane; o quadro ainda lista sobretudo tickets abertos/pendentes.
+Não prometer pipeline de oportunidade. Encerrar aplica a lane; o card `closed` permanece no quadro se tiver coluna Kanban.

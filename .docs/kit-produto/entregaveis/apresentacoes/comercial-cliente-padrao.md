@@ -80,7 +80,7 @@ Posicionamento: **CRM de conversa no WhatsApp** (contato → ticket). Não é CR
 
 - Lead — Carla (pendente). Qualificado — João (Vendas).
 - Negociação — Maria (aberto, Urgente). Aguardando cliente — Ana (supervisor).
-- Fechado ganho — Mercado Central. Fechado perdido — Pedro (`closed`; o quadro ainda lista sobretudo `open`/`pending`).
+- Fechado ganho — Mercado Central. Fechado perdido — Pedro (`closed`, visível no quadro porque tem lane).
 - Mais de 8 colunas cansa; a demo usa 6.
 
 ## Slide 10 — Avanço automático das colunas

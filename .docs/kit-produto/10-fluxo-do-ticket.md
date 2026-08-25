@@ -66,6 +66,7 @@ Com plano `useKanban` (ou empresa `platform`):
 
 - Ticket novo (entrada ou saída) recebe a coluna de entrada, se ainda não tiver tag `kanban=1`.
 - Arrastar no quadro **substitui** a coluna (uma lane por vez).
+- Encerrar deixa o card `closed` visível na lane de encerrar (o quadro não lista `closed` sem lane).
 - Cron `timeLane` avança pela `updatedAt` do ticket; não exige mensagem `fromMe`; não avança lane terminal (“Fechado…”).
 - Rollback só no ticket **ainda aberto**.
 

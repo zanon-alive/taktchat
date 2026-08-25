@@ -113,7 +113,7 @@ const comercialClientePadrao = [
     bullets: [
       "Lead — Carla (pendente). Qualificado — João (Vendas).",
       "Negociação — Maria (aberto, Urgente). Aguardando cliente — Ana (supervisor).",
-      "Fechado ganho — Mercado Central. Fechado perdido — Pedro (closed; o quadro ainda lista sobretudo open/pending).",
+      "Fechado ganho — Mercado Central. Fechado perdido — Pedro (closed, visível no quadro porque tem lane).",
       "Mais de 8 colunas cansa a leitura; a demo usa 6. Rotas: /kanban e /TagsKanban.",
     ],
     ...shot(

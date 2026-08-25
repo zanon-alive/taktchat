@@ -1,6 +1,6 @@
 # Pendências de produto — Kanban / CRM de conversa
 
-Itens identificados na branch `docs/kit-documentacao-produto`. Atualizado em **2026-08-25** após o merge da `main` (PR #21) e os commits de overlay/token nesta branch.
+Itens identificados na branch `docs/kit-documentacao-produto`. Atualizado em **2026-08-25** após o merge da `main` (PR #21), overlay/token e o filtro do quadro para `closed` com lane (2b).
 
 Fonte: Tags (`kanban`, `timeLane`, `nextLaneId`, `rollbackLaneId`), `FindOrCreateTicketService`, `UpdateTicketService`, `queues.handleProcessLanes`, `wbotMessageListener`. Como o funil funciona hoje: [`.docs/funcionalidades/kanban-lanes.md`](../funcionalidades/kanban-lanes.md).
 
@@ -12,7 +12,7 @@ Ticket novo (incluindo pós-`closed`) recebe a lane configurada em Tags Kanban (
 
 ### 2. Encerrar aplica a lane configurada — PR #21
 
-Ao encerrar, o ticket recebe a tag `closedKanbanTagId` (ex.: Fechado ganho). Quem quiser Fechado perdido arrasta no quadro. **Nuance:** a listagem `/ticket/kanban` ainda filtra só `open`/`pending`, então o card `closed` pode não aparecer na tela até o filtro incluir `closed` (resto do A3).
+Ao encerrar, o ticket recebe a tag `closedKanbanTagId` (ex.: Fechado ganho). Quem quiser Fechado perdido arrasta no quadro. O quadro lista o card `closed` se ele tiver lane Kanban (item 2b).
 
 ### 3. Cron de `timeLane` por `updatedAt` — PR #21
 
@@ -34,11 +34,11 @@ Rotas montam durante o health; diálogo só se a API falhar; retry automático.
 
 `resolvePartnerFromTokenOrId` consulta `signupToken` primeiro; id numérico só se a string inteira for dígitos.
 
+### 2b. Quadro mostrar tickets `closed` — esta branch
+
+`ListTicketsServiceKanban` inclui `closed` quando o ticket tem tag `kanban=1`. Encerrar deixa o card visível na lane de encerrar; Pedro do seed aparece em Fechado perdido. `closed` sem lane continua fora do quadro.
+
 ## Ainda aberto (não bloqueia o kit)
-
-### 2b. Quadro mostrar tickets `closed`
-
-`ListTicketsServiceKanban` ainda restringe a `pending`/`open`. Sem isso, a lane de encerrar existe no ticket, mas some da tela `/kanban`.
 
 ### 6. Pipeline nativo (CRM)
 

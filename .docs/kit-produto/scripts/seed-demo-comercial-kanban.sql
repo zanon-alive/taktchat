@@ -249,8 +249,8 @@ FROM (VALUES
   ('Qualificado', '#1565C0', 1),
   ('Negociação', '#EF6C00', 1),
   ('Aguardando cliente', '#00838F', 1),
-  ('Fechado — ganho', '#2E7D32', 1),
-  ('Fechado — perdido', '#546E7A', 1),
+  ('Fechado ganho', '#2E7D32', 1),
+  ('Fechado perdido', '#546E7A', 1),
   ('Urgente', '#C62828', 0),
   ('VIP', '#F9A825', 0),
   ('Resolvido', '#2E7D32', 0)
@@ -270,8 +270,8 @@ FROM (VALUES
   ('Qualificado', '#1565C0', 1),
   ('Negociação', '#EF6C00', 1),
   ('Aguardando cliente', '#00838F', 1),
-  ('Fechado — ganho', '#2E7D32', 1),
-  ('Fechado — perdido', '#546E7A', 1),
+  ('Fechado ganho', '#2E7D32', 1),
+  ('Fechado perdido', '#546E7A', 1),
   ('Urgente', '#C62828', 0),
   ('VIP', '#F9A825', 0),
   ('Resolvido', '#2E7D32', 0)
@@ -341,7 +341,7 @@ SET
   "greetingMessageLane" = NULL
 FROM "Companies" c
 WHERE c.id = t."companyId" AND c.name = 'Cliente Demo Kit'
-  AND t.name IN ('Fechado — ganho', 'Fechado — perdido', 'Urgente', 'VIP', 'Resolvido');
+  AND t.name IN ('Fechado ganho', 'Fechado perdido', 'Urgente', 'VIP', 'Resolvido');
 
 INSERT INTO "Contacts" (
   name, number, email, "companyId", channel, active, "isGroup",
@@ -493,8 +493,8 @@ WHERE (
     OR (ct.number = '5511900001002' AND tag.name = 'Qualificado')
     OR (ct.number = '5511900001001' AND tag.name IN ('Negociação', 'Urgente'))
     OR (ct.number = '5511900001003' AND tag.name = 'Aguardando cliente')
-    OR (ct.number = '5511900001004' AND tag.name IN ('Fechado — ganho', 'VIP'))
-    OR (ct.number = '5511900001005' AND tag.name = 'Fechado — perdido')
+    OR (ct.number = '5511900001004' AND tag.name IN ('Fechado ganho', 'VIP'))
+    OR (ct.number = '5511900001005' AND tag.name = 'Fechado perdido')
   )
   AND NOT EXISTS (
     SELECT 1 FROM "TicketTags" x WHERE x."ticketId" = t.id AND x."tagId" = tag.id
