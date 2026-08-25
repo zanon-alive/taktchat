@@ -7,13 +7,13 @@ describe('Socket Validation Patterns', () => {
   describe('Verificação básica de socket', () => {
     test('deve retornar false quando socket é null', () => {
       const socket = null;
-      const isValid = socket && typeof socket.on === 'function';
+      const isValid = Boolean(socket && typeof socket.on === 'function');
       expect(isValid).toBe(false);
     });
 
     test('deve retornar false quando socket é undefined', () => {
       const socket = undefined;
-      const isValid = socket && typeof socket.on === 'function';
+      const isValid = Boolean(socket && typeof socket.on === 'function');
       expect(isValid).toBe(false);
     });
 
@@ -103,14 +103,14 @@ describe('Socket Validation Patterns', () => {
     test('deve retornar false quando user.companyId não existe', () => {
       const socket = { on: jest.fn() };
       const user = { id: 1 };
-      const isValid = socket && typeof socket.on === 'function' && user?.companyId;
+      const isValid = Boolean(socket && typeof socket.on === 'function' && user?.companyId);
       expect(isValid).toBe(false);
     });
 
     test('deve retornar true quando tudo é válido', () => {
       const socket = { on: jest.fn() };
       const user = { id: 1, companyId: 1 };
-      const isValid = socket && typeof socket.on === 'function' && user?.companyId;
+      const isValid = Boolean(socket && typeof socket.on === 'function' && user?.companyId);
       expect(isValid).toBe(true);
     });
   });

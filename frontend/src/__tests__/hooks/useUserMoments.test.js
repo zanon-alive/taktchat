@@ -3,8 +3,8 @@
  * Foca nas verificações de socket implementadas
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { useContext } from 'react';
+import React from 'react';
+import { render } from '@testing-library/react';
 import useUserMoments from '../../hooks/useUserMoments';
 import { AuthContext } from '../../context/Auth/AuthContext';
 import {
@@ -33,11 +33,13 @@ jest.mock('../../translate/i18n', () => ({
   },
 }));
 
-const createWrapper = (socket, user) => {
-  const mockUser = user || createMockUser();
+const createWrapper = (options = {}) => {
+  const mockUser = options.user || createMockUser();
   const mockAuthContext = {
     user: mockUser,
-    socket: socket || createMockSocket().mockSocket,
+    socket: Object.prototype.hasOwnProperty.call(options, 'socket')
+      ? options.socket
+      : createMockSocket().mockSocket,
     isAuth: true,
     loading: false,
   };
@@ -49,6 +51,19 @@ const createWrapper = (socket, user) => {
   );
 };
 
+const renderTestHook = (callback, { wrapper: Wrapper }) => {
+  const TestHook = () => {
+    callback();
+    return null;
+  };
+
+  return render(
+    <Wrapper>
+      <TestHook />
+    </Wrapper>
+  );
+};
+
 describe('useUserMoments Hook - Socket Verifications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,8 +72,8 @@ describe('useUserMoments Hook - Socket Verifications', () => {
   test('não deve chamar socket.on quando socket é null', () => {
     const { mockSocket } = createMockSocket();
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(null),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: null }),
     });
 
     expect(mockSocket.on).not.toHaveBeenCalled();
@@ -67,14 +82,14 @@ describe('useUserMoments Hook - Socket Verifications', () => {
   test('não deve chamar socket.on quando socket não tem método on', () => {
     const invalidSocket = createInvalidSocket();
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(invalidSocket),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: invalidSocket }),
     });
 
     // Não deve quebrar
     expect(() => {
-      renderHook(() => useUserMoments(), {
-        wrapper: createWrapper(invalidSocket),
+      renderTestHook(() => useUserMoments(), {
+        wrapper: createWrapper({ socket: invalidSocket }),
       });
     }).not.toThrow();
   });
@@ -82,14 +97,14 @@ describe('useUserMoments Hook - Socket Verifications', () => {
   test('não deve chamar socket.on quando socket é objeto vazio', () => {
     const emptySocket = createEmptySocket();
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(emptySocket),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: emptySocket }),
     });
 
     // Não deve quebrar
     expect(() => {
-      renderHook(() => useUserMoments(), {
-        wrapper: createWrapper(emptySocket),
+      renderTestHook(() => useUserMoments(), {
+        wrapper: createWrapper({ socket: emptySocket }),
       });
     }).not.toThrow();
   });
@@ -99,8 +114,8 @@ describe('useUserMoments Hook - Socket Verifications', () => {
     const userWithoutId = createMockUser();
     delete userWithoutId.id;
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(mockSocket, userWithoutId),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: mockSocket, user: userWithoutId }),
     });
 
     expect(mockSocket.on).not.toHaveBeenCalled();
@@ -111,8 +126,8 @@ describe('useUserMoments Hook - Socket Verifications', () => {
     const userWithoutCompanyId = createMockUser();
     delete userWithoutCompanyId.companyId;
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(mockSocket, userWithoutCompanyId),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: mockSocket, user: userWithoutCompanyId }),
     });
 
     expect(mockSocket.on).not.toHaveBeenCalled();
@@ -121,27 +136,23 @@ describe('useUserMoments Hook - Socket Verifications', () => {
   test('deve chamar socket.on quando socket e user são válidos', () => {
     const { mockSocket } = createMockSocket();
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(mockSocket),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: mockSocket }),
     });
 
-    waitFor(() => {
-      expect(mockSocket.on).toHaveBeenCalled();
-    });
+    expect(mockSocket.on).toHaveBeenCalled();
   });
 
   test('deve chamar socket.off no cleanup quando socket é válido', () => {
     const { mockSocket } = createMockSocket();
     
-    const { unmount } = renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(mockSocket),
+    const { unmount } = renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: mockSocket }),
     });
 
     unmount();
 
-    waitFor(() => {
-      expect(mockSocket.off).toHaveBeenCalled();
-    });
+    expect(mockSocket.off).toHaveBeenCalled();
   });
 
   test('não deve quebrar quando socket.off não é uma função no cleanup', () => {
@@ -150,8 +161,8 @@ describe('useUserMoments Hook - Socket Verifications', () => {
       off: null,
     };
     
-    const { unmount } = renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(invalidSocket),
+    const { unmount } = renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: invalidSocket }),
     });
 
     expect(() => {
@@ -162,18 +173,16 @@ describe('useUserMoments Hook - Socket Verifications', () => {
   test('deve registrar listeners para company-ticket e company-appMessage', () => {
     const { mockSocket } = createMockSocket();
     
-    renderHook(() => useUserMoments(), {
-      wrapper: createWrapper(mockSocket),
+    renderTestHook(() => useUserMoments(), {
+      wrapper: createWrapper({ socket: mockSocket }),
     });
 
-    waitFor(() => {
-      expect(mockSocket.on).toHaveBeenCalledWith(
-        expect.stringContaining('company-'),
-        expect.any(Function)
-      );
-      // Deve ser chamado 2 vezes (ticket e appMessage)
-      expect(mockSocket.on).toHaveBeenCalledTimes(2);
-    });
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      expect.stringContaining('company-'),
+      expect.any(Function)
+    );
+    // Deve ser chamado 2 vezes (ticket e appMessage)
+    expect(mockSocket.on).toHaveBeenCalledTimes(2);
   });
 });
 

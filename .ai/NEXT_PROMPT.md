@@ -2,21 +2,25 @@
 
 **Projeto:** Taktchat  
 **Repositório:** https://github.com/zanon-alive/taktchat.git  
-**Branch atual:** `docs/kit-documentacao-produto`
+**Branch atual:** `fix/producao-socket-css`
 
 ## Estado
 
-Kit **v1.7** (polish da demo) em cima do v1.6. Caminho A encerrado. Melhorias validadas, commitadas e incorporadas localmente em `main`.
+Correção local do incidente de produção em andamento, sem commit e sem deploy. As alterações
+anteriores de PostCSS, Socket.IO, layout e AdminDocs foram preservadas.
 
 Este repositório **não** é projeto Telecontrol.
 
-## Ainda aberto (não é código desta branch)
+## Validação concluída
 
-1. Captura **real** do celular (print ainda é ilustração de IA).
-2. Seed **não** vira migration / não vai para a VPS.
-3. Caminho B (Deal / CRM de mercado).
-4. PR — o usuário decide. Deploy — nunca automático.
+- Backend TypeScript e testes já estavam aprovados conforme documentação local da branch.
+- Build de produção frontend já estava aprovado.
+- Frontend Jest agora aprova 6 suítes e 44 testes:
+  `CI=true BABEL_ENV=test NODE_ENV=test npm test -- --watchAll=false --runInBand`.
+- As correções adicionais ficaram restritas à configuração e aos testes; nenhum componente de
+  produção foi alterado nesta etapa.
 
 ## Próximo passo
 
-Branches locais `docs/kit-documentacao-produto` e `main` ainda não foram enviadas. Pedir autorização antes de qualquer push/PR.
+Confirmar com o usuário se a demanda está finalizada. Não executar deploy, push, PR ou commit sem
+solicitação explícita.
