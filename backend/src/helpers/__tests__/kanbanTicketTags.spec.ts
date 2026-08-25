@@ -6,7 +6,8 @@ import {
   getKanbanLaneSettings,
   isTerminalKanbanLane,
   kanbanBoardStatusWhere,
-  replaceKanbanLane
+  replaceKanbanLane,
+  shouldWarnKanbanColumnCount
 } from "../kanbanTicketTags";
 import Setting from "../../models/Setting";
 import Tag from "../../models/Tag";
@@ -96,6 +97,11 @@ describe("kanbanTicketTags", () => {
     expect(isTerminalKanbanLane({ id: 20, name: "Negociação" }, 20)).toBe(true);
     expect(isTerminalKanbanLane({ id: 7, name: "Fechado ganho" }, 20)).toBe(true);
     expect(isTerminalKanbanLane({ id: 7, name: "Qualificado" }, 20)).toBe(false);
+  });
+
+  it("avisa quando o quadro passa de 8 colunas", () => {
+    expect(shouldWarnKanbanColumnCount(8)).toBe(false);
+    expect(shouldWarnKanbanColumnCount(9)).toBe(true);
   });
 
   it("inclui closed só quando o ticket tem lane kanban", () => {

@@ -1580,6 +1580,7 @@ const messages = {
       },
       tags: {
         title: "Tags",
+        operationalHint: "Estas tags são etiquetas (Urgente, VIP). Colunas do quadro ficam em Kanban → Adicionar colunas.",
         confirmationModal: {
           deleteTitle: "Você tem certeza que quer excluir esta Tag?",
           deleteMessage: "Esta ação não pode ser revertida.",
@@ -1627,6 +1628,8 @@ const messages = {
           entryLane: "Lane de entrada",
           closedLane: "Ao encerrar, mover para",
           none: "Não definido",
+          operationalVsLane: "Etiquetas como Urgente ou VIP ficam em Tags. Aqui só entram colunas do quadro.",
+          tooManyColumns: "Mais de 8 colunas cansa a leitura. Considere juntar etapas.",
         },
       },
       kanban: {

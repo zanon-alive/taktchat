@@ -106,6 +106,12 @@ export function isTerminalKanbanLane(
   return /fechado/i.test(tag.name || "");
 }
 
+export const KANBAN_COLUMN_WARN_LIMIT = 8;
+
+export function shouldWarnKanbanColumnCount(count: number): boolean {
+  return Number(count) > KANBAN_COLUMN_WARN_LIMIT;
+}
+
 /**
  * Tickets `closed` só entram no quadro se tiverem lane (`kanban=1`).
  * Sem isso, Encerrar some o card e a lane0 encheria de histórico.
