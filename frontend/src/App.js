@@ -282,10 +282,12 @@ const App = () => {
     window.localStorage.setItem("preferredTheme", mode);
   }, [mode]);
 
-  const runHealthCheck = useCallback(async ({ silent = false } = {}) => {
+  const runHealthCheck = useCallback(async ({ silent = false, commitFailure = true } = {}) => {
     if (!backendUrl) {
-      setApiStatus("offline");
-      setApiErrorMessage("Variável REACT_APP_BACKEND_URL não configurada.");
+      if (commitFailure) {
+        setApiStatus("offline");
+        setApiErrorMessage("Variável REACT_APP_BACKEND_URL não configurada.");
+      }
       return false;
     }
 
@@ -294,7 +296,7 @@ const App = () => {
       setApiErrorMessage("");
     }
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 4000);
+    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
 
     try {
       const response = await fetch(`${backendUrl}/health`, {
@@ -318,16 +320,20 @@ const App = () => {
 
       if (!response.ok) {
         if (response.status === 503 && hasDatabaseError) {
-          setApiStatus("degraded");
-          setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
+          if (commitFailure) {
+            setApiStatus("degraded");
+            setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
+          }
           return false;
         }
         throw new Error(`Healthcheck retornou status ${response.status}`);
       }
 
       if (hasDatabaseError) {
-        setApiStatus("degraded");
-        setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
+        if (commitFailure) {
+          setApiStatus("degraded");
+          setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
+        }
         return false;
       }
 
@@ -338,10 +344,12 @@ const App = () => {
       window.clearTimeout(timeoutId);
       const message =
         error?.name === "AbortError"
-          ? "Tempo limite ao verificar o backend (4s)."
+          ? "Tempo limite ao verificar o backend (8s)."
           : error?.message || "Falha ao contactar o backend.";
-      setApiErrorMessage(message);
-      setApiStatus("offline");
+      if (commitFailure) {
+        setApiErrorMessage(message);
+        setApiStatus("offline");
+      }
       return false;
     }
   }, [backendUrl]);
@@ -356,7 +364,8 @@ const App = () => {
           await new Promise((resolve) => window.setTimeout(resolve, delays[index]));
         }
         if (cancelled) return;
-        const ok = await runHealthCheck({ silent: index > 0 });
+        const isLast = index === delays.length - 1;
+        const ok = await runHealthCheck({ silent: true, commitFailure: isLast });
         if (ok || cancelled) return;
       }
     };
@@ -524,7 +533,11 @@ const App = () => {
                     )}
                   </DialogContent>
                   <DialogActions>
-                    <Button onClick={runHealthCheck} color="inherit" disabled={apiStatus === "checking"}>
+                    <Button
+                      onClick={() => runHealthCheck({ silent: false, commitFailure: true })}
+                      color="inherit"
+                      disabled={apiStatus === "checking"}
+                    >
                       {apiStatus === "checking" ? (
                         <>
                           <CircularProgress size={18} style={{ marginRight: 8 }} /> Verificando…

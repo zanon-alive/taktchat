@@ -125,6 +125,24 @@ WHERE NOT EXISTS (SELECT 1 FROM "Users" WHERE email = 'atendente@taktchat.local'
 INSERT INTO "Users" (
   name, email, "passwordHash", profile, super, "companyId",
   "allTicket", "showDashboard", "allowRealTime", "allowConnections",
+  language, "startWork", "endWork", permissions, "allowedContactTags", "createdAt", "updatedAt"
+)
+SELECT 'Lucia Sem Tag', 'atendente.vazio@taktchat.local',
+  '$2a$08$nQpaca4BSpb7TPRGxt.ypeWhfk.a3plHceWto8uRmzWrYbrmVZVle',
+  'user', false, (SELECT id FROM "Companies" WHERE name = 'Cliente Demo Kit'),
+  'disable', 'disabled', 'disabled', 'disabled',
+  'pt-BR', '00:00', '23:59',
+  ARRAY[
+    'tickets.view','tickets.update','tickets.transfer','tickets.close',
+    'quick-messages.view','contacts.view','tags.view','helps.view','kanban.view'
+  ]::varchar[],
+  ARRAY[]::integer[],
+  NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM "Users" WHERE email = 'atendente.vazio@taktchat.local');
+
+INSERT INTO "Users" (
+  name, email, "passwordHash", profile, super, "companyId",
+  "allTicket", "showDashboard", "allowRealTime", "allowConnections",
   language, "startWork", "endWork", permissions, "createdAt", "updatedAt"
 )
 SELECT 'Diego Supervisor', 'supervisor@taktchat.local',
@@ -149,6 +167,7 @@ WHERE email IN (
   'parceiro@taktchat.local',
   'admin.cliente@taktchat.local',
   'atendente@taktchat.local',
+  'atendente.vazio@taktchat.local',
   'supervisor@taktchat.local'
 );
 
@@ -157,7 +176,7 @@ SET permissions = ARRAY[
   'tickets.view','tickets.update','tickets.transfer','tickets.close',
   'quick-messages.view','contacts.view','tags.view','helps.view','kanban.view'
 ]::varchar[]
-WHERE email = 'atendente@taktchat.local';
+WHERE email IN ('atendente@taktchat.local', 'atendente.vazio@taktchat.local');
 
 UPDATE "Users"
 SET permissions = ARRAY[
@@ -212,7 +231,7 @@ SELECT u.id, q.id, NOW(), NOW()
 FROM "Users" u
 JOIN "Companies" c ON c.id = u."companyId" AND c.name = 'Cliente Demo Kit'
 JOIN "Queues" q ON q."companyId" = c.id AND q.name = 'Suporte'
-WHERE u.email = 'atendente@taktchat.local'
+WHERE u.email IN ('atendente@taktchat.local', 'atendente.vazio@taktchat.local')
   AND NOT EXISTS (SELECT 1 FROM "UserQueues" uq WHERE uq."userId" = u.id AND uq."queueId" = q.id);
 
 INSERT INTO "UserQueues" ("userId", "queueId", "createdAt", "updatedAt")
@@ -275,9 +294,10 @@ FROM (VALUES
   ('Urgente', '#C62828', 0),
   ('VIP', '#F9A825', 0),
   ('Resolvido', '#2E7D32', 0)
-) AS v(name, color, kanban)
-JOIN "Companies" c ON c.id = t."companyId" AND c.name = 'Cliente Demo Kit'
-WHERE t.name = v.name;
+) AS v(name, color, kanban), "Companies" c
+WHERE c.id = t."companyId"
+  AND c.name = 'Cliente Demo Kit'
+  AND t.name = v.name;
 
 UPDATE "Tags" t
 SET
@@ -285,9 +305,12 @@ SET
   "nextLaneId" = n.id,
   "rollbackLaneId" = NULL,
   "greetingMessageLane" = 'Olá! Recebemos seu contato e vamos te qualificar.'
-FROM "Tags" n
-JOIN "Companies" c ON c.id = t."companyId" AND c.name = 'Cliente Demo Kit' AND n."companyId" = c.id
-WHERE t.name = 'Lead' AND n.name = 'Qualificado';
+FROM "Tags" n, "Companies" c
+WHERE c.id = t."companyId"
+  AND c.name = 'Cliente Demo Kit'
+  AND n."companyId" = c.id
+  AND t.name = 'Lead'
+  AND n.name = 'Qualificado';
 
 UPDATE "Tags" t
 SET
@@ -329,9 +352,12 @@ SET
   "nextLaneId" = NULL,
   "rollbackLaneId" = r.id,
   "greetingMessageLane" = 'Ficamos no aguardo do seu retorno.'
-FROM "Tags" r
-JOIN "Companies" c ON c.id = t."companyId" AND c.name = 'Cliente Demo Kit' AND r."companyId" = c.id
-WHERE t.name = 'Aguardando cliente' AND r.name = 'Negociação';
+FROM "Tags" r, "Companies" c
+WHERE c.id = t."companyId"
+  AND c.name = 'Cliente Demo Kit'
+  AND r."companyId" = c.id
+  AND t.name = 'Aguardando cliente'
+  AND r.name = 'Negociação';
 
 UPDATE "Tags" t
 SET
@@ -537,6 +563,10 @@ FROM "Tags" t
 JOIN "Companies" c ON c.id = t."companyId" AND c.name = 'Cliente Demo Kit'
 WHERE u.email = 'atendente@taktchat.local'
   AND t.name = '#Beatriz';
+
+UPDATE "Users"
+SET "allowedContactTags" = ARRAY[]::integer[]
+WHERE email = 'atendente.vazio@taktchat.local';
 
 INSERT INTO "ContactTags" ("contactId", "tagId", "createdAt", "updatedAt")
 SELECT ct.id, t.id, NOW(), NOW()

@@ -399,6 +399,9 @@ const Tags = () => {
             <Typography variant="body2" className={classes.settingsHint}>
               {i18n.t("tagsKanban.settings.operationalVsLane")}
             </Typography>
+            <Alert severity="info" style={{ marginBottom: 16 }}>
+              {i18n.t("tagsKanban.settings.tooManyColumnsWhen")}
+            </Alert>
             {tags.length > 8 && (
               <Alert severity="warning" style={{ marginBottom: 16 }}>
                 {i18n.t("tagsKanban.settings.tooManyColumns")}

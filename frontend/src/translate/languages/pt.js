@@ -1640,6 +1640,7 @@ const messages = {
           none: "Não definido",
           operationalVsLane: "Etiquetas como Urgente ou VIP ficam em Tags. Aqui só entram colunas do quadro.",
           tooManyColumns: "Mais de 8 colunas cansa a leitura. Considere juntar etapas.",
+          tooManyColumnsWhen: "O aviso amarelo só aparece com mais de 8 colunas (kanban=1). O ambiente de demo usa 6.",
         },
       },
       kanban: {
@@ -1657,6 +1658,7 @@ const messages = {
         orderBy: "Ordenar por:",
         searchContact: "Buscar contato...",
         addColumns: "+ Adicionar colunas",
+        openStats: "Funil (quantidade e idade por lane)",
         resetColumns: "Redefinir colunas",
         dateStart: "Data de início",
         dateEnd: "Data de fim",

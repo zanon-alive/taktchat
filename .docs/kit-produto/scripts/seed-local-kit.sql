@@ -89,6 +89,18 @@ WHERE NOT EXISTS (SELECT 1 FROM "Users" WHERE email = 'atendente@taktchat.local'
 INSERT INTO "Users" (
   name, email, "passwordHash", profile, super, "companyId",
   "allTicket", "showDashboard", "allowRealTime", "allowConnections",
+  language, "startWork", "endWork", "allowedContactTags", "createdAt", "updatedAt"
+)
+SELECT 'Lucia Sem Tag', 'atendente.vazio@taktchat.local',
+  '$2a$08$nQpaca4BSpb7TPRGxt.ypeWhfk.a3plHceWto8uRmzWrYbrmVZVle',
+  'user', false, (SELECT id FROM "Companies" WHERE name = 'Cliente Demo Kit'),
+  'disable', 'disabled', 'disabled', 'disabled',
+  'pt-BR', '00:00', '23:59', ARRAY[]::integer[], NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM "Users" WHERE email = 'atendente.vazio@taktchat.local');
+
+INSERT INTO "Users" (
+  name, email, "passwordHash", profile, super, "companyId",
+  "allTicket", "showDashboard", "allowRealTime", "allowConnections",
   language, "startWork", "endWork", "createdAt", "updatedAt"
 )
 SELECT 'Diego Supervisor', 'supervisor@taktchat.local',
@@ -143,7 +155,7 @@ SELECT u.id, q.id, NOW(), NOW()
 FROM "Users" u
 JOIN "Companies" c ON c.id = u."companyId" AND c.name = 'Cliente Demo Kit'
 JOIN "Queues" q ON q."companyId" = c.id AND q.name = 'Suporte'
-WHERE u.email = 'atendente@taktchat.local'
+WHERE u.email IN ('atendente@taktchat.local', 'atendente.vazio@taktchat.local')
   AND NOT EXISTS (SELECT 1 FROM "UserQueues" uq WHERE uq."userId" = u.id AND uq."queueId" = q.id);
 
 INSERT INTO "UserQueues" ("userId", "queueId", "createdAt", "updatedAt")
@@ -378,6 +390,10 @@ FROM "Tags" t
 JOIN "Companies" c ON c.id = t."companyId" AND c.name = 'Cliente Demo Kit'
 WHERE u.email = 'atendente@taktchat.local'
   AND t.name = '#Beatriz';
+
+UPDATE "Users"
+SET "allowedContactTags" = ARRAY[]::integer[]
+WHERE email = 'atendente.vazio@taktchat.local';
 
 INSERT INTO "ContactTags" ("contactId", "tagId", "createdAt", "updatedAt")
 SELECT ct.id, t.id, NOW(), NOW()
