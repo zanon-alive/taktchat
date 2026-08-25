@@ -22,4 +22,4 @@ IDs (URL, não mudam): `comercial-cliente-padrao`, `comercial-cliente-longa`, `c
 
 Rota **privada**: precisa de login. Vê o player quem é `super`, admin da empresa plataforma, ou (nessa empresa) tem `apresentacoes.view`. Admin de empresa cliente/parceiro **não** vê. Setas do teclado avançam. Cada slide tem um parágrafo **Para falar** + bullets.
 
-PNG canônicos: `backend/private/kit-apresentacoes/` (API autenticada). O que ainda não existe aparece como caixa “Print a gravar”. Lista: `backend/private/kit-apresentacoes/README.md`.
+PNG canônicos: `backend/private/kit-apresentacoes/` (API autenticada). Lista: `backend/private/kit-apresentacoes/README.md`. Celular: ilustração de IA (`pendente-whatsapp-celular.png`).

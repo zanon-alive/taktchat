@@ -36,7 +36,7 @@ Iguais ao padrão (inclui o argumento do ticket).
 
 ## Slide 18 — Limites honestos
 
-**Para falar:** neste kit o whitelabel foi ligado no banco local. É o mesmo sistema fatiado por empresa, não um deploy por cliente. Billing do dono ainda sem print.
+**Para falar:** neste kit o whitelabel foi ligado no banco local. É o mesmo sistema fatiado por empresa, não um deploy por cliente. Prints de empresas, licenças e billing do dono já estão no kit.
 
 ## Slides 19–20 — Fechamento
 

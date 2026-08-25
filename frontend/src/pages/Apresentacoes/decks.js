@@ -6,14 +6,6 @@ function shot(file, caption) {
   };
 }
 
-function pendente(file, oQueGravar) {
-  return {
-    image: file,
-    imageCaption: file,
-    placeholder: oQueGravar,
-  };
-}
-
 const comercialClientePadrao = [
   {
     title: "Taktchat",
@@ -166,10 +158,7 @@ const comercialClientePadrao = [
       "Campanhas: lista, cadência, validação de número.",
       "IA / RAG: opcional, sobre arquivos da empresa.",
     ],
-    ...pendente(
-      "pendente-flow-builder.png",
-      "Grave /flowbuilders: canvas do Flow Builder com um fluxo visível (nós e conexões)."
-    ),
+    ...shot("pendente-flow-builder.png", "Flow Builder: fluxo Boas-vindas Demo Kit"),
   },
   {
     title: "Visão da operação",
@@ -225,10 +214,7 @@ const comercialClientePadrao = [
       "Critério de sucesso: pendente vira resposta humana em X minutos.",
       "Valores: tabela da landing; proposta comercial à parte.",
     ],
-    ...pendente(
-      "pendente-landing-hero.png",
-      "Grave /landing: hero da página pública + formulário de lead visível."
-    ),
+    ...shot("pendente-landing-hero.png", "Landing pública: hero e formulário de lead"),
   },
 ];
 
@@ -291,10 +277,7 @@ const comercialClienteLonga = [
       "Validação reduz número inexistente / mal formatado.",
       "Oficial: fora da janela, só template. Baileys: risco de ban sobe com volume.",
     ],
-    ...pendente(
-      "pendente-campanhas.png",
-      "Grave /campaigns: lista de campanhas (nome, status, cadência). Se o menu não aparecer, ligue campanhas no localStorage cshow."
-    ),
+    ...shot("pendente-campanhas.png", "Campanhas: lista com nome, status e cadência"),
   },
   {
     title: "IA com pé no chão",
@@ -305,10 +288,7 @@ const comercialClienteLonga = [
       "RAG lê documentos que a empresa enviou — não a internet inteira.",
       "Pergunta honesta: quem responde quando a IA errar?",
     ],
-    ...pendente(
-      "pendente-ia-prompts.png",
-      "Grave /prompts ou /ai-settings: tela de prompt/IA com aviso de chave, sem secrets visíveis."
-    ),
+    ...shot("pendente-ia-prompts.png", "Prompts / IA: tela de configuração, sem secrets"),
   },
   {
     title: "Entradas além do WhatsApp",
@@ -319,10 +299,7 @@ const comercialClienteLonga = [
       "Widget do site (widget.js) quando a empresa ativa nas settings.",
       "A origem fica no ticket para relatório e fila certa.",
     ],
-    ...pendente(
-      "pendente-widget-chat-site.png",
-      "Grave /landing com o widget de chat do site aberto (bolha + janela), ou a tela de ajuda EntrySource."
-    ),
+    ...shot("pendente-widget-chat-site.png", "Widget do chat no site / ajuda EntrySource"),
   },
   {
     title: "LGPD",
@@ -344,10 +321,7 @@ const comercialClienteLonga = [
       "Campanhas, flow e IA costumam depender do plano / flag.",
       "Proposta: papel, não print da landing.",
     ],
-    ...pendente(
-      "pendente-landing-planos.png",
-      "Grave /landing#plans: os três cards de plano com preços visíveis."
-    ),
+    ...shot("pendente-landing-planos.png", "Landing: cards de plano (Básico, Premium, Enterprise)"),
   },
   {
     title: "Encerramento",
@@ -455,10 +429,7 @@ const comercialParceiroPadrao = [
       "Relatório consolidado na plataforma (dono).",
       "Preço que você cobra a filha: regra comercial de vocês.",
     ],
-    ...pendente(
-      "pendente-partner-billing.png",
-      "Grave /partner-billing-report (dono da plataforma): consolidado de período das filhas."
-    ),
+    ...shot("pendente-partner-billing.png", "Relatório de cobrança do dono: consolidado das filhas"),
   },
   {
     title: "Dual channel no argumento de venda",
@@ -480,10 +451,7 @@ const comercialParceiroPadrao = [
       "Sem operar Redis, Bull ou arquivos de sessão.",
       "Documentação de produto: kit em .docs/kit-produto/.",
     ],
-    ...pendente(
-      "pendente-infra-docker.png",
-      "Grave o terminal com docker compose ps (postgres + redis healthy) — slide de “isso não é problema do parceiro”."
-    ),
+    ...shot("pendente-infra-docker.png", "Postgres + Redis no Compose — operação da plataforma, não do parceiro"),
   },
   {
     title: "Como começar",
@@ -532,10 +500,7 @@ const comercialParceiroLonga = [
       "Planos da sua empresa: o que a filha assina com você.",
       "Confirmar na UI de financeiro/planos do ambiente real.",
     ],
-    ...pendente(
-      "pendente-planos-whitelabel.png",
-      "Grave a tela de planos/financeiro do parceiro com catálogo próprio visível (se existir no ambiente)."
-    ),
+    ...shot("pendente-planos-whitelabel.png", "Planos com alvo whitelabel no ambiente local"),
   },
   {
     title: "Token de signup",
@@ -560,10 +525,7 @@ const comercialParceiroLonga = [
       "Dono: consolidado. Parceiro: filhas e licenças.",
       "Régua de bloqueio por inadimplência: combinada no contrato.",
     ],
-    ...pendente(
-      "pendente-partner-billing.png",
-      "Grave /partner-billing-report: tabela de período / valores (sem dado real de produção)."
-    ),
+    ...shot("pendente-partner-billing.png", "Cobrança: snapshot de período (sem dado de produção)"),
   },
   {
     title: "Risco operacional",
@@ -593,8 +555,7 @@ const comercialParceiroLonga = [
       "Neste ambiente de kit o whitelabel foi ligado no banco local (tipo + parent). Menu de filhas e licenças já foram percorridos. Não vender como se cada parceiro ganhasse infra dedicada.",
     bullets: [
       "É o mesmo sistema, fatiado por empresa — não um deploy por cliente.",
-      "Prints de empresas e licenças: rodada já feita (f23, f24).",
-      "Billing consolidado do dono: print ainda pendente.",
+      "Prints de empresas, licenças e billing do dono: já no kit (f23, f24, pendente-partner-billing).",
     ],
     ...shot("f22-parceiro-tickets-menu.png", "Menu do parceiro no ambiente local"),
   },
@@ -607,10 +568,7 @@ const comercialParceiroLonga = [
       "Trial configurável; 14 dias é referência, não lei.",
       "Régua de bloqueio e suporte nível 1 vs 2.",
     ],
-    ...pendente(
-      "pendente-landing-planos.png",
-      "Grave /landing#plans como referência de trial/planos públicos."
-    ),
+    ...shot("pendente-landing-planos.png", "Landing: planos públicos como referência de trial"),
   },
   {
     title: "Fechamento — primeiro cliente no ar",
@@ -659,10 +617,7 @@ const tecnicaPadrao = [
       "PostgreSQL 15 + Redis 6.2 / Bull.",
       "Socket.IO no mesmo backend da API.",
     ],
-    ...pendente(
-      "pendente-infra-docker.png",
-      "Grave docker compose ps (postgres 15 + redis) e, se couber, o /health no browser."
-    ),
+    ...shot("pendente-infra-docker.png", "Compose local: Postgres 15 + Redis healthy"),
   },
   {
     title: "Mensagem",
@@ -718,7 +673,7 @@ const tecnicaPadrao = [
       "Baileys: QR + arquivos de sessão no servidor.",
       "Oficial: credenciais WABA — sem QR de celular pessoal.",
     ],
-    ...shot("f15-admin-conexoes-disconnected.png", "Conexão Baileys ainda sem creds.json"),
+    ...shot("f16-admin-conexao-qrcode.png", "Baileys: QR e sessão em disco; a Cliente Demo Kit já está CONNECTED"),
   },
   {
     title: "Filas",
@@ -729,10 +684,7 @@ const tecnicaPadrao = [
       "Cron: tags, licenças, rotinas de manutenção.",
       "Fila de atendimento (queue) é outra entidade — não confundir com Bull.",
     ],
-    ...pendente(
-      "pendente-bull-redis.png",
-      "Grave Redis/Bull: tela de campanhas com job ou um recorte do log do worker (sem secrets)."
-    ),
+    ...shot("pendente-bull-redis.png", "Bull/Redis: campanha ou worker (sem secrets)"),
   },
   {
     title: "Integrações",
@@ -743,10 +695,7 @@ const tecnicaPadrao = [
       "widget.js + token por empresa.",
       "Typebot / Flow Builder quando o plano libera.",
     ],
-    ...pendente(
-      "pendente-widget-chat-site.png",
-      "Grave o widget.js na landing ou a página de ajuda EntrySource /helps/entrysource-chat-site."
-    ),
+    ...shot("pendente-widget-chat-site.png", "widget.js na landing ou ajuda EntrySource"),
   },
   {
     title: "Local",
@@ -757,10 +706,7 @@ const tecnicaPadrao = [
       "Backend :8080 · frontend PORT=3000.",
       "GET /health: API + database.",
     ],
-    ...pendente(
-      "pendente-health.png",
-      "Grave o JSON de GET /health no browser (http://localhost:8080/health) com database ok."
-    ),
+    ...shot("pendente-health.png", "GET /health: API e database ok"),
   },
   {
     title: "Produção (alto nível)",
@@ -771,10 +717,7 @@ const tecnicaPadrao = [
       "Traefik / TLS na borda.",
       "Runbook: .docs/infraestrutura/ e ATUALIZACAO_SERVIDOR.md.",
     ],
-    ...pendente(
-      "pendente-arquitetura.png",
-      "Grave um diagrama simples (ou a capa de .docs/infraestrutura) — boxes frontend / API / Postgres / Redis / WhatsApp."
-    ),
+    ...shot("pendente-arquitetura.png", "Blocos: frontend, API, Postgres, Redis, WhatsApp"),
   },
   {
     title: "Atenção",
@@ -796,10 +739,7 @@ const tecnicaPadrao = [
       "Legado: .docs/visao-geral/ e funcionalidades/.",
       "Player /apresentacoes exige login (kit comercial da operação).",
     ],
-    ...pendente(
-      "pendente-docs-kit.png",
-      "Grave o explorer da pasta .docs/kit-produto/ (README + entregaveis) no editor."
-    ),
+    ...shot("pendente-docs-kit.png", ".docs/kit-produto/: README e entregáveis"),
   },
 ];
 
@@ -859,35 +799,29 @@ const tecnicaLonga = [
       "Kit local: type, parentCompanyId, Licenses, entrySource.",
       "Drift: ver .docs/operacao/recuperacao-migrations-banco.md.",
     ],
-    ...pendente(
-      "pendente-migrations.png",
-      "Grave a pasta backend/src/database/migrations no explorer (lista de arquivos, sem .env)."
-    ),
+    ...shot("pendente-migrations.png", "Migrations Sequelize (sem .env na foto)"),
   },
   {
     title: "Pontos frágeis",
     lead:
-      "Pegadinhas desta demanda: Baileys sem creds.json (QR ainda não escaneado), frontend herdando PORT do backend. Overlay de health não bloqueia mais o first paint da landing.",
+      "Pegadinhas que continuam valendo mesmo com a demo CONNECTED: Baileys sem creds.json, frontend herdando PORT do backend. Overlay de health não bloqueia mais o first paint da landing.",
     bullets: [
-      "Sem creds.json: conexão DISCONNECTED, mensagem real não sai.",
+      "Sem creds.json a conexão cai e a mensagem real não sai — a Cliente Demo Kit neste ambiente já está CONNECTED.",
       "Frontend: unset PORT && PORT=3000.",
       "Lista /tickets sem queueIds: count 0 (filtro, não seed vazio).",
     ],
-    ...shot("f15-admin-conexoes-disconnected.png", "Sem QR escaneado = sem envio real"),
+    ...shot("f15-admin-conexoes-disconnected.png", "Sem sessão: DISCONNECTED. A demo do kit já passou disso."),
   },
   {
     title: "Próximas rodadas técnicas",
     lead:
-      "O que o kit ainda não fechou no hardware: escanear o QR e gravar CONNECTED. UI de campanhas/flow foi documentada sem print desta rodada. Filtro queueIds já está entendido — não “corrigir” apagando o filtro.",
+      "Neste ambiente o QR da Cliente Demo Kit já foi escaneado: sessão CONNECTED, envio e transferência persistidos. Prints de campanha, flow, health e billing já estão no kit. O que ainda é hardware: captura real do WhatsApp no celular (hoje ilustração de IA).",
     bullets: [
-      "QR no celular → sessão CONNECTED → envio/transfer reais.",
-      "Prints pendentes: campanhas, flow, /health, billing dono.",
+      "CONNECTED neste kit: print pendente-whatsapp-connected.png.",
+      "Ainda aberto: foto real do aparelho (pendente-whatsapp-celular.png é IA).",
       "Não tratar count 0 sem queueIds como bug de seed.",
     ],
-    ...pendente(
-      "pendente-whatsapp-connected.png",
-      "Grave /connections com a sessão CONNECTED (bolinha verde) depois de escanear o QR no celular."
-    ),
+    ...shot("pendente-whatsapp-connected.png", "Cliente Demo Kit: sessão Baileys CONNECTED"),
   },
 ];
 

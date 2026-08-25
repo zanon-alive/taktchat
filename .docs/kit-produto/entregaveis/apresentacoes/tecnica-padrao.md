@@ -38,7 +38,7 @@ Audiência: dev / infra / integrador. 12–15 min. Player: `/apresentacoes/tecni
 
 ## Slide 8 — Dual channel
 
-**Para falar:** `channelType` baileys | oficial. Baileys: QR + sessão em `private/sessions`. Oficial: Cloud API. Os dois podem coexistir.
+**Para falar:** `channelType` baileys | oficial. Baileys: QR + sessão em `private/sessions`. Oficial: Cloud API. Os dois podem coexistir. Neste kit a Cliente Demo Kit já está **CONNECTED**.
 
 ## Slide 9 — Filas
 
@@ -50,7 +50,7 @@ Audiência: dev / infra / integrador. 12–15 min. Player: `/apresentacoes/tecni
 
 ## Slide 11 — Local
 
-**Para falar:** Compose (Postgres+Redis). Backend `:8080`, frontend `PORT=3000` (não herdar 8080). `GET /health`.
+**Para falar:** Compose (Postgres+Redis). Backend `:8080`, frontend `PORT=3000` (não herdar 8080). `GET /health` com database ok (print no kit).
 
 ## Slide 12 — Produção (alto nível)
 

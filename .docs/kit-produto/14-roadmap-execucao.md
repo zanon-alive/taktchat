@@ -58,7 +58,7 @@ Merge da `main` (PR #21) nesta branch. Copy do kit deixa de descrever o Kanban a
 - Ticket novo recebe a lane de entrada (`defaultKanbanTagId`).
 - Encerrar aplica `closedKanbanTagId`; uma tag `kanban=1` por ticket; cron por `updatedAt`; rollback não vale em ticket novo.
 - Overlay de API e token hex: já em `0e2c051` (não são mais pegadinha da demo).
-- Copy dos slides: login comercial (`@taktchat.local` / `LocalTest#2026`) e funil de **6 colunas** no player e nos MD.
+- Copy dos slides: login comercial, funil de **6 colunas**, deck técnico com QR CONNECTED e prints `pendente-*` já gravados (sem caixa “a gravar”).
 
 ## Ainda aberto (não bloqueia o lote)
 

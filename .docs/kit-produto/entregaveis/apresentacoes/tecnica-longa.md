@@ -30,8 +30,8 @@ Iguais ao padrão (inclui FindOrCreate / contato → ticket).
 
 ## Slide 20 — Pontos frágeis
 
-**Para falar:** Baileys sem `creds.json`; frontend herdando `PORT` do backend; `/tickets` sem `queueIds` volta count 0 (filtro, não seed vazio). Overlay de health **não** bloqueia mais o first paint da landing.
+**Para falar:** Baileys sem `creds.json` derruba a sessão; frontend herdando `PORT` do backend; `/tickets` sem `queueIds` volta count 0 (filtro, não seed vazio). Overlay de health **não** bloqueia mais o first paint. A Cliente Demo Kit **já está CONNECTED**.
 
 ## Slide 21 — Próximas rodadas técnicas
 
-**Para falar:** escanear QR → `CONNECTED`. Prints ainda pendentes: campanhas, flow, billing do dono. Não “corrigir” o filtro de fila apagando `queueIds`.
+**Para falar:** neste ambiente o QR já foi escaneado (CONNECTED, envio e transferência persistidos). Prints de campanha, flow, health e billing já estão no kit. Ainda é hardware: captura **real** do celular (hoje ilustração de IA). Não “corrigir” o filtro de fila apagando `queueIds`.
