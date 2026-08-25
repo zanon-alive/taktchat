@@ -12,7 +12,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 
 ### Funcionalidades em alto nível
 
-- Atendimento omnichannel com múltiplas filas, Kanban, tags e automações anti-ban.
+- Atendimento omnichannel com múltiplas filas, Kanban (lane de entrada e lane ao encerrar), tags e automações anti-ban.
 - Campanhas segmentadas, Flow Builder visual, integrações com bots/IA e controle de cadência.
 - Contatos, listas, arquivos inteligentes, dashboards e relatórios operacionais.
 - **Validação i18n**: mensagens de validação de formulários em pt-BR, en, es e tr (campo obrigatório, muito curto, etc.).
@@ -91,6 +91,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Funcionalidades por módulo: `.docs/funcionalidades/`
   - **Assets estáticos (public vs src, evitar 404 em produção):** `.docs/funcionalidades/frontend-assets-estaticos.md`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
+  - **Kanban (lanes de entrada e encerramento):** `.docs/funcionalidades/kanban-lanes.md`
   - **EntrySource e Chat do Site:** `.docs/funcionalidades/widget-chat-site.md` - Canais de entrada, widget e API pública
 - Procedimentos de diagnóstico: `.docs/diagnosticos/` (inclui auditoria e deduplicação de contatos: `npm run db:audit-contacts`, `npm run db:dedupe-contacts`, `npm run db:delete-contacts-without-tickets`)
 - Diagnóstico de banco (erros DB_* do backend): `.docs/diagnosticos/banco.md`

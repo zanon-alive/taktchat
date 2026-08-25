@@ -24,6 +24,7 @@ import CreateMessageService from "../MessageServices/CreateMessageService";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
 import formatBody from "../../helpers/Mustache";
 import { Mutex } from "async-mutex";
+import { applyClosedKanbanLane } from "../../helpers/kanbanTicketTags";
 
 interface TicketData {
   status?: string;
@@ -106,6 +107,12 @@ const UpdateTicketService = async ({
       await ticket.update({
         status: "closed"
       });
+
+      try {
+        await applyClosedKanbanLane(Number(ticketId), companyId);
+      } catch (error) {
+        Sentry.captureException(error);
+      }
 
       io.of(`/workspace-${companyId}`)
         // .to(oldStatus)
@@ -303,6 +310,12 @@ const UpdateTicketService = async ({
         dataWebhook: null,
         hashFlowId: null,
       });
+
+      try {
+        await applyClosedKanbanLane(Number(ticketId), companyId);
+      } catch (error) {
+        Sentry.captureException(error);
+      }
 
       io.of(`/workspace-${companyId}`)
         // .to(oldStatus)
@@ -696,6 +709,14 @@ const UpdateTicketService = async ({
       typebotStatus: useIntegration,
       unreadMessages
     });
+
+    if (status === "closed" && oldStatus !== "closed") {
+      try {
+        await applyClosedKanbanLane(Number(ticketId), companyId);
+      } catch (error) {
+        Sentry.captureException(error);
+      }
+    }
 
     ticketTraking.queuedAt = moment().toDate();
     ticketTraking.queueId = queueId;

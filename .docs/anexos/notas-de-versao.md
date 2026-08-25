@@ -2,6 +2,9 @@
 
 Use este arquivo para registrar mudanças relevantes em cada release.
 
+| Data | Versão | Descrição | Autor |
+| --- | --- | --- | --- |
+| 2026-08-25 | 2.2.2v-26 | Kanban: lane de entrada e lane ao encerrar (settings por empresa); uma tag kanban por ticket; Encerrar mantém o card no funil. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Overlay de API não bloqueia o first paint; token de signup hex resolve pelo `signupToken` primeiro. | Equipe Dev |
 | 2026-08-24 | 2.2.2v-26 | Player `/apresentacoes` privado (login + permissão na empresa plataforma); prints em `backend/private/` via API. Seed do kit permanece só local. | Equipe Dev |
 | 2026-08-24 | 2.2.2v-26 | Player: ilustração de IA só no celular (`pendente-whatsapp-celular.png`). | Equipe Dev |
@@ -14,4 +17,3 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 | 2025-02-05 | 2.2.2v-26 | Correção de aninhamento DOM inválido em skeletons de loading: remove TableRowSkeleton de dentro de td/div, cria CardSkeleton para views mobile, melhora TableRowSkeleton com default columns e PropTypes. | Equipe Dev |
 | 2025-01-27 | 2.2.2v-26 | Melhorias na Landing Page de Vendas: novos componentes (FAQ, ChatWidget, CookieBanner), SEO avançado com Schema.org, lazy loading, design modernizado. | Equipe Dev |
 | 2025-11-07 | 2.2.2v-26 | Reestruturação completa da documentação. | Equipe Docs |
-

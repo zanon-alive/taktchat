@@ -15,6 +15,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
   - **Frontend — assets em `public/` vs imports:** `funcionalidades/frontend-assets-estaticos.md`
+  - **Kanban (lanes automáticas):** `funcionalidades/kanban-lanes.md` – Lane de entrada, Encerrar no funil, uma tag por card.
   - **EntrySource e Chat do Site:** `funcionalidades/widget-chat-site.md` – Widget, API e canais de entrada.
 - `diagnosticos/`: procedimentos de investigação e correção para cenários recorrentes.
   - **Logs WhatsApp (Baileys):** `diagnosticos/logs-whatsapp-baileys.md` – Erros esperados (decrypt, SessionError, sessões).

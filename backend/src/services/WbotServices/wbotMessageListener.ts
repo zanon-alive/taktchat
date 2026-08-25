@@ -90,6 +90,7 @@ import {
 import typebotListener from "../TypebotServices/typebotListener";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
+import { findKanbanTicketTag } from "../../helpers/kanbanTicketTags";
 import pino from "pino";
 import BullQueues from "../../libs/queue";
 import { Transform } from "stream";
@@ -4662,11 +4663,7 @@ const handleMessage = async (
     let ticketTag = undefined;
     // console.log(ticket.id)
     if (ticket?.company?.plan?.useKanban || ticket?.company?.type === "platform") {
-      ticketTag = await TicketTag.findOne({
-        where: {
-          ticketId: ticket.id
-        }
-      });
+      ticketTag = await findKanbanTicketTag(ticket.id);
 
       if (ticketTag) {
         const tag = await Tag.findByPk(ticketTag.tagId);
@@ -4693,7 +4690,13 @@ const handleMessage = async (
       return;
     }
 
+    const skipRollbackOnNewTicketAfterClose =
+      isFirstMsg &&
+      isFirstMsg.id !== ticket.id &&
+      isFirstMsg.status === "closed";
+
     if (
+      !skipRollbackOnNewTicketAfterClose &&
       rollbackTag &&
       formatBody(bodyNextTag, ticket) !== bodyMessage &&
       formatBody(bodyRollbackTag, ticket) !== bodyMessage

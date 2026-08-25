@@ -1,6 +1,6 @@
 # 🗺️ Roadmap e Melhorias Futuras - TaktChat
 
-**Última atualização:** 2026-08-24  
+**Última atualização:** 2026-08-25
 **Status:** Documento centralizado de melhorias futuras do projeto
 
 ---
@@ -164,8 +164,8 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 ## 🎫 Tickets e Atendimento
 
 ### Melhorias de Interface
+- [x] Lanes automáticas (entrada + Encerrar no funil; uma tag kanban por ticket) — ver `.docs/funcionalidades/kanban-lanes.md`
 - [ ] Kanban mais intuitivo
-- [ ] Lane padrão Lead em ticket novo; encerrar alinhado ao funil (ver kit-produto/15-pendencias-produto-outras-branches.md)
 - [ ] Drag and drop entre colunas
 - [ ] Atalhos de teclado
 - [ ] Busca avançada com múltiplos filtros
@@ -354,17 +354,17 @@ Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma 
 - [x] **Prints do player (signup da filha)** — captura real de `pendente-signup-partner.png` e `pendente-signup-token.png`. Celular continua ilustração de IA (`pendente-whatsapp-celular.png`).
 - [x] **Seed demo não vai para produção** — SQL só em `.docs/kit-produto/scripts/` (não é migration).
 
-Detalhe do que é **código de produto** (outras branches): [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
+Pendências 1–5, 8 e 10 do kit: resolvidas (PR #21 + esta branch). Restam captura real do celular, copy dos slides e demanda 16. Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 
-## 🎫 Tickets, tags e Kanban (produto — outras branches)
+## 🎫 Tickets, tags e Kanban
 
-Lista completa: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`.
+Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do funil: `.docs/funcionalidades/kanban-lanes.md`.
 
-- [ ] Ticket novo (pós-`closed`) receber lane padrão Lead
-- [ ] Encerrar ticket mover/remover coluna Kanban (hoje o trecho está comentado)
-- [ ] Cron `timeLane` não depender de `fromMe: true`
-- [ ] Garantir uma tag `kanban=1` por ticket (arrastar substitui)
-- [ ] Rollback de lane não correr em ticket já `closed`
+- [x] Ticket novo recebe lane de entrada (`defaultKanbanTagId`) — PR #21
+- [x] Encerrar move o card para a lane configurada (`closedKanbanTagId`) — PR #21
+- [x] Cron `timeLane` usa `updatedAt` (sem exigir `fromMe`) — PR #21
+- [x] Uma tag `kanban=1` por ticket (arrastar substitui) — PR #21
+- [x] Ticket novo pós-`closed` não herda rollback da conversa encerrada — PR #21
 - [ ] **Demanda (análise):** CRM de conversa estruturado vs. CRM de mercado — [kit-produto/16-demanda-crm-conversa-ou-mercado.md](../kit-produto/16-demanda-crm-conversa-ou-mercado.md). Sem código até escolher caminho A ou B.
 
 ---
