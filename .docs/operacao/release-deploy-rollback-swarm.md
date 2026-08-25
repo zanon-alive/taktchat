@@ -43,22 +43,21 @@ Antes do deploy:
 
 Não use `latest` como identidade de release. O Portainer deve receber referências por digest, por exemplo `ghcr.io/zanon-alive/taktchat-backend@sha256:<digest>`.
 
-## 3. Atualização da stack no Portainer
+## 3. Atualização da stack (Git + Portainer)
 
-1. Acessar **Stacks → taktchat → Editor**.
-2. Exportar ou copiar a definição vigente para registro restrito da janela, sem divulgar secrets.
-3. Alterar somente as imagens dos serviços afetados para os novos digests.
-4. Conferir que:
-   - backend mantém `taktchat_taktchat_private:/app/private`;
-   - backend mantém `taktchat_taktchat_media:/app/public`;
-   - frontend continua sem mounts;
-   - PostgreSQL e Redis continuam nas stacks separadas;
-   - nenhuma variável ou secret foi removido acidentalmente.
-5. Revisar o diff apresentado pelo Portainer.
-6. Acionar **Update the stack**.
-7. Aguardar convergência dos serviços antes de continuar.
+A stack `taktchat` no Portainer está ligada ao repositório `zanon-alive/stacks_producao-main-server`, arquivo `15_taktchat_prod_ghcr.yml` (branch `master`). `/root/stacks` na VPS **não** contém esse arquivo.
 
-Não aplicar `/root/stacks/14_taktchat.yml`: esse arquivo não existe no servidor auditado.
+Após merge na `main` e builds GHCR verdes, o workflow `update-prod-stack (GHCR digests)` grava os novos `@sha256:<digest>` nesse YAML (secret `STACKS_DEPLOY_TOKEN`). Só atualiza imagens cuja tag `:<sha>` existe — um merge só de frontend não reescreve o backend.
+
+No Portainer:
+
+1. Com GitOps/webhook ligado: o pull aplica o commit do bot; conferir convergência.
+2. Sem GitOps: **Pull and redeploy** (Prune **off**). Não editar o YAML na mão.
+3. Conferir que volumes, Postgres/Redis e secrets não foram alterados no diff.
+
+Não aplicar `/root/stacks/14_taktchat.yml`. Não usar `latest` no YAML de produção.
+
+Rollback: revert do commit no repo das stacks e novo pull; ou restaurar as linhas `image:` anteriores no Git.
 
 ## 4. Migration
 
@@ -104,11 +103,11 @@ Smoke tests mínimos:
 Iniciar rollback em indisponibilidade, perda funcional crítica, erro persistente ou degradação sem correção segura na janela.
 
 1. Preservar logs e interromper novas alterações.
-2. No editor da stack do Portainer, restaurar os digests anteriores dos serviços afetados.
-3. Revisar o diff e atualizar a stack.
+2. Reverter o commit do bot no repositório das stacks (ou restaurar as linhas `image:` anteriores nesse Git).
+3. Aplicar o Git no Portainer (GitOps ou Pull and redeploy).
 4. Aguardar convergência.
 5. Repetir health e smoke tests.
-6. Registrar o `<sha>` e os pares de digest anterior/novo em local operacional restrito.
+6. Registrar o `<sha>` em local operacional restrito.
 
 Se houve migration incompatível, não improvisar down migration ou restauração. Abrir procedimento específico com backup do estado corrente e confirmação explícita.
 

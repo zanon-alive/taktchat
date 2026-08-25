@@ -2,29 +2,27 @@
 
 > Resumo de apoio. Siga integralmente `release-deploy-rollback-swarm.md`.
 
-Não existe checkout `/root/taktchat` nem script `update-taktchat.sh` no fluxo confirmado. Produção usa imagens GHCR fixadas por digest e a stack é atualizada no Portainer.
+Não existe checkout `/root/taktchat` nem script `update-taktchat.sh`. Produção usa GHCR por digest no Git `stacks_producao-main-server` (`15_taktchat_prod_ghcr.yml`).
 
 ## Passos
 
-1. Aprovar PR e fazer merge na `main`.
-2. Aguardar os workflows GHCR.
-3. Confirmar que tags, `<sha>` e digests correspondem à release.
-4. Registrar os digests anteriores.
-5. Atualizar as imagens por digest no editor da stack Taktchat no Portainer.
-6. Aguardar backend, frontend e label-sync convergirem.
-7. Executar e acompanhar `taktchat_taktchat-migrate` quando aplicável.
-8. Validar:
+1. Merge na `main`.
+2. Aguardar builds GHCR e o workflow `update-prod-stack (GHCR digests)` (secret `STACKS_DEPLOY_TOKEN`).
+3. No Portainer: GitOps/webhook ou **Pull and redeploy** (Prune off). Não editar o YAML na mão.
+4. Aguardar backend, frontend e label-sync convergirem.
+5. Executar e acompanhar `taktchat_taktchat-migrate` quando aplicável.
+6. Validar:
 
 ```bash
 curl --fail --show-error https://api.taktchat.com.br/health
 curl --fail --show-error --head https://taktchat.com.br
 ```
 
-9. Executar smoke tests de login, conversa, mensagem, tempo real e mídia/label-sync quando afetados.
+7. Executar smoke tests de login, conversa, mensagem, tempo real e mídia/label-sync quando afetados.
 
 ## Rollback
 
-Restaurar no Portainer os digests anteriores dos serviços afetados. Não remover a stack. Migration exige avaliação separada.
+Revert do commit no repo das stacks e pull no Portainer. Não remover a stack. Migration exige avaliação separada.
 
 ## Observações
 
