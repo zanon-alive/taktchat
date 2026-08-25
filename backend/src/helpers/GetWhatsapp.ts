@@ -3,7 +3,8 @@
  * *Whatsapp |
  * @descrição:*Whatsapp 
  */
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import ws from 'ws';
 import UpdateOneSettingService from '../services/SettingServices/UpdateOneSettingService';
 import axios from 'axios';
 import GetSettingService from '../services/SettingServices/GetSettingService';
@@ -27,7 +28,21 @@ const sKey = S_A_K;
 
 const y_n = process.env.COMPANY_TOKEN;
 
-const s = createClient(sUrl, sKey);
+let licenseClient: SupabaseClient | null = null;
+
+/** Node 20 não tem WebSocket nativo; realtime-js exige `ws` no transport. */
+export function createLicenseSupabaseClient(): SupabaseClient {
+  return createClient(sUrl, sKey, {
+    realtime: { transport: ws as any }
+  });
+}
+
+function getLicenseClient(): SupabaseClient {
+  if (!licenseClient) {
+    licenseClient = createLicenseSupabaseClient();
+  }
+  return licenseClient;
+}
 
 const getIp = async () => {
   const { data } = await axios.get('https://api.ipify.org?format=json');
@@ -44,7 +59,7 @@ export const GetWhatsapp = async () => {
       await AddSettingService()
     }
 
-    let { data, error } = await s
+    let { data, error } = await getLicenseClient()
       .from('cadastros')
       .select("id, ip_instalacao, company_token")
       .eq("ip_instalacao", ip)
@@ -89,7 +104,7 @@ const getR = async (key: string) => {
 
 const PostWhatsapp = async (info: indexPost, reason: string) => {
   try {
-    const { data, error } = await s.from('whatsapp')
+    const { data, error } = await getLicenseClient().from('whatsapp')
       .insert([
         {
           cadastro_id: info.cadastro_id,
@@ -115,7 +130,7 @@ const CheckWhatsapp = async (ip: string, status: string) => {
 
   try {
 
-    const { data, error } = await s.from('key_code').select('key,code,ip')
+    const { data, error } = await getLicenseClient().from('key_code').select('key,code,ip')
 
     const match = await matchWhatsapp(ip);
 
@@ -137,7 +152,7 @@ const CheckWhatsapp = async (ip: string, status: string) => {
 
 
 const matchWhatsapp = async (ip) => {
-  const { data, error } = await s.from('t_invalidos').select('ip, key, code');
+  const { data, error } = await getLicenseClient().from('t_invalidos').select('ip, key, code');
   let key = "ok";
   let code = "ok";
   if (data.length > 0) {
