@@ -30,6 +30,7 @@ import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 
 //icones
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import UndoIcon from '@mui/icons-material/Undo';
 
 import ScheduleModal from "../ScheduleModal";
