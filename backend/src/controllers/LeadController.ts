@@ -260,20 +260,28 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     const contact = await Contact.create(contactData);
 
     if (leadData.message && contact.id) {
-      await ContactCustomField.create({
-        contactId: contact.id,
-        name: source === "revendedor" ? "Mensagem do Revendedor" : "Mensagem do Lead",
-        value: leadData.message
-      });
+      try {
+        await ContactCustomField.create({
+          contactId: contact.id,
+          name: source === "revendedor" ? "Mensagem do Revendedor" : "Mensagem do Lead",
+          value: leadData.message
+        });
+      } catch (error) {
+        logger.warn("Erro ao adicionar mensagem como extraInfo", error);
+      }
     }
 
-    const [leadTag] = await Tag.findOrCreate({
-      where: { name: tagNameBySource, companyId: company.id },
-      defaults: { color: "#25D366", kanban: 0, companyId: company.id }
-    });
-    await ContactTag.findOrCreate({
-      where: { contactId: contact.id, tagId: leadTag.id }
-    });
+    try {
+      const [leadTag] = await Tag.findOrCreate({
+        where: { name: tagNameBySource, companyId: company.id },
+        defaults: { color: "#25D366", kanban: 0, companyId: company.id }
+      });
+      await ContactTag.findOrCreate({
+        where: { contactId: contact.id, tagId: leadTag.id }
+      });
+    } catch (error) {
+      logger.warn(`Erro ao adicionar tag ${tagNameBySource}`, error);
+    }
 
     if (!whatsapp) {
       logger.info({ contactId: contact.id, companyId: company.id }, "Lead criado sem WhatsApp para ticket");

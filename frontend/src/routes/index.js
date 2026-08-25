@@ -51,12 +51,15 @@ const QueueIntegration = lazy(() => import("../pages/QueueIntegration"));
 const Files = lazy(() => import("../pages/Files"));
 const ToDoList = lazy(() => import("../pages/ToDoList"));
 const Kanban = lazy(() => import("../pages/Kanban"));
+const KanbanStats = lazy(() => import("../pages/KanbanStats"));
 const TagsKanban = lazy(() => import("../pages/TagsKanban"));
 const AISettings = lazy(() => import("../components/AISettings"));
 const OnboardingDocs = lazy(() => import("../pages/OnboardingDocs"));
 const AdminDocs = lazy(() => import("../pages/AdminDocs"));
 const Licenses = lazy(() => import("../pages/Licenses"));
 const PartnerBillingReport = lazy(() => import("../pages/PartnerBillingReport"));
+const ApresentacoesHub = lazy(() => import("../pages/Apresentacoes"));
+const ApresentacaoDeck = lazy(() => import("../pages/Apresentacoes/Deck"));
 
 
 const Routes = () => {
@@ -82,6 +85,8 @@ const Routes = () => {
             <Route exact path="/signup-partner" component={SignupPartner} />
             <Route exact path="/forgot-password" component={ForgotPassword} />
             <Route exact path="/reset-password" component={ResetPassword} />
+            <Route exact path="/apresentacoes" component={ApresentacoesHub} isPrivate />
+            <Route exact path="/apresentacoes/:deckId" component={ApresentacaoDeck} isPrivate />
             <WhatsAppsProvider>
               <LoggedInLayout>
                 <Route exact path="/financeiro" component={Financeiro} isPrivate />
@@ -131,6 +136,8 @@ const Routes = () => {
                 <Route exact path="/files" component={Files} isPrivate />
                 <Route exact path="/moments" component={ChatMoments} isPrivate />
                 <Route exact path="/Kanban" component={Kanban} isPrivate />
+                <Route exact path="/kanban" component={Kanban} isPrivate />
+                <Route exact path="/kanban/stats" component={KanbanStats} isPrivate />
                 <Route exact path="/TagsKanban" component={TagsKanban} isPrivate />
                 <Route exact path="/prompts" component={Prompts} isPrivate />
                 <Route exact path="/allConnections" component={AllConnections} isPrivate />

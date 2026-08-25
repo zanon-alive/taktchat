@@ -43,7 +43,12 @@ const useStyles = makeStyles((theme) => ({
 
 const ChatMoments = () => {
   const classes = useStyles();
-  const { user } = useContext(AuthContext)
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading || !user?.id) {
+    return null;
+  }
+
   return (
 
     user.profile === "user" && user.allowRealTime === "disabled" ?

@@ -12,6 +12,23 @@ import logger from "../../utils/logger";
 // import { useDate } from "../../hooks/useDate";
 import moment from "moment";
 
+const PUBLIC_AUTH_PATHS = [
+  "/login",
+  "/signup",
+  "/signup-partner",
+  "/forgot-password",
+  "/reset-password",
+];
+
+function isPublicAuthPath(pathname) {
+  const path =
+    pathname ||
+    (typeof window !== "undefined" ? window.location.pathname : "");
+  return PUBLIC_AUTH_PATHS.some(
+    (p) => path === p || path.startsWith(`${p}/`)
+  );
+}
+
 const useAuth = () => {
   const history = useHistory();
   const [isAuth, setIsAuth] = useState(false);
@@ -99,8 +116,7 @@ const useAuth = () => {
           api.defaults.headers.Authorization = undefined;
           safeSetState(setIsAuth, false);
           
-          // Redirecionar para login apenas se não estiver já na página de login
-          if (history.location.pathname !== "/login") {
+          if (!isPublicAuthPath(window.location.pathname)) {
             history.push("/login");
           }
         }
@@ -111,8 +127,7 @@ const useAuth = () => {
         api.defaults.headers.Authorization = undefined;
         safeSetState(setIsAuth, false);
         
-        // Redirecionar para login apenas se não estiver já na página de login
-        if (history.location.pathname !== "/login") {
+        if (!isPublicAuthPath(window.location.pathname)) {
           history.push("/login");
         }
       }
@@ -134,8 +149,7 @@ const useAuth = () => {
         api.defaults.headers.Authorization = undefined;
         safeSetState(setIsAuth, false);
         
-        // Redirecionar para login apenas se não estiver já na página de login
-        if (history.location.pathname !== "/login") {
+        if (!isPublicAuthPath(window.location.pathname)) {
           history.push("/login");
         }
       }
@@ -171,11 +185,10 @@ const useAuth = () => {
           api.defaults.headers.Authorization = undefined;
           safeSetState(setIsAuth, false);
           
-          // Redirecionar para login apenas se não estiver já na página de login
-          if (history.location.pathname !== "/login") {
+          // Sem sessão: ficar nas rotas públicas (cadastro da filha, signup, etc.)
+          if (!isPublicAuthPath(window.location.pathname)) {
             history.push("/login");
           }
-          // não exibir toast aqui para não poluir ao simplesmente abrir o app sem sessão
         }
       } finally {
         isRefreshingRef.current = false;

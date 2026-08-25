@@ -11,6 +11,7 @@ jest.mock("../../../models/Company", () => ({
   __esModule: true,
   default: {
     findOne: jest.fn(),
+    findByPk: jest.fn(),
   },
 }));
 
@@ -66,6 +67,12 @@ describe("CreateUserService - regras de super (Dono da Plataforma)", () => {
       id: platformCompanyId,
       plan: { users: 10 },
     });
+    (Company.findByPk as jest.Mock).mockImplementation((id: number) =>
+      Promise.resolve({
+        id,
+        type: id === platformCompanyId ? "platform" : "direct"
+      })
+    );
   });
 
   afterEach(() => {

@@ -194,8 +194,8 @@ describe("SendWelcomeMessageService", () => {
         expect.anything(),
         expect.anything(),
         null, // queueId deve ser null
-        expect.anything(),
-        expect.anything(),
+        null,
+        null,
         expect.anything(),
         expect.anything(),
         expect.anything(),

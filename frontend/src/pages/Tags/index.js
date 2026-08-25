@@ -289,6 +289,9 @@ const Tags = () => {
                 <Title>
                   {i18n.t("tags.title")} ({tags.length})
                 </Title>
+                <Typography variant="body2" color="textSecondary" style={{ marginTop: 4 }}>
+                  {i18n.t("tags.operationalHint")}
+                </Typography>
               </Grid>
               <Grid xs={12} sm={7} item>
                 <Grid container alignItems="center" spacing={2}>

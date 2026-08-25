@@ -62,6 +62,7 @@ import permissionRoutes from "./permissionRoutes";
 import auditLogRoutes from "./auditLogRoutes";
 import whatsappWebhookRoutes from "./whatsappWebhookRoutes";
 import publicRoutes from "./publicRoutes";
+import kitApresentacoesRoutes from "./kitApresentacoesRoutes";
 import paymentGatewayRoutes from "./paymentGatewayRoutes";
 
 
@@ -132,5 +133,6 @@ routes.use(permissionRoutes);
 routes.use(auditLogRoutes);
 routes.use(whatsappWebhookRoutes);
 routes.use("/public", publicRoutes);
+routes.use(kitApresentacoesRoutes);
 
 export default routes;

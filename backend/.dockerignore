@@ -24,7 +24,7 @@ package-lock.json
 .env.*
 public/tmp
 public/uploads
-private
+private/sessions
 sqlite
 *.sqlite
 *.sqlite-journal

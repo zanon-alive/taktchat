@@ -5,6 +5,12 @@ const env = {
   BROWSER: "none",
 };
 
+if (!env.NODE_OPTIONS || !String(env.NODE_OPTIONS).includes("max-old-space-size")) {
+  env.NODE_OPTIONS = [env.NODE_OPTIONS, "--max-old-space-size=4096"]
+    .filter(Boolean)
+    .join(" ");
+}
+
 console.log("[start-dev] Iniciando frontend sem abrir o navegador padrão…");
 
 const child = spawn("craco", ["start"], {

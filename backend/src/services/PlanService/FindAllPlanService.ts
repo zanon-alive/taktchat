@@ -11,10 +11,10 @@ const FindAllPlanService = async (
   listPublic?: string,
   options: ListOptions = {}
 ): Promise<Plan[]> => {
-  const platformCompanyId = getPlatformCompanyId();
   const { requestUserCompanyId, requestUserSuper = false } = options;
 
   if (listPublic === "false") {
+    const platformCompanyId = getPlatformCompanyId();
     return Plan.findAll({
       where: {
         isPublic: true,
@@ -32,6 +32,7 @@ const FindAllPlanService = async (
       // Whitelabel vê apenas os próprios planos (não os planos da plataforma targetType whitelabel)
       where = { companyId: requestUserCompanyId };
     } else {
+      const platformCompanyId = getPlatformCompanyId();
       where = { companyId: platformCompanyId, targetType: "direct" };
     }
   }

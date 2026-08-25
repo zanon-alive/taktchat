@@ -11,6 +11,7 @@ ticketRoutes.get("/tickets/:ticketId", isAuth, TicketController.show);
 
 ticketRoutes.get("/tickets-log/:ticketId", isAuth, TicketController.showLog);
 
+ticketRoutes.get("/ticket/kanban/stats", isAuth, TicketController.kanbanStats);
 ticketRoutes.get("/ticket/kanban", isAuth, TicketController.kanban);
 
 ticketRoutes.get("/ticketreport/reports", isAuth, TicketController.report);

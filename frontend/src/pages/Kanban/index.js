@@ -7,9 +7,9 @@ import Board from 'react-trello';
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import { useHistory } from 'react-router-dom';
-import { Facebook, Instagram, WhatsApp, FilterList, Add, Refresh } from "@mui/icons-material";
+import { Facebook, Instagram, WhatsApp, FilterList, Add, Refresh, Assessment } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
-import { Badge, Tooltip, Typography, Button, TextField, Box, Select, MenuItem, Paper, FormControl, InputLabel, Checkbox, ListItemText, Popover, Grid, useMediaQuery, InputAdornment, IconButton } from "@mui/material";
+import { Badge, Tooltip, Typography, Button, TextField, Box, Select, MenuItem, Paper, FormControl, InputLabel, Checkbox, ListItemText, Popover, Grid, useMediaQuery, InputAdornment, IconButton, Alert } from "@mui/material";
 import { DateRangePicker } from 'materialui-daterange-picker';
 import KanbanBoardCard from "./KanbanBoardCard";
 import KanbanLaneHeader from "./KanbanLaneHeader";
@@ -499,6 +499,11 @@ const Kanban = () => {
                 <Title>
                   {i18n.t('kanban.title')} ({totalTickets})
                 </Title>
+                {tags.length > 8 && (
+                  <Alert severity="warning" style={{ marginTop: 8 }}>
+                    {i18n.t("tagsKanban.settings.tooManyColumns")}
+                  </Alert>
+                )}
               </Grid>
               <Grid xs={12} sm={7} item>
                 <Grid container alignItems="center" spacing={2}>
@@ -535,6 +540,21 @@ const Kanban = () => {
                           aria-label="Filtrar e ordenar"
                         >
                           <FilterList fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip {...CustomTooltipProps} title={i18n.t("kanban.openStats")}>
+                        <IconButton
+                          size="small"
+                          onClick={() => history.push("/kanban/stats")}
+                          style={{
+                            color: "#374151",
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "8px"
+                          }}
+                          aria-label={i18n.t("kanban.openStats")}
+                        >
+                          <Assessment fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Can role={user.profile} perform="dashboard:view" yes={() => (

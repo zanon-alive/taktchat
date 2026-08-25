@@ -109,6 +109,18 @@ const useStyles = makeStyles(theme => ({
         lineHeight: 1.2,
     },
 
+    commercialCard: {
+        marginTop: 8,
+        padding: 8,
+        width: "100%",
+    },
+
+    commercialRow: {
+        fontSize: 12,
+        marginTop: 4,
+        color: theme.palette.text.primary,
+    },
+
     contactDetails: {
         marginTop: 8,
         padding: 8,
@@ -312,24 +324,11 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {`Encomenda: ${contact.florder ? 'Sim' : 'Não'}`}
                                         </Typography>
-                                        {contact.dtUltCompra && (
-                                          <Typography style={{ color: "primary", fontSize: 12 }}>
-                                            {`Última Compra: ${new Date(contact.dtUltCompra).toLocaleDateString()}`}
-                                          </Typography>
-                                        )}
-                                        {typeof contact.vlUltCompra !== 'undefined' && contact.vlUltCompra !== null && (
-                                          <Typography style={{ color: "primary", fontSize: 12 }}>
-                                            {`Valor Última Compra: ${formatCurrencyBRL(contact.vlUltCompra, '—')}`}
-                                          </Typography>
-                                        )}
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.instagram && `Instagram: ${contact.instagram}`}
                                         </Typography>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                             {contact.fantasyName && `Nome Fantasia: ${contact.fantasyName}`}
-                                        </Typography>
-                                        <Typography style={{ color: "primary", fontSize: 12 }}>
-                                            {contact.situation && `Situação: ${contact.situation}`}
                                         </Typography>
                                         <Typography style={{ color: "primary", fontSize: 12 }}>
                                            {contact.segment && `Segmento: ${contact.segment}`}
@@ -372,6 +371,24 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
                                 </Tooltip>
                             </div>
                             {(contact.id && openForm) && <ContactForm initialContact={contact} onCancel={() => setOpenForm(false)} />}
+                        </Paper>
+
+                        <Paper square variant="outlined" className={classes.commercialCard}>
+                            <Typography variant="subtitle1">
+                                {i18n.t("contactDrawer.commercial.title")}
+                            </Typography>
+                            <Typography className={classes.commercialRow}>
+                                {i18n.t("contactDrawer.commercial.situation")}: {contact.situation || "—"}
+                            </Typography>
+                            <Typography className={classes.commercialRow}>
+                                {i18n.t("contactDrawer.commercial.lastPurchase")}: {contact.dtUltCompra ? new Date(contact.dtUltCompra).toLocaleDateString() : "—"}
+                                {typeof contact.vlUltCompra !== "undefined" && contact.vlUltCompra !== null
+                                  ? ` (${formatCurrencyBRL(contact.vlUltCompra, "—")})`
+                                  : ""}
+                            </Typography>
+                            <Typography className={classes.commercialRow}>
+                                {i18n.t("contactDrawer.commercial.wallet")}: {(contact.wallets || []).map((wallet) => wallet.name).filter(Boolean).join(", ") || "—"}
+                            </Typography>
                         </Paper>
                         
                         <TagsKanbanContainer ticket={ticket} className={classes.contactTags} />

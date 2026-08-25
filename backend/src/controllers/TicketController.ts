@@ -12,6 +12,7 @@ import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUID
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
+import KanbanLaneStatsService from "../services/TicketServices/KanbanLaneStatsService";
 
 import CreateLogTicketService from "../services/TicketServices/CreateLogTicketService";
 import ShowLogTicketService from "../services/TicketServices/ShowLogTicketService";
@@ -272,6 +273,15 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   });
 
   return res.status(200).json({ tickets, count, hasMore });
+};
+
+export const kanbanStats = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId } = req.user;
+  const lanes = await KanbanLaneStatsService({ companyId });
+  return res.status(200).json({ lanes });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
