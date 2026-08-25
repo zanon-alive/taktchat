@@ -1,0 +1,160 @@
+name: update-prod-stack (GHCR digests)
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  STACKS_REPO: zanon-alive/stacks_producao-main-server
+  STACKS_BRANCH: master
+  STACKS_FILE: 15_taktchat_prod_ghcr.yml
+
+on:
+  workflow_run:
+    workflows:
+      - "build-taktchat-backend (GHCR)"
+      - "build-taktchat-frontend (GHCR)"
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Git SHA cujas tags GHCR devem ser pinadas"
+        required: true
+        type: string
+  pull_request:
+    paths:
+      - ".github/scripts/update_prod_stack_images.py"
+      - ".github/scripts/test_update_prod_stack_images.py"
+      - ".github/workflows/update-prod-stack-ghcr.yml"
+
+concurrency:
+  group: update-prod-stack-${{ github.event.workflow_run.head_sha || github.event.inputs.sha || github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test-script:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Testar atualizador de YAML
+        working-directory: .github/scripts
+        run: python3 test_update_prod_stack_images.py
+
+  update-stacks:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'master'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Taktchat
+        uses: actions/checkout@v4
+
+      - name: Testar atualizador de YAML
+        working-directory: .github/scripts
+        run: python3 test_update_prod_stack_images.py
+
+      - name: Conferir token das stacks
+        env:
+          STACKS_DEPLOY_TOKEN: ${{ secrets.STACKS_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$STACKS_DEPLOY_TOKEN" ]; then
+            echo "Configure o secret STACKS_DEPLOY_TOKEN (escrita no repo das stacks)."
+            exit 1
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolver SHA e digests
+        id: digests
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SHA="${{ github.event.inputs.sha }}"
+          else
+            SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "SHA=$SHA"
+
+          inspect() {
+            local image="$1"
+            local out=""
+            local i
+            for i in $(seq 1 6); do
+              if out="$(docker buildx imagetools inspect "$image" --format '{{.Manifest.Digest}}' 2>/dev/null)"; then
+                if [ -n "$out" ]; then
+                  echo "$out"
+                  return 0
+                fi
+              fi
+              sleep 5
+            done
+            return 1
+          }
+
+          BACKEND=""
+          BROWSER=""
+          FRONTEND=""
+          if BACKEND="$(inspect "ghcr.io/${OWNER}/taktchat-backend:${SHA}")"; then
+            echo "backend=$BACKEND" >> "$GITHUB_OUTPUT"
+          else
+            echo "Imagem backend:${SHA} ausente (merge sem rebuild de backend)."
+          fi
+          if BROWSER="$(inspect "ghcr.io/${OWNER}/taktchat-backend-browser:${SHA}")"; then
+            echo "browser=$BROWSER" >> "$GITHUB_OUTPUT"
+          else
+            echo "Imagem backend-browser:${SHA} ausente."
+          fi
+          if FRONTEND="$(inspect "ghcr.io/${OWNER}/taktchat-frontend:${SHA}")"; then
+            echo "frontend=$FRONTEND" >> "$GITHUB_OUTPUT"
+          else
+            echo "Imagem frontend:${SHA} ausente (merge sem rebuild de frontend)."
+          fi
+
+          if [ -z "${BACKEND}${BROWSER}${FRONTEND}" ]; then
+            echo "Nenhuma imagem com a tag deste SHA. Encerrando sem alterar stacks."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clonar repo das stacks e atualizar YAML
+        if: steps.digests.outputs.skip != 'true'
+        env:
+          STACKS_DEPLOY_TOKEN: ${{ secrets.STACKS_DEPLOY_TOKEN }}
+          SHA: ${{ steps.digests.outputs.sha }}
+          BACKEND: ${{ steps.digests.outputs.backend }}
+          BROWSER: ${{ steps.digests.outputs.browser }}
+          FRONTEND: ${{ steps.digests.outputs.frontend }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch "$STACKS_BRANCH" \
+            "https://x-access-token:${STACKS_DEPLOY_TOKEN}@github.com/${STACKS_REPO}.git" stacks-repo
+          ARGS=()
+          if [ -n "$BACKEND" ]; then ARGS+=(--backend-digest "$BACKEND"); fi
+          if [ -n "$BROWSER" ]; then ARGS+=(--browser-digest "$BROWSER"); fi
+          if [ -n "$FRONTEND" ]; then ARGS+=(--frontend-digest "$FRONTEND"); fi
+          python3 .github/scripts/update_prod_stack_images.py "stacks-repo/${STACKS_FILE}" "${ARGS[@]}"
+          cd stacks-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$STACKS_FILE"
+          if git diff --cached --quiet; then
+            echo "YAML sem mudanças."
+            exit 0
+          fi
+          SHORT="$(echo "$SHA" | cut -c1-12)"
+          git commit -m "chore(taktchat): pin GHCR digest SHA ${SHORT}"
+          git push origin "$STACKS_BRANCH"

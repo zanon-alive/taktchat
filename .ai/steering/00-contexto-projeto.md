@@ -14,7 +14,7 @@ inclusion: auto
 | Stack frontend | React 17 / CRACO / Material UI v5 / Zustand |
 | Banco de dados | PostgreSQL 15 |
 | Cache/Filas | Redis 6.2 + Bull |
-| Deploy | Docker Swarm (volumes montados) + Traefik — `14_taktchat.yml` |
+| Deploy | Docker Swarm + Portainer + GHCR (digest no Git `15_taktchat_prod_ghcr.yml`) |
 | Versao | 2.2.2v-26 |
 
 Plataforma de mensageria omnichannel (WhatsApp), multi-tenant e whitelabel (plataforma → parceiros → clientes). Dual channel: Baileys e WhatsApp Business API Oficial.

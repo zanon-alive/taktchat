@@ -102,9 +102,9 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Checklists e histórico: `.docs/anexos/`
 - Scripts SQL organizados: `.docs/sql/`
 - Build/publicação de imagens Docker: `.docs/DOCKER_BUILD_E_DEPLOY.md` (guia completo passo a passo)
-- **🔄 Atualização do servidor de produção:** `.docs/ATUALIZACAO_SERVIDOR.md` - **GUIA OBRIGATÓRIO para atualizar o servidor após PR/merge na branch `main`** (stack atual: volumes em `14_taktchat.yml`)
-- Stack de produção (VPS atual): `.docs/infraestrutura/stack-producao.md` e `14_taktchat.yml`
-- Stack GHCR (alternativa): `.docs/infraestrutura/stack-producao-ghcr.md` e `14_taktchat_ghcr.yml`
+- **Atualização de produção:** `.docs/operacao/release-deploy-rollback-swarm.md` (resumo: `.docs/ATUALIZACAO_SERVIDOR.md`). Imagens GHCR por digest; YAML `15_taktchat_prod_ghcr.yml` no repo das stacks, aplicado pelo Portainer.
+- Stack local de referência: `14_taktchat.yml` (não é o arquivo da VPS).
+- Variante GHCR no repo Taktchat: `.docs/infraestrutura/stack-producao-ghcr.md` e `14_taktchat_ghcr.yml`
 - PM2 híbrido (exemplo, não é a VPS): `.docs/infraestrutura/pm2-hibrido.md` e `ecosystem.config.cjs`
 
 Documentos anteriores permanecem disponíveis como referência em `.docs/legacy/`.

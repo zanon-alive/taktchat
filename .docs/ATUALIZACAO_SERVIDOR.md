@@ -10,13 +10,10 @@ Produção usa Docker Swarm administrado pelo Portainer e imagens imutáveis do 
 
 1. Abrir, revisar e aprovar o PR.
 2. Fazer merge na `main`.
-3. Aguardar os workflows publicarem backend, frontend e backend-browser/label-sync no GHCR.
-4. Confirmar tag, `<sha>` e digest de cada imagem.
-5. Registrar os digests anteriores para rollback.
-6. Atualizar as referências por digest no editor da stack Taktchat no Portainer.
-7. Executar `taktchat_taktchat-migrate` quando houver migration.
-8. Aguardar convergência, validar health e executar smoke tests.
-9. Se necessário, restaurar os digests anteriores no Portainer.
+3. Aguardar os workflows GHCR e `update-prod-stack (GHCR digests)` (secret `STACKS_DEPLOY_TOKEN`).
+4. Aplicar o Git no Portainer (GitOps/webhook ou Pull and redeploy; Prune off).
+6. Aguardar convergência, validar health e executar smoke tests.
+7. Rollback: revert no repo das stacks e pull no Portainer.
 
 ## Topologia relevante
 
