@@ -89,9 +89,18 @@ export async function applyDefaultKanbanLane(
 
 export async function applyClosedKanbanLane(
   ticketId: number,
-  companyId: number
+  companyId: number,
+  options?: { tagId?: number | null; leaveBoard?: boolean }
 ): Promise<void> {
   if (!(await companyUsesKanban(companyId))) return;
+  if (options?.leaveBoard) {
+    await replaceKanbanLane(ticketId, companyId, null);
+    return;
+  }
+  if (options?.tagId) {
+    await replaceKanbanLane(ticketId, companyId, options.tagId);
+    return;
+  }
   const { closedTagId } = await getKanbanLaneSettings(companyId);
   if (!closedTagId) return;
   await replaceKanbanLane(ticketId, companyId, closedTagId);

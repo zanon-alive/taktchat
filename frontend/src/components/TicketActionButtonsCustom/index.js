@@ -40,7 +40,7 @@ import { toast } from "react-toastify";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import ShowTicketLogModal from "../ShowTicketLogModal";
 import TicketMessagesDialog from "../TicketMessagesDialog";
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import CloseTicketOutcomeDialog from "../CloseTicketOutcomeDialog";
 
 const useStyles = makeStyles(theme => ({
     actionButtons: {
@@ -95,6 +95,8 @@ const TicketActionButtonsCustom = ({ ticket
     const { user } = useContext(AuthContext);
     const { setCurrentTicket, setTabOpen } = useContext(TicketsContext);
     const [open, setOpen] = React.useState(false);
+    const [outcomeOpen, setOutcomeOpen] = useState(false);
+    const closeOutcomeRef = useRef({});
     const formRef = React.useRef(null);
     const [confirmationOpen, setConfirmationOpen] = useState(false);
     const [transferTicketModalOpen, setTransferTicketModalOpen] = useState(false);
@@ -148,23 +150,24 @@ const TicketActionButtonsCustom = ({ ticket
         });
 
         if (setting?.requiredTag === "enabled") {
-            //verificar se tem uma tag   
             try {
                 const contactTags = await api.get(`/contactTags/${ticket.contact.id}`);
                 if (!contactTags.data.tags) {
                     toast.warning(i18n.t("messagesList.header.buttons.requiredTag"))
-                } else {
-                    setOpen(true);
-                    // handleUpdateTicketStatus(e, "closed", user?.id);
+                    return;
                 }
             } catch (err) {
                 toastError(err);
+                return;
             }
-        } else {
-
-            setOpen(true);
-            // handleUpdateTicketStatus(e, "closed", user?.id);
         }
+        setOutcomeOpen(true);
+    };
+
+    const handleOutcomeConfirm = (outcome) => {
+        closeOutcomeRef.current = outcome || {};
+        setOutcomeOpen(false);
+        setOpen(true);
     };
 
     const handleClose = () => {
@@ -210,7 +213,8 @@ const TicketActionButtonsCustom = ({ ticket
                 status: "closed",
                 userId: user?.id || null,
                 sendFarewellMessage: false,
-                amountUsedBotQueues: 0
+                amountUsedBotQueues: 0,
+                ...(closeOutcomeRef.current || {})
             });
 
             setLoading(false);
@@ -300,6 +304,7 @@ const TicketActionButtonsCustom = ({ ticket
             await api.put(`/tickets/${ticket.id}`, {
                 status: status,
                 userId: userId || null,
+                ...(status === "closed" ? (closeOutcomeRef.current || {}) : {})
             });
 
             let setting;
@@ -566,6 +571,11 @@ const TicketActionButtonsCustom = ({ ticket
                 </Menu>
             </div>
             <>
+                <CloseTicketOutcomeDialog
+                    open={outcomeOpen}
+                    onClose={() => setOutcomeOpen(false)}
+                    onConfirm={handleOutcomeConfirm}
+                />
                 <Formik
                     enableReinitialize={true}
                     validationSchema={SessionSchema}

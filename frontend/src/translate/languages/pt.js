@@ -825,6 +825,11 @@ const messages = {
         toasts: {
           deleted: "O atendimento que você estava foi deletado.",
         },
+        outcome: {
+          title: "Como encerrar?",
+          hint: "O card permanece no quadro na lane escolhida, ou sai do Kanban.",
+          leaveBoard: "Sair do quadro",
+        },
         notification: {
           message: "Mensagem de",
         },

@@ -93,6 +93,18 @@ describe("kanbanTicketTags", () => {
     expect(TicketTag.create).toHaveBeenCalledWith({ ticketId: 5, tagId: 20 });
   });
 
+  it("ao encerrar usa a lane informada ou sai do quadro", async () => {
+    (TicketTag.findAll as jest.Mock).mockResolvedValue([{ tagId: 10 }]);
+    (Tag.findAll as jest.Mock).mockResolvedValue([{ id: 10 }]);
+    (Tag.findOne as jest.Mock).mockResolvedValue({ id: 21 });
+
+    await applyClosedKanbanLane(5, 1, { tagId: 21 });
+    expect(TicketTag.create).toHaveBeenCalledWith({ ticketId: 5, tagId: 21 });
+
+    await applyClosedKanbanLane(5, 1, { leaveBoard: true });
+    expect(TicketTag.create).toHaveBeenCalledTimes(1);
+  });
+
   it("reconhece lane terminal pelo id configurado ou pelo nome Fechado", () => {
     expect(isTerminalKanbanLane({ id: 20, name: "Negociação" }, 20)).toBe(true);
     expect(isTerminalKanbanLane({ id: 7, name: "Fechado ganho" }, 20)).toBe(true);
