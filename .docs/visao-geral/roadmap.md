@@ -347,14 +347,15 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ### Kit de produto e apresentações (branch `docs/kit-documentacao-produto`)
 
-Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma ou permissão `apresentacoes.view`). Lote v1.4 fechado em 2026-08-24: WhatsApp CONNECTED, transferência persistida, maioria dos `pendente-*.png`.
+Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma ou permissão `apresentacoes.view`). Lote **v1.5** (2026-08-25): copy alinhado ao Kanban PR #21, overlay e token. v1.4 fechou WhatsApp CONNECTED e prints.
 
 - [x] **WhatsApp real no ambiente local** — QR Baileys da Cliente Demo Kit escaneado; sessão **CONNECTED**; envio de teste e transferência persistida. Print: `pendente-whatsapp-connected.png`.
 - [x] **Prints comerciais do player** — landing, planos, Flow Builder, campanhas, Kanban/funil, IA, widget, health, billing, infra (lista em `backend/private/kit-apresentacoes/README.md`).
 - [x] **Prints do player (signup da filha)** — captura real de `pendente-signup-partner.png` e `pendente-signup-token.png`. Celular continua ilustração de IA (`pendente-whatsapp-celular.png`).
 - [x] **Seed demo não vai para produção** — SQL só em `.docs/kit-produto/scripts/` (não é migration).
+- [x] **Copy do kit alinhado ao Kanban #21** — ticket novo na lane de entrada; Encerrar aplica lane; overlay/token não são mais pegadinha da demo.
 
-Pendências 1–5, 8 e 10 do kit: resolvidas (PR #21 + esta branch). Restam captura real do celular, copy dos slides e demanda 16. Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
+Pendências 1–5, 8 e 10: resolvidas. Restam captura real do celular, copy fino, demanda 16 (A6–A9 / B) e quadro listar `closed` (2b). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 
 ## 🎫 Tickets, tags e Kanban
 

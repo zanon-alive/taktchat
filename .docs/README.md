@@ -4,7 +4,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 
 ## Como navegar
 
-- `kit-produto/`: **kit por audiência (v1.4)** — catálogo, manuais por role, comercial/técnica, screenshots e player em `/apresentacoes`. Comece por `kit-produto/README.md`. Demanda em análise (CRM de conversa vs. CRM de mercado): `kit-produto/16-demanda-crm-conversa-ou-mercado.md`.
+- `kit-produto/`: **kit por audiência (v1.5)** — catálogo, manuais por role, comercial/técnica, screenshots e player em `/apresentacoes`. Comece por `kit-produto/README.md`. Kanban alinhado ao PR #21. Demanda restante (CRM): `kit-produto/16-demanda-crm-conversa-ou-mercado.md`.
 - `visao-geral/`: contexto do produto, arquitetura, fluxos críticos e roadmap.
   - **Roadmap centralizado:** `visao-geral/roadmap.md` - Melhorias futuras e funcionalidades pendentes do projeto
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.
@@ -42,7 +42,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 
 ### Para produto, venda e operação por persona
 
-- **Kit por audiência (v1.4):** `kit-produto/README.md` — catálogo, manuais, comercial/técnica, prints e player `http://localhost:3000/apresentacoes`.
+- **Kit por audiência (v1.5):** `kit-produto/README.md` — catálogo, manuais, comercial/técnica, prints e player `http://localhost:3000/apresentacoes`.
 
 ### Para operação
 

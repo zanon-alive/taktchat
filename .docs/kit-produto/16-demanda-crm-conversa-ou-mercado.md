@@ -1,9 +1,9 @@
 # Demanda para análise — CRM de conversa estruturado vs. CRM de mercado
 
-**Status:** draft — aguarda escolha de caminho  
-**Data:** 2026-08-22  
+**Status:** draft — A1–A5 (núcleo Kanban) feitos no PR #21 (2026-08-25). Restam A6–A9, listar `closed` no quadro e o caminho B.  
+**Data:** 2026-08-22 (atualizado 2026-08-25)  
 **Origem:** pedido verbal nesta sessão (kit de produto)  
-**Não implementar nesta branch** (`docs/kit-documentacao-produto`). Abrir `feat/` própria depois do OK.
+**Não implementar o restante nesta branch** (`docs/kit-documentacao-produto`). A1–A5 já estão na `main`.
 
 Classificação local (MCP Cerebro indisponível):
 
@@ -38,7 +38,7 @@ Núcleo operacional (já existe e deve permanecer):
 - Cadastro já tem cara de ERP/B2B: CPF/CNPJ, razão/fantasia, cidade, segmento, região, situação (Ativo / Ex-Cliente…), última compra, limite de crédito, carteira (`ContactWallet`).
 - Ticket = conversa (`pending` / `open` / `closed` + bot, lgpd, nps, grupo), fila, responsável, histórico, transferência.
 - Kanban = tags com `kanban = 1` viram colunas; o card é o **ticket**, não uma oportunidade. Plano precisa `useKanban`.
-- Automação de lane: `timeLane` + `nextLaneId` + `rollbackLaneId` (com falhas conhecidas — ver [15](15-pendencias-produto-outras-branches.md)).
+- Automação de lane: `timeLane` + `nextLaneId` + `rollbackLaneId`. Ticket novo recebe `defaultKanbanTagId`; Encerrar aplica `closedKanbanTagId`; uma tag `kanban=1` por ticket; cron por `updatedAt` (PR #21). Detalhe: [15](15-pendencias-produto-outras-branches.md) e [`.docs/funcionalidades/kanban-lanes.md`](../funcionalidades/kanban-lanes.md).
 - Um contato não tem dois tickets **abertos** na mesma conexão; ticket `closed` **não é reusado** (nova mensagem = ticket novo).
 
 O que **não** existe como entidade:
@@ -50,7 +50,7 @@ O que **não** existe como entidade:
 - Atividade de CRM (ligar, e-mail, reunião) desligada da mensagem WhatsApp.
 - Relatório “quanto está em Negociação este mês”.
 
-O quadro Kanban **só lista tickets `open` e `pending`**. Encerrar some o card. Por isso “Fechado — ganho/perdido” como coluna de tag **mente** se o ticket já estiver `closed`. Isso é o coração da confusão comercial.
+O quadro Kanban **lista tickets `open` e `pending`**. Encerrar **grava** a lane `closedKanbanTagId` no ticket, mas o card `closed` ainda pode **não aparecer** na tela `/kanban` (`ListTicketsServiceKanban`). Colunas “Fechado ganho/perdido” só ficam visíveis enquanto o ticket estiver aberto, ou depois que o filtro incluir `closed`. Isso continua sendo a principal confusão comercial restante do funil.
 
 ---
 
@@ -62,10 +62,10 @@ O quadro Kanban **só lista tickets `open` e `pending`**. Encerrar some o card. 
 
 Fazer com que contato + ticket + Kanban se comportem como um único sistema:
 
-1. Ticket novo (inclusive pós-`closed`) cai na lane padrão (Lead), se o plano tiver Kanban.
-2. Uma tag `kanban = 1` por ticket; arrastar **substitui** a coluna.
-3. Encerrar tem regra explícita e visível: mover para “Fechado — ganho” / “Fechado — perdido” **ou** tirar do quadro. O quadro passa a mostrar o que a regra mandar (incluindo `closed`, se essa for a escolha).
-4. Cron de lane não depende de `fromMe: true`; não avança coluna terminal.
+1. ~~Ticket novo (inclusive pós-`closed`) cai na lane padrão (Lead), se o plano tiver Kanban.~~ **Feito (PR #21).**
+2. ~~Uma tag `kanban = 1` por ticket; arrastar **substitui** a coluna.~~ **Feito (PR #21).**
+3. Encerrar tem regra visível (`closedKanbanTagId`). **Parcial:** a tag é aplicada; o quadro ainda não lista `closed`. Popup ganho/perdido e “sair do quadro” continuam fora.
+4. ~~Cron de lane não depende de `fromMe: true`; não avança coluna terminal.~~ **Feito (PR #21).**
 5. Ficha do contato e ficha do ticket lado a lado no atendimento (o que já existe na ficha, **usado** de propósito: situação, última compra, carteira, tags operacionais ≠ colunas do funil).
 6. Relatório operacional: volume por lane, tempo médio na coluna, tickets sem dono, sem inventar “R$ em pipeline”.
 7. Glossário e UI: a palavra **funil** some ou vira “quadro de conversas”; **ganho/perdido** só se a empresa ligar o modo “desfecho ao encerrar”.
@@ -114,17 +114,17 @@ Branch: `feat/crm-conversa-estruturado`.
 
 | # | Item | Relação com [15](15-pendencias-produto-outras-branches.md) |
 |---|------|--------------------------------------------------------------|
-| A1 | Lane padrão no `FindOrCreateTicketService` (setting `defaultKanbanTagId`) | item 1 |
-| A2 | Uma lane Kanban por ticket (listener + arrastar no quadro) | item 4 |
-| A3 | Encerrar: setting “mover para tag X / Y” ou “sair do quadro”; quadro lista `closed` se a regra deixar o card | item 2 |
-| A4 | Ticket novo pós-`closed` recebe Lead; não aplica rollback da conversa morta | itens 1 e 5 |
-| A5 | Cron `timeLane` por `updatedAt` / última mensagem, sem exigir `fromMe` | item 3 |
+| A1 | Lane padrão no `FindOrCreateTicketService` (setting `defaultKanbanTagId`) | item 1 — **feito PR #21** |
+| A2 | Uma lane Kanban por ticket (listener + arrastar no quadro) | item 4 — **feito PR #21** |
+| A3 | Encerrar: setting “mover para tag X”; quadro lista `closed` | item 2 — **parcial** (tag sim; listagem não) |
+| A4 | Ticket novo pós-`closed` recebe Lead; não aplica rollback da conversa morta | itens 1 e 5 — **feito PR #21** |
+| A5 | Cron `timeLane` por `updatedAt` / última mensagem, sem exigir `fromMe` | item 3 — **feito PR #21** |
 | A6 | UI: separar **tag operacional** (Urgente, VIP) de **coluna** (Lead…); aviso se houver > 8 colunas | item 7 |
 | A7 | Relatório simples por lane (quantidade, idade média) — sem R$ | novo |
 | A8 | Ficha de atendimento: bloco “cadastro comercial” (situação, última compra, carteira) sempre visível | novo |
 | A9 | Kit/glossário/player: linguagem alinhada (CRM de conversa, não pipeline) | docs |
 
-Estimativa grosseira: várias PRs; A1–A5 são o núcleo de produto. A6–A9 podem ser PRs menores.
+Estimativa grosseira: A1–A5 (núcleo) já na `main`. A3 restante + A6–A9 podem ser PRs menores.
 
 ### Caminho B — só após A ou se o comercial exigir pipeline de verdade
 
@@ -157,10 +157,10 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 
 ### Se caminho A
 
-- [ ] Ticket de entrada em empresa com Kanban nasce na lane padrão.
-- [ ] Arrastar no quadro troca a coluna; não acumula duas `kanban=1`.
-- [ ] Encerrar segue a setting; o comercial consegue explicar o quadro em 30 segundos.
-- [ ] Nova mensagem após `closed` abre ticket **novo** já no Lead (não no rollback antigo).
+- [x] Ticket de entrada em empresa com Kanban nasce na lane padrão. *(PR #21)*
+- [x] Arrastar no quadro troca a coluna; não acumula duas `kanban=1`. *(PR #21)*
+- [ ] Encerrar segue a setting **e** o comercial vê o card na coluna Fechado (hoje a tag é aplicada; o quadro ainda esconde `closed`).
+- [x] Nova mensagem após `closed` abre ticket **novo** já no Lead (não no rollback antigo). *(PR #21)*
 - [ ] Relatório por lane sem campo de dinheiro.
 - [ ] Docs e glossário usam “quadro de conversas” / CRM de conversa.
 
@@ -176,8 +176,8 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 ## Riscos
 
 - Tratar tag Kanban como pipeline de vendas **para sempre** gera suporte eterno (“cadê o valor do negócio?”).
-- Caminho B sem A deixa o Kanban atual quebrado **e** soma um segundo funil.
-- Mostrar `closed` no Kanban muda filtro em `ListTicketsServiceKanban` (`status` só `open`/`pending` hoje) — regressão possível na tela `/kanban`.
+- Caminho B sem A deixa o Kanban atual incompleto **e** soma um segundo funil.
+- Mostrar `closed` no Kanban muda filtro em `ListTicketsServiceKanban` (`status` só `open`/`pending` hoje) — ainda pendente; regressão possível na tela `/kanban`.
 - Contatos da atendente vazios (tags `#`) continuam fora desta demanda; não misturar.
 - Campos B2B no contato (CNPJ, última compra) já parecem CRM; se o A não os mostrar no chat, o time acha que “não tem cadastro”.
 
@@ -186,7 +186,7 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 ## Perguntas para travar antes de codar
 
 1. **Qual caminho na primeira branch: só A, A+B em sequência, ou B direto?** (recomendação: só A.)
-2. Ao **encerrar** o ticket, o padrão da empresa demo deve ser “Fechado — ganho”, perguntar ganho/perdido, ou sair do quadro?
+2. Ao **encerrar** o ticket, o padrão da empresa demo deve continuar “Fechado ganho” (setting), perguntar ganho/perdido no clique, ou sair do quadro? *(setting já existe; popup não.)*
 3. O card do Kanban deve continuar sendo o **ticket** (A) ou passar a ser a **oportunidade** (B)?
 4. Precisa relatório em R$ nesta geração do produto, ou volume/tempo basta?
 5. Account (CNPJ pai de vários WhatsApp) é requisito de algum cliente nomeado, ou pode esperar?
@@ -195,7 +195,7 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 
 ## Decisão
 
-Pendente de revisão do solicitante.
+Núcleo A1–A5 (lanes) aprovado e mergeado na `main` via [PR #21](https://github.com/zanon-alive/taktchat/pull/21). Caminho B e resto do A (quadro `closed`, aviso de 8 colunas, relatório, ficha) pendentes de revisão.
 
 ---
 

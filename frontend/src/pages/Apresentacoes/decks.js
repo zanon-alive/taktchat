@@ -116,12 +116,12 @@ const comercialClientePadrao = [
   {
     title: "Funil no Kanban",
     lead:
-      "Não há pipeline de oportunidade (valor, probabilidade, ganho/perdido). Dá para simular um funil visual: tags marcadas como Kanban viram colunas (Lead → Negociação → Fechado). O time arrasta o ticket. Depende do plano (useKanban).",
+      "Não há pipeline de oportunidade (valor, probabilidade, ganho/perdido nativos). Tags Kanban viram colunas (Lead → Negociação → Fechado). Ticket novo entra na lane configurada; Encerrar aplica a lane de encerrar. O time arrasta o ticket. Depende do plano (useKanban).",
     bullets: [
       "Coluna = tag com flag Kanban, não fase nativa de CRM.",
-      "Sem limite no código: cabem quantas colunas o admin criar.",
-      "Na prática, 4–7 fases leem melhor no quadro.",
-      "Rotas: /kanban e /TagsKanban (esta rodada do kit não fotografou a tela).",
+      "Lane de entrada e lane ao Encerrar: Tags Kanban (settings da empresa).",
+      "Sem limite no código: cabem quantas colunas o admin criar; 4–7 leem melhor.",
+      "Rotas: /kanban e /TagsKanban.",
     ],
     ...pendente(
       "pendente-kanban.png",
@@ -131,12 +131,12 @@ const comercialClientePadrao = [
   {
     title: "Avanço automático das colunas",
     lead:
-      "Há automação de lane, mas não “ao encerrar, volta para Lead”. Tempo parado numa coluna pode mandar para a próxima. Cliente falando de novo, no ticket ainda aberto, pode voltar à coluna de rollback. Ticket novo depois de encerrado nasce sem coluna de funil — alguém (ou uma regra) precisa colocar em Lead.",
+      "Há automação de lane: tempo parado numa coluna pode mandar para a próxima. Cliente falando de novo, no ticket ainda aberto, pode voltar à coluna de rollback. Ticket novo depois de encerrado recebe a lane de entrada (Lead, se configurado) — não herda o rollback da conversa fechada.",
     bullets: [
       "timeLane + nextLane: horas sem interação no ticket aberto → próxima coluna (e pode mandar mensagem).",
       "rollbackLane: cliente responde de novo no ticket aberto → volta à coluna configurada.",
       "Regras de tag: classificam contato por campo (região, segmento…) no cron — não pelo status closed.",
-      "Conversa encerrada + nova mensagem = ticket novo, em geral sem tag Kanban Lead.",
+      "Conversa encerrada + nova mensagem = ticket novo na lane de entrada.",
     ],
     ...pendente(
       "pendente-kanban-lane.png",
@@ -248,11 +248,11 @@ const comercialClienteLonga = [
   {
     title: "Quando o cliente volta a falar",
     lead:
-      "Ticket encerrado não volta sozinho para o mesmo card. Nova mensagem no mesmo número cria outro ticket (FindOrCreate não reusa closed). O contato continua o mesmo; a coluna Kanban Lead não é herdada.",
+      "Ticket encerrado não volta sozinho para o mesmo card. Nova mensagem no mesmo número cria outro ticket (FindOrCreate não reusa closed). O contato continua o mesmo; o ticket novo recebe a lane de entrada (Lead, se configurado).",
     bullets: [
       "Aberto / pendente / bot: a mensagem entra no mesmo ticket.",
       "Encerrado: o FindOrCreate não reusa closed — nasce outro ticket.",
-      "Esse ticket novo não herda a coluna Kanban (Lead) sozinho.",
+      "Esse ticket novo cai na coluna Kanban de entrada (não herda o rollback da conversa fechada).",
       "LGPD ligado: pode nascer em lgpd até o consentimento.",
       "Grupo WhatsApp: status group, se a empresa permitir.",
     ],
@@ -866,7 +866,7 @@ const tecnicaLonga = [
   {
     title: "Pontos frágeis",
     lead:
-      "Três pegadinhas que esta demanda encontrou de verdade: Baileys sem creds.json (QR ainda não escaneado), frontend herdando PORT do backend, overlay de health no first paint da landing.",
+      "Pegadinhas desta demanda: Baileys sem creds.json (QR ainda não escaneado), frontend herdando PORT do backend. Overlay de health não bloqueia mais o first paint da landing.",
     bullets: [
       "Sem creds.json: conexão DISCONNECTED, mensagem real não sai.",
       "Frontend: unset PORT && PORT=3000.",

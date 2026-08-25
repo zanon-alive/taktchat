@@ -4,6 +4,7 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-25 | 2.2.2v-26 | Kit v1.5: copy alinhado ao Kanban (#21), overlay de API e token de signup. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Kanban: lane de entrada e lane ao encerrar (settings por empresa); uma tag kanban por ticket; Encerrar mantém o card no funil. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Overlay de API não bloqueia o first paint; token de signup hex resolve pelo `signupToken` primeiro. | Equipe Dev |
 | 2026-08-24 | 2.2.2v-26 | Player `/apresentacoes` privado (login + permissão na empresa plataforma); prints em `backend/private/` via API. Seed do kit permanece só local. | Equipe Dev |

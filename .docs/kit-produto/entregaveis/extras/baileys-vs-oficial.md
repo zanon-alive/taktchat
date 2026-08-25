@@ -7,6 +7,6 @@
 | Risco de conta pessoal | Existe | Número business, outro regime |
 | Templates / 24h | Conversação livre no app | Regras de janela e template |
 | Quando indicar | Piloto, volume baixo | Operação, campanha séria |
-| Neste demo | Conexão DISCONNECTED | Não configurada |
+| Neste demo | Cliente Demo Kit CONNECTED | Não configurada |
 
 Não dizer “sem risco de banimento”. Campanha agressiva quebra os dois mundos (política Meta ou denúncia).

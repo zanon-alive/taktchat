@@ -16,10 +16,10 @@ Iguais ao padrão (capa até CTA).
 
 ## Slide 19 — Quando o cliente volta a falar
 
-**Para falar:** ticket encerrado não é reusado pelo FindOrCreate. Nova mensagem no mesmo número gera **outro ticket**. O contato continua o mesmo. Esse ticket novo **não** cai sozinho na coluna Lead do Kanban.
+**Para falar:** ticket encerrado não é reusado pelo FindOrCreate. Nova mensagem no mesmo número gera **outro ticket**. O contato continua o mesmo. Esse ticket novo **cai na lane de entrada** (Lead, se configurado em Tags Kanban).
 
 - Aberto / pendente / bot: entra no mesmo ticket.
-- Encerrado: ticket novo, sem herdar a lane Kanban.
+- Encerrado: ticket novo, na lane de entrada — sem herdar o rollback da conversa fechada.
 - LGPD: pode nascer em `lgpd` até o consentimento.
 
 ## Slide 20 — A equipe fala primeiro

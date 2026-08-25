@@ -30,7 +30,7 @@ Iguais ao padrão (inclui FindOrCreate / contato → ticket).
 
 ## Slide 20 — Pontos frágeis
 
-**Para falar:** Baileys sem `creds.json`; frontend herdando `PORT` do backend; overlay de health no first paint; `/tickets` sem `queueIds` volta count 0 (filtro, não seed vazio).
+**Para falar:** Baileys sem `creds.json`; frontend herdando `PORT` do backend; `/tickets` sem `queueIds` volta count 0 (filtro, não seed vazio). Overlay de health **não** bloqueia mais o first paint da landing.
 
 ## Slide 21 — Próximas rodadas técnicas
 

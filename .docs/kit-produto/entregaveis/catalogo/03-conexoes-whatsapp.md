@@ -19,10 +19,10 @@ Detalhe comercial/técnico: [../extras/baileys-vs-oficial.md](../extras/baileys-
 
 ## Nesta versão
 
-Conexão **WhatsApp Cliente Demo Kit**, `channelType=baileys`, status `DISCONNECTED`. Serve para mostrar a tela, não para enviar.
+Conexão **WhatsApp Cliente Demo Kit**, `channelType=baileys`, status **CONNECTED** (2026-08-23). Envio de teste e transferência persistida. Print: `pendente-whatsapp-connected.png`.
 
-Na Empresa 01 existe a conexão `teste` (QR / sem credencial salva nos logs do backend).
+Na Empresa 01 existe a conexão `teste` (à parte do kit).
 
-## Rodada futura
+## Ainda aberto
 
-Escanear QR ou configurar Oficial e refazer prints de envio/recebimento.
+Captura real da tela do celular (hoje ilustração de IA). API Oficial não configurada neste demo.

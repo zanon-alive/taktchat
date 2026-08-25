@@ -1,6 +1,6 @@
 # Fluxo do ticket — guia para o kit
 
-Este texto é a **base** do módulo mais importante para cliente novo. Validado na UI em 2026-08-22 (prints `f2`–`f7`). WhatsApp ainda sem sessão `CONNECTED`: aceite local funciona; transferência persistida e envio real não.
+Este texto é a **base** do módulo mais importante para cliente novo. Validado na UI em 2026-08-22 (prints `f2`–`f7`). WhatsApp da Cliente Demo Kit está **CONNECTED** (envio e transferência persistida em 2026-08-23/24). Lanes Kanban alinhadas ao PR #21 (2026-08-25).
 
 ## O que é um ticket
 
@@ -22,7 +22,7 @@ Há dois caminhos principais.
 6. Com bot/fila automática, pode nascer em `bot` ou já em `pending` na fila.
 7. O painel recebe o evento em tempo real (Socket.IO).
 
-No ambiente local do kit o QR **já foi gerado** (print `f17`). Sem scan no celular, o caminho “cliente fala primeiro” continua simulado pelo seed.
+No ambiente local do kit o QR **já foi gerado** (print `f17`) e a sessão da Cliente Demo Kit está **CONNECTED**.
 
 ### 2. A equipe fala primeiro (saída)
 
@@ -57,8 +57,19 @@ Ordem típica (manual do atendente deve virar receita com prints):
 4. **Responder** — texto, áudio, arquivo, resposta rápida (`/saudacao`, `/aguardar` no kit).
 5. **Organizar** — tag (Urgente, VIP), fila certa, contato atualizado.
 6. **Transferir** — para outra fila ou outro usuário (o código fecha ou mantém conforme `closeTicketOnTransfer`).
-7. **Encerrar** — status `closed`; pode haver mensagem de despedida e NPS.
-8. **Se o cliente voltar a falar** — o sistema reaproveita ticket aberto ou cria outro depois do tempo configurado na conexão (`timeCreateNewTicket`).
+7. **Encerrar** — status `closed`; aplica a lane de encerrar se configurada em Tags Kanban (`closedKanbanTagId`); pode haver mensagem de despedida e NPS.
+8. **Se o cliente voltar a falar** — o sistema reaproveita ticket aberto ou cria outro depois do tempo configurado na conexão (`timeCreateNewTicket`). O ticket **novo** recebe a lane de entrada (`defaultKanbanTagId`), não o rollback da conversa fechada.
+
+## Kanban no ciclo do ticket
+
+Com plano `useKanban` (ou empresa `platform`):
+
+- Ticket novo (entrada ou saída) recebe a coluna de entrada, se ainda não tiver tag `kanban=1`.
+- Arrastar no quadro **substitui** a coluna (uma lane por vez).
+- Cron `timeLane` avança pela `updatedAt` do ticket; não exige mensagem `fromMe`; não avança lane terminal (“Fechado…”).
+- Rollback só no ticket **ainda aberto**.
+
+Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../funcionalidades/kanban-lanes.md).
 
 ## O que o atendente vê vs. o admin
 

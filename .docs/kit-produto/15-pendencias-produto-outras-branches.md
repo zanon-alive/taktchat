@@ -1,66 +1,56 @@
 # Pendências de produto — Kanban / CRM de conversa
 
-Itens identificados na branch `docs/kit-documentacao-produto`. Kanban (1–5, 7) e CRM de pipeline (6) vão em `feat/` própria. Overlay (8) e token de signup (10) entram nesta branch do kit.
+Itens identificados na branch `docs/kit-documentacao-produto`. Atualizado em **2026-08-25** após o merge da `main` (PR #21) e os commits de overlay/token nesta branch.
 
-Fonte: código de Tags (`kanban`, `timeLane`, `nextLaneId`, `rollbackLaneId`), `FindOrCreateTicketService`, `UpdateTicketService`, `queues.handleProcessLanes`, `wbotMessageListener`.
+Fonte: Tags (`kanban`, `timeLane`, `nextLaneId`, `rollbackLaneId`), `FindOrCreateTicketService`, `UpdateTicketService`, `queues.handleProcessLanes`, `wbotMessageListener`. Como o funil funciona hoje: [`.docs/funcionalidades/kanban-lanes.md`](../funcionalidades/kanban-lanes.md).
 
-## 🔴 Alta
+## Resolvido
 
-### 1. Ticket novo sem coluna Lead
+### 1. Ticket novo na coluna de entrada — PR #21
 
-**Hoje:** `FindOrCreateTicketService` não atribui tag Kanban. Depois de `closed`, a próxima mensagem cria **outro** ticket sem lane.
+Ticket novo (incluindo pós-`closed`) recebe a lane configurada em Tags Kanban (`defaultKanbanTagId`, ex.: Lead), se a empresa usa Kanban e o ticket ainda não tem tag `kanban=1`.
 
-**Fazer:** setting da empresa `defaultKanbanTagId` (ou “Lead” pelo nome). Ao criar ticket de entrada, se o plano tiver `useKanban` e o ticket ainda não tiver tag `kanban=1`, aplicar a lane padrão.
+### 2. Encerrar aplica a lane configurada — PR #21
 
-### 2. Encerrar não move o funil
+Ao encerrar, o ticket recebe a tag `closedKanbanTagId` (ex.: Fechado ganho). Quem quiser Fechado perdido arrasta no quadro. **Nuance:** a listagem `/ticket/kanban` ainda filtra só `open`/`pending`, então o card `closed` pode não aparecer na tela até o filtro incluir `closed` (resto do A3).
 
-**Hoje:** o trecho que remove tags Kanban no `closed` está **comentado** em `UpdateTicketService`. Status `closed` ≠ coluna “Fechado”.
+### 3. Cron de `timeLane` por `updatedAt` — PR #21
 
-**Fazer:** ao encerrar, opção configurável: (a) ir para tag “Fechado — ganho/perdido” ou (b) tirar a lane. Uma tag Kanban por ticket.
+`handleProcessLanes` não exige `fromMe: true`. Avança com base em `ticket.updatedAt`. Não avança lanes terminais (`closedKanbanTagId` ou nome com “Fechado”).
 
-## 🟡 Média
+### 4. Uma tag Kanban por ticket — PR #21
 
-### 3. Cron de `timeLane` só com `fromMe: true`
+Ao aplicar lane (store do quadro, cron, helpers), as outras tags `kanban=1` daquele ticket são removidas. Arrastar no quadro substitui, não acumula.
 
-**Hoje:** `handleProcessLanes` em `queues.ts` filtra ticket `fromMe: true`. Conversas em que a última interação é do cliente quase não avançam.
+### 5. Rollback só no ticket aberto — PR #21
 
-**Fazer:** avançar com base em `ticket.updatedAt` (ou última mensagem), independente de `fromMe`, com trava para não pular “Fechado”.
+Ticket **novo** após encerrar recebe a lane de entrada (item 1). Não aplica `rollbackLaneId` da conversa fechada.
 
-### 4. Uma tag Kanban por ticket
+### 8. Overlay “API indisponível” no first paint — esta branch (`0e2c051`)
 
-**Hoje:** o listener usa `TicketTag.findOne` sem filtrar `kanban=1`. Duas colunas no mesmo card quebram rollback/next.
+Rotas montam durante o health; diálogo só se a API falhar; retry automático.
 
-**Fazer:** ao aplicar lane, remover as outras `kanban=1` daquele ticket. UI: ao arrastar no quadro, substituir, não acumular.
+### 10. Token de signup hex que começa com dígito — esta branch (`0e2c051`)
 
-### 5. Rollback só no ticket aberto
+`resolvePartnerFromTokenOrId` consulta `signupToken` primeiro; id numérico só se a string inteira for dígitos.
 
-**Hoje:** se `status === closed`, o listener retorna antes de aplicar `rollbackLaneId`.
+## Ainda aberto (não bloqueia o kit)
 
-**Fazer:** no ticket **novo** pós-encerramento, aplicar lane padrão (item 1), não o rollback da conversa morta.
+### 2b. Quadro mostrar tickets `closed`
 
-## 🟢 Baixa / produto maior
+`ListTicketsServiceKanban` ainda restringe a `pending`/`open`. Sem isso, a lane de encerrar existe no ticket, mas some da tela `/kanban`.
 
-### 6. Pipeline nativo
+### 6. Pipeline nativo (CRM)
 
-Valor, probabilidade, ganho/perdido, dono da oportunidade. Fora do recorte de tags. Só se o comercial exigir CRM de funil de verdade.
-
-Demanda completa para análise (caminhos A e B, backlog e perguntas): [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md).
+Valor, probabilidade, ganho/perdido, dono da oportunidade. Fora do recorte de tags. Análise: [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md).
 
 ### 7. Aviso de excesso de colunas
 
 Sem limite no código. Sugerir na UI se `kanban=1` > 8.
 
-### 8. Overlay “API indisponível” no first paint
-
-**Feito nesta branch (2026-08-25):** rotas montam durante o health; diálogo só se a API falhar; retry automático.
-
 ### 9. Contatos da atendente vazios
 
 Tags hierárquicas `#`. Fora do Kanban.
-
-### 10. Token de signup hex que começa com dígito
-
-**Feito nesta branch (2026-08-25):** `resolvePartnerFromTokenOrId` consulta `signupToken` primeiro; id numérico só se a string inteira for dígitos.
 
 ## Já coberto nesta branch (não reabrir)
 
@@ -68,5 +58,3 @@ Tags hierárquicas `#`. Fora do Kanban.
 - Player `/apresentacoes` privado (login + permissão); prints fora de `public/`.
 - `Route.js`: redirect de rota privada **só se o path casar** — senão `/signup-partner` caía no login sem sessão.
 - Logins de teste documentados no deck (apenas empresa demo).
-- Overlay de API no first paint (item 8).
-- Token de signup hex (item 10).

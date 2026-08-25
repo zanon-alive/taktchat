@@ -2,27 +2,35 @@
 
 ## Para que serve
 
-Cadastro de pessoas/empresas que conversam com você; etiquetas para filtrar e um quadro Kanban por estágio.
+Cadastro de pessoas/empresas que conversam com você; etiquetas para filtrar e um quadro Kanban por estágio da **conversa** (não é pipeline de oportunidade).
 
 ## Onde fica
 
-`/contacts`, `/contacts/import`, `/tags`, `/Kanban`, `/TagsKanban`
+`/contacts`, `/contacts/import`, `/tags`, `/kanban`, `/TagsKanban`
 
 ## Quem usa
 
-Atendente (ver/editar o básico), admin (importação, regras, kanban).
+Atendente (ver/editar o básico), admin (importação, regras, lanes).
 
 ## O que a pessoa faz
 
 - Buscar, abrir ficha, iniciar conversa
 - Importar planilha (admin)
-- Criar tags (Urgente, VIP, Aguardando cliente, Resolvido no seed)
+- Criar tags operacionais (Urgente, VIP — `kanban=0`) e colunas (`kanban=1`)
 - Mover cards no Kanban se o plano tiver `useKanban`
+- Admin: em Tags Kanban, **lane de entrada** e **ao Encerrar, mover para** (settings `defaultKanbanTagId` / `closedKanbanTagId`)
+
+## Comportamento atual (PR #21)
+
+- Ticket novo recebe a lane de entrada, se a empresa usa Kanban.
+- Encerrar aplica a lane de encerrar no ticket. A tela `/kanban` ainda lista só `open`/`pending` — o card `closed` pode não aparecer.
+- Uma tag `kanban=1` por ticket; arrastar substitui a coluna.
+- Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 
 ## Seed
 
-Maria, João, Ana, Mercado Central, Pedro — números `551190000100x` (fictícios).
+Maria, João, Ana, Mercado Central, Pedro — números `551190000100x` (fictícios). Funil demo: Lead → Qualificado → Negociação → Aguardando cliente → Fechado ganho / Fechado perdido.
 
 ## Status
 
-Simulado no banco. UI de lista: validar na rodada WhatsApp real. Kanban: depende do plano.
+Simulado no banco + WhatsApp da Cliente Demo Kit CONNECTED. Kanban: depende do plano `useKanban`.

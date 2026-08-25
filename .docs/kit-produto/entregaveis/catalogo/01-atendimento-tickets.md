@@ -1,6 +1,6 @@
 # Atendimento e tickets
 
-**Prioridade para cliente novo.** Situação desta versão: seed local no Cliente Demo Kit + login real da atendente Beatriz. WhatsApp da empresa demo está `DISCONNECTED` — mensagens ao vivo ficam para a rodada com WhatsApp real.
+**Prioridade para cliente novo.** Situação desta versão: seed local no Cliente Demo Kit + login real da atendente Beatriz. WhatsApp da empresa demo está **CONNECTED** (envio e transferência persistida). Lanes Kanban: PR #21.
 
 ## Para que serve
 
@@ -27,9 +27,9 @@ Permissões da Beatriz (API de login): `tickets.view`, `tickets.close`, `contact
 
 ### Cliente fala primeiro (entrada)
 
-Mensagem no WhatsApp (Baileys ou API Oficial) ou no chat do site → contato criado/localizado → o sistema reutiliza ticket ainda aberto ou cria outro (`pending`, `bot` ou `lgpd`). O painel atualiza por Socket.IO.
+Mensagem no WhatsApp (Baileys ou API Oficial) ou no chat do site → contato criado/localizado → o sistema reutiliza ticket ainda aberto ou cria outro (`pending`, `bot` ou `lgpd`). Ticket novo recebe a lane de entrada do Kanban, se configurada. O painel atualiza por Socket.IO.
 
-**Nesta versão:** não exercitado ao vivo (conexão desconectada). Simulado no banco.
+**Nesta versão:** exercitado com WhatsApp CONNECTED (ticket 14 / transferência persistida). Seed continua válido para a demo visual.
 
 ### Equipe fala primeiro (saída)
 
@@ -52,8 +52,8 @@ Contatos → iniciar conversa. O ticket costuma nascer `open` já com o usuário
 4. Responder com texto ou resposta rápida (`/saudacao`, `/aguardar`).
 5. Aplicar **tag** (Maria = Urgente).
 6. **Transferir** para outra fila ou colega, se não for com você.
-7. **Encerrar** quando o assunto acabar.
-8. Se o cliente falar de novo, o sistema reabre ou cria outro conforme a conexão (`timeCreateNewTicket`).
+7. **Encerrar** quando o assunto acabar (aplica a lane de encerrar no Kanban, se configurada).
+8. Se o cliente falar de novo, o sistema reabre ou cria outro conforme a conexão (`timeCreateNewTicket`); o ticket novo cai na lane de entrada.
 
 ## Dados de demonstração (Cliente Demo Kit)
 
@@ -77,7 +77,7 @@ Não é um helpdesk com protocolo visível para o cliente no WhatsApp. É a conv
 
 - Login da atendente: **exercitado** (Boas-vindas “Cliente Demo Kit”; dashboard `/` retorna **403** — esperado sem `dashboard.view`).
 - Lista/chat de tickets na UI: **parcial** (menu estreito / SPA; API de listagem com filtro padrão voltou vazia neste ambiente — dados confirmados no banco).
-- Mensagem WhatsApp ao vivo: **não exercitado**.
+- Mensagem WhatsApp ao vivo: **exercitado** (CONNECTED; ticket 14).
 
 ## Screenshots
 

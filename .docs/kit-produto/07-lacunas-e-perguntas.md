@@ -27,7 +27,7 @@
 
 WhatsApp da Cliente Demo Kit no ambiente **local** já está CONNECTED (envio e transferência persistida). Seed de demo **não** vai para produção.
 
-Kanban e CRM de pipeline: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) — branch `feat/` própria. Overlay de API e token de signup: nesta branch.
+Kanban de conversa (entrada, Encerrar, uma tag, cron, rollback): **feito** no PR #21. Overlay de API e token de signup: **feito** nesta branch (`0e2c051`). Restam CRM nativo (demanda 16, A6–A9 / caminho B), aviso de 8 colunas, quadro listar `closed`, captura real do celular. Lista: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md).
 
 ## Divergências código × docs antigos
 

@@ -26,7 +26,13 @@ Criar outra empresa, cobrar parceiro, anúncio global da plataforma.
 
 ### Como acompanhar a operação
 
-Dashboard, tempo real (`/moments`), tickets abertos/pendentes, tags.
+Dashboard, tempo real (`/moments`), tickets abertos/pendentes, tags e o quadro Kanban.
+
+### Como configurar as lanes do Kanban
+
+1. Menu **Tags Kanban** (ou Kanban → Adicionar colunas).
+2. Bloco **Lanes automáticas**: lane de entrada (ticket novo) e ao Encerrar, mover para (ex.: Fechado ganho).
+3. O plano precisa ter `useKanban`. Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 
 ### Como disparar campanha (se o plano permitir)
 

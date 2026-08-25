@@ -75,11 +75,11 @@ Posicionamento: **CRM de conversa no WhatsApp** (contato → ticket). Não é CR
 
 ## Slide 9 — Funil no Kanban
 
-**Para falar:** não há pipeline de oportunidade. Dá para simular funil com tags Kanban (Lead → Negociação → Fechado). Arrasta o ticket. Plano `useKanban`. Sem limite no código; 4–7 colunas leem melhor.
+**Para falar:** não há pipeline de oportunidade. Tags Kanban viram colunas (Lead → Negociação → Fechado). Ticket novo entra na lane configurada em Tags Kanban. Encerrar aplica a lane de encerrar. Arrasta o ticket. Plano `useKanban`. Sem limite no código; 4–7 colunas leem melhor.
 
 ## Slide 10 — Avanço automático das colunas
 
-**Para falar:** horas paradas podem ir para a próxima lane. Cliente respondendo no ticket **aberto** pode voltar ao rollback. Encerrar + nova mensagem = ticket **novo**, em geral **sem** cair sozinho em Lead.
+**Para falar:** horas paradas podem ir para a próxima lane. Cliente respondendo no ticket **aberto** pode voltar ao rollback. Encerrar aplica a lane de encerrar; nova mensagem = ticket **novo**, já na lane de entrada (Lead, se configurado).
 
 ## Slide 11 — Dual channel
 

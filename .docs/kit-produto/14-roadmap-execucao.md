@@ -1,8 +1,8 @@
 # Roadmap do que foi feito nesta demanda
 
 **Branch:** `docs/kit-documentacao-produto`  
-**Data:** 2026-08-21 → 2026-08-24  
-**Status:** kit **v1.4** — lote fechado (player + prints + WhatsApp CONNECTED).
+**Data:** 2026-08-21 → 2026-08-25  
+**Status:** kit **v1.5** — alinhado à `main` (Kanban PR #21 + overlay/token nesta branch).
 
 ## Entregue
 
@@ -51,12 +51,20 @@ Rota **privada** (login). Hub + slideshow. PNG em `backend/private/kit-apresenta
 
 QR escaneado; sessão CONNECTED; print `pendente-whatsapp-connected.png`; landing, flow, Kanban, health, billing, infra. Transferência persistida com canal conectado.
 
+## v1.5 — alinhamento com a main (2026-08-25)
+
+Merge da `main` (PR #21) nesta branch. Copy do kit deixa de descrever o Kanban antigo.
+
+- Ticket novo recebe a lane de entrada (`defaultKanbanTagId`).
+- Encerrar aplica `closedKanbanTagId`; uma tag `kanban=1` por ticket; cron por `updatedAt`; rollback não vale em ticket novo.
+- Overlay de API e token hex: já em `0e2c051` (não são mais pegadinha da demo).
+
 ## Ainda aberto (não bloqueia o lote)
 
 1. Captura real do WhatsApp no celular — hoje há **ilustração de IA** em `pendente-whatsapp-celular.png`
-2. Copy dos slides (login comercial + 6 colunas) em MD/`decks.js`
+2. Copy fino dos slides (login comercial) em MD/`decks.js`
 3. **Não** transformar o seed em migration Sequelize — seed só local (ver `scripts/README.md`)
-4. Demanda 16 (A ou B) e bugs Kanban (`15`) — **outra branch**. Overlay de API e token de signup: nesta branch.
+4. Demanda 16: A1–A5 feitos no PR #21; restam A6–A9 (aviso de 8 colunas, relatório, ficha) e caminho B. Quadro `/kanban` ainda não lista `closed` (item 2b).
 
 ## Fora desta branch
 
