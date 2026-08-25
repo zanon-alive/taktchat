@@ -56,7 +56,7 @@ QR escaneado; sessão CONNECTED; print `pendente-whatsapp-connected.png`; landin
 1. Captura real do WhatsApp no celular — hoje há **ilustração de IA** em `pendente-whatsapp-celular.png`
 2. Copy dos slides (login comercial + 6 colunas) em MD/`decks.js`
 3. **Não** transformar o seed em migration Sequelize — seed só local (ver `scripts/README.md`)
-4. Demanda 16 (A ou B) e bugs Kanban (`15`) — **outras branches**. O `parseInt` no token de signup (hex que começa com dígito) continua lá.
+4. Demanda 16 (A ou B) e bugs Kanban (`15`) — **outra branch**. Overlay de API e token de signup: nesta branch.
 
 ## Fora desta branch
 

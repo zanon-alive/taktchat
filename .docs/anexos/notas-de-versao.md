@@ -2,8 +2,7 @@
 
 Use este arquivo para registrar mudanças relevantes em cada release.
 
-| Data | Versão | Descrição | Autor |
-| --- | --- | --- | --- |
+| 2026-08-25 | 2.2.2v-26 | Overlay de API não bloqueia o first paint; token de signup hex resolve pelo `signupToken` primeiro. | Equipe Dev |
 | 2026-08-24 | 2.2.2v-26 | Player `/apresentacoes` privado (login + permissão na empresa plataforma); prints em `backend/private/` via API. Seed do kit permanece só local. | Equipe Dev |
 | 2026-08-24 | 2.2.2v-26 | Player: ilustração de IA só no celular (`pendente-whatsapp-celular.png`). | Equipe Dev |
 | 2026-08-24 | 2.2.2v-26 | Kit v1.4: WhatsApp CONNECTED, prints do player, transferência persistida; restam captura real do celular/signup. | Equipe Dev |

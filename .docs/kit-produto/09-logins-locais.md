@@ -45,4 +45,4 @@ Empresa 01: sessão `teste` continua à parte.
 - Fluxo **Boas-vindas Demo Kit** (company 5) com menu Suporte / Vendas / atendente.
 - Lanes Kanban: Lead → Qualificado → Negociação → Aguardando cliente → Fechado ganho / Fechado perdido. Urgente/VIP/Resolvido voltaram a `kanban=0` (label, não coluna).
 - Plano **Revenda Starter Kit** (`targetType=whitelabel`, `companyId=4`) para o cadastro da filha em `/signup-partner?partner=4`.
-- Token de signup do Parceiro Demo Kit no banco local começa com **letra** (ajuste 2026-08-24). Hex que começa com dígito ainda quebra no backend — ver `15-pendencias-produto-outras-branches.md` item 10.
+- Token de signup do Parceiro Demo Kit no banco local começa com **letra** (ajuste 2026-08-24). Hex que começa com dígito passa a resolver pelo `signupToken` primeiro.

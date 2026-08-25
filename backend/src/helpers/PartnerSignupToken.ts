@@ -10,9 +10,13 @@ export function generateSignupToken(): string {
   return crypto.randomBytes(TOKEN_BYTES).toString("hex");
 }
 
+function isNumericCompanyId(value: string): boolean {
+  return /^\d+$/.test(value);
+}
+
 /**
  * Resolve partnerId a partir de token ou ID.
- * Retorna o companyId do parceiro whitelabel ou null se inválido.
+ * Token opaco (signupToken) tem prioridade. Id numérico só se a string inteira for dígitos.
  */
 export async function resolvePartnerFromTokenOrId(
   tokenOrId: string
@@ -20,18 +24,22 @@ export async function resolvePartnerFromTokenOrId(
   const trimmed = (tokenOrId || "").trim();
   if (!trimmed) return null;
 
-  const asNum = parseInt(trimmed, 10);
-  if (!Number.isNaN(asNum)) {
-    const byId = await Company.findOne({
-      where: { id: asNum, type: "whitelabel" },
-      attributes: ["id"]
-    });
-    return byId ? { partnerId: byId.id } : null;
-  }
-
   const byToken = await Company.findOne({
     where: { signupToken: trimmed, type: "whitelabel" },
     attributes: ["id"]
   });
-  return byToken ? { partnerId: byToken.id } : null;
+  if (byToken) {
+    return { partnerId: byToken.id };
+  }
+
+  if (!isNumericCompanyId(trimmed)) {
+    return null;
+  }
+
+  const asNum = Number(trimmed);
+  const byId = await Company.findOne({
+    where: { id: asNum, type: "whitelabel" },
+    attributes: ["id"]
+  });
+  return byId ? { partnerId: byId.id } : null;
 }

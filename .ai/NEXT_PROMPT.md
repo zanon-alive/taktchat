@@ -4,18 +4,12 @@
 
 ## Estado
 
-Kit v1.4 + player privado **prontos**. Smoke local (2026-08-25):
+Kit + player privado no GitHub (`ce81b53`). Nesta leva: token de signup e overlay de API.
 
-- Sem sessão, `/apresentacoes` vai para `/login`
-- `dono@taktchat.local` vê o hub, o menu e o print (blob autenticado)
-- PNG sem JWT: 401; atendente da filha: 403
-- URL estática no frontend devolve HTML da SPA, não o PNG
+Kanban (Lead, encerrar → Fechado, cron, uma tag, rollback) — **branch nova**, ainda não aberta.
 
-Seed SQL só em `.docs/kit-produto/scripts/` — **não** rodar no Postgres da VPS.
+Este repositório **não** é projeto Telecontrol.
 
-Este repositório **não** é projeto Telecontrol e **não** deve ser trackeado no MCP/Cérebro dela.
+## Dúvida em aberto (Kanban)
 
-## Fora desta branch
-
-- Captura real do celular; copy dos slides
-- Kanban (`15`), demanda 16, parseInt do signupToken, overlay “API indisponível”
+Ao encerrar, o kit local tem **Fechado ganho** e **Fechado perdido**. Qual usar como padrão?

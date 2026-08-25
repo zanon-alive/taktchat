@@ -1,6 +1,6 @@
 # Pendências de produto — Kanban / CRM de conversa
 
-Itens identificados na branch `docs/kit-documentacao-produto`. **Não implementar nesta branch de documentação** (exceto a base demo e o player). Abrir branch `feat/` própria.
+Itens identificados na branch `docs/kit-documentacao-produto`. Kanban (1–5, 7) e CRM de pipeline (6) vão em `feat/` própria. Overlay (8) e token de signup (10) entram nesta branch do kit.
 
 Fonte: código de Tags (`kanban`, `timeLane`, `nextLaneId`, `rollbackLaneId`), `FindOrCreateTicketService`, `UpdateTicketService`, `queues.handleProcessLanes`, `wbotMessageListener`.
 
@@ -52,7 +52,7 @@ Sem limite no código. Sugerir na UI se `kanban=1` > 8.
 
 ### 8. Overlay “API indisponível” no first paint
 
-Retry automático na landing/login. Fora do Kanban.
+**Feito nesta branch (2026-08-25):** rotas montam durante o health; diálogo só se a API falhar; retry automático.
 
 ### 9. Contatos da atendente vazios
 
@@ -60,9 +60,7 @@ Tags hierárquicas `#`. Fora do Kanban.
 
 ### 10. Token de signup hex que começa com dígito
 
-**Hoje:** `resolvePartnerFromTokenOrId` faz `parseInt` e, se o hex começa com 0–9, trata o valor como `companyId`. No kit local o token do Parceiro Demo Kit foi prefixado com letra só para a demo.
-
-**Fazer:** resolver token opaco primeiro (igualdade com `signupToken`); id numérico só se a string inteira for dígitos.
+**Feito nesta branch (2026-08-25):** `resolvePartnerFromTokenOrId` consulta `signupToken` primeiro; id numérico só se a string inteira for dígitos.
 
 ## Já coberto nesta branch (não reabrir)
 
@@ -70,3 +68,5 @@ Tags hierárquicas `#`. Fora do Kanban.
 - Player `/apresentacoes` privado (login + permissão); prints fora de `public/`.
 - `Route.js`: redirect de rota privada **só se o path casar** — senão `/signup-partner` caía no login sem sessão.
 - Logins de teste documentados no deck (apenas empresa demo).
+- Overlay de API no first paint (item 8).
+- Token de signup hex (item 10).
