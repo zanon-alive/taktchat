@@ -891,6 +891,7 @@ const messages = {
           settings: "Ayarlar",
           files: "Dosya Listesi",
           helps: "Yardım",
+          apresentacoes: "Sunumlar",
           messagesAPI: "API",
           schedules: "Randevular",
           campaigns: "Kampanyalar",

@@ -17,7 +17,12 @@ module.exports = {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    await queryInterface.removeColumn("Contacts", "contactName");
-    await queryInterface.removeColumn("Contacts", "florder");
+    const columns = (await queryInterface.describeTable("Contacts")) as Record<string, unknown>;
+    if (columns.contactName) {
+      await queryInterface.removeColumn("Contacts", "contactName");
+    }
+    if (columns.florder) {
+      await queryInterface.removeColumn("Contacts", "florder");
+    }
   }
 };

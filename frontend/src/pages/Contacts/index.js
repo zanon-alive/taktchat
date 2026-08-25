@@ -678,6 +678,10 @@ const Contacts = () => {
     }, [appliedFilters, formatCurrency, formatDate, safeNumber]);
 
     const hasActiveFilters = filtersSummary.length > 0;
+    const emptyContactsHint =
+        user?.profile === "user" && !hasActiveFilters
+            ? i18n.t("contacts.empty.needsPersonalTag")
+            : i18n.t("contacts.empty.noResults");
 
     // Estados para seleção avançada
     const [lastSelectedIndex, setLastSelectedIndex] = useState(null); // Desktop: shift-select
@@ -1678,7 +1682,7 @@ const Contacts = () => {
                                                     <div className={classes.emptyStateBlock}>
                                                         <Users />
                                                         <span>
-                                                            Nenhum contato encontrado com os filtros selecionados.
+                                                            {emptyContactsHint}
                                                         </span>
                                                         <div className={classes.emptyStateActions}>
                                                             {hasActiveFilters && (
@@ -1847,7 +1851,7 @@ const Contacts = () => {
                             <div className={classes.emptyStateBlock} style={{ background: "inherit", marginTop: 16 }}>
                                 <Users />
                                 <span style={{ textAlign: "center", fontSize: "0.875rem" }}>
-                                    Nenhum contato encontrado com os filtros selecionados.
+                                    {emptyContactsHint}
                                 </span>
                                 <div className={classes.emptyStateActions}>
                                     {hasActiveFilters && (

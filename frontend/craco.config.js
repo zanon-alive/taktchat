@@ -1,12 +1,30 @@
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
 module.exports = {
+  jest: {
+    configure: (jestConfig) => {
+      jestConfig.testMatch = [
+        "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}",
+      ];
+      jestConfig.transformIgnorePatterns = [
+        "[/\\\\]node_modules[/\\\\](?!lucide-react[/\\\\]).+\\.(js|jsx|mjs|cjs|ts|tsx)$",
+        "^.+\\.module\\.(css|sass|scss)$",
+      ];
+
+      return jestConfig;
+    },
+  },
   style: {
     postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-      ],
+      mode: "extends",
+      loaderOptions: {
+        postcssOptions: {
+          plugins: [
+            require("tailwindcss"),
+            require("autoprefixer"),
+          ],
+        },
+      },
     },
   },
   webpack: {

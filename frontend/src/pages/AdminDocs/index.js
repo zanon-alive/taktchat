@@ -582,7 +582,10 @@ O TaktChat é uma **plataforma multi-tenant nativa**, onde:
 \`\`\`javascript
 // Frontend conecta ao namespace da empresa
 const nsUrl = \`\${backendUrl}/workspace-\${companyId}\`;
-socket = io(nsUrl, { query: { token, userId } });
+socket = io(nsUrl, {
+  auth: { token },
+  query: { userId }
+});
 
 // Backend emite eventos apenas para a empresa correta
 io.of(\`/workspace-\${companyId}\`).emit(\`company-\${companyId}-ticket\`, data);

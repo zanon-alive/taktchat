@@ -89,9 +89,18 @@ export async function applyDefaultKanbanLane(
 
 export async function applyClosedKanbanLane(
   ticketId: number,
-  companyId: number
+  companyId: number,
+  options?: { tagId?: number | null; leaveBoard?: boolean }
 ): Promise<void> {
   if (!(await companyUsesKanban(companyId))) return;
+  if (options?.leaveBoard) {
+    await replaceKanbanLane(ticketId, companyId, null);
+    return;
+  }
+  if (options?.tagId) {
+    await replaceKanbanLane(ticketId, companyId, options.tagId);
+    return;
+  }
   const { closedTagId } = await getKanbanLaneSettings(companyId);
   if (!closedTagId) return;
   await replaceKanbanLane(ticketId, companyId, closedTagId);
@@ -104,4 +113,88 @@ export function isTerminalKanbanLane(
   if (!tag) return false;
   if (closedTagId && tag.id === closedTagId) return true;
   return /fechado/i.test(tag.name || "");
+}
+
+export const KANBAN_COLUMN_WARN_LIMIT = 8;
+
+export function shouldWarnKanbanColumnCount(count: number): boolean {
+  return Number(count) > KANBAN_COLUMN_WARN_LIMIT;
+}
+
+export type KanbanLaneStatRow = {
+  tagId: number;
+  tagName: string;
+  updatedAt: Date | string;
+};
+
+export type KanbanLaneStat = {
+  tagId: number;
+  name: string;
+  count: number;
+  avgAgeHours: number;
+};
+
+export function aggregateKanbanLaneStats(
+  rows: KanbanLaneStatRow[],
+  now: Date = new Date()
+): KanbanLaneStat[] {
+  const grouped = new Map<number, { name: string; ages: number[] }>();
+
+  rows.forEach(row => {
+    const ageMs = now.getTime() - new Date(row.updatedAt).getTime();
+    const hours = Number.isFinite(ageMs) ? Math.max(0, ageMs / 36e5) : 0;
+    const current = grouped.get(row.tagId) || { name: row.tagName, ages: [] };
+    current.ages.push(hours);
+    grouped.set(row.tagId, current);
+  });
+
+  return [...grouped.entries()].map(([tagId, item]) => ({
+    tagId,
+    name: item.name,
+    count: item.ages.length,
+    avgAgeHours:
+      Math.round(
+        (item.ages.reduce((sum, hours) => sum + hours, 0) / item.ages.length) * 10
+      ) / 10
+  }));
+}
+
+/**
+ * Tickets `closed` só entram no quadro se tiverem lane (`kanban=1`).
+ * Sem isso, Encerrar some o card e a lane0 encheria de histórico.
+ */
+export function kanbanBoardStatusWhere(ticketIdsWithKanbanLane: number[]) {
+  const closedIds =
+    ticketIdsWithKanbanLane.length > 0 ? ticketIdsWithKanbanLane : [0];
+
+  return {
+    [Op.or]: [
+      { status: { [Op.in]: ["pending", "open"] } },
+      { status: "closed", id: { [Op.in]: closedIds } }
+    ]
+  };
+}
+
+export async function findTicketIdsWithKanbanLane(
+  companyId: number
+): Promise<number[]> {
+  const rows = await TicketTag.findAll({
+    attributes: ["ticketId"],
+    include: [
+      {
+        model: Tag,
+        as: "tag",
+        attributes: [],
+        required: true,
+        where: { kanban: 1, companyId }
+      }
+    ],
+    raw: true
+  });
+
+  const ids = rows
+    .map((row: { ticketId?: number }) => Number(row.ticketId))
+    .filter(id => Number.isInteger(id) && id > 0);
+
+  return [...new Set(ids)];
 }

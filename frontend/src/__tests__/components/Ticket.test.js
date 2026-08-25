@@ -4,10 +4,12 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter } from 'react-router-dom';
 import Ticket from '../../components/Ticket';
 import { AuthContext } from '../../context/Auth/AuthContext';
+import { TicketsContext } from '../../context/Tickets/TicketsContext';
 import {
   createMockSocket,
   createInvalidSocket,
@@ -32,11 +34,24 @@ jest.mock('../../services/api', () => ({
   post: jest.fn(() => Promise.resolve({ data: {} })),
 }));
 
-const renderWithProviders = (component, { socket, user, ...authOverrides } = {}) => {
+// Mantém estes testes focados no ciclo de vida do socket do Ticket.
+jest.mock('../../components/ContactDrawer', () => () => null);
+jest.mock('../../components/MessageInput', () => () => null);
+jest.mock('../../components/MessagesList', () => () => null);
+jest.mock('../../components/TicketInfo', () => () => null);
+jest.mock('../../components/TicketActionButtonsCustom', () => () => null);
+jest.mock('../../components/TicketHeader', () => () => null);
+
+const theme = createTheme();
+
+const renderWithProviders = (component, options = {}) => {
+  const { user, ...authOverrides } = options;
   const mockUser = user || createMockUser();
   const mockAuthContext = {
     user: mockUser,
-    socket: socket || createMockSocket().mockSocket,
+    socket: Object.prototype.hasOwnProperty.call(options, 'socket')
+      ? options.socket
+      : createMockSocket().mockSocket,
     isAuth: true,
     loading: false,
     handleLogin: jest.fn(),
@@ -46,9 +61,13 @@ const renderWithProviders = (component, { socket, user, ...authOverrides } = {})
 
   return render(
     <BrowserRouter>
-      <AuthContext.Provider value={mockAuthContext}>
-        {component}
-      </AuthContext.Provider>
+      <ThemeProvider theme={theme}>
+        <AuthContext.Provider value={mockAuthContext}>
+          <TicketsContext.Provider value={{ setTabOpen: jest.fn() }}>
+            {component}
+          </TicketsContext.Provider>
+        </AuthContext.Provider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 };
@@ -111,9 +130,7 @@ describe('Ticket Component - Socket Verifications', () => {
       socket: mockSocket,
     });
 
-    waitFor(() => {
-      expect(mockSocket.on).toHaveBeenCalled();
-    });
+    expect(mockSocket.on).toHaveBeenCalled();
   });
 
   test('deve chamar socket.off no cleanup quando socket é válido', () => {
@@ -125,9 +142,7 @@ describe('Ticket Component - Socket Verifications', () => {
 
     unmount();
 
-    waitFor(() => {
-      expect(mockSocket.off).toHaveBeenCalled();
-    });
+    expect(mockSocket.off).toHaveBeenCalled();
   });
 
   test('deve verificar socket.emit antes de chamar joinChatBoxLeave', () => {
@@ -140,12 +155,11 @@ describe('Ticket Component - Socket Verifications', () => {
 
     unmount();
 
-    waitFor(() => {
-      // Verifica que emit só é chamado se socket.emit é uma função
-      if (typeof mockSocket.emit === 'function') {
-        expect(mockSocket.emit).toHaveBeenCalled();
-      }
-    });
+    expect(mockSocket.emit).toHaveBeenCalledWith(
+      'joinChatBoxLeave',
+      'test-ticket-id',
+      expect.any(Function)
+    );
   });
 
   test('não deve quebrar quando socket.off não é uma função no cleanup', () => {
@@ -172,10 +186,7 @@ describe('Ticket Component - Socket Verifications', () => {
     });
 
     // Não deve chamar onConnectTicket se não estiver conectado
-    waitFor(() => {
-      // Verifica que não houve erro
-      expect(mockSocket.on).toHaveBeenCalled();
-    });
+    expect(mockSocket.on).toHaveBeenCalled();
   });
 });
 

@@ -72,14 +72,14 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.fancyBackground,
 
     "& .MuiButton-outlinedPrimary": {
-      color: theme.palette.primary,
+      color: theme.palette.primary.main,
       border:
         theme.mode === "light"
           ? "1px solid rgba(0 124 102)"
           : "1px solid rgba(255, 255, 255, 0.5)",
     },
     "& .MuiTab-textColorPrimary.Mui-selected": {
-      color: theme.palette.primary,
+      color: theme.palette.primary.main,
     },
   },
   chip: {
@@ -305,8 +305,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
 
   // Rotas públicas que não devem mostrar os menus
-  const publicRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
-  const isPublicRoute = publicRoutes.includes(location.pathname);
+  // Rotas sem menu do painel
+  const publicRoutes = ["/login", "/signup", "/signup-partner", "/forgot-password", "/reset-password"];
+  const isPublicRoute =
+    publicRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/apresentacoes");
   
   // Só mostrar menus se estiver autenticado e não estiver em rota pública
   const shouldShowMenus = isAuth && !isPublicRoute && user?.id;

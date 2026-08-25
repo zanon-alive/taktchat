@@ -282,17 +282,21 @@ const App = () => {
     window.localStorage.setItem("preferredTheme", mode);
   }, [mode]);
 
-  const runHealthCheck = useCallback(async () => {
+  const runHealthCheck = useCallback(async ({ silent = false, commitFailure = true } = {}) => {
     if (!backendUrl) {
-      setApiStatus("offline");
-      setApiErrorMessage("Variável REACT_APP_BACKEND_URL não configurada.");
-      return;
+      if (commitFailure) {
+        setApiStatus("offline");
+        setApiErrorMessage("Variável REACT_APP_BACKEND_URL não configurada.");
+      }
+      return false;
     }
 
-    setApiStatus("checking");
-    setApiErrorMessage("");
+    if (!silent) {
+      setApiStatus("checking");
+      setApiErrorMessage("");
+    }
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 4000);
+    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
 
     try {
       const response = await fetch(`${backendUrl}/health`, {
@@ -316,38 +320,79 @@ const App = () => {
 
       if (!response.ok) {
         if (response.status === 503 && hasDatabaseError) {
-          setApiStatus("degraded");
-          setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
-          return;
+          if (commitFailure) {
+            setApiStatus("degraded");
+            setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
+          }
+          return false;
         }
         throw new Error(`Healthcheck retornou status ${response.status}`);
       }
 
       if (hasDatabaseError) {
-        setApiStatus("degraded");
-        setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
-        return;
+        if (commitFailure) {
+          setApiStatus("degraded");
+          setApiErrorMessage(payload?.database?.error || "Falha ao conectar no banco de dados.");
+        }
+        return false;
       }
 
       setApiStatus("online");
       setApiErrorMessage("");
+      return true;
     } catch (error) {
       window.clearTimeout(timeoutId);
       const message =
         error?.name === "AbortError"
-          ? "Tempo limite ao verificar o backend (4s)."
+          ? "Tempo limite ao verificar o backend (8s)."
           : error?.message || "Falha ao contactar o backend.";
-      setApiErrorMessage(message);
-      setApiStatus("offline");
+      if (commitFailure) {
+        setApiErrorMessage(message);
+        setApiStatus("offline");
+      }
+      return false;
     }
   }, [backendUrl]);
 
   useEffect(() => {
-    runHealthCheck();
+    let cancelled = false;
+    const delays = [0, 1500, 3000];
+
+    const bootstrap = async () => {
+      for (let index = 0; index < delays.length; index += 1) {
+        if (delays[index]) {
+          await new Promise((resolve) => window.setTimeout(resolve, delays[index]));
+        }
+        if (cancelled) return;
+        const isLast = index === delays.length - 1;
+        const ok = await runHealthCheck({ silent: true, commitFailure: isLast });
+        if (ok || cancelled) return;
+      }
+    };
+
+    bootstrap();
+    return () => {
+      cancelled = true;
+    };
   }, [runHealthCheck]);
 
   useEffect(() => {
-    setShowApiStatusDialog(apiStatus !== "online");
+    if (apiStatus !== "offline" && apiStatus !== "degraded") {
+      return undefined;
+    }
+    const intervalId = window.setInterval(() => {
+      runHealthCheck({ silent: true });
+    }, 5000);
+    return () => window.clearInterval(intervalId);
+  }, [apiStatus, runHealthCheck]);
+
+  useEffect(() => {
+    if (apiStatus === "offline" || apiStatus === "degraded") {
+      setShowApiStatusDialog(true);
+    }
+    if (apiStatus === "online") {
+      setShowApiStatusDialog(false);
+    }
   }, [apiStatus]);
 
   useEffect(() => {
@@ -434,7 +479,7 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <ActiveMenuProvider>
               <div style={{ position: "relative", overflow: "visible", zIndex: 0, minHeight: "100vh" }}>
-                {apiStatus === "online" && <Routes />}
+                <Routes />
 
                 <Dialog
                   open={showApiStatusDialog}
@@ -488,7 +533,11 @@ const App = () => {
                     )}
                   </DialogContent>
                   <DialogActions>
-                    <Button onClick={runHealthCheck} color="inherit" disabled={apiStatus === "checking"}>
+                    <Button
+                      onClick={() => runHealthCheck({ silent: false, commitFailure: true })}
+                      color="inherit"
+                      disabled={apiStatus === "checking"}
+                    >
                       {apiStatus === "checking" ? (
                         <>
                           <CircularProgress size={18} style={{ marginRight: 8 }} /> Verificando…

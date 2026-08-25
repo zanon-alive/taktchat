@@ -91,6 +91,7 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/public ./public
+COPY --from=build /app/private/kit-apresentacoes ./kit-apresentacoes
 COPY --from=build /app/certs ./certs
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/.sequelizerc ./.sequelizerc

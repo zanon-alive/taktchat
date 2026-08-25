@@ -1,6 +1,6 @@
 # 🗺️ Roadmap e Melhorias Futuras - TaktChat
 
-**Última atualização:** 2026-08-25  
+**Última atualização:** 2026-08-25
 **Status:** Documento centralizado de melhorias futuras do projeto
 
 ---
@@ -345,6 +345,37 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 - [ ] Documentação de arquitetura com diagramas
 - [ ] Changelog automático
 
+### Kit de produto e apresentações (branch `docs/kit-documentacao-produto`)
+
+Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma ou permissão `apresentacoes.view`). Lote **v1.5** (2026-08-25): copy alinhado ao Kanban PR #21, overlay e token. v1.4 fechou WhatsApp CONNECTED e prints.
+
+- [x] **WhatsApp real no ambiente local** — QR Baileys da Cliente Demo Kit escaneado; sessão **CONNECTED**; envio de teste e transferência persistida. Print: `pendente-whatsapp-connected.png`.
+- [x] **Prints comerciais do player** — landing, planos, Flow Builder, campanhas, Kanban/funil, IA, widget, health, billing, infra (lista em `backend/private/kit-apresentacoes/README.md`).
+- [x] **Prints do player (signup da filha)** — captura real de `pendente-signup-partner.png` e `pendente-signup-token.png`. Celular continua ilustração de IA (`pendente-whatsapp-celular.png`).
+- [x] **Seed demo não vai para produção** — SQL só em `.docs/kit-produto/scripts/` (não é migration).
+- [x] **Copy do kit alinhado ao Kanban #21** — ticket novo na lane de entrada; Encerrar aplica lane; overlay/token não são mais pegadinha da demo.
+- [x] **Copy dos slides (login comercial + 6 colunas)** — logins `@taktchat.local` na capa; funil Lead → … → Fechado ganho/perdido no player.
+- [x] **Deck técnico** — QR da demo CONNECTED; prints `pendente-*` já gravados (sem caixa “a gravar”).
+- [x] **A6–A8, desfecho, tags `#`, relatório por lane** — mergeados na kit (v1.6).
+- [x] **Polish da demo (v1.7)** — overlay do Painel, atalho do funil, login sem tag `#`, heap do frontend.
+
+Pendências 1–5, 6–10 (aviso, desfecho, ficha, tags, relatório), 8 overlay, 10 token e 2b: resolvidas. Restam captura real do celular e caminho B (CRM de mercado). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
+
+## 🎫 Tickets, tags e Kanban
+
+Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do funil: `.docs/funcionalidades/kanban-lanes.md`.
+
+- [x] Ticket novo recebe lane de entrada (`defaultKanbanTagId`) — PR #21
+- [x] Encerrar move o card para a lane configurada (`closedKanbanTagId`) — PR #21
+- [x] Quadro `/kanban` lista `closed` com lane Kanban — 2b nesta branch
+- [x] Cron `timeLane` usa `updatedAt` (sem exigir `fromMe`) — PR #21
+- [x] Uma tag `kanban=1` por ticket (arrastar substitui) — PR #21
+- [x] Ticket novo pós-`closed` não herda rollback da conversa encerrada — PR #21
+- [x] Aviso se `kanban=1` > 8; desfecho ao Encerrar; ficha comercial; relatório `/kanban/stats`; tags `#` da atendente
+- [ ] **Caminho B (opcional):** CRM de mercado / Deal — [kit-produto/16-demanda-crm-conversa-ou-mercado.md](../kit-produto/16-demanda-crm-conversa-ou-mercado.md)
+
+---
+
 ### Organização
 - [ ] Sincronização automática de documentação entre `.docs/` e frontend
 - [ ] Script de sincronização docs (`scripts/sync-docs-frontend.sh`)
@@ -418,6 +449,10 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ## 📝 Histórico de Atualizações
 
+- **2026-08-24:** Player `/apresentacoes` exige login; PNG fora de `public/`. Seed do kit não vai para produção.
+- **2026-08-24:** Ilustração de IA para o celular (`pendente-whatsapp-celular.png`). Não é print do aparelho.
+- **2026-08-24:** Kit v1.4: WhatsApp CONNECTED, transferência persistida, maioria dos prints `pendente-*` gravados. Restam captura real do celular/signup e migration Sequelize do seed.
+- **2026-08-22:** Kit de produto: prints pendentes do player `/apresentacoes` e jornada WhatsApp com QR escaneado registrados como melhorias futuras (não bloqueiam o fechamento da branch).
 - **2026-08-21:** Revisão: CookieBanner, reCAPTCHA, SEO da landing, MUI v5 e Chat do Site marcados como feitos; GHCR deixou de ser descrito como deploy atual (VPS usa volumes).
   - Funcionalidade para ser embedada ou usada por empresas clientes
   - Integração com backend `/leads` e geração automática de Contacts
@@ -456,6 +491,7 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 - Deploy e configuração de produção
 
 ### 🟡 Média Prioridade (Implementar Depois)
+- Captura real do WhatsApp no celular (hoje só ilustração de IA) e migration Sequelize do seed demo (kit de produto)
 - Configurações separadas por canal (campanhas)
 - Relatório expandido de campanhas
 - Google Analytics (landing page)

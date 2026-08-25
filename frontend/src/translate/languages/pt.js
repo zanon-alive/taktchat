@@ -453,6 +453,10 @@ const messages = {
           title: "Filtrar Contatos",
           close: "Fechar",
         },
+        empty: {
+          noResults: "Nenhum contato encontrado com os filtros selecionados.",
+          needsPersonalTag: "Nenhum contato visível. Peça ao administrador uma tag pessoal (#SeuNome) e que ela esteja nos seus contatos.",
+        },
       },
       forwardMessage: {
         text: "Encaminhada",
@@ -825,6 +829,11 @@ const messages = {
         toasts: {
           deleted: "O atendimento que você estava foi deletado.",
         },
+        outcome: {
+          title: "Como encerrar?",
+          hint: "O card permanece no quadro na lane escolhida, ou sai do Kanban.",
+          leaveBoard: "Sair do quadro",
+        },
         notification: {
           message: "Mensagem de",
         },
@@ -959,6 +968,7 @@ const messages = {
           settings: "Configurações",
           files: "Lista de arquivos",
           helps: "Ajuda",
+          apresentacoes: "Apresentações",
           messagesAPI: "API",
           schedules: "Agendamentos",
           campaigns: "Envio em Massa",
@@ -968,6 +978,7 @@ const messages = {
           queueIntegration: "Integrações",
           version: "Versão",
           kanban: "Kanban",
+          kanbanStats: "Funil (lanes)",
           prompts: "Talk.Ai",
           allConnections: "Gerenciar conexões",
           reports: "Relatórios",
@@ -1579,6 +1590,7 @@ const messages = {
       },
       tags: {
         title: "Tags",
+        operationalHint: "Estas tags são etiquetas (Urgente, VIP). Colunas do quadro ficam em Kanban → Adicionar colunas.",
         confirmationModal: {
           deleteTitle: "Você tem certeza que quer excluir esta Tag?",
           deleteMessage: "Esta ação não pode ser revertida.",
@@ -1626,6 +1638,9 @@ const messages = {
           entryLane: "Lane de entrada",
           closedLane: "Ao encerrar, mover para",
           none: "Não definido",
+          operationalVsLane: "Etiquetas como Urgente ou VIP ficam em Tags. Aqui só entram colunas do quadro.",
+          tooManyColumns: "Mais de 8 colunas cansa a leitura. Considere juntar etapas.",
+          tooManyColumnsWhen: "O aviso amarelo só aparece com mais de 8 colunas (kanban=1). O ambiente de demo usa 6.",
         },
       },
       kanban: {
@@ -1643,6 +1658,7 @@ const messages = {
         orderBy: "Ordenar por:",
         searchContact: "Buscar contato...",
         addColumns: "+ Adicionar colunas",
+        openStats: "Funil (quantidade e idade por lane)",
         resetColumns: "Redefinir colunas",
         dateStart: "Data de início",
         dateEnd: "Data de fim",
@@ -1680,6 +1696,14 @@ const messages = {
           moveError: "Falha ao mover o ticket",
           priorityUpdated: "Prioridade atualizada"
         }
+      },
+      kanbanStats: {
+        title: "Relatório por lane",
+        openBoard: "Abrir quadro",
+        lane: "Lane",
+        count: "Tickets",
+        avgAge: "Idade média (h)",
+        empty: "Nenhuma coluna Kanban configurada."
       },
       files: {
         title: "Lista de arquivos",
@@ -1823,6 +1847,12 @@ const messages = {
           unblock: "Desbloquear",
         },
         extraInfo: "Outras informações",
+        commercial: {
+          title: "Cadastro comercial",
+          situation: "Situação",
+          lastPurchase: "Última compra",
+          wallet: "Carteira",
+        },
       },
       messageVariablesPicker: {
         label: "Variavéis disponíveis",

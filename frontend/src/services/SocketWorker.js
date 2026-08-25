@@ -45,17 +45,17 @@ class SocketWorker {
     }
     const backendUrl = getBackendUrl() || process.env.REACT_APP_BACKEND_URL;
     const nsUrl = `${backendUrl}/workspace-${this?.companyId}`;
-    // Importante: o backend valida namespaces como /workspace-<id> e exige query.token (JWT)
+    // O token segue no payload de autenticação, sem aparecer na URL ou em logs de proxy.
     this.socket = io(nsUrl, {
-      transports: ["polling", "websocket"],
+      transports: ["websocket", "polling"],
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: Infinity,
       pingTimeout: 20000,
       pingInterval: 25000,
-      query: token ? { token, userId: String(this.userId) } : { userId: String(this.userId) }
-      // auth: token ? { token } : undefined, // opcional, backend lê de query.token
+      query: { userId: String(this.userId) },
+      auth: token ? { token } : {},
     });
 
     // Expondo para debug manual no console do navegador

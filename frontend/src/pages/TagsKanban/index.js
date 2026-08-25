@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material";
-import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery, FormControl, InputLabel, Select, MenuItem, Typography } from "@mui/material";
+import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery, FormControl, InputLabel, Select, MenuItem, Typography, Alert } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -396,6 +396,17 @@ const Tags = () => {
             <Typography variant="body2" className={classes.settingsHint}>
               {i18n.t("tagsKanban.settings.whatIs")}
             </Typography>
+            <Typography variant="body2" className={classes.settingsHint}>
+              {i18n.t("tagsKanban.settings.operationalVsLane")}
+            </Typography>
+            <Alert severity="info" style={{ marginBottom: 16 }}>
+              {i18n.t("tagsKanban.settings.tooManyColumnsWhen")}
+            </Alert>
+            {tags.length > 8 && (
+              <Alert severity="warning" style={{ marginBottom: 16 }}>
+                {i18n.t("tagsKanban.settings.tooManyColumns")}
+              </Alert>
+            )}
             <Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 4 }}>
               {i18n.t("tagsKanban.settings.title")}
             </Typography>

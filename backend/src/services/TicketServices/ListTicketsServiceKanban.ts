@@ -12,6 +12,10 @@ import TicketTag from "../../models/TicketTag";
 import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
 import ContactTag from "../../models/ContactTag";
+import {
+  findTicketIdsWithKanbanLane,
+  kanbanBoardStatusWhere
+} from "../../helpers/kanbanTicketTags";
 
 interface Request {
   searchParam?: string;
@@ -89,9 +93,11 @@ const ListTicketsServiceKanban = async ({
     whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
   }
 
+  const kanbanLaneTicketIds = await findTicketIdsWithKanbanLane(companyId);
+
   whereCondition = {
     ...whereCondition,
-    status: { [Op.or]: ["pending", "open"] }
+    [Op.and]: [kanbanBoardStatusWhere(kanbanLaneTicketIds)]
   };
 
   if (searchParam) {

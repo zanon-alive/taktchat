@@ -87,7 +87,9 @@ const ShowTicketService = async (
           "segment",
           "fantasyName",
           "foundationDate",
-          "creditLimit"
+          "creditLimit",
+          "dtUltCompra",
+          "vlUltCompra"
         ],
         include: ["extraInfo", "tags",
           {
@@ -221,7 +223,9 @@ const ShowTicketService = async (
                 "segment",
                 "fantasyName",
                 "foundationDate",
-                "creditLimit"
+                "creditLimit",
+                "dtUltCompra",
+                "vlUltCompra"
               ],
               include: ["extraInfo", "tags",
                 {

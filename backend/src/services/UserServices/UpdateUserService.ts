@@ -7,6 +7,7 @@ import ShowUserService from "./ShowUserService";
 import Company from "../../models/Company";
 import User from "../../models/User";
 import { getPlatformCompanyId } from "../../config/platform";
+import { stripKitPermissionIfNotPlatform } from "../../helpers/canViewKitApresentacoes";
 
 interface UserData {
   email?: string;
@@ -117,9 +118,11 @@ const UpdateUserService = async ({
   }
   // Atualiza permissions apenas se enviado (pode ser [] para limpar)
   if (userData.hasOwnProperty("permissions")) {
-    dataToUpdate.permissions = Array.isArray(userData.permissions)
-      ? userData.permissions
-      : [];
+    const next = Array.isArray(userData.permissions) ? userData.permissions : [];
+    dataToUpdate.permissions = stripKitPermissionIfNotPlatform(
+      next,
+      user.company?.type
+    );
   }
   
   // Lógica especial para a conexão (whatsappId):

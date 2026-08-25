@@ -3,6 +3,13 @@
  */
 import '@testing-library/jest-dom';
 
+// Dependências como react-modal esperam o elemento raiz já no carregamento.
+if (!document.getElementById('root')) {
+  const root = document.createElement('div');
+  root.id = 'root';
+  document.body.appendChild(root);
+}
+
 // Mock do window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

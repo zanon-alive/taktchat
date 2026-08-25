@@ -891,6 +891,7 @@ const messages = {
 			settings: "Settings",
 			files: "File List",
 			helps: "Help",
+			apresentacoes: "Presentations",
 			messagesAPI: "API",
 			schedules: "Schedules",
 			campaigns: "Campaigns",

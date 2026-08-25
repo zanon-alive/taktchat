@@ -25,6 +25,7 @@ import {
   WhatsApp as WhatsAppIcon,
   FlashOn as FlashOnIcon,
   ViewModule as ViewKanban,
+  Assessment as AssessmentIcon,
   ContactPhoneOutlined as ContactPhoneOutlinedIcon,
   Schedule,
   LocalOffer as LocalOfferIcon,
@@ -44,6 +45,7 @@ import {
   LocalAtm as LocalAtmIcon,
   Business as BusinessIcon,
   Description as DescriptionIcon,
+  Slideshow as SlideshowIcon,
 } from "@mui/icons-material";
 
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -212,7 +214,7 @@ const MainListItems = ({ collapsed, onItemClick }) => {
   const { user, socket, isAuth } = useContext(AuthContext);
   const { setActiveMenu } = useActiveMenu();
   const location = useLocation();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, canViewKitApresentacoes } = usePermissions();
 
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
@@ -486,6 +488,16 @@ const MainListItems = ({ collapsed, onItemClick }) => {
         />
       )}
 
+      {showKanban && hasPermission("kanban.view") && (
+        <ListItemLink
+          to="/kanban/stats"
+          primary={i18n.t("mainDrawer.listItems.kanbanStats")}
+          icon={<AssessmentIcon />}
+          tooltip={collapsed}
+          onClick={onItemClick}
+        />
+      )}
+
       {hasPermission("contacts.view") && (
         <ListItemLink
           to="/contacts"
@@ -541,6 +553,16 @@ const MainListItems = ({ collapsed, onItemClick }) => {
             to="/helps"
             primary={i18n.t("mainDrawer.listItems.helps")}
             icon={<HelpOutlineIcon />}
+            tooltip={collapsed}
+            onClick={onItemClick}
+          />
+        )}
+
+        {canViewKitApresentacoes() && (
+          <ListItemLink
+            to="/apresentacoes"
+            primary={i18n.t("mainDrawer.listItems.apresentacoes")}
+            icon={<SlideshowIcon />}
             tooltip={collapsed}
             onClick={onItemClick}
           />

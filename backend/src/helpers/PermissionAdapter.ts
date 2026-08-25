@@ -122,7 +122,10 @@ export const AVAILABLE_PERMISSIONS = {
     "companies.edit",
     "companies.delete",
     "all-connections.view"
-  ]
+  ],
+
+  // Kit comercial (não entra no pacote admin de empresa-filha)
+  kitProduto: ["apresentacoes.view"]
 };
 
 /**
@@ -267,15 +270,21 @@ export const hasAnyPermission = (user: User | null | undefined, permissions: str
 /**
  * Retorna lista de todas as permissões disponíveis (flat)
  */
-export const getAllAvailablePermissions = (): string[] => {
-  return Object.values(AVAILABLE_PERMISSIONS).flat();
+export const getAllAvailablePermissions = (
+  opts?: { includeKitProduto?: boolean }
+): string[] => {
+  const includeKitProduto = opts?.includeKitProduto !== false;
+  return Object.entries(AVAILABLE_PERMISSIONS)
+    .filter(([key]) => includeKitProduto || key !== "kitProduto")
+    .flatMap(([, value]) => value);
 };
 
 /**
  * Retorna permissões organizadas por categoria para exibição no frontend
  */
-export const getPermissionsCatalog = () => {
-  return [
+export const getPermissionsCatalog = (opts?: { includeKitProduto?: boolean }) => {
+  const includeKitProduto = opts?.includeKitProduto !== false;
+  const catalog = [
     {
       category: "Atendimento",
       permissions: AVAILABLE_PERMISSIONS.tickets.map(key => ({
@@ -349,6 +358,19 @@ export const getPermissionsCatalog = () => {
       }))
     }
   ];
+
+  if (includeKitProduto) {
+    catalog.push({
+      category: "Kit de produto",
+      permissions: AVAILABLE_PERMISSIONS.kitProduto.map(key => ({
+        key,
+        label: formatPermissionLabel(key),
+        description: getPermissionDescription(key)
+      }))
+    });
+  }
+
+  return catalog;
 };
 
 /**
@@ -385,7 +407,8 @@ const formatPermissionLabel = (key: string): string => {
     "users.edit": "Editar Usuários",
     "users.delete": "Deletar Usuários",
     "connections.view": "Ver Conexões",
-    "connections.edit": "Gerenciar Conexões"
+    "connections.edit": "Gerenciar Conexões",
+    "apresentacoes.view": "Ver apresentações comerciais"
   };
   return labels[key] || key;
 };
@@ -398,7 +421,8 @@ const getPermissionDescription = (key: string): string => {
     "tickets.view": "Visualizar atendimentos e tickets",
     "campaigns.create": "Criar e configurar novas campanhas",
     "users.edit": "Editar informações e permissões de usuários",
-    "connections.edit": "Adicionar, editar e remover conexões WhatsApp"
+    "connections.edit": "Adicionar, editar e remover conexões WhatsApp",
+    "apresentacoes.view": "Acessar o player de apresentações e os prints do kit (não conceder a empresas clientes)"
   };
   return descriptions[key] || "";
 };

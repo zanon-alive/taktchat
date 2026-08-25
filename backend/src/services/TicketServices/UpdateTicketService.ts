@@ -40,6 +40,8 @@ interface TicketData {
   unreadMessages?: number;
   msgTransfer?: string;
   isTransfered?: boolean;
+  kanbanCloseTagId?: number | null;
+  leaveKanbanBoard?: boolean;
 }
 
 interface Request {
@@ -71,10 +73,21 @@ const UpdateTicketService = async ({
       unreadMessages,
       msgTransfer,
       isTransfered = false,
-      status
+      status,
+      kanbanCloseTagId,
+      leaveKanbanBoard
     } = ticketData;
     let isBot: boolean | null = ticketData.isBot || false;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
+
+    const applyCloseLane = () =>
+      applyClosedKanbanLane(Number(ticketId), companyId, {
+        tagId:
+          kanbanCloseTagId != null && String(kanbanCloseTagId) !== ""
+            ? Number(kanbanCloseTagId)
+            : undefined,
+        leaveBoard: Boolean(leaveKanbanBoard)
+      });
 
     const io = getIO();
 
@@ -109,7 +122,7 @@ const UpdateTicketService = async ({
       });
 
       try {
-        await applyClosedKanbanLane(Number(ticketId), companyId);
+        await applyCloseLane();
       } catch (error) {
         Sentry.captureException(error);
       }
@@ -312,7 +325,7 @@ const UpdateTicketService = async ({
       });
 
       try {
-        await applyClosedKanbanLane(Number(ticketId), companyId);
+        await applyCloseLane();
       } catch (error) {
         Sentry.captureException(error);
       }
@@ -712,7 +725,7 @@ const UpdateTicketService = async ({
 
     if (status === "closed" && oldStatus !== "closed") {
       try {
-        await applyClosedKanbanLane(Number(ticketId), companyId);
+        await applyCloseLane();
       } catch (error) {
         Sentry.captureException(error);
       }
