@@ -66,7 +66,7 @@ Tags hierárquicas `#`. Fora do Kanban.
 
 ## Já coberto nesta branch (não reabrir)
 
-- Base **Cliente Demo Kit** com funil Lead → … → Fechado (migration + seed).
-- Player `/apresentacoes` com o recorte honesto (CRM de conversa, não pipeline).
+- Base **Cliente Demo Kit** com funil Lead → … → Fechado (seed **local**, não migration).
+- Player `/apresentacoes` privado (login + permissão); prints fora de `public/`.
 - `Route.js`: redirect de rota privada **só se o path casar** — senão `/signup-partner` caía no login sem sessão.
 - Logins de teste documentados no deck (apenas empresa demo).

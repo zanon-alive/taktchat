@@ -19,6 +19,7 @@ Personas: Dono · Parceiro · Admin emp. · Atendente · Supervisor
 | Usuários / filas | V | V | V | — | — |
 | Settings | V | V | V | — | — |
 | Empresas / licenças | V | V (filhas) | — | — | — |
+| Apresentações `/apresentacoes` | V | — | — | — | — |
 | Cobrança parceiro | V | — | — | — | — |
 | Financeiro | V | V | V | — | — |
 | API externa | P | P | P | — | — |

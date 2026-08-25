@@ -1,4 +1,5 @@
--- Seed local do kit de documentação. SOMENTE localhost. Idempotente.
+-- NÃO RODAR EM PRODUÇÃO. Só localhost. Não é migration Sequelize.
+-- Seed local do kit de documentação. Idempotente.
 -- Senha dos usuários @taktchat.local: LocalTest#2026
 
 BEGIN;

@@ -1,10 +1,10 @@
 # Screenshots do kit
 
-Os PNG **reais** ficam em `frontend/public/kit-apresentacoes/` (o player e o Docker copiam `public/`). Os `f*.png` desta pasta são **atalhos** para os mesmos arquivos — o catálogo e os manuais continuam apontando para cá.
+Os PNG **reais** ficam em `backend/private/kit-apresentacoes/` e só saem pela API autenticada. Os `f*.png` desta pasta são **atalhos** para os mesmos arquivos — o catálogo e os manuais continuam apontando para cá.
 
-Novos prints (inclusive `pendente-*.png`): grave direto em `frontend/public/kit-apresentacoes/`. Se for um `fNN-….png` do kit, crie o atalho aqui com o mesmo nome.
+Novos prints (inclusive `pendente-*.png`): grave em `backend/private/kit-apresentacoes/`. Se for um `fNN-….png` do kit, crie o atalho aqui com o mesmo nome.
 
-Signup da filha: prints **reais** na pasta canônica. Celular: ilustração de IA. Lista: [README do player](../../../../../frontend/public/kit-apresentacoes/README.md).
+Signup da filha: prints **reais** na pasta canônica. Celular: ilustração de IA. Lista: [README do player](../../../../../backend/private/kit-apresentacoes/README.md).
 
 | Arquivo | O que mostra |
 |---------|----------------|

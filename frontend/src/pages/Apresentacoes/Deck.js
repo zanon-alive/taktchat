@@ -2,42 +2,70 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, useHistory, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { getDeck } from "./decks";
+import api from "../../services/api";
+import usePermissions from "../../hooks/usePermissions";
+import ForbiddenPage from "../../components/ForbiddenPage";
 
 const NAVY = "#071525";
 const ACCENT = "#3db4e6";
 
 function SlideMedia({ image, imageCaption, placeholder }) {
-  const [loaded, setLoaded] = useState(false);
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    setLoaded(false);
+    let cancelled = false;
+    let objectUrl = null;
+    setBlobUrl(null);
+    setFailed(false);
+
+    if (!image) {
+      return undefined;
+    }
+
+    api
+      .get(`/kit-apresentacoes/${encodeURIComponent(image)}`, { responseType: "blob" })
+      .then((response) => {
+        if (cancelled) return;
+        const type = response.data?.type || "";
+        if (type && !type.startsWith("image/")) {
+          setFailed(true);
+          return;
+        }
+        objectUrl = URL.createObjectURL(response.data);
+        setBlobUrl(objectUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [image]);
 
-  const fileName = image ? image.split("/").pop() : "print.png";
-  const showImage = Boolean(image && loaded);
-  const showPlaceholder = Boolean(placeholder) && !showImage;
+  const fileName = image || "print.png";
+  const showImage = Boolean(blobUrl);
+  const showPlaceholder = Boolean(placeholder) && (failed || !image);
 
   return (
     <>
-      {image ? (
-        <figure style={{ ...mediaStyles.figure, display: showImage ? "block" : "none" }}>
-          <img
-            src={image}
-            alt={imageCaption || ""}
-            style={mediaStyles.img}
-            onLoad={() => setLoaded(true)}
-            onError={() => setLoaded(false)}
-          />
+      {showImage ? (
+        <figure style={mediaStyles.figure}>
+          <img src={blobUrl} alt={imageCaption || ""} style={mediaStyles.img} />
           {imageCaption ? <figcaption style={mediaStyles.caption}>{imageCaption}</figcaption> : null}
         </figure>
       ) : null}
-      {showPlaceholder ? (
+      {showPlaceholder || (failed && !placeholder) ? (
         <div style={mediaStyles.todo} role="note">
-          <div style={mediaStyles.todoKicker}>Print a gravar</div>
+          <div style={mediaStyles.todoKicker}>{failed ? "Print indisponível" : "Print a gravar"}</div>
           <div style={mediaStyles.todoFile}>{fileName}</div>
-          <p style={mediaStyles.todoText}>{placeholder}</p>
+          <p style={mediaStyles.todoText}>
+            {placeholder || "Arquivo não encontrado no kit privado."}
+          </p>
           <p style={mediaStyles.todoHint}>
-            Salve o PNG em <code>frontend/public/kit-apresentacoes/</code> com este nome.
+            Salve o PNG em <code>backend/private/kit-apresentacoes/</code> com este nome.
           </p>
         </div>
       ) : null}
@@ -48,9 +76,9 @@ function SlideMedia({ image, imageCaption, placeholder }) {
 const ApresentacaoDeck = () => {
   const { deckId } = useParams();
   const history = useHistory();
+  const { canViewKitApresentacoes, loading } = usePermissions();
   const deck = getDeck(deckId);
   const [index, setIndex] = useState(0);
-
   const total = deck ? deck.slides.length : 0;
   const slide = deck ? deck.slides[index] : null;
 
@@ -92,6 +120,14 @@ const ApresentacaoDeck = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [go, history, total]);
 
+  if (loading) {
+    return null;
+  }
+
+  if (!canViewKitApresentacoes()) {
+    return <ForbiddenPage />;
+  }
+
   if (!deck || !slide) {
     return (
       <div style={layout.root}>
@@ -114,6 +150,9 @@ const ApresentacaoDeck = () => {
       <header style={layout.top}>
         <RouterLink to="/apresentacoes" style={layout.back}>
           ← Decks
+        </RouterLink>
+        <RouterLink to="/" style={layout.back}>
+          Painel
         </RouterLink>
         <div style={layout.meta}>
           {deck.audience} · {deck.size}

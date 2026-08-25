@@ -1,3 +1,4 @@
+-- NÃO RODAR EM PRODUÇÃO. Só localhost. Não é migration Sequelize.
 -- Demo comercial do kit (idempotente). Empresas isoladas; não altera plano 1.
 -- Senha dos @taktchat.local (hash abaixo): LocalTest#2026
 -- Não cria superuser na empresa da plataforma.

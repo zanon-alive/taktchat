@@ -89,7 +89,7 @@ Técnica **longa**: incluir isolamento multi-tenant, JWT/permissões, LGPD, volu
 
 ## Screenshots
 
-Pasta `extras/screenshots/` (atalhos para os PNG em `frontend/public/kit-apresentacoes/`). Nome:
+Pasta `extras/screenshots/` (atalhos para os PNG em `backend/private/kit-apresentacoes/`). Nome:
 
 `f1-<persona>-<tela-curta>.png`  
 Ex.: `f1-atendente-ticket-maria.png`

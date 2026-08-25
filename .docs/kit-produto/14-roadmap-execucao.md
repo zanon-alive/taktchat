@@ -29,7 +29,7 @@ Pasta `.docs/kit-produto/` (plano, roles, checklist, fichas, tom, lacunas). Melh
 - Jornada: chat Maria, `/saudacao`, aceite Carla, modal transferir
 - WhatsApp CONNECTED; envio para `5514981812988`; transferência do ticket 14 persistida
 - Parceiro: Minhas empresas + Licenças com Cliente Demo Kit
-- Prints `f1`–`f26` e a maioria dos `pendente-*` em `frontend/public/kit-apresentacoes/`
+- Prints `f1`–`f26` e a maioria dos `pendente-*` em `backend/private/kit-apresentacoes/`
 
 ### Fase 3–5 — Documentos finais
 
@@ -45,7 +45,7 @@ Pasta `.docs/kit-produto/` (plano, roles, checklist, fichas, tom, lacunas). Melh
 
 ## Extra autorizado (v1.3) — `/apresentacoes`
 
-Rota pública **de propósito**. Hub + slideshow. PNG canônicos em `frontend/public/kit-apresentacoes/`.
+Rota **privada** (login). Hub + slideshow. PNG em `backend/private/kit-apresentacoes/`, servidos pela API.
 
 ## v1.4 — WhatsApp e prints (2026-08-23/24)
 
@@ -55,9 +55,9 @@ QR escaneado; sessão CONNECTED; print `pendente-whatsapp-connected.png`; landin
 
 1. Captura real do WhatsApp no celular — hoje há **ilustração de IA** em `pendente-whatsapp-celular.png`
 2. Copy dos slides (login comercial + 6 colunas) em MD/`decks.js`
-3. Migration Sequelize `.ts` + copiar `*.sql` no `build`
+3. **Não** transformar o seed em migration Sequelize — seed só local (ver `scripts/README.md`)
 4. Demanda 16 (A ou B) e bugs Kanban (`15`) — **outras branches**. O `parseInt` no token de signup (hex que começa com dígito) continua lá.
 
 ## Fora desta branch
 
-Commit/PR — só se você pedir. Deploy — nunca automático.
+Commit/PR desta leva: local já testado em 2026-08-25. Deploy — nunca automático. Seed **não** vai para o Postgres da VPS.

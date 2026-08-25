@@ -15,7 +15,7 @@ Fonte da verdade desta demanda. Se algo divergir da pasta gitignored `.docs/bran
 | Screenshots | Sim, nesta versão |
 | README da raiz | Pode estar incompleto; revisar na Fase 6 |
 | Ticket | Funcionalidade central; ver `10-fluxo-do-ticket.md` |
-| Código de produto | Não alterar **exceto** a rota pública `/apresentacoes` (hub + 6 decks), autorizada nesta branch |
+| Código de produto | Player `/apresentacoes` **privado** (login + permissão); prints em `backend/private/kit-apresentacoes/` |
 
 ## Como usar
 

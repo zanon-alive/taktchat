@@ -1,8 +1,6 @@
-const KIT = "/kit-apresentacoes";
-
 function shot(file, caption) {
   return {
-    image: `${KIT}/${file}`,
+    image: file,
     imageCaption: caption || "",
     placeholder: null,
   };
@@ -10,7 +8,7 @@ function shot(file, caption) {
 
 function pendente(file, oQueGravar) {
   return {
-    image: `${KIT}/${file}`,
+    image: file,
     imageCaption: file,
     placeholder: oQueGravar,
   };
@@ -795,7 +793,7 @@ const tecnicaPadrao = [
     bullets: [
       "Kit: .docs/kit-produto/ (manuais, comercial, prints).",
       "Legado: .docs/visao-geral/ e funcionalidades/.",
-      "Player desta branch: /apresentacoes.",
+      "Player /apresentacoes exige login (kit comercial da operação).",
     ],
     ...pendente(
       "pendente-docs-kit.png",

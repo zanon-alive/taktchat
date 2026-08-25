@@ -21,15 +21,14 @@
 
 ## Ainda aberto (fora do código desta branch)
 
-Registrado no roadmap do projeto (`.docs/visao-geral/roadmap.md`, seção Documentação → Kit de produto) para outro dia:
-
-1. Completar prints `pendente-*.png` do player `/apresentacoes`.
-2. Escanear o QR Baileys até `CONNECTED` (envio, transferência persistida, encerrar).
-
-Outros, sem data:
-
+1. Captura **real** do WhatsApp no celular — hoje há ilustração de IA (`pendente-whatsapp-celular.png`).
+2. Copy dos slides (login comercial) em MD/`decks.js`.
 3. Tag pessoal `#` na atendente se quiser agenda de contatos no perfil `user`.
 4. Overlay “API indisponível” no first paint — retry.
+
+WhatsApp da Cliente Demo Kit no ambiente **local** já está CONNECTED (envio e transferência persistida). Seed de demo **não** vai para produção.
+
+Kanban, CRM de pipeline e o `parseInt` do token de signup: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) — outras branches.
 
 ## Divergências código × docs antigos
 

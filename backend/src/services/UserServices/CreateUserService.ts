@@ -6,6 +6,7 @@ import User from "../../models/User";
 import Plan from "../../models/Plan";
 import Company from "../../models/Company";
 import { getPlatformCompanyId } from "../../config/platform";
+import { stripKitPermissionIfNotPlatform } from "../../helpers/canViewKitApresentacoes";
 
 interface Request {
   email: string;
@@ -124,6 +125,14 @@ const CreateUserService = async ({
     }
   }
 
+  let companyType: string | null = null;
+  if (companyId !== undefined) {
+    const targetCompany = await Company.findByPk(companyId, {
+      attributes: ["id", "type"]
+    });
+    companyType = targetCompany?.type || null;
+  }
+
   const user = await User.create(
     {
       email,
@@ -147,7 +156,7 @@ const CreateUserService = async ({
       allowRealTime,
       allowConnections,
       allowedContactTags,
-      permissions
+      permissions: stripKitPermissionIfNotPlatform(permissions, companyType)
     },
     { include: ["queues", "company"] }
   );

@@ -4,17 +4,18 @@
 
 ## Estado
 
-Lote do kit **fechado (v1.4)**. Fonte versionável: `.docs/kit-produto/`.
+Kit v1.4 + player privado **prontos**. Smoke local (2026-08-25):
 
-Commit desta leva **feito**. PR e deploy só se você pedir.
+- Sem sessão, `/apresentacoes` vai para `/login`
+- `dono@taktchat.local` vê o hub, o menu e o print (blob autenticado)
+- PNG sem JWT: 401; atendente da filha: 403
+- URL estática no frontend devolve HTML da SPA, não o PNG
 
-Prints de signup **reais** em `frontend/public/kit-apresentacoes/`. Celular: ilustração de IA.
+Seed SQL só em `.docs/kit-produto/scripts/` — **não** rodar no Postgres da VPS.
 
-`Route.js` só redireciona rota privada quando o path casa. Token local do parceiro 4 começa com letra.
+Este repositório **não** é projeto Telecontrol e **não** deve ser trackeado no MCP/Cérebro dela.
 
-## Aberto
+## Fora desta branch
 
-- Captura real do celular
-- Copy dos slides (login comercial)
-- Migration Sequelize `.ts` do seed
-- Demanda 16 (A/B), Kanban (`15`) e parseInt do signupToken — outras branches
+- Captura real do celular; copy dos slides
+- Kanban (`15`), demanda 16, parseInt do signupToken, overlay “API indisponível”

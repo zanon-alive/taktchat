@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { DECKS } from "./decks";
+import usePermissions from "../../hooks/usePermissions";
+import ForbiddenPage from "../../components/ForbiddenPage";
 
 const NAVY = "#0b1f33";
 const ACCENT = "#065183";
@@ -85,9 +87,19 @@ const styles = {
 };
 
 const ApresentacoesHub = () => {
+  const { canViewKitApresentacoes, loading } = usePermissions();
+
   useEffect(() => {
     document.title = "Apresentações — Taktchat";
   }, []);
+
+  if (loading) {
+    return null;
+  }
+
+  if (!canViewKitApresentacoes()) {
+    return <ForbiddenPage />;
+  }
 
   return (
     <div style={styles.root}>
@@ -118,8 +130,11 @@ const ApresentacoesHub = () => {
           ))}
         </div>
         <p style={styles.footer}>
-          Imagens em <code>/kit-apresentacoes/</code>. Rota pública de propósito — só quem
-          conhece o link acessa; não pede login.
+          Login obrigatório. Prints saem da API autenticada — não ficam em pasta pública.
+          <br />
+          <RouterLink to="/" style={{ color: "#fff" }}>
+            Voltar ao painel
+          </RouterLink>
         </p>
       </div>
     </div>

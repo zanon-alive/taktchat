@@ -6,7 +6,7 @@ import { AuthContext } from '../context/Auth/AuthContext';
  * Compatível com sistema antigo (profile) e novo (permissions)
  */
 const usePermissions = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
 
   /**
    * Verifica se usuário tem uma permissão específica
@@ -43,8 +43,11 @@ const usePermissions = () => {
     // FALLBACK: usa sistema antigo (profile + flags)
     // Admin tem tudo (exceto super)
     if (user.profile === "admin") {
-      // Admin não tem permissões de super (companies, all-connections)
-      if (permission.startsWith("companies.") || permission === "all-connections.view") {
+      if (
+        permission.startsWith("companies.") ||
+        permission === "all-connections.view" ||
+        permission.startsWith("apresentacoes.")
+      ) {
         return false;
       }
       return true;
@@ -105,13 +108,16 @@ const usePermissions = () => {
     return user?.profile === "admin" || user?.super === true;
   };
 
-  /**
-   * Verifica se usuário é super admin
-   * 
-   * @returns {boolean}
-   */
   const isSuper = () => {
     return user?.super === true;
+  };
+
+  const canViewKitApresentacoes = () => {
+    if (!user?.id) return false;
+    if (user.super === true) return true;
+    if (user.company?.type !== "platform") return false;
+    if (user.profile === "admin") return true;
+    return hasPermission("apresentacoes.view");
   };
 
   return {
@@ -120,6 +126,8 @@ const usePermissions = () => {
     hasAnyPermission,
     isAdmin,
     isSuper,
+    canViewKitApresentacoes,
+    loading,
     user
   };
 };

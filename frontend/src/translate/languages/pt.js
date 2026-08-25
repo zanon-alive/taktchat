@@ -959,6 +959,7 @@ const messages = {
           settings: "Configurações",
           files: "Lista de arquivos",
           helps: "Ajuda",
+          apresentacoes: "Apresentações",
           messagesAPI: "API",
           schedules: "Agendamentos",
           campaigns: "Envio em Massa",

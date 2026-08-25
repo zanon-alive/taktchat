@@ -1,6 +1,6 @@
 # Logins locais do kit
 
-**Ambiente:** `localhost:5433`, banco `taktchat_database`. Não usar em produção.
+**Ambiente:** `localhost:5433`, banco `taktchat_database`. **Não usar em produção. Não aplicar via migration.**
 
 Senha dos `@taktchat.local`:
 
@@ -24,13 +24,15 @@ LocalTest#2026
 Jornada dos users kit: `00:00`–`23:59` (senão `ERR_OUT_OF_HOURS`).  
 Parceiro e cliente: licença `active` até 2027 (senão `ERR_ACCESS_BLOCKED_PLATFORM`).
 
+**Player `/apresentacoes`:** `dono@taktchat.local` e `admin@admin.com` (empresa plataforma). Parceiro, admin da filha e atendente **não** entram.
+
 ## Seed
 
 `scripts/seed-local-kit.sql` + adjustments (licenses, type, parent, hours).
 
 ## WhatsApp
 
-Cliente Demo Kit: conexão Baileys **CONNECTED** em 2026-08-23 (número da sessão `(14) 99687-0843`). Print: `frontend/public/kit-apresentacoes/pendente-whatsapp-connected.png`.
+Cliente Demo Kit: conexão Baileys **CONNECTED** em 2026-08-23 (número da sessão `(14) 99687-0843`). Print: `backend/private/kit-apresentacoes/pendente-whatsapp-connected.png`.
 
 Mensagem de teste enviada para `5514981812988` (ticket **14**, contato “Teste Kit WhatsApp”).
 

@@ -347,12 +347,12 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ### Kit de produto e apresentações (branch `docs/kit-documentacao-produto`)
 
-Player: `/apresentacoes` (rota pública de propósito — só quem conhece o link acessa). Lote v1.4 fechado em 2026-08-24: WhatsApp CONNECTED, transferência persistida, maioria dos `pendente-*.png`.
+Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma ou permissão `apresentacoes.view`). Lote v1.4 fechado em 2026-08-24: WhatsApp CONNECTED, transferência persistida, maioria dos `pendente-*.png`.
 
 - [x] **WhatsApp real no ambiente local** — QR Baileys da Cliente Demo Kit escaneado; sessão **CONNECTED**; envio de teste e transferência persistida. Print: `pendente-whatsapp-connected.png`.
-- [x] **Prints comerciais do player** — landing, planos, Flow Builder, campanhas, Kanban/funil, IA, widget, health, billing, infra (lista em `frontend/public/kit-apresentacoes/README.md`).
+- [x] **Prints comerciais do player** — landing, planos, Flow Builder, campanhas, Kanban/funil, IA, widget, health, billing, infra (lista em `backend/private/kit-apresentacoes/README.md`).
 - [x] **Prints do player (signup da filha)** — captura real de `pendente-signup-partner.png` e `pendente-signup-token.png`. Celular continua ilustração de IA (`pendente-whatsapp-celular.png`).
-- [ ] **Seed demo em migration Sequelize** — hoje há `.sql` local; falta `.ts` + copiar `*.sql` no `build` (Docker só leva `dist/`).
+- [x] **Seed demo não vai para produção** — SQL só em `.docs/kit-produto/scripts/` (não é migration).
 
 Detalhe do que é **código de produto** (outras branches): [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 
@@ -442,7 +442,7 @@ Lista completa: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`.
 
 ## 📝 Histórico de Atualizações
 
-- **2026-08-24:** Prints reais de `/signup-partner` (`partner=4` e token). `Route.js` só redireciona ao login quando a rota privada **bate**. Token local do Parceiro Demo Kit começa com letra (hex com dígito ainda é bug de produto).
+- **2026-08-24:** Player `/apresentacoes` exige login; PNG fora de `public/`. Seed do kit não vai para produção.
 - **2026-08-24:** Ilustração de IA para o celular (`pendente-whatsapp-celular.png`). Não é print do aparelho.
 - **2026-08-24:** Kit v1.4: WhatsApp CONNECTED, transferência persistida, maioria dos prints `pendente-*` gravados. Restam captura real do celular/signup e migration Sequelize do seed.
 - **2026-08-22:** Kit de produto: prints pendentes do player `/apresentacoes` e jornada WhatsApp com QR escaneado registrados como melhorias futuras (não bloqueiam o fechamento da branch).

@@ -14,8 +14,6 @@ import SignupPartner from "../pages/SignupPartner";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
 import LandingPage from "../pages/LandingPage";
-import ApresentacoesHub from "../pages/Apresentacoes";
-import ApresentacaoDeck from "../pages/Apresentacoes/Deck";
 
 // Lazy loading para todas as outras páginas (code splitting automático)
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -59,6 +57,8 @@ const OnboardingDocs = lazy(() => import("../pages/OnboardingDocs"));
 const AdminDocs = lazy(() => import("../pages/AdminDocs"));
 const Licenses = lazy(() => import("../pages/Licenses"));
 const PartnerBillingReport = lazy(() => import("../pages/PartnerBillingReport"));
+const ApresentacoesHub = lazy(() => import("../pages/Apresentacoes"));
+const ApresentacaoDeck = lazy(() => import("../pages/Apresentacoes/Deck"));
 
 
 const Routes = () => {
@@ -75,8 +75,6 @@ const Routes = () => {
     <BrowserRouter>
       <Switch>
         <RouterRoute exact path="/landing" component={LandingPage} />
-        <RouterRoute exact path="/apresentacoes" component={ApresentacoesHub} />
-        <RouterRoute exact path="/apresentacoes/:deckId" component={ApresentacaoDeck} />
         <AuthProvider>
           <TicketsContextProvider>
             <Route exact path="/docs" component={OnboardingDocs} />
@@ -86,6 +84,8 @@ const Routes = () => {
             <Route exact path="/signup-partner" component={SignupPartner} />
             <Route exact path="/forgot-password" component={ForgotPassword} />
             <Route exact path="/reset-password" component={ResetPassword} />
+            <Route exact path="/apresentacoes" component={ApresentacoesHub} isPrivate />
+            <Route exact path="/apresentacoes/:deckId" component={ApresentacaoDeck} isPrivate />
             <WhatsAppsProvider>
               <LoggedInLayout>
                 <Route exact path="/financeiro" component={Financeiro} isPrivate />
