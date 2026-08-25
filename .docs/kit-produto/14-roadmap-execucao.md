@@ -2,7 +2,7 @@
 
 **Branch:** `docs/kit-documentacao-produto`  
 **Data:** 2026-08-21 → 2026-08-25  
-**Status:** kit **v1.5** — alinhado à `main` (Kanban PR #21 + overlay/token nesta branch).
+**Status:** kit **v1.6** — caminho A da demanda 16 encerrado nesta linha (além do v1.5).
 
 ## Entregue
 
@@ -61,11 +61,22 @@ Merge da `main` (PR #21) nesta branch. Copy do kit deixa de descrever o Kanban a
 - Copy dos slides: login comercial, funil de **6 colunas**, deck técnico com QR CONNECTED e prints `pendente-*` já gravados (sem caixa “a gravar”).
 - Quadro `/kanban` lista `closed` com lane Kanban (item 2b).
 
+## v1.6 — lote A6–A8, desfecho, tags # e relatório (2026-08-25)
+
+Branches mergeadas nesta linha: `feat/kanban-aviso-colunas`, `feat/kanban-desfecho-encerrar`, `feat/ficha-cadastro-comercial`, `feat/contatos-tags-hierarquicas`, `feat/relatorio-lanes-kanban`.
+
+- Aviso se o quadro passa de 8 colunas; tag operacional vs lane.
+- Encerrar pergunta ganho/perdido ou sair do quadro.
+- Drawer: bloco Cadastro comercial.
+- Empty state + seed `#Beatriz` para a atendente (regra `#` mantida).
+- Relatório `/kanban/stats` (quantidade e idade média).
+- Rota `/kanban` além de `/Kanban`.
+
 ## Ainda aberto (não bloqueia o lote)
 
 1. Captura real do WhatsApp no celular — hoje há **ilustração de IA** em `pendente-whatsapp-celular.png`
 2. **Não** transformar o seed em migration Sequelize — seed só local (ver `scripts/README.md`)
-3. Demanda 16: A1–A5 no PR #21; A3 listagem `closed` (2b) nesta branch. Restam A6–A9 (aviso de 8 colunas, relatório, ficha) e caminho B.
+3. Demanda 16 caminho B (CRM de mercado / Deal) — fora desta geração.
 
 ## Fora desta branch
 

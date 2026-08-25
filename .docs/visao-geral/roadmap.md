@@ -356,8 +356,9 @@ Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma 
 - [x] **Copy do kit alinhado ao Kanban #21** — ticket novo na lane de entrada; Encerrar aplica lane; overlay/token não são mais pegadinha da demo.
 - [x] **Copy dos slides (login comercial + 6 colunas)** — logins `@taktchat.local` na capa; funil Lead → … → Fechado ganho/perdido no player.
 - [x] **Deck técnico** — QR da demo CONNECTED; prints `pendente-*` já gravados (sem caixa “a gravar”).
+- [x] **A6–A8, desfecho, tags `#`, relatório por lane** — mergeados na kit (v1.6).
 
-Pendências 1–5, 8, 10 e 2b: resolvidas. Restam captura real do celular e demanda 16 (A6–A9 / B). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
+Pendências 1–5, 6–10 (aviso, desfecho, ficha, tags, relatório), 8 overlay, 10 token e 2b: resolvidas. Restam captura real do celular e caminho B (CRM de mercado). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 
 ## 🎫 Tickets, tags e Kanban
 
@@ -369,7 +370,8 @@ Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do 
 - [x] Cron `timeLane` usa `updatedAt` (sem exigir `fromMe`) — PR #21
 - [x] Uma tag `kanban=1` por ticket (arrastar substitui) — PR #21
 - [x] Ticket novo pós-`closed` não herda rollback da conversa encerrada — PR #21
-- [ ] **Demanda (análise):** CRM de conversa estruturado vs. CRM de mercado — [kit-produto/16-demanda-crm-conversa-ou-mercado.md](../kit-produto/16-demanda-crm-conversa-ou-mercado.md). Sem código até escolher caminho A ou B.
+- [x] Aviso se `kanban=1` > 8; desfecho ao Encerrar; ficha comercial; relatório `/kanban/stats`; tags `#` da atendente
+- [ ] **Caminho B (opcional):** CRM de mercado / Deal — [kit-produto/16-demanda-crm-conversa-ou-mercado.md](../kit-produto/16-demanda-crm-conversa-ou-mercado.md)
 
 ---
 

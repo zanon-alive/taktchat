@@ -16,7 +16,10 @@ Atualizar assim que a UI usar outro nome. Não deixar para a Fase 5.
 | Encerrado | Ticket fechado; o cliente pode gerar outro ao falar de novo |
 | Transferir | Passar o ticket de fila e/ou de pessoa |
 | Tag | Etiqueta operacional (Urgente, VIP; `kanban=0`) |
-| Lane | Coluna do quadro Kanban (`kanban=1`): Lead, Qualificado, Fechado ganho… Uma por ticket |
+| Lane | Coluna do quadro de conversas (`kanban=1`): Lead, Qualificado, Fechado ganho… Uma por ticket |
+| Cadastro comercial | Situação, última compra e carteira no drawer do atendimento |
+| Tag pessoal `#` | Tag que começa com um `#` (ex.: `#Beatriz`); sem ela o perfil `user` não vê contatos |
+| Relatório por lane | Quantidade e idade média dos tickets em cada coluna (`/kanban/stats`) |
 | CRM de conversa | Contato + ticket (fila, dono, histórico) no WhatsApp — posicionamento atual; ver demanda 16 |
 | CRM de mercado / pipeline | Oportunidade com valor e estágio nativo (Pipedrive/HubSpot). O Taktchat **não** tem isso; tags Kanban organizam a conversa |
 | Atendente | `profile = user` focado em conversa |

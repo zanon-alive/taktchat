@@ -6,7 +6,7 @@ Cadastro de pessoas/empresas que conversam com você; etiquetas para filtrar e u
 
 ## Onde fica
 
-`/contacts`, `/contacts/import`, `/tags`, `/kanban`, `/TagsKanban`
+`/contacts`, `/contacts/import`, `/tags`, `/kanban`, `/kanban/stats`, `/TagsKanban`
 
 ## Quem usa
 
@@ -23,8 +23,10 @@ Atendente (ver/editar o básico), admin (importação, regras, lanes).
 ## Comportamento atual (PR #21)
 
 - Ticket novo recebe a lane de entrada, se a empresa usa Kanban.
-- Encerrar aplica a lane de encerrar no ticket. A tela `/kanban` lista `closed` quando o ticket tem lane (`kanban=1`).
+- Encerrar pergunta a lane de desfecho (Fechado*) ou sair do quadro.
 - Uma tag `kanban=1` por ticket; arrastar substitui a coluna.
+- Atendente: precisa de tag pessoal `#` nos contatos (seed `#Beatriz`).
+- Relatório por lane em `/kanban/stats`.
 - Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 
 ## Seed

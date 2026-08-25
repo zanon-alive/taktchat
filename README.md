@@ -23,7 +23,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - **EntrySource e Chat do Site**: Rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis; widget de chat embarcável para sites externos; API pública e token por empresa.
 - **Governança Multi-Empresa e Whitelabel**: Hierarquia plataforma → whitelabels → clientes; visibilidade e CRUD por nível (empresas, planos, licenças); dashboards e menus por perfil; relatório de cobrança por parceiro (`/partner-billing-report`) e registro de snapshots; cadastro direto na landing e cadastro por link do parceiro (`/signup-partner`); bloqueio por cobrança (plataforma suspende parceiro; parceiro bloqueia/libera empresas-filhas). Fase 1 e Fase 2 concluídas.
 
-> **Kit por audiência (v1.5):** `.docs/kit-produto/README.md` — player em `/apresentacoes` (login obrigatório), execução em `.docs/kit-produto/14-roadmap-execucao.md`.
+> **Kit por audiência (v1.6):** `.docs/kit-produto/README.md` — player em `/apresentacoes` (login obrigatório), execução em `.docs/kit-produto/14-roadmap-execucao.md`.
 > Detalhamento técnico legado: `.docs/visao-geral/funcionalidades.md`.
 > WhatsApp API Oficial: `.docs/funcionalidades/whatsapp-api-oficial/`
 > Arquitetura Whitelabel (Fase 2): `.docs/visao-geral/whitelabel-architecture.md`

@@ -1,9 +1,9 @@
 # Demanda para análise — CRM de conversa estruturado vs. CRM de mercado
 
-**Status:** draft — A1–A5 (núcleo Kanban) no PR #21; A3 listagem `closed` no quadro feito nesta branch (2b, 2026-08-25). Restam A6–A9 e o caminho B.  
+**Status:** caminho A (A1–A9) feito — núcleo na `main` (PR #21); 2b, A6–A8, desfecho ao Encerrar, tags `#` e relatório nesta branch. Resta o caminho B.  
 **Data:** 2026-08-22 (atualizado 2026-08-25)  
 **Origem:** pedido verbal nesta sessão (kit de produto)  
-**Não implementar o restante nesta branch** (`docs/kit-documentacao-produto`), salvo o 2b já feito. A1–A5 estão na `main`.
+**Não implementar o caminho B nesta branch** (`docs/kit-documentacao-produto`). A1–A9 do caminho A já estão no código desta linha.
 
 Classificação local (MCP Cerebro indisponível):
 
@@ -119,12 +119,12 @@ Branch: `feat/crm-conversa-estruturado`.
 | A3 | Encerrar: setting “mover para tag X”; quadro lista `closed` | itens 2 e 2b — **feito** (tag no PR #21; listagem nesta branch) |
 | A4 | Ticket novo pós-`closed` recebe Lead; não aplica rollback da conversa morta | itens 1 e 5 — **feito PR #21** |
 | A5 | Cron `timeLane` por `updatedAt` / última mensagem, sem exigir `fromMe` | item 3 — **feito PR #21** |
-| A6 | UI: separar **tag operacional** (Urgente, VIP) de **coluna** (Lead…); aviso se houver > 8 colunas | item 7 |
-| A7 | Relatório simples por lane (quantidade, idade média) — sem R$ | novo |
-| A8 | Ficha de atendimento: bloco “cadastro comercial” (situação, última compra, carteira) sempre visível | novo |
-| A9 | Kit/glossário/player: linguagem alinhada (CRM de conversa, não pipeline) | docs |
+| A6 | UI: separar **tag operacional** (Urgente, VIP) de **coluna** (Lead…); aviso se houver > 8 colunas | item 7 — **feito** |
+| A7 | Relatório simples por lane (quantidade, idade média) — sem R$ | **feito** (`/kanban/stats`) |
+| A8 | Ficha de atendimento: bloco “cadastro comercial” (situação, última compra, carteira) sempre visível | **feito** |
+| A9 | Kit/glossário/player: linguagem alinhada (CRM de conversa, não pipeline) | docs — **feito** |
 
-Estimativa grosseira: A1–A5 e a listagem `closed` (A3) já feitos. A6–A9 podem ser PRs menores.
+Estimativa grosseira: caminho A encerrado nesta geração. Caminho B continua opcional.
 
 ### Caminho B — só após A ou se o comercial exigir pipeline de verdade
 
@@ -186,7 +186,7 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 ## Perguntas para travar antes de codar
 
 1. **Qual caminho na primeira branch: só A, A+B em sequência, ou B direto?** (recomendação: só A.)
-2. Ao **encerrar** o ticket, o padrão da empresa demo deve continuar “Fechado ganho” (setting), perguntar ganho/perdido no clique, ou sair do quadro? *(setting já existe; popup não.)*
+2. Ao **encerrar** o ticket, o padrão da empresa demo deve continuar “Fechado ganho” (setting), perguntar ganho/perdido no clique, ou sair do quadro? *(popup de desfecho implementado; setting continua como fallback.)*
 3. O card do Kanban deve continuar sendo o **ticket** (A) ou passar a ser a **oportunidade** (B)?
 4. Precisa relatório em R$ nesta geração do produto, ou volume/tempo basta?
 5. Account (CNPJ pai de vários WhatsApp) é requisito de algum cliente nomeado, ou pode esperar?
@@ -195,7 +195,7 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 
 ## Decisão
 
-Núcleo A1–A5 (lanes) na `main` via [PR #21](https://github.com/zanon-alive/taktchat/pull/21). Listagem `closed` no quadro (resto do A3 / 2b) feita nesta branch. Caminho B e resto do A (aviso de 8 colunas, relatório, ficha) pendentes de revisão.
+Núcleo A1–A5 (lanes) na `main` via [PR #21](https://github.com/zanon-alive/taktchat/pull/21). Nesta branch: 2b, A6–A8, popup de desfecho, tags `#` da atendente, relatório por lane e copy A9. Caminho B (Deal/CRM de mercado) permanece fora desta geração.
 
 ---
 

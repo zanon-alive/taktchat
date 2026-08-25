@@ -22,11 +22,10 @@
 ## Ainda aberto (fora do código desta branch)
 
 1. Captura **real** do WhatsApp no celular — hoje há ilustração de IA (`pendente-whatsapp-celular.png`).
-2. Tag pessoal `#` na atendente se quiser agenda de contatos no perfil `user`.
 
 WhatsApp da Cliente Demo Kit no ambiente **local** já está CONNECTED (envio e transferência persistida). Seed de demo **não** vai para produção.
 
-Kanban de conversa (entrada, Encerrar, uma tag, cron, rollback, quadro com `closed` na lane): **feito** (PR #21 + 2b). Overlay de API e token de signup: **feito** nesta branch (`0e2c051`). Restam CRM nativo (demanda 16, A6–A9 / caminho B), aviso de 8 colunas, captura real do celular. Lista: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md).
+Kanban de conversa (entrada, Encerrar com desfecho, uma tag, cron, rollback, quadro com `closed`, aviso de 8 colunas, ficha comercial, relatório por lane): **feito**. Overlay de API e token de signup: **feito**. Caminho B (CRM de mercado) e captura real do celular: fora desta geração. Lista: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md).
 
 ## Divergências código × docs antigos
 

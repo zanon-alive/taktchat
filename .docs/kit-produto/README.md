@@ -3,7 +3,7 @@
 Fonte da verdade desta demanda. Se algo divergir da pasta gitignored `.docs/branchs/docs/kit-documentacao-produto/`, **vale este kit**.
 
 **Branch:** `docs/kit-documentacao-produto`  
-**Status:** v1.5 — alinhado à `main` (Kanban PR #21 + overlay/token). Player em `/apresentacoes` (6 decks). WhatsApp Cliente Demo Kit **CONNECTED**. Roadmap: [14-roadmap-execucao.md](14-roadmap-execucao.md).
+**Status:** v1.6 — A6–A8, desfecho ao Encerrar, tags `#` da atendente e relatório por lane mergeados nesta branch. Player em `/apresentacoes` (6 decks). WhatsApp Cliente Demo Kit **CONNECTED**. Roadmap: [14-roadmap-execucao.md](14-roadmap-execucao.md).
 
 ## Decisões travadas
 
@@ -44,8 +44,8 @@ Fonte da verdade desta demanda. Se algo divergir da pasta gitignored `.docs/bran
 | [12-glossario.md](12-glossario.md) | Termos — começar na Fase 1 |
 | [13-o-que-o-produto-nao-faz.md](13-o-que-o-produto-nao-faz.md) | Limites e honestidade comercial |
 | [14-roadmap-execucao.md](14-roadmap-execucao.md) | O que esta branch entregou |
-| [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) | Kanban 1–5 / 2b / overlay / token: resolvidos; restam CRM nativo e A6–A9 |
-| [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md) | Demanda (draft): CRM de conversa vs. CRM de mercado |
+| [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) | A1–A8, 2b, overlay, token, tags `#`: resolvidos; restam captura do celular e caminho B |
+| [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md) | Caminho A feito; CRM de mercado (B) fora desta geração |
 
 ## Entregáveis finais (v1)
 

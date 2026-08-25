@@ -29,4 +29,4 @@ Ver [../../13-o-que-o-produto-nao-faz.md](../../13-o-que-o-produto-nao-faz.md).
 ## Rodadas futuras
 
 1. Captura **real** do WhatsApp no celular (hoje ilustração de IA).
-2. Demanda 16 restante: aviso de 8 colunas, relatório, ficha, CRM nativo.
+2. Demanda 16 caminho B (CRM de mercado). O caminho A (quadro de conversas) já está no produto.

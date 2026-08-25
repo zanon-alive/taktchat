@@ -1,6 +1,6 @@
 # Pendências de produto — Kanban / CRM de conversa
 
-Itens identificados na branch `docs/kit-documentacao-produto`. Atualizado em **2026-08-25** após o merge da `main` (PR #21), overlay/token e o filtro do quadro para `closed` com lane (2b).
+Itens identificados na branch `docs/kit-documentacao-produto`. Atualizado em **2026-08-25** após o lote A6, desfecho ao Encerrar, A8, tags `#` e A7.
 
 Fonte: Tags (`kanban`, `timeLane`, `nextLaneId`, `rollbackLaneId`), `FindOrCreateTicketService`, `UpdateTicketService`, `queues.handleProcessLanes`, `wbotMessageListener`. Como o funil funciona hoje: [`.docs/funcionalidades/kanban-lanes.md`](../funcionalidades/kanban-lanes.md).
 
@@ -38,19 +38,35 @@ Rotas montam durante o health; diálogo só se a API falhar; retry automático.
 
 `ListTicketsServiceKanban` inclui `closed` quando o ticket tem tag `kanban=1`. Encerrar deixa o card visível na lane de encerrar; Pedro do seed aparece em Fechado perdido. `closed` sem lane continua fora do quadro.
 
+### 6. Aviso de excesso de colunas — `feat/kanban-aviso-colunas`
+
+Alert em Tags Kanban e no quadro se `kanban=1` > 8. Hint de tag operacional vs coluna.
+
+### 7. Desfecho ao Encerrar — `feat/kanban-desfecho-encerrar`
+
+Popup: lane Fechado* (ou a setting) ou sair do quadro. Backend: `kanbanCloseTagId` / `leaveKanbanBoard`.
+
+### Cadastro comercial no drawer — `feat/ficha-cadastro-comercial`
+
+Bloco **Cadastro comercial** (situação, última compra, carteira) no atendimento.
+
+### 9. Contatos da atendente — `feat/contatos-tags-hierarquicas`
+
+A regra `#` **não** foi relaxada. Empty state explica a tag pessoal. Seed local: `#Beatriz` nos contatos Maria/Carla (Suporte).
+
+### Relatório por lane — `feat/relatorio-lanes-kanban`
+
+`GET /ticket/kanban/stats` e menu **Funil (lanes)** (`/kanban/stats`): quantidade e idade média. Sem R$.
+
 ## Ainda aberto (não bloqueia o kit)
 
-### 6. Pipeline nativo (CRM)
+### Pipeline nativo (CRM de mercado)
 
-Valor, probabilidade, ganho/perdido, dono da oportunidade. Fora do recorte de tags. Análise: [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md).
+Valor, probabilidade, ganho/perdido como entidade Deal. Fora do recorte de tags. Análise: [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md).
 
-### 7. Aviso de excesso de colunas
+### Captura real do celular
 
-Sem limite no código. Sugerir na UI se `kanban=1` > 8.
-
-### 9. Contatos da atendente vazios
-
-Tags hierárquicas `#`. Fora do Kanban.
+Print `pendente-whatsapp-celular.png` ainda é ilustração de IA.
 
 ## Já coberto nesta branch (não reabrir)
 
