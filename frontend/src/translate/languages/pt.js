@@ -1832,6 +1832,12 @@ const messages = {
           unblock: "Desbloquear",
         },
         extraInfo: "Outras informações",
+        commercial: {
+          title: "Cadastro comercial",
+          situation: "Situação",
+          lastPurchase: "Última compra",
+          wallet: "Carteira",
+        },
       },
       messageVariablesPicker: {
         label: "Variavéis disponíveis",
