@@ -2,7 +2,7 @@
 
 **Versão:** 1.0  
 **Data:** 2025-01-27  
-**Status:** ✅ Implementado (75% completo - aguardando testes)
+**Status v1.8 documental:** implementação condicionada a credenciais/configuração Meta; documentos de 2025 abaixo preservam histórico e não confirmam deploy, SLA ou garantia anti-ban.
 
 ---
 
@@ -151,26 +151,25 @@ WhatsAppFactory (Factory Pattern)
 |---------|---------|-------------|
 | **Setup** | QR Code (2 min) | Credenciais Meta (30 min) |
 | **Custo** | R$ 0 | R$ 0,17-0,34/conversa* |
-| **Banimento** | Risco moderado | Sem risco |
-| **Limite msg/dia** | ~150-500** | Ilimitado |
+| **Bloqueio/restrição** | Risco do canal não oficial | Sujeito às políticas e à qualidade da conta Meta |
+| **Limite de envio** | Varia por sessão e comportamento | Limites vigentes da conta/Meta |
 | **Multi-agente** | Problemático | Nativo |
 | **Templates** | ❌ | ✅ |
 | **Botões interativos** | Limitado | Completo |
 | **Webhooks** | ❌ | ✅ |
 | **SLA/Suporte** | Comunidade | Meta oficial |
-| **Uptime** | ~95% | 99.9% |
+| **Disponibilidade** | Depende da sessão Web | Depende da plataforma Meta e da integração |
 
 *\* Primeiras 1.000 conversas/mês grátis*  
-*\*\* Com anti-ban configurado*
+*\*\* Cadência reduz risco, sem garantia anti-ban.*
 
 ---
 
 ## Benefícios Principais
 
-### ✅ Confiabilidade Empresarial
-- SLA garantido pela Meta
-- Sem risco de banimento
-- Uptime 99.9%
+### ✅ Canal oficial
+- Credenciais, templates e suporte conforme a conta e os contratos vigentes da Meta
+- Políticas, qualidade da conta e limites continuam aplicáveis
 
 ### 📈 Escalabilidade
 - Suporte a milhares de conversas simultâneas
@@ -196,7 +195,7 @@ WhatsAppFactory (Factory Pattern)
 ### Cenário 2: Suporte Técnico
 ✅ Multi-agente nativo  
 ✅ Webhooks para notificações  
-✅ Confiabilidade 99.9%  
+✅ Canal oficial e webhooks
 **Solução:** API Oficial
 
 ### Cenário 3: Pequena Empresa

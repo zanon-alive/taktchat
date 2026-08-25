@@ -23,8 +23,9 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - **EntrySource e Chat do Site**: Rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis; widget de chat embarcável para sites externos; API pública e token por empresa.
 - **Governança Multi-Empresa e Whitelabel**: Hierarquia plataforma → whitelabels → clientes; visibilidade e CRUD por nível (empresas, planos, licenças); dashboards e menus por perfil; relatório de cobrança por parceiro (`/partner-billing-report`) e registro de snapshots; cadastro direto na landing e cadastro por link do parceiro (`/signup-partner`); bloqueio por cobrança (plataforma suspende parceiro; parceiro bloqueia/libera empresas-filhas). Fase 1 e Fase 2 concluídas.
 
-> **Kit por audiência (v1.7):** `.docs/kit-produto/README.md` — player em `/apresentacoes` (login obrigatório), execução em `.docs/kit-produto/14-roadmap-execucao.md`.
-> Detalhamento técnico legado: `.docs/visao-geral/funcionalidades.md`.
+> **Documentação funcional v1.8:** `.docs/kit-produto/README.md` — revisão do código atual, sem afirmar implantação em produção.
+> **Mapa real do frontend:** `.docs/funcionalidades/mapa-frontend.md` — rotas, menu, personas, permissões e gates de plano.
+> Visão funcional consolidada: `.docs/visao-geral/funcionalidades.md`.
 > WhatsApp API Oficial: `.docs/funcionalidades/whatsapp-api-oficial/`
 > Arquitetura Whitelabel (Fase 2): `.docs/visao-geral/whitelabel-architecture.md`
 
@@ -90,6 +91,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Infraestrutura e stack de produção: `.docs/infraestrutura/` (inclui stack Docker Swarm em produção)
 - Operação, monitoramento e suporte: `.docs/operacao/`
 - Funcionalidades por módulo: `.docs/funcionalidades/`
+  - **Mapa de rotas e acesso do frontend:** `.docs/funcionalidades/mapa-frontend.md`
   - **Assets estáticos (public vs src, evitar 404 em produção):** `.docs/funcionalidades/frontend-assets-estaticos.md`
   - **WhatsApp Business API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/` - Documentação completa da integração
   - **Kanban (lanes de entrada e encerramento):** `.docs/funcionalidades/kanban-lanes.md`

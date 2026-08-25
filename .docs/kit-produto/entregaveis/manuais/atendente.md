@@ -44,7 +44,8 @@ Conectar WhatsApp, criar usuário, plano, campanha em massa, empresa-filha.
 ### Como encerrar
 
 1. Ação **Encerrar** / finalizar.
-2. Só faça quando o assunto acabou. Nova mensagem do cliente abre **outro** ticket, já na lane de entrada do Kanban (se a empresa usar o quadro). Encerrar aplica a lane configurada pelo admin (ex.: Fechado ganho).
+2. Escolha no popup a lane de desfecho (Fechado*) ou sair do quadro; a configuração do admin é o padrão.
+3. Só faça quando o assunto acabou. Nova mensagem do cliente abre **outro** ticket, já na lane de entrada do Kanban (se a empresa usar o quadro).
 
 ## Telas que você usa
 

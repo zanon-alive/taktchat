@@ -18,6 +18,14 @@ Licenças ativas até 2027 para parceiro e cliente (senão o login devolve `ERR_
 
 `/companies`, `/licenses`, `/partner-billing-report` (super).
 
+## Capacidades
+
+- Hierarquia e bloqueio de empresas-filhas.
+- Licenças, avisos, crons e snapshots de cobrança.
+- Registro de pagamento (`register-payment`).
+- Mercado Pago funcional quando configurado.
+- Gateway genérico **manual/stub**: não prometer cobrança automática para provedores genéricos.
+
 ## Status
 
-Tipos e licenças **criados no banco**. Menus de revenda na UI do parceiro: **a validar na rodada parceiro** (login da Ana funciona via API).
+Tipos e licenças **criados no banco**. Menus de revenda foram validados no ambiente local; esta documentação não afirma implantação em produção.

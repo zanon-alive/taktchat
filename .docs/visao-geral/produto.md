@@ -17,7 +17,7 @@ Suporta **dual channel** (Baileys e WhatsApp Business API Oficial), landing de v
 - **Backend** (`backend/`): API REST, Socket.IO, filas Bull, Jobs agendados (cron) e integrações externas.
 - **Frontend** (`frontend/`): SPA React 17 com Material UI v5, gerenciamento de estado via hooks e `zustand`.
 - **Infraestrutura**: PostgreSQL 15, Redis 6.2, armazenamento local (volumes Docker) para mídias e sessões do WhatsApp.
-- **Produção (VPS atual)**: Docker Swarm com volumes montados (`14_taktchat.yml`); código em `/root/taktchat`.
+- **Produção (VPS atual)**: Docker Swarm/Portainer com imagens GHCR imutáveis por digest; apenas o backend monta volumes de mídia e dados privados.
 - **Automação**: Scripts em `lib/` e `utils/` para provisionamento, diagnósticos e integrações.
 
 ### Público-alvo

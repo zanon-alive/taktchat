@@ -1,180 +1,55 @@
-# Stack de Produção - Docker Swarm
+# Stack de produção — Docker Swarm e Portainer
 
-Este documento descreve a stack final utilizada em produção com Portainer/Docker Swarm para o TaktChat.
+## Estado confirmado em 25/08/2026
 
-## 📋 Visão Geral
+A produção na VPS Contabo usa Docker Swarm administrado pelo Portainer e imagens GHCR imutáveis por digest. Os digests implantados observados são de abril de 2026; não são reproduzidos neste documento.
 
-A stack utiliza volumes montados para permitir atualizações rápidas sem necessidade de rebuild das imagens Docker. O código é montado diretamente do repositório clonado no servidor, permitindo atualizações em segundos com apenas `git pull` + restart dos serviços.
+### Serviços Taktchat
 
-### Arquivo da Stack
+- `taktchat_taktchat-backend`: `ghcr.io/zanon-alive/taktchat-backend@sha256:<digest>`;
+- `taktchat_taktchat-frontend`: `ghcr.io/zanon-alive/taktchat-frontend@sha256:<digest>`;
+- `taktchat_taktchat-label-sync`: backend-browser por digest;
+- `taktchat_taktchat-migrate`: serviço one-shot, observado em `0/1`.
 
-A stack final utilizada em produção está disponível em:
-- **`14_taktchat.yml`** (raiz deste repositório) — cópia da stack da VPS (`stacks_producao-main-server/14_taktchat.yml`): volumes montados, imagem local `taktchat-backend:latest`, frontend `node:20-bookworm-slim`.
+### Mounts e persistência
 
-Alternativas (não usadas na VPS hoje):
-- `14_taktchat_ghcr.yml` — imagens GHCR + serviço `taktchat-label-sync`
-- `14_taktchat_rapido.yml` — variante histórica (URLs alivesolucoes / porta 3000)
+O backend monta somente:
 
-Exemplo **PM2 no host** (Postgres/Redis no Docker, Node fora do Swarm): `.docs/infraestrutura/pm2-hibrido.md` e `ecosystem.config.cjs`. Não substitui a stack da VPS.
+- `taktchat_taktchat_private` em `/app/private`;
+- `taktchat_taktchat_media` em `/app/public`.
 
-## ⚠️ Pré-requisitos no Servidor VPS
+O frontend não possui mounts.
 
-### 1. Clonar Repositório Completo
+PostgreSQL e Redis estão em stacks separadas:
 
-```bash
-git clone https://github.com/zanon-alive/taktchat.git /root/taktchat
-```
+- PostgreSQL: volume `postgres_postgres_data`;
+- Redis: volume `redis_redis_data`.
 
-### 2. Instalar Dependências do Backend
+## Fonte da verdade
 
-```bash
-cd /root/taktchat/backend
-npm install --legacy-peer-deps
-```
+A definição ativa no Portainer é a fonte operacional atual. Não existe `/root/taktchat`; `/root/stacks` contém apenas YAMLs `01`–`06`, não é repositório Git e não possui `14_taktchat.yml`.
 
-### 3. Instalar Dependências do Frontend (opcional - será feito automaticamente)
+Os arquivos locais `14_taktchat.yml`, `14_taktchat_ghcr.yml` e outras variantes servem somente como referências para comparação. Nenhum está confirmado como export fiel da produção.
 
-```bash
-cd /root/taktchat/frontend
-npm install --legacy-peer-deps
-```
+## Releases
 
-### 4. Verificar Estrutura
+O fluxo é:
 
-```bash
-ls -la /root/taktchat/backend/package.json
-ls -la /root/taktchat/frontend/package.json
-```
+`commit/PR → main → workflows GHCR → confirmar tag/SHA/digest → Portainer → migrate → health/smoke`
 
-### 5. Scripts de Startup
+Rollback é realizado restaurando os digests anteriores no Portainer. Consulte `../operacao/release-deploy-rollback-swarm.md`.
 
-Os scripts de startup devem estar em `/root/stacks/scripts/`:
+## Segurança
 
-- `taktchat-migrate-startup.sh` - Script de inicialização do serviço de migração
-- `taktchat-backend-startup.sh` - Script de inicialização do backend
-- `taktchat-frontend-startup.sh` - Script de inicialização do frontend
+- Não reproduzir digests completos nem secrets na documentação.
+- Não substituir referências por digest por `latest`.
+- Não exportar a stack do Portainer para repositório sem sanitizar secrets.
+- Rollback de imagem não desfaz migration.
 
-> **Nota:** Veja exemplos de scripts em `.docs/SCRIPTS_STARTUP_EXEMPLO.md`
+## Pendências
 
-## 🚀 Serviços da Stack
-
-### taktchat-migrate
-
-Serviço de migração e seed do banco de dados que executa uma vez:
-
-- **Imagem:** `taktchat-backend:latest`
-- **Função:** Executa migrações e seeds iniciais
-- **Restart Policy:** `none` (não reinicia após conclusão)
-- **Recursos:** 0.25 CPU, 768M RAM
-
-### taktchat-backend
-
-Serviço principal do backend:
-
-- **Imagem:** `taktchat-backend:latest`
-- **Porta:** 8080 (interno)
-- **Volumes Montados:**
-  - `/root/taktchat/backend:/usr/src/app` - Código do backend
-  - `taktchat_node_modules` - Dependências isoladas
-  - `taktchat_media` - Uploads e arquivos públicos
-  - `taktchat_tsc_cache` - Cache de compilação TypeScript
-- **Healthcheck:** Verifica endpoint `/health` (API, DB, etc)
-- **Recursos:** 0.75 CPU, 1536M RAM
-- **Roteamento Traefik:** `api.taktchat.com.br`
-
-### taktchat-frontend
-
-Serviço do frontend:
-
-- **Imagem:** `node:20-bookworm-slim`
-- **Porta:** 80 (interno)
-- **Volumes Montados:**
-  - `/root/taktchat/frontend:/usr/src/app` - Código do frontend
-  - `taktchat_frontend_node_modules` - Dependências isoladas
-- **Build:** Compilação React em runtime (`npm run build`)
-- **Recursos:** 1.0 CPU, 4096M RAM (necessário para compilação React)
-- **Roteamento Traefik:** `taktchat.com.br`
-
-## 🔄 Atualizações Rápidas
-
-Para atualizar o código em produção sem rebuild de imagens:
-
-```bash
-# 1. Atualizar código
-cd /root/taktchat
-git pull origin main
-
-# 2. Instalar novas dependências (se houver)
-cd backend
-npm install --legacy-peer-deps  # Se houver novas dependências no backend
-
-cd ../frontend
-npm install --legacy-peer-deps  # Se houver novas dependências no frontend
-
-# 3. Reiniciar serviços
-docker service update --force taktchat_taktchat-backend
-docker service update --force taktchat_taktchat-frontend  # Se houver mudanças no frontend
-```
-
-> **📖 Guia Completo:** Para o processo completo e detalhado de atualização, incluindo build do frontend, verificação de logs e troubleshooting, consulte `.docs/ATUALIZACAO_SERVIDOR.md` - **Guia Completo de Atualização do TaktChat no Servidor**
-
-## 🌐 Variáveis de Ambiente Principais
-
-### Backend
-
-- `BACKEND_URL=https://api.taktchat.com.br`
-- `FRONTEND_URL=https://taktchat.com.br`
-- `DB_HOST=postgres_postgres`
-- `DB_PORT=5432`
-- `DB_NAME=taktchat_database`
-- `DB_USER=taktchat_user`
-- `DB_PASS` — senha do banco (não versionar o valor real; na VPS está no YAML da stack)
-- `JWT_SECRET` e `JWT_REFRESH_SECRET` - Secrets de autenticação (na VPS, no YAML da stack)
-- `REDIS_URI` - Conexão Redis para filas e Socket.IO
-
-### Frontend
-
-- `REACT_APP_BACKEND_URL=https://api.taktchat.com.br`
-- `REACT_APP_SOCKET_URL=https://api.taktchat.com.br`
-- `PUBLIC_URL=https://taktchat.com.br`
-- `NODE_ENV=production`
-
-## 📊 Redes e Volumes
-
-### Redes
-
-- `app_network` (external) - Rede interna para comunicação entre serviços
-- `traefik_public` (external) - Rede para roteamento via Traefik
-
-### Volumes
-
-- `taktchat_media` - Uploads e arquivos públicos do backend
-- `taktchat_node_modules` - Dependências do backend (isoladas)
-- `taktchat_tsc_cache` - Cache de compilação TypeScript
-- `taktchat_frontend_node_modules` - Dependências do frontend (isoladas)
-
-## 🔍 Monitoramento e Healthcheck
-
-O backend possui healthcheck configurado que verifica:
-
-- Status da API (`/health`)
-- Status do banco de dados
-- Status do Redis
-
-O healthcheck executa a cada 30 segundos com timeout de 10 segundos e 5 retries.
-
-## ⚡ Benefícios desta Abordagem
-
-- ✅ **Atualização em segundos** (apenas git pull + restart)
-- ✅ **Não precisa fazer build de imagem Docker** para mudanças de código
-- ✅ **Ideal para desenvolvimento e atualizações frequentes**
-- ✅ **Consistência entre backend e frontend** (mesma abordagem com volumes)
-- ✅ **Build em runtime** permite ajustes rápidos
-
-## 📚 Documentação Relacionada
-
-- **Scripts de Startup:** `.docs/SCRIPTS_STARTUP_EXEMPLO.md`
-- **Atualização no Servidor:** `.docs/ATUALIZACAO_SERVIDOR.md`
-- **Build e Deploy Docker (legado Docker Hub):** `.docs/DOCKER_BUILD_E_DEPLOY.md`
-- **Comparação de Stacks:** `.docs/COMPARACAO_STACKS.md`
-- **Stack GHCR (alternativa):** `.docs/infraestrutura/stack-producao-ghcr.md`
+1. Exportar a stack ativa.
+2. Remover/redigir secrets.
+3. Comparar com as variantes locais.
+4. Versionar a definição sanitizada após revisão.
+5. Confirmar política de tags, labels OCI e retenção de digests.

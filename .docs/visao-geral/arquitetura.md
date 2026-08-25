@@ -16,7 +16,7 @@
 3. **Infraestrutura compartilhada**
    - PostgreSQL 15 (Docker ou serviço gerenciado).
    - Redis 6.2 para cache, filas e adaptação Socket.IO.
-   - Armazenamento de mídias em volumes Docker (`backend-private`, `backend-public`) ou buckets externos.
+   - Armazenamento de mídias/sessões em volumes Docker; em produção: `taktchat_taktchat_media` e `taktchat_taktchat_private`.
 
 ### Fluxo principal de mensagens
 
@@ -34,7 +34,7 @@ flowchart LR
   Frontend --> Usuario[Equipe de Atendimento]
 ```
 
-Produção atual (VPS): Swarm com volumes (`14_taktchat.yml`). Serviço `taktchat-label-sync` existe só na stack GHCR alternativa.
+Produção atual: Swarm/Portainer com imagens GHCR por digest. Backend monta os volumes de mídia e dados privados; frontend não tem mounts. O serviço `taktchat_taktchat-label-sync` está ativo com imagem backend-browser.
 
 ### Integrações essenciais
 

@@ -2,25 +2,32 @@
 
 **Projeto:** Taktchat  
 **Repositório:** https://github.com/zanon-alive/taktchat.git  
-**Branch atual:** `fix/producao-socket-css`
+**Branch atual:** `main`
 
 ## Estado
 
-Correção local do incidente de produção em andamento, sem commit e sem deploy. As alterações
-anteriores de PostCSS, Socket.IO, layout e AdminDocs foram preservadas.
+PR [#22](https://github.com/zanon-alive/taktchat/pull/22) mesclado na `main`. Kit v1.7, Kanban e correções de CSS/Socket.IO estão no remoto. PR [#23](https://github.com/zanon-alive/taktchat/pull/23) (documentação v1.8) estava em conflito só em `.ai/NEXT_PROMPT.md` e foi resolvido localmente para merge.
+
+Produção na Contabo usa Docker Swarm/Portainer e imagens GHCR por digest. Não há checkout da aplicação no servidor. Runbook: `.docs/operacao/release-deploy-rollback-swarm.md`.
 
 Este repositório **não** é projeto Telecontrol.
 
 ## Validação concluída
 
-- Backend TypeScript e testes já estavam aprovados conforme documentação local da branch.
-- Build de produção frontend já estava aprovado.
-- Frontend Jest agora aprova 6 suítes e 44 testes:
-  `CI=true BABEL_ENV=test NODE_ENV=test npm test -- --watchAll=false --runInBand`.
-- As correções adicionais ficaram restritas à configuração e aos testes; nenhum componente de
-  produção foi alterado nesta etapa.
+- Backend: 59 testes; frontend: 44 testes; builds aprovados.
+- Handshake Socket.IO com token em `auth`, não na URL.
+- CSS de produção sem diretivas `@tailwind` residuais.
+- Documentação alinhada à stack GHCR observada.
+
+## Ainda aberto
+
+1. Publicar na Contabo: workflows GHCR → digests → Update stack no Portainer (agente não executa deploy).
+2. Investigar `ERR_INVALID_CREDENTIALS` do login `zanon@taktchat.com.br` (base não foi perdida).
+3. Rotacionar `JWT_SECRET` / `JWT_REFRESH_SECRET` na janela de manutenção.
+4. Captura real do celular (ainda ilustração de IA).
+5. Caminho B (Deal / CRM de mercado).
+6. Exportar a stack do Portainer sem secrets.
 
 ## Próximo passo
 
-Confirmar com o usuário se a demanda está finalizada. Não executar deploy, push, PR ou commit sem
-solicitação explícita.
+Após o merge do PR 23, atualizar a `main` local e orientar a publicação manual na Contabo.

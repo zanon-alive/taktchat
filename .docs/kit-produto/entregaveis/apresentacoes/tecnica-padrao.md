@@ -50,7 +50,7 @@ Audiência: dev / infra / integrador. 12–15 min. Player: `/apresentacoes/tecni
 
 ## Slide 11 — Local
 
-**Para falar:** Compose (Postgres+Redis). Backend `:8080`, frontend `PORT=3000` (não herdar 8080). `GET /health` com database ok (print no kit).
+**Para falar:** Compose (Postgres+Redis). Backend `:8080`, frontend `PORT=3000` (não herdar 8080). `GET /health` verifica API e banco; `GET /ticket/kanban/stats` autenticado entrega quantidade e idade média por lane.
 
 ## Slide 12 — Produção (alto nível)
 
@@ -58,7 +58,7 @@ Audiência: dev / infra / integrador. 12–15 min. Player: `/apresentacoes/tecni
 
 ## Slide 13 — Atenção
 
-**Para falar:** sessão Baileys é estado em disco; job depende de Redis; **não** apontar `.env` para produção. Anti-ban é cadência, não botão.
+**Para falar:** sessão Baileys é estado em disco; job depende de Redis; **não** apontar `.env` para produção. No frontend, o health não bloqueia o primeiro paint: o overlay só aparece depois de 3 tentativas falhas, em cerca de 8 segundos. Anti-ban é cadência, não botão.
 
 ## Slide 14 — Docs
 

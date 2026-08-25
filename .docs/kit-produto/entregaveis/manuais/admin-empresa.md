@@ -32,11 +32,12 @@ Dashboard, tempo real (`/moments`), tickets abertos/pendentes, tags e o quadro K
 
 1. Menu **Tags Kanban** (ou Kanban → Adicionar colunas).
 2. Bloco **Lanes automáticas**: lane de entrada (ticket novo) e ao Encerrar, mover para (ex.: Fechado ganho).
-3. O plano precisa ter `useKanban`. Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
+3. Ao encerrar, o atendente recebe um popup para escolher a lane Fechado* ou sair do quadro; a configuração é o fallback.
+4. O plano precisa ter `useKanban`. Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 
 ### Como disparar campanha (se o plano permitir)
 
-Campanhas → lista de contatos → criar disparo → respeitar cadência (anti-ban / política Meta).
+Campanhas → lista de contatos → criar disparo → respeitar cadência e política do canal. Anti-ban reduz risco, não oferece garantia, especialmente no Baileys.
 
 ## Telas
 

@@ -15,7 +15,8 @@ Atendente (ver/editar o básico), admin (importação, regras, lanes).
 ## O que a pessoa faz
 
 - Buscar, abrir ficha, iniciar conversa
-- Importar planilha (admin)
+- Importar planilha de forma assíncrona (admin), deduplicar e importar contatos do dispositivo
+- Manter dados comerciais e carteira do contato
 - Criar tags operacionais (Urgente, VIP — `kanban=0`) e colunas (`kanban=1`)
 - Mover cards no Kanban se o plano tiver `useKanban`
 - Admin: em Tags Kanban, **lane de entrada** e **ao Encerrar, mover para** (settings `defaultKanbanTagId` / `closedKanbanTagId`)
@@ -26,6 +27,7 @@ Atendente (ver/editar o básico), admin (importação, regras, lanes).
 - Encerrar pergunta a lane de desfecho (Fechado*) ou sair do quadro.
 - Uma tag `kanban=1` por ticket; arrastar substitui a coluna.
 - Atendente: precisa de tag pessoal `#` nos contatos. Beatriz tem `#Beatriz`; `atendente.vazio@taktchat.local` demonstra a lista vazia.
+- Regras de tags podem automatizar classificação; os jobs correspondentes exigem Redis.
 - Relatório por lane em `/kanban/stats` (atalho no quadro).
 - Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 
@@ -35,4 +37,6 @@ Maria, João, Ana, Mercado Central, Pedro, Carla — números `551190000100x` (f
 
 ## Status
 
-Simulado no banco + WhatsApp da Cliente Demo Kit CONNECTED. Kanban: depende do plano `useKanban`.
+**Implementado:** contatos enriquecidos, importação assíncrona, dedupe, importação do dispositivo, carteira, regras de tags, popup de desfecho e stats.
+**Condicional:** Kanban depende de `useKanban`; jobs dependem de Redis.
+**Path correto:** `/TagsKanban` (não `/tagsKanban`); a rota existe sem item próprio no menu.

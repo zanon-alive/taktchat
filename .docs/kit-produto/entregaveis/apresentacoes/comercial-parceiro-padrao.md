@@ -25,14 +25,15 @@ Player: `/apresentacoes/comercial-parceiro-padrao`.
 
 ## Slide 4 — O que você vende
 
-**Para falar:** o WhatsApp da filha vira ticket, com filas e dual channel. Parceiro que opera o chat da filha vira BPO, não revenda.
+**Para falar:** o WhatsApp da filha vira atendimento, com filas, Kanban, desfecho, relatório por coluna, agenda segmentada, cadastro comercial e dual channel. Parceiro que opera o chat da filha vira BPO, não revenda.
 
 - A filha compra CRM de conversa no WhatsApp (contato → ticket).
+- A filha usa atendimento, contatos e gestão do Kanban.
 - Painel do parceiro: empresas e licenças.
 
 ## Slide 5 — O argumento do ticket
 
-**Para falar:** na reunião com a filha, o gancho é o mesmo do comercial de cliente. WhatsApp no celular não é CRM. Cada contato que fala gera ticket, com fila e dono.
+**Para falar:** na reunião com a filha, o gancho é o mesmo do comercial de cliente. WhatsApp no celular não é operação. Cada contato que fala gera atendimento, com fila, dono, andamento no Kanban e desfecho.
 
 - Histórico isolado por empresa-filha.
 - Honestidade: não é Pipedrive; é o CRM da conversa no WhatsApp.
@@ -53,7 +54,7 @@ Player: `/apresentacoes/comercial-parceiro-padrao`.
 
 ## Slide 9 — Dual channel no argumento de venda
 
-**Para falar:** Oficial para volume; Baileys para piloto, com aviso de risco de conta pessoal no contrato da filha.
+**Para falar:** Oficial para volume; Baileys pode viabilizar o piloto, mas é integração não oficial e não oferece garantia de estabilidade nem ausência de bloqueio. O risco precisa ser explicado e registrado na venda.
 
 ## Slide 10 — O que você não precisa
 

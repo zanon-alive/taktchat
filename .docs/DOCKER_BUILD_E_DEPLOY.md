@@ -1,6 +1,8 @@
 # Build e Deploy de Imagens Docker - TaktChat (legado Docker Hub)
 
-> **Produção atual da VPS não usa este fluxo.** A VPS sobe com volumes (`14_taktchat.yml`). Este guia permanece para build/push opcional no Docker Hub.
+> **LEGADO — NÃO USAR NO FLUXO ATUAL.** Este guia descreve Docker Hub e scripts antigos. Produção usa Docker Swarm/Portainer com imagens GHCR imutáveis por digest; não há checkout ou bind mounts de código na VPS. O procedimento vigente está em `.docs/operacao/release-deploy-rollback-swarm.md`.
+>
+> GHCR já está em uso. A definição ativa está no Portainer; `14_taktchat.yml` local é referência/variante não confirmada.
 
 Este documento descreve o processo completo para construir e publicar as imagens Docker do TaktChat no Docker Hub.
 
@@ -297,4 +299,4 @@ docker images | grep taktchat
 
 - [Configuração de Variáveis de Ambiente](configuracao/variaveis-ambiente.md)
 - [Stack de produção atual (volumes)](infraestrutura/stack-producao.md)
-- [Stack GHCR (alternativa)](infraestrutura/stack-producao-ghcr.md)
+- [Produção atual com GHCR](infraestrutura/stack-producao-ghcr.md)

@@ -1,6 +1,6 @@
 # Alternativa: TaktChat com PM2 (híbrido)
 
-> **Não é o processo da VPS hoje.** Produção atual: Swarm + volumes (`14_taktchat.yml`).  
+> **NÃO É O PROCESSO DA VPS.** Produção usa Swarm/Portainer com imagens GHCR fixadas por digest, sem checkout ou bind mounts de código.
 > Este guia descreve um desenho opcional: **Docker só para Postgres/Redis** (e Traefik, se já existir) + **PM2 para o Node**.
 
 Arquivo de exemplo: `ecosystem.config.cjs` na raiz do repositório.
@@ -128,7 +128,7 @@ TLS pode continuar no Traefik ou passar para o Nginx (`certbot`).
 
 ## Quando não usar
 
-- VPS atual com Swarm já estável e atualização via `update-taktchat.sh`.
+- VPS atual com Swarm/Portainer e atualização por digest.
 - Necessidade de `taktchat-label-sync` (Chromium) — esse serviço é da stack GHCR, não do PM2.
 - Querer várias réplicas do backend com WhatsApp Baileys no mesmo disco.
 

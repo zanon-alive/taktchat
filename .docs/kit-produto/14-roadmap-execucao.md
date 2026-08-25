@@ -2,7 +2,7 @@
 
 **Branch:** `docs/kit-documentacao-produto`  
 **Data:** 2026-08-21 → 2026-08-25  
-**Status:** kit **v1.7** — polish de demo após o v1.6.
+**Status:** kit **v1.8 documental** — inventário funcional e limites alinhados ao código; v1.7 permanece no histórico abaixo.
 
 ## Entregue
 
@@ -80,6 +80,16 @@ Branches mergeadas nesta linha: `feat/kanban-aviso-colunas`, `feat/kanban-desfec
 - Login `atendente.vazio@taktchat.local` para mostrar lista de contatos vazia.
 - Heap 4 GB no `npm start` do frontend.
 - Roteiro: não encerrar a Maria.
+
+## v1.8 — revisão funcional documental (2026-08-25)
+
+- Inventário backend/frontend com estados implementado, condicional, stub e órfão.
+- Mapa de rotas, menu, personas, permissões híbridas e gates de plano.
+- Redis e `pgvector` registrados como dependências.
+- Gateway genérico, Lead público, Facebook/Instagram e `QueueAdvanced` documentados com seus limites.
+- Popup de desfecho e stats do Kanban confirmados como existentes.
+- Pendências de segurança (`ticketsUsers`, `ticketsDay` e Helmet) registradas.
+- Revisão documental; não confirma deploy em produção.
 
 ## Ainda aberto (não bloqueia o lote)
 

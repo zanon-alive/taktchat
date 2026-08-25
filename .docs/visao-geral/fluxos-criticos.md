@@ -5,7 +5,7 @@
 1. Super Admin cria empresa (plataforma, whitelabel ou cliente) ou o cadastro ocorre na landing / `/signup-partner`.
 2. Backend provisiona `Companies`, `Users`, licença trial quando aplicável.
 3. Conexão WhatsApp: QR Baileys **ou** credenciais da API Oficial.
-4. Sessão Baileys persiste no volume do backend (`private/sessions` no bind `/root/taktchat/backend` na VPS).
+4. Sessão Baileys persiste no volume nomeado `taktchat_taktchat_private`, montado em `/app/private` no backend.
 
 ### 2. Atendimento em tempo real
 

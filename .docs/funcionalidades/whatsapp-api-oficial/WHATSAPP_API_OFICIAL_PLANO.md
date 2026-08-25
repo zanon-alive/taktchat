@@ -1,5 +1,7 @@
 # 🚀 PLANO DE AÇÃO: Integração WhatsApp Business API Oficial
 
+> **Plano histórico.** A implementação evoluiu desde este snapshot; prazos, bibliotecas, preços e afirmações comerciais não são vigentes. Consulte [../whatsapp-api-oficial.md](../whatsapp-api-oficial.md).
+
 ## 📋 Índice
 1. [Visão Geral](#visão-geral)
 2. [Análise da Arquitetura Atual](#análise)
@@ -15,7 +17,7 @@
 Adicionar **WhatsApp Business API Oficial** como novo canal, mantendo Baileys.
 
 ### Benefícios
-- ✅ **Confiabilidade**: SLA garantido pela Meta
+- ✅ **Canal oficial**: sujeito aos contratos, limites e políticas vigentes da Meta
 - ✅ **Escalabilidade**: Alto volume de mensagens
 - ✅ **Recursos Avançados**: Templates, botões, listas
 - ✅ **Webhooks**: Eventos em tempo real

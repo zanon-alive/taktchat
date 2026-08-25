@@ -25,7 +25,7 @@ docker compose down
 docker compose down -v
 ```
 
-Produção na VPS usa Docker Swarm (`14_taktchat.yml`), não este compose.
+Produção na VPS usa Docker Swarm/Portainer com imagens GHCR por digest, não este Compose. `14_taktchat.yml` local é referência não confirmada como definição ativa.
 
 ### Variáveis para produção
 

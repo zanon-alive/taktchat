@@ -1,10 +1,14 @@
-# Scripts de Startup - Exemplos
+# Scripts de startup — referência histórica
 
-Este documento contém exemplos de scripts de startup que devem ser criados no servidor em `/root/stacks/scripts/` para a stack `14_taktchat_rapido.yml` funcionar.
+> **Histórico, não fonte de instalação.** Estes exemplos foram produzidos para variantes antigas com bind mounts. Produção usa imagens GHCR fixadas por digest e não monta estes scripts.
+>
+> Não copie estes blocos para a VPS. A definição ativa está no Portainer; `14_taktchat.yml` local não foi confirmado em produção. Para release, use `.docs/operacao/release-deploy-rollback-swarm.md`.
+
+Os exemplos ajudam a entender o contrato antigo dos scripts. Containers usam Node.js 20; Node.js 22 pode ser usado no desenvolvimento local.
 
 ## 📋 Pré-requisito
 
-Criar o diretório de scripts no servidor:
+Referência de diretório usada pela stack:
 
 ```bash
 mkdir -p /root/stacks/scripts
@@ -90,11 +94,11 @@ if [ "$BUILD_NEEDED" = "true" ]; then
 fi
 
 # Iniciar servidor Express para servir arquivos estáticos
-echo "🚀 Iniciando servidor frontend na porta 3000..."
+echo "🚀 Iniciando servidor frontend na porta 80..."
 exec node server.js
 ```
 
-**⚠️ IMPORTANTE**: O `server.js` precisa ser ajustado para usar a porta 3000 (conforme Traefik):
+**Configuração atual:** o frontend deve atender internamente na porta `80`, conforme o label do Traefik na stack canônica. O build recomendado é executado no host antes da atualização do serviço.
 
 ```javascript
 // frontend/server.js
@@ -108,7 +112,7 @@ app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
   console.log(`Frontend servindo na porta ${PORT}`);
 });
@@ -142,16 +146,16 @@ npm run build
 echo "🗄️ Executando migrations do banco de dados..."
 npx sequelize db:migrate
 
-# Executar seeds (opcional - descomente se necessário)
-# echo "🌱 Executando seeds..."
-# npx sequelize db:seed:all
+# Seeds não fazem parte do release normal de produção.
 
 echo "✅ Migrations concluídas com sucesso!"
 ```
 
 ---
 
-## 📝 Como Criar os Scripts no Servidor
+## Como os scripts eram criados
+
+> As seções abaixo são históricas. Na VPS atual, altere scripts somente por mudança revisada no repositório de infraestrutura; não crie ou substitua arquivos manualmente a partir desta página.
 
 ### Método 1: Via SSH (Manual)
 
@@ -211,7 +215,7 @@ if [ "$BUILD_NEEDED" = "true" ]; then
     fi
     echo "✅ Build concluído com sucesso!"
 fi
-echo "🚀 Iniciando servidor frontend na porta 3000..."
+echo "🚀 Iniciando servidor frontend na porta 80..."
 exec node server.js
 EOF
 
@@ -267,16 +271,15 @@ ls -la /root/stacks/scripts/
 # Verificar permissões (devem ser executáveis)
 chmod +x /root/stacks/scripts/*.sh
 
-# Testar script manualmente (opcional)
-cd /root/taktchat/backend
-/root/stacks/scripts/taktchat-backend-startup.sh
+# Compare permissões e conteúdo com o repositório /root/stacks.
+# Não execute scripts de migrate/startup isoladamente sem janela e plano.
 ```
 
 ---
 
-## ⚠️ Ajuste Necessário no `server.js`
+## Porta interna do frontend
 
-O `frontend/server.js` precisa usar a porta 3000 (não 3001):
+Na stack canônica, o Traefik encaminha para a porta interna `80`:
 
 ```javascript
 // frontend/server.js
@@ -290,7 +293,7 @@ app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-const PORT = process.env.PORT || 3000;  // ← Alterar de 3001 para 3000
+const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
   console.log(`Frontend servindo na porta ${PORT}`);
 });
@@ -300,6 +303,7 @@ app.listen(PORT, () => {
 
 ## 📚 Referências
 
-- Stack rápida: `14_taktchat_rapido.yml`
+- Referência histórica: variantes locais com scripts/bind mounts; não correspondem à stack ativa no Portainer.
+- Stack histórica: `14_taktchat_rapido.yml`
 - Deploy no Portainer: `.docs/PORTAINER_GITHUB_DEPLOY.md`
-- Atualização no servidor: `.docs/ATUALIZACAO_SERVIDOR.md`
+- Runbook atual: `.docs/operacao/release-deploy-rollback-swarm.md`
