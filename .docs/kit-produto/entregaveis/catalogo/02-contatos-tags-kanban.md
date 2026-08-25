@@ -25,8 +25,8 @@ Atendente (ver/editar o básico), admin (importação, regras, lanes).
 - Ticket novo recebe a lane de entrada, se a empresa usa Kanban.
 - Encerrar pergunta a lane de desfecho (Fechado*) ou sair do quadro.
 - Uma tag `kanban=1` por ticket; arrastar substitui a coluna.
-- Atendente: precisa de tag pessoal `#` nos contatos (seed `#Beatriz`).
-- Relatório por lane em `/kanban/stats`.
+- Atendente: precisa de tag pessoal `#` nos contatos. Beatriz tem `#Beatriz`; `atendente.vazio@taktchat.local` demonstra a lista vazia.
+- Relatório por lane em `/kanban/stats` (atalho no quadro).
 - Detalhe: [`.docs/funcionalidades/kanban-lanes.md`](../../../funcionalidades/kanban-lanes.md).
 
 ## Seed

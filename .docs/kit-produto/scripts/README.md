@@ -6,7 +6,7 @@
 |---------|-----|
 | `seed-local-kit.sql` | Personas, empresas, tickets de demonstração |
 | `seed-demo-comercial-kanban.sql` | Funil Kanban + extras da demo comercial |
-| ambos | Tag `#Beatriz` + `allowedContactTags` da atendente nos contatos Maria/Carla (Suporte) |
+| ambos | Tag `#Beatriz` na Beatriz; `atendente.vazio@taktchat.local` sem tag (lista vazia) |
 
 Rodar apenas em `localhost` (ex.: porta `5433`), depois de confirmar que o `.env` do backend aponta para banco local.
 

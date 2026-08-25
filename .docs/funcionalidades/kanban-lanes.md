@@ -25,8 +25,8 @@ Admin da empresa (ou super) altera os selects; o `PUT /settings/:settingKey` exi
 
 - **Criação de ticket** (`FindOrCreateTicketService`, Meta, `CreateTicketService`): se a empresa usa Kanban (`plan.useKanban` ou `company.type === "platform"`) e não há lane ainda, aplica a lane de entrada.
 - **Encerrar**: o botão abre o desfecho (lane Fechado* ou sair do quadro). Depois do ticket ir para `closed`, aplica a lane escolhida (ou a setting `closedKanbanTagId` se nada for informado). A listagem `/ticket/kanban` inclui `pending`/`open` e também `closed` **quando o ticket tem tag `kanban=1`**. `closed` sem lane não entra no quadro.
-- **Aviso de colunas**: Tags Kanban e o quadro alertam se houver mais de 8 tags `kanban=1`.
-- **Relatório**: `GET /ticket/kanban/stats` e a tela `/kanban/stats` (quantidade e idade média por lane).
+- **Aviso de colunas**: Tags Kanban explica que o alerta só aparece com mais de 8 tags `kanban=1` (o demo tem 6). O quadro também alerta nesse caso.
+- **Relatório**: `GET /ticket/kanban/stats`, tela `/kanban/stats` e botão no quadro.
 - **Arrastar no quadro**: `PUT /ticket-tags/:ticketId/:tagId` substitui a tag kanban (não acumula colunas).
 - **Cron `timeLane`**: usa `ticket.updatedAt`; não exige última mensagem `fromMe`; não avança lanes terminais (`closedKanbanTagId` ou nome com “Fechado”).
 - **Nova conversa após encerrar**: o ticket novo recebe a lane de entrada; o rollback da lane da conversa fechada **não** é aplicado.

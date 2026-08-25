@@ -19,6 +19,7 @@ LocalTest#2026
 | Parceiro | parceiro@taktchat.local | Parceiro Demo Kit | whitelabel |
 | Admin empresa | admin.cliente@taktchat.local | Cliente Demo Kit | direct (filho do parceiro) |
 | Atendente | atendente@taktchat.local | Cliente Demo Kit | direct |
+| Atendente sem tag `#` | atendente.vazio@taktchat.local | Cliente Demo Kit | direct (lista de contatos vazia) |
 | Supervisor | supervisor@taktchat.local | Cliente Demo Kit | direct |
 
 Jornada dos users kit: `00:00`–`23:59` (senão `ERR_OUT_OF_HOURS`).  

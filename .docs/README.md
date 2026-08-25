@@ -4,7 +4,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 
 ## Como navegar
 
-- `kit-produto/`: **kit por audiência (v1.6)** — catálogo, manuais por role, comercial/técnica, screenshots e player em `/apresentacoes`. Comece por `kit-produto/README.md`. Caminho A da demanda 16 (quadro de conversas) feito; caminho B (CRM de mercado) permanece fora: `kit-produto/16-demanda-crm-conversa-ou-mercado.md`.
+- `kit-produto/`: **kit por audiência (v1.7)** — catálogo, manuais por role, comercial/técnica, screenshots e player em `/apresentacoes`. Comece por `kit-produto/README.md`. Caminho A da demanda 16 (quadro de conversas) feito; caminho B (CRM de mercado) permanece fora: `kit-produto/16-demanda-crm-conversa-ou-mercado.md`.
 - `visao-geral/`: contexto do produto, arquitetura, fluxos críticos e roadmap.
   - **Roadmap centralizado:** `visao-geral/roadmap.md` - Melhorias futuras e funcionalidades pendentes do projeto
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.

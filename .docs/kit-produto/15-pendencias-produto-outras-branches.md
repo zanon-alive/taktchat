@@ -52,11 +52,15 @@ Bloco **Cadastro comercial** (situação, última compra, carteira) no atendimen
 
 ### 9. Contatos da atendente — `feat/contatos-tags-hierarquicas`
 
-A regra `#` **não** foi relaxada. Empty state explica a tag pessoal. Seed local: `#Beatriz` nos contatos Maria/Carla (Suporte).
+A regra `#` **não** foi relaxada. Empty state explica a tag pessoal. Seed: `#Beatriz` (Beatriz vê Maria/Carla) e `atendente.vazio@taktchat.local` (lista vazia).
 
 ### Relatório por lane — `feat/relatorio-lanes-kanban`
 
-`GET /ticket/kanban/stats` e menu **Funil (lanes)** (`/kanban/stats`): quantidade e idade média. Sem R$.
+`GET /ticket/kanban/stats` e menu **Funil (lanes)** (`/kanban/stats`): quantidade e idade média. Sem R$. Atalho no quadro Kanban.
+
+### Overlay no Painel — esta branch (v1.7)
+
+Healthcheck não marca offline no primeiro timeout. `/moments` não renderiza até o usuário existir.
 
 ## Ainda aberto (não bloqueia o kit)
 

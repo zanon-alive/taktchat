@@ -92,4 +92,5 @@ Lista completa, senha e seed: **`09-logins-locais.md`**.
 | Parceiro | parceiro@taktchat.local | Parceiro Demo Kit | criado; sem `company.type` no banco |
 | Admin empresa | admin.cliente@taktchat.local | Cliente Demo Kit | criado |
 | Atendente | atendente@taktchat.local | Cliente Demo Kit | criado |
+| Atendente sem `#` | atendente.vazio@taktchat.local | Cliente Demo Kit | criado |
 | Supervisor | supervisor@taktchat.local | Cliente Demo Kit | criado (flags, não profile) |

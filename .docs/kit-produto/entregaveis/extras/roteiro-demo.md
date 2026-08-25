@@ -11,4 +11,10 @@ Ambiente: local, logins em `../../09-logins-locais.md`.
 7. **Dono ou parceiro** — hierarquia empresas (2 min) *melhor na rodada parceiro*.
 8. **Fecho** — próximo passo é WhatsApp real (QR).
 
+**Encerrar:** mostre o diálogo em um ticket de teste. Não encerre a Maria (ela é a âncora da demo).
+
+**Contatos vazios:** `atendente.vazio@taktchat.local` (mesma senha). Beatriz com `#Beatriz` vê Maria e Carla.
+
+**Quadro:** botão de gráfico abre `/kanban/stats`. Tags Kanban explica que o alerta de 8 colunas não aparece neste demo (6 lanes).
+
 Não prometer pipeline de oportunidade. Encerrar aplica a lane; o card `closed` permanece no quadro se tiver coluna Kanban.

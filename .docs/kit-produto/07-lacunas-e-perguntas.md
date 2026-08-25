@@ -25,7 +25,7 @@
 
 WhatsApp da Cliente Demo Kit no ambiente **local** já está CONNECTED (envio e transferência persistida). Seed de demo **não** vai para produção.
 
-Kanban de conversa (entrada, Encerrar com desfecho, uma tag, cron, rollback, quadro com `closed`, aviso de 8 colunas, ficha comercial, relatório por lane): **feito**. Overlay de API e token de signup: **feito**. Caminho B (CRM de mercado) e captura real do celular: fora desta geração. Lista: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md).
+Kanban de conversa (entrada, Encerrar com desfecho, uma tag, cron, rollback, quadro com `closed`, aviso de 8 colunas, ficha comercial, relatório por lane): **feito**. Overlay de API, token de signup e overlay no first paint do Painel: **feito**. Caminho B (CRM de mercado) e captura real do celular: fora desta geração. Lista: [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md).
 
 ## Divergências código × docs antigos
 

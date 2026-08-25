@@ -4,6 +4,7 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-25 | 2.2.2v-26 | Kit v1.7: overlay do Painel, atalho do funil, login sem tag `#`, heap do frontend. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Kit v1.6: aviso de 8 colunas, desfecho ao Encerrar, ficha comercial, tags `#` da atendente, relatório por lane. | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Kanban: quadro `/kanban` lista tickets `closed` que têm lane (`kanban=1`). | Equipe Dev |
 | 2026-08-25 | 2.2.2v-26 | Kit: deck técnico alinhado ao WhatsApp CONNECTED; prints `pendente-*` passam a `shot`. | Equipe Dev |

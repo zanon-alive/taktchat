@@ -2,7 +2,7 @@
 
 **Branch:** `docs/kit-documentacao-produto`  
 **Data:** 2026-08-21 → 2026-08-25  
-**Status:** kit **v1.6** — caminho A da demanda 16 encerrado nesta linha (além do v1.5).
+**Status:** kit **v1.7** — polish de demo após o v1.6.
 
 ## Entregue
 
@@ -71,6 +71,15 @@ Branches mergeadas nesta linha: `feat/kanban-aviso-colunas`, `feat/kanban-desfec
 - Empty state + seed `#Beatriz` para a atendente (regra `#` mantida).
 - Relatório `/kanban/stats` (quantidade e idade média).
 - Rota `/kanban` além de `/Kanban`.
+
+## v1.7 — polish da demo (2026-08-25)
+
+- Healthcheck: overlay só depois das 3 tentativas (8s); Painel `/moments` espera o usuário.
+- Tags Kanban: texto de quando o aviso de 8 colunas aparece.
+- Botão Funil no quadro.
+- Login `atendente.vazio@taktchat.local` para mostrar lista de contatos vazia.
+- Heap 4 GB no `npm start` do frontend.
+- Roteiro: não encerrar a Maria.
 
 ## Ainda aberto (não bloqueia o lote)
 

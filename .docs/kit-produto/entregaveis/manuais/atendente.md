@@ -2,7 +2,7 @@
 
 ## Este manual é para você se…
 
-Você entra com um usuário **atendente** (`profile = user`) e o trabalho é conversar com o cliente. Login de teste: `atendente@taktchat.local`.
+Você entra com um usuário **atendente** (`profile = user`) e o trabalho é conversar com o cliente. Login de teste: `atendente@taktchat.local`. Para ver a lista de contatos **vazia** (falta tag `#`): `atendente.vazio@taktchat.local`.
 
 ## O que você não precisa fazer
 

@@ -357,6 +357,7 @@ Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma 
 - [x] **Copy dos slides (login comercial + 6 colunas)** — logins `@taktchat.local` na capa; funil Lead → … → Fechado ganho/perdido no player.
 - [x] **Deck técnico** — QR da demo CONNECTED; prints `pendente-*` já gravados (sem caixa “a gravar”).
 - [x] **A6–A8, desfecho, tags `#`, relatório por lane** — mergeados na kit (v1.6).
+- [x] **Polish da demo (v1.7)** — overlay do Painel, atalho do funil, login sem tag `#`, heap do frontend.
 
 Pendências 1–5, 6–10 (aviso, desfecho, ficha, tags, relatório), 8 overlay, 10 token e 2b: resolvidas. Restam captura real do celular e caminho B (CRM de mercado). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 

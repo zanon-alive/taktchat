@@ -17,6 +17,7 @@ Uma ficha por tela → `08-ficha-tela.template.md`.
 - [x] Frontend http://localhost:3000
 - [x] Health http://localhost:8080/health
 - [x] Login com `atendente@taktchat.local` (persona principal do ticket)
+- [x] Login com `atendente.vazio@taktchat.local` (contatos vazios, sem tag `#`)
 - [x] Login com `admin.cliente@taktchat.local`
 - [x] Login com `dono@taktchat.local` (API)
 - [x] Login com `parceiro@taktchat.local`
@@ -48,7 +49,8 @@ Fazer com `atendente@taktchat.local` e repetir o que faltar com o admin.
 | V | Resposta rápida `/saudacao` | Lista `/` no composer |
 | V | Aplicar/ver tag | Maria = Urgente na lista |
 | V | Transferir (abrir o fluxo) | Modal ok; persiste com o canal CONNECTED |
-| V | Encerrar um ticket de teste | Diálogo “Como encerrar?”: Fechado ganho / Fechado perdido / Sair do quadro |
+| V | Encerrar um ticket de teste | Diálogo “Como encerrar?”. **Não** encerrar a Maria; use ticket de teste |
+| V | Lista vazia da atendente | `atendente.vazio@taktchat.local`: empty state da tag `#` |
 | V | Nova conversa a partir de Contatos | Atendente com tag `#Beatriz`: Maria e Carla |
 | V | Tempo real / dashboard | Supervisor: dashboard `f26`; Painel no menu |
 
@@ -60,11 +62,11 @@ Detalhe conceitual: `10-fluxo-do-ticket.md`.
 |--------|------|------|----------|
 | V | `/` | Dashboard | Atendente 403; admin e supervisor ok |
 | V | `/tickets` | Atendimento | Ver jornada 2 |
-| B | `/moments` | Tempo real | Menu Painel no supervisor; reload caiu no overlay |
+| V | `/moments` | Tempo real | Supervisor: Painel; healthcheck não abre overlay no first paint |
 | V | `/quick-messages` | Respostas rápidas | `/saudacao`, `/aguardar` |
-| V | `/kanban` | Kanban | 6 colunas; `closed` com lane no quadro; sem aviso de 8 |
+| V | `/kanban` | Kanban | 6 colunas; botão Funil → `/kanban/stats` |
 | V | `/kanban/stats` | Funil (lanes) | Quantidade e idade média por coluna |
-| N | `/TagsKanban` | Kanban tags | — |
+| V | `/TagsKanban` | Kanban tags | Texto operacional vs coluna; aviso de 8 só com >8 lanes |
 | V | `/contacts` | Contatos | Admin 7; atendente 2 (tag `#Beatriz`) |
 | N | `/contacts/import` | Importação | — |
 | N | `/schedules` | Agendamentos | Menu no admin |
