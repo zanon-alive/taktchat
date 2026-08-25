@@ -47,9 +47,9 @@ Fazer com `atendente@taktchat.local` e repetir o que faltar com o admin.
 | V | Aceitar Carla (pending) | Virou open com a atendente |
 | V | Resposta rápida `/saudacao` | Lista `/` no composer |
 | V | Aplicar/ver tag | Maria = Urgente na lista |
-| V | Transferir (abrir o fluxo) | Modal ok; persistir falhou (WhatsApp) |
-| B | Encerrar um ticket de teste | Mesmo bloqueio de canal |
-| B | Nova conversa a partir de Contatos | Atendente: lista 0; WhatsApp sem sessão |
+| V | Transferir (abrir o fluxo) | Modal ok; persiste com o canal CONNECTED |
+| V | Encerrar um ticket de teste | Diálogo “Como encerrar?”: Fechado ganho / Fechado perdido / Sair do quadro |
+| V | Nova conversa a partir de Contatos | Atendente com tag `#Beatriz`: Maria e Carla |
 | V | Tempo real / dashboard | Supervisor: dashboard `f26`; Painel no menu |
 
 Detalhe conceitual: `10-fluxo-do-ticket.md`.
@@ -62,9 +62,10 @@ Detalhe conceitual: `10-fluxo-do-ticket.md`.
 | V | `/tickets` | Atendimento | Ver jornada 2 |
 | B | `/moments` | Tempo real | Menu Painel no supervisor; reload caiu no overlay |
 | V | `/quick-messages` | Respostas rápidas | `/saudacao`, `/aguardar` |
-| N | `/kanban` | Kanban | Menu no admin; não aberto |
+| V | `/kanban` | Kanban | 6 colunas; `closed` com lane no quadro; sem aviso de 8 |
+| V | `/kanban/stats` | Funil (lanes) | Quantidade e idade média por coluna |
 | N | `/TagsKanban` | Kanban tags | — |
-| V | `/contacts` | Contatos | Atendente 0; admin 6 |
+| V | `/contacts` | Contatos | Admin 7; atendente 2 (tag `#Beatriz`) |
 | N | `/contacts/import` | Importação | — |
 | N | `/schedules` | Agendamentos | Menu no admin |
 | V | `/tags` | Tags | Hierárquicas + transacional Aguardando cliente |
