@@ -7,7 +7,8 @@ import {
   isTerminalKanbanLane,
   kanbanBoardStatusWhere,
   replaceKanbanLane,
-  shouldWarnKanbanColumnCount
+  shouldWarnKanbanColumnCount,
+  aggregateKanbanLaneStats
 } from "../kanbanTicketTags";
 import Setting from "../../models/Setting";
 import Tag from "../../models/Tag";
@@ -114,6 +115,23 @@ describe("kanbanTicketTags", () => {
   it("avisa quando o quadro passa de 8 colunas", () => {
     expect(shouldWarnKanbanColumnCount(8)).toBe(false);
     expect(shouldWarnKanbanColumnCount(9)).toBe(true);
+  });
+
+  it("agrega quantidade e idade média por lane", () => {
+    const now = new Date("2026-08-25T12:00:00.000Z");
+    const stats = aggregateKanbanLaneStats(
+      [
+        { tagId: 1, tagName: "Lead", updatedAt: "2026-08-25T10:00:00.000Z" },
+        { tagId: 1, tagName: "Lead", updatedAt: "2026-08-25T06:00:00.000Z" },
+        { tagId: 2, tagName: "Fechado ganho", updatedAt: "2026-08-24T12:00:00.000Z" }
+      ],
+      now
+    );
+
+    expect(stats).toEqual([
+      { tagId: 1, name: "Lead", count: 2, avgAgeHours: 4 },
+      { tagId: 2, name: "Fechado ganho", count: 1, avgAgeHours: 24 }
+    ]);
   });
 
   it("inclui closed só quando o ticket tem lane kanban", () => {

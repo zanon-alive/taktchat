@@ -978,6 +978,7 @@ const messages = {
           queueIntegration: "Integrações",
           version: "Versão",
           kanban: "Kanban",
+          kanbanStats: "Funil (lanes)",
           prompts: "Talk.Ai",
           allConnections: "Gerenciar conexões",
           reports: "Relatórios",
@@ -1693,6 +1694,14 @@ const messages = {
           moveError: "Falha ao mover o ticket",
           priorityUpdated: "Prioridade atualizada"
         }
+      },
+      kanbanStats: {
+        title: "Relatório por lane",
+        openBoard: "Abrir quadro",
+        lane: "Lane",
+        count: "Tickets",
+        avgAge: "Idade média (h)",
+        empty: "Nenhuma coluna Kanban configurada."
       },
       files: {
         title: "Lista de arquivos",

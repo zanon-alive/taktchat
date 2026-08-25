@@ -25,6 +25,7 @@ import {
   WhatsApp as WhatsAppIcon,
   FlashOn as FlashOnIcon,
   ViewModule as ViewKanban,
+  Assessment as AssessmentIcon,
   ContactPhoneOutlined as ContactPhoneOutlinedIcon,
   Schedule,
   LocalOffer as LocalOfferIcon,
@@ -482,6 +483,16 @@ const MainListItems = ({ collapsed, onItemClick }) => {
           to="/kanban"
           primary={i18n.t("mainDrawer.listItems.kanban")}
           icon={<ViewKanban />}
+          tooltip={collapsed}
+          onClick={onItemClick}
+        />
+      )}
+
+      {showKanban && hasPermission("kanban.view") && (
+        <ListItemLink
+          to="/kanban/stats"
+          primary={i18n.t("mainDrawer.listItems.kanbanStats")}
+          icon={<AssessmentIcon />}
           tooltip={collapsed}
           onClick={onItemClick}
         />

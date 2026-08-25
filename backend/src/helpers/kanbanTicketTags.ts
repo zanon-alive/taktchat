@@ -121,6 +121,44 @@ export function shouldWarnKanbanColumnCount(count: number): boolean {
   return Number(count) > KANBAN_COLUMN_WARN_LIMIT;
 }
 
+export type KanbanLaneStatRow = {
+  tagId: number;
+  tagName: string;
+  updatedAt: Date | string;
+};
+
+export type KanbanLaneStat = {
+  tagId: number;
+  name: string;
+  count: number;
+  avgAgeHours: number;
+};
+
+export function aggregateKanbanLaneStats(
+  rows: KanbanLaneStatRow[],
+  now: Date = new Date()
+): KanbanLaneStat[] {
+  const grouped = new Map<number, { name: string; ages: number[] }>();
+
+  rows.forEach(row => {
+    const ageMs = now.getTime() - new Date(row.updatedAt).getTime();
+    const hours = Number.isFinite(ageMs) ? Math.max(0, ageMs / 36e5) : 0;
+    const current = grouped.get(row.tagId) || { name: row.tagName, ages: [] };
+    current.ages.push(hours);
+    grouped.set(row.tagId, current);
+  });
+
+  return [...grouped.entries()].map(([tagId, item]) => ({
+    tagId,
+    name: item.name,
+    count: item.ages.length,
+    avgAgeHours:
+      Math.round(
+        (item.ages.reduce((sum, hours) => sum + hours, 0) / item.ages.length) * 10
+      ) / 10
+  }));
+}
+
 /**
  * Tickets `closed` só entram no quadro se tiverem lane (`kanban=1`).
  * Sem isso, Encerrar some o card e a lane0 encheria de histórico.
