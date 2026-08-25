@@ -23,19 +23,25 @@ jest.mock("../../models/Contact");
 jest.mock("../../models/Company");
 jest.mock("../../models/Tag");
 jest.mock("../../models/ContactTag");
+jest.mock("../../models/CompaniesSettings");
 jest.mock("../../services/LeadService/SendWelcomeMessageService");
+jest.mock("../../helpers/GetDefaultWhatsApp");
+jest.mock("../../services/ChannelEntryConfigService/GetChannelEntryConfigService");
 jest.mock("../../libs/wbot", () => ({
   getWbot: jest.fn(),
   default: jest.fn(),
 }));
 
 import { Request, Response } from "express";
+import { Op } from "sequelize";
 import * as LeadController from "../LeadController";
 import Contact from "../../models/Contact";
 import Company from "../../models/Company";
 import Tag from "../../models/Tag";
 import ContactTag from "../../models/ContactTag";
 import SendWelcomeMessageService from "../../services/LeadService/SendWelcomeMessageService";
+import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
+import GetChannelEntryConfigService from "../../services/ChannelEntryConfigService/GetChannelEntryConfigService";
 import AppError from "../../errors/AppError";
 import logger from "../../utils/logger";
 jest.mock("../../utils/logger", () => ({
@@ -104,6 +110,11 @@ describe("LeadController", () => {
       email: "joao.antigo@example.com",
       number: "5514999999999",
       companyId: 1,
+      bzEmpresa: "Empresa Antiga",
+      update: jest.fn().mockImplementation(function (this: any, updates: any) {
+        Object.assign(this, updates);
+        return Promise.resolve(this);
+      }),
       save: jest.fn().mockResolvedValue(true),
     } as any;
 
@@ -114,6 +125,13 @@ describe("LeadController", () => {
       color: "#25D366",
       companyId: 1,
     } as Tag;
+
+    (GetDefaultWhatsApp as jest.Mock).mockResolvedValue(undefined);
+    (GetChannelEntryConfigService as jest.Mock).mockResolvedValue({
+      defaultQueueId: null,
+      defaultTagId: null,
+      welcomeMessage: null,
+    });
   });
 
   describe("store - Criar novo lead", () => {
@@ -142,8 +160,11 @@ describe("LeadController", () => {
       });
       expect(Contact.findOne).toHaveBeenCalledWith({
         where: {
-          number: "14999999999", // Número limpo (sem formatação)
           companyId: 1,
+          [Op.or]: [
+            { canonicalNumber: "14999999999" },
+            { number: "14999999999" },
+          ],
         },
       });
       expect(Contact.create).toHaveBeenCalledWith(
@@ -156,7 +177,7 @@ describe("LeadController", () => {
       );
       expect(Tag.findOrCreate).toHaveBeenCalledWith({
         where: { name: "Lead", companyId: 1 },
-        defaults: { color: "#25D366", kanban: 0 },
+        defaults: { color: "#25D366", kanban: 0, companyId: 1 },
       });
       expect(ContactTag.findOrCreate).toHaveBeenCalledWith({
         where: { contactId: 1, tagId: 1 },
@@ -245,8 +266,11 @@ describe("LeadController", () => {
       // Assert
       expect(Contact.findOne).toHaveBeenCalledWith({
         where: {
-          number: "14996870843", // Número limpo
           companyId: 1,
+          [Op.or]: [
+            { canonicalNumber: "14996870843" },
+            { number: "14996870843" },
+          ],
         },
       });
       expect(Contact.create).toHaveBeenCalledWith(
@@ -258,7 +282,7 @@ describe("LeadController", () => {
   });
 
   describe("store - Atualizar lead existente", () => {
-    it("deve atualizar contato existente quando número já existe", async () => {
+    it("deve preservar dados preenchidos do contato existente", async () => {
       // Arrange
       (Company.findOne as jest.Mock).mockResolvedValue(mockCompany);
       (Contact.findOne as jest.Mock).mockResolvedValue(mockExistingContact);
@@ -273,9 +297,9 @@ describe("LeadController", () => {
 
       // Assert
       expect(Contact.findOne).toHaveBeenCalled();
-      expect(mockExistingContact.save).toHaveBeenCalled();
-      expect(mockExistingContact.name).toBe("João Silva");
-      expect(mockExistingContact.email).toBe("joao@example.com");
+      expect(mockExistingContact.update).not.toHaveBeenCalled();
+      expect(mockExistingContact.name).toBe("João Silva Antigo");
+      expect(mockExistingContact.email).toBe("joao.antigo@example.com");
       expect(Contact.create).not.toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.json).toHaveBeenCalledWith(

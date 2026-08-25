@@ -1,3 +1,31 @@
+jest.mock("../../../models/Company", () => ({
+  __esModule: true,
+  default: { findByPk: jest.fn() }
+}));
+jest.mock("../../../models/User", () => ({
+  __esModule: true,
+  default: { findOne: jest.fn() }
+}));
+jest.mock("../../../models/Plan", () => ({
+  __esModule: true,
+  default: { findByPk: jest.fn() }
+}));
+jest.mock("../CompanyAccessService", () => ({
+  __esModule: true,
+  default: jest.fn()
+}));
+jest.mock("../CreateCompanyService", () => ({
+  __esModule: true,
+  default: jest.fn()
+}));
+jest.mock("../../LicenseService/CreateLicenseService", () => ({
+  __esModule: true,
+  default: jest.fn()
+}));
+jest.mock("../../MailServices/SendWelcomePartnerSignupMailService", () => ({
+  sendWelcomePartnerSignupMail: jest.fn(() => Promise.resolve())
+}));
+
 import PartnerSignupService from "../PartnerSignupService";
 import Company from "../../../models/Company";
 import User from "../../../models/User";
@@ -5,13 +33,6 @@ import Plan from "../../../models/Plan";
 import CompanyAccessService from "../CompanyAccessService";
 import CreateCompanyService from "../CreateCompanyService";
 import CreateLicenseService from "../../LicenseService/CreateLicenseService";
-
-jest.mock("../../../models/Company");
-jest.mock("../../../models/User");
-jest.mock("../../../models/Plan");
-jest.mock("../CompanyAccessService");
-jest.mock("../CreateCompanyService");
-jest.mock("../../LicenseService/CreateLicenseService");
 
 describe("PartnerSignupService", () => {
   beforeEach(() => {
@@ -77,7 +98,10 @@ describe("PartnerSignupService", () => {
         password: "senha123",
         planId: 1
       })
-    ).rejects.toThrow("Parceiro inválido");
+    ).rejects.toMatchObject({
+      message: "Parceiro inválido.",
+      statusCode: 400
+    });
   });
 
   it("deve rejeitar quando e-mail já existe", async () => {
@@ -106,6 +130,9 @@ describe("PartnerSignupService", () => {
         password: "senha123",
         planId: 1
       })
-    ).rejects.toThrow("E-mail já cadastrado");
+    ).rejects.toMatchObject({
+      message: "E-mail já cadastrado.",
+      statusCode: 400
+    });
   });
 });
