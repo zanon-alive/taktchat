@@ -22,8 +22,7 @@
 ## Ainda aberto (fora do código desta branch)
 
 1. Captura **real** do WhatsApp no celular — hoje há ilustração de IA (`pendente-whatsapp-celular.png`).
-2. Copy dos slides (login comercial) em MD/`decks.js`.
-3. Tag pessoal `#` na atendente se quiser agenda de contatos no perfil `user`.
+2. Tag pessoal `#` na atendente se quiser agenda de contatos no perfil `user`.
 
 WhatsApp da Cliente Demo Kit no ambiente **local** já está CONNECTED (envio e transferência persistida). Seed de demo **não** vai para produção.
 

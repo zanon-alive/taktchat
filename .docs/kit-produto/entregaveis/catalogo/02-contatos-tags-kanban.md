@@ -29,7 +29,7 @@ Atendente (ver/editar o básico), admin (importação, regras, lanes).
 
 ## Seed
 
-Maria, João, Ana, Mercado Central, Pedro — números `551190000100x` (fictícios). Funil demo: Lead → Qualificado → Negociação → Aguardando cliente → Fechado ganho / Fechado perdido.
+Maria, João, Ana, Mercado Central, Pedro, Carla — números `551190000100x` (fictícios). Funil demo (6 colunas): Lead (Carla) → Qualificado (João) → Negociação (Maria) → Aguardando cliente (Ana) → Fechado ganho (Mercado Central) / Fechado perdido (Pedro).
 
 ## Status
 

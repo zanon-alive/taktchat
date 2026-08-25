@@ -19,13 +19,14 @@ const comercialClientePadrao = [
     title: "Taktchat",
     kicker: "Comercial · cliente final · padrão",
     lead:
-      "Plataforma para o time atender no WhatsApp como operação, não como conversa no celular. Cada pessoa que fala vira contato; cada conversa em andamento vira ticket. Nesta reunião o núcleo é isso.",
+      "Plataforma para o time atender no WhatsApp como operação, não como conversa no celular. Cada pessoa que fala vira contato; cada conversa em andamento vira ticket. Esta é a tela de login da demo comercial (só ambiente local).",
     bullets: [
-      "Uma tela para atendimento, fila e histórico.",
-      "Multi-empresa: cada cliente da operação isolado.",
-      "Reunião de 10–12 minutos; demo do ticket depois.",
+      "Player desta apresentação: dono@taktchat.local (empresa plataforma).",
+      "Demo do ticket: atendente@taktchat.local — Beatriz, fila Suporte.",
+      "Admin da empresa: admin.cliente@taktchat.local. Senha dos @taktchat.local: LocalTest#2026.",
+      "Não usar estes logins em produção. Núcleo da reunião: contato → ticket.",
     ],
-    ...shot("f1-login.png", "Tela de login do produto"),
+    ...shot("f1-login.png", "Login da demo comercial (ambiente local)"),
   },
   {
     title: "A dor",
@@ -116,31 +117,31 @@ const comercialClientePadrao = [
   {
     title: "Funil no Kanban",
     lead:
-      "Não há pipeline de oportunidade (valor, probabilidade, ganho/perdido nativos). Tags Kanban viram colunas (Lead → Negociação → Fechado). Ticket novo entra na lane configurada; Encerrar aplica a lane de encerrar. O time arrasta o ticket. Depende do plano (useKanban).",
+      "Não há pipeline de oportunidade (valor, probabilidade nativos). O quadro da demo tem 6 colunas — tags kanban=1, não fases de CRM. Ticket novo entra em Lead; Encerrar aplica Fechado ganho. O time arrasta o card. Depende do plano (useKanban).",
     bullets: [
-      "Coluna = tag com flag Kanban, não fase nativa de CRM.",
-      "Lane de entrada e lane ao Encerrar: Tags Kanban (settings da empresa).",
-      "Sem limite no código: cabem quantas colunas o admin criar; 4–7 leem melhor.",
-      "Rotas: /kanban e /TagsKanban.",
+      "Lead — Carla (pendente). Qualificado — João (Vendas).",
+      "Negociação — Maria (aberto, Urgente). Aguardando cliente — Ana (supervisor).",
+      "Fechado ganho — Mercado Central. Fechado perdido — Pedro (closed; o quadro ainda lista sobretudo open/pending).",
+      "Mais de 8 colunas cansa a leitura; a demo usa 6. Rotas: /kanban e /TagsKanban.",
     ],
-    ...pendente(
+    ...shot(
       "pendente-kanban.png",
-      "Grave /kanban (ou /TagsKanban) com 4 colunas tipo Lead / Qualificado / Negociação / Fechado e um card arrastável."
+      "Quadro da demo: 6 colunas Lead → Qualificado → Negociação → Aguardando cliente → Fechado ganho / Fechado perdido"
     ),
   },
   {
     title: "Avanço automático das colunas",
     lead:
-      "Há automação de lane: tempo parado numa coluna pode mandar para a próxima. Cliente falando de novo, no ticket ainda aberto, pode voltar à coluna de rollback. Ticket novo depois de encerrado recebe a lane de entrada (Lead, se configurado) — não herda o rollback da conversa fechada.",
+      "Há automação de lane nas 6 colunas. Tempo parado manda para a próxima. Cliente falando de novo, no ticket ainda aberto, volta ao rollback. Ticket novo depois de encerrado cai em Lead — não herda o rollback da conversa fechada.",
     bullets: [
-      "timeLane + nextLane: horas sem interação no ticket aberto → próxima coluna (e pode mandar mensagem).",
-      "rollbackLane: cliente responde de novo no ticket aberto → volta à coluna configurada.",
-      "Regras de tag: classificam contato por campo (região, segmento…) no cron — não pelo status closed.",
-      "Conversa encerrada + nova mensagem = ticket novo na lane de entrada.",
+      "Lead: 48h → Qualificado. Qualificado: 72h → Negociação (e pode voltar a Lead).",
+      "Negociação: 72h → Aguardando cliente. Fechado ganho/perdido não avançam sozinhos.",
+      "rollbackLane só no ticket aberto. Encerrar aplica Fechado ganho; Fechado perdido é arrastar.",
+      "Conversa encerrada + nova mensagem = ticket novo em Lead.",
     ],
-    ...pendente(
+    ...shot(
       "pendente-kanban-lane.png",
-      "Grave o modal da tag Kanban mostrando Tempo (horas), Lane seguinte e Voltar para Lane após retomar."
+      "Modal da lane na demo: tempo (horas), próxima coluna e voltar para lane após retomar"
     ),
   },
   {
@@ -207,11 +208,11 @@ const comercialClientePadrao = [
   {
     title: "Próximo passo",
     lead:
-      "A demo de 15 minutos é o ticket: Maria (já aberta) e Carla (aguardando aceite). Só depois conectamos o WhatsApp real da empresa — QR na conta deles, não na nossa demo eterna.",
+      "A demo de 15 minutos é o ticket, com os logins da Cliente Demo Kit. Maria já está aberta (Negociação); Carla aguarda em Lead. Só depois conectamos o WhatsApp real da empresa — QR na conta deles.",
     bullets: [
-      "Demo: aceitar pendente, responder, ver tag e transferir.",
-      "Piloto: um número + uma fila de suporte.",
-      "WhatsApp real só na conta e no celular de vocês.",
+      "Entrar como atendente@taktchat.local (Beatriz) / LocalTest#2026.",
+      "Aceitar pendente, responder, ver o quadro de 6 colunas, transferir.",
+      "Admin da demo: admin.cliente@taktchat.local. WhatsApp real só na conta de vocês.",
     ],
     ...shot("f5-atendente-aguardando.png", "Aba Aguardando: ticket pronto para aceitar"),
   },
@@ -237,7 +238,7 @@ const comercialClienteLonga = [
     title: "Jornada do ticket com números",
     kicker: "Extensão da versão longa",
     lead:
-      "Três estados que o gestor precisa decorar. Pendente = ninguém pegou. Aberto = tem dono. Encerrado = acabou. No seed: Maria aberta (Urgente), João pendente em Vendas, Pedro já fechado.",
+      "Três estados que o gestor precisa decorar. Pendente = ninguém pegou. Aberto = tem dono. Encerrado = acabou. No quadro de 6 colunas: Carla em Lead, João em Qualificado, Maria em Negociação, Ana aguardando, Mercado Central ganho, Pedro perdido.",
     bullets: [
       "Pendente / aberto / encerrado (há também bot, lgpd, nps, grupo).",
       "A fila define quem vê o ticket: atendente da Suporte não vê Vendas.",
@@ -366,13 +367,13 @@ const comercialParceiroPadrao = [
     title: "Taktchat para parceiros",
     kicker: "Comercial · revenda · padrão",
     lead:
-      "Vocês revendem o mesmo produto com a operação no modelo whitelabel: seus clientes entram como empresas filhas. A marca e o comercial são de vocês; a plataforma é nossa.",
+      "Vocês revendem o mesmo produto com a operação no modelo whitelabel: seus clientes entram como empresas filhas. A marca e o comercial são de vocês; a plataforma é nossa. Logins da demo (só local).",
     bullets: [
-      "Revenda com a sua marca na operação (whitelabel).",
-      "Você não reconstrói omnichannel: usa o que já existe.",
-      "Reunião de 10–12 minutos focada no modelo, não no chat.",
+      "Player: dono@taktchat.local. Painel da revenda: parceiro@taktchat.local.",
+      "Filha (Cliente Demo Kit): admin.cliente@taktchat.local e atendente@taktchat.local.",
+      "Senha dos @taktchat.local: LocalTest#2026. Não usar em produção.",
     ],
-    ...shot("f23-parceiro-empresas-filhas.png", "Parceiro: empresas filhas (Cliente Demo Kit)"),
+    ...shot("f23-parceiro-empresas-filhas.png", "Parceiro: empresas filhas (Cliente Demo Kit). Login: parceiro@taktchat.local"),
   },
   {
     title: "Por que revender",
@@ -578,11 +579,11 @@ const comercialParceiroLonga = [
   {
     title: "Demo",
     lead:
-      "Roteiro curto: painel do parceiro (empresas + licenças) e depois login da filha (Carlos admin / Beatriz atendente) no ticket. O prospect precisa ver os dois lados na mesma reunião.",
+      "Roteiro curto: painel do parceiro e depois a filha no ticket. O prospect precisa ver os dois lados na mesma reunião. Senha dos @taktchat.local: LocalTest#2026.",
     bullets: [
-      "Ana Parceira: Minhas empresas e Licenças.",
-      "Carlos: tickets e filas da filha.",
-      "Beatriz: aceite e chat — o produto que o cliente usa de verdade.",
+      "parceiro@taktchat.local — Ana: Minhas empresas e Licenças.",
+      "admin.cliente@taktchat.local — Carlos: tickets, filas e o quadro de 6 colunas.",
+      "atendente@taktchat.local — Beatriz: aceite e chat — o produto que o cliente usa.",
     ],
     ...shot("f13-admin-tickets.png", "Carlos (admin da filha) nos tickets"),
   },

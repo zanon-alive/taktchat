@@ -58,13 +58,13 @@ Merge da `main` (PR #21) nesta branch. Copy do kit deixa de descrever o Kanban a
 - Ticket novo recebe a lane de entrada (`defaultKanbanTagId`).
 - Encerrar aplica `closedKanbanTagId`; uma tag `kanban=1` por ticket; cron por `updatedAt`; rollback não vale em ticket novo.
 - Overlay de API e token hex: já em `0e2c051` (não são mais pegadinha da demo).
+- Copy dos slides: login comercial (`@taktchat.local` / `LocalTest#2026`) e funil de **6 colunas** no player e nos MD.
 
 ## Ainda aberto (não bloqueia o lote)
 
 1. Captura real do WhatsApp no celular — hoje há **ilustração de IA** em `pendente-whatsapp-celular.png`
-2. Copy fino dos slides (login comercial) em MD/`decks.js`
-3. **Não** transformar o seed em migration Sequelize — seed só local (ver `scripts/README.md`)
-4. Demanda 16: A1–A5 feitos no PR #21; restam A6–A9 (aviso de 8 colunas, relatório, ficha) e caminho B. Quadro `/kanban` ainda não lista `closed` (item 2b).
+2. **Não** transformar o seed em migration Sequelize — seed só local (ver `scripts/README.md`)
+3. Demanda 16: A1–A5 feitos no PR #21; restam A6–A9 (aviso de 8 colunas, relatório, ficha) e caminho B. Quadro `/kanban` ainda não lista `closed` (item 2b).
 
 ## Fora desta branch
 

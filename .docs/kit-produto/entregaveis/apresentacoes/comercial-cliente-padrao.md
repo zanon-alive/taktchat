@@ -6,11 +6,12 @@ Posicionamento: **CRM de conversa no WhatsApp** (contato → ticket). Não é CR
 
 ## Slide 1 — Capa
 
-**Para falar:** cada pessoa que fala vira contato; cada conversa em andamento vira ticket. O núcleo desta reunião é isso.
+**Para falar:** cada pessoa que fala vira contato; cada conversa em andamento vira ticket. Esta é a tela de login da demo comercial (só ambiente local).
 
-- Uma tela para atendimento, fila e histórico.
-- Multi-empresa: cada cliente da operação isolado.
-- Demo do ticket fica para o próximo passo.
+- Player desta apresentação: `dono@taktchat.local` (empresa plataforma).
+- Demo do ticket: `atendente@taktchat.local` — Beatriz, fila Suporte.
+- Admin da empresa: `admin.cliente@taktchat.local`. Senha dos `@taktchat.local`: `LocalTest#2026`.
+- Não usar estes logins em produção.
 
 ## Slide 2 — A dor
 
@@ -75,11 +76,16 @@ Posicionamento: **CRM de conversa no WhatsApp** (contato → ticket). Não é CR
 
 ## Slide 9 — Funil no Kanban
 
-**Para falar:** não há pipeline de oportunidade. Tags Kanban viram colunas (Lead → Negociação → Fechado). Ticket novo entra na lane configurada em Tags Kanban. Encerrar aplica a lane de encerrar. Arrasta o ticket. Plano `useKanban`. Sem limite no código; 4–7 colunas leem melhor.
+**Para falar:** não há pipeline de oportunidade. O quadro da demo tem **6 colunas** (tags `kanban=1`): Lead, Qualificado, Negociação, Aguardando cliente, Fechado ganho, Fechado perdido. Ticket novo entra em Lead; Encerrar aplica Fechado ganho. Arrasta o ticket. Plano `useKanban`.
+
+- Lead — Carla (pendente). Qualificado — João (Vendas).
+- Negociação — Maria (aberto, Urgente). Aguardando cliente — Ana (supervisor).
+- Fechado ganho — Mercado Central. Fechado perdido — Pedro (`closed`; o quadro ainda lista sobretudo `open`/`pending`).
+- Mais de 8 colunas cansa; a demo usa 6.
 
 ## Slide 10 — Avanço automático das colunas
 
-**Para falar:** horas paradas podem ir para a próxima lane. Cliente respondendo no ticket **aberto** pode voltar ao rollback. Encerrar aplica a lane de encerrar; nova mensagem = ticket **novo**, já na lane de entrada (Lead, se configurado).
+**Para falar:** nas 6 colunas, horas paradas vão para a próxima lane (Lead 48h → Qualificado; Qualificado 72h → Negociação). Cliente respondendo no ticket **aberto** volta ao rollback. Encerrar aplica Fechado ganho; nova mensagem = ticket **novo** em Lead. Fechado ganho/perdido não avançam sozinhos.
 
 ## Slide 11 — Dual channel
 
@@ -103,7 +109,11 @@ Posicionamento: **CRM de conversa no WhatsApp** (contato → ticket). Não é CR
 
 ## Slide 16 — Próximo passo
 
-**Para falar:** demo no ticket (Maria aberta, Carla aguardando). WhatsApp real só na conta deles.
+**Para falar:** demo no ticket com os logins da Cliente Demo Kit. Maria em Negociação; Carla em Lead. WhatsApp real só na conta deles.
+
+- Entrar como `atendente@taktchat.local` / `LocalTest#2026`.
+- Admin da demo: `admin.cliente@taktchat.local`.
+- Ver o quadro de 6 colunas em `/kanban`.
 
 ## Slide 17 — CTA
 

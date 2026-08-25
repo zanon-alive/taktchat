@@ -8,7 +8,7 @@ Iguais ao padrão (capa até CTA).
 
 ## Slide 18 — Jornada do ticket com números
 
-**Para falar:** pendente = ninguém pegou; aberto = tem dono; encerrado = acabou. Demo: Maria aberta (Urgente), João pendente em Vendas, Pedro fechado.
+**Para falar:** pendente = ninguém pegou; aberto = tem dono; encerrado = acabou. Nas 6 colunas: Carla em Lead, João em Qualificado, Maria em Negociação, Ana aguardando, Mercado Central ganho, Pedro perdido.
 
 - A fila define quem vê o ticket.
 - Admin com “ver todos” vê o quadro da empresa.

@@ -4,10 +4,11 @@ Player: `/apresentacoes/comercial-parceiro-padrao`.
 
 ## Slide 1 — Capa
 
-**Para falar:** revenda com a sua marca (whitelabel). Seus clientes nascem como empresas filhas. A plataforma é nossa; o comercial é de vocês.
+**Para falar:** revenda com a sua marca (whitelabel). Seus clientes nascem como empresas filhas. A plataforma é nossa; o comercial é de vocês. Logins da demo (só local).
 
-- Mesmo produto, outro papel.
-- Reunião de 10–12 min focada no modelo, não no chat.
+- Player: `dono@taktchat.local`. Painel da revenda: `parceiro@taktchat.local`.
+- Filha: `admin.cliente@taktchat.local` e `atendente@taktchat.local`.
+- Senha dos `@taktchat.local`: `LocalTest#2026`. Não usar em produção.
 
 ## Slide 2 — Por que revender
 

@@ -6,15 +6,13 @@
 
 ## Estado
 
-Kit **v1.5**: copy alinhado à `main` (Kanban PR #21 + overlay de API + token de signup). Merge `27807d7` + docs desta leva.
-
-Pendências 1–5, 8 e 10 do arquivo 15 estão resolvidas no produto. Nuance: o quadro `/kanban` ainda não lista tickets `closed` (item 2b).
+Kit **v1.5**: Kanban #21 + overlay/token + copy dos slides (login comercial e 6 colunas do funil).
 
 Este repositório **não** é projeto Telecontrol.
 
 ## Ainda aberto no kit (não bloqueia)
 
-Captura real do celular; copy fino dos slides; demanda 16 (A6–A9 e caminho B); aviso de 8 colunas; quadro listar `closed`.
+Captura real do celular; demanda 16 (A6–A9 e caminho B); aviso de 8 colunas; quadro listar `closed`.
 
 ## Próximo passo
 

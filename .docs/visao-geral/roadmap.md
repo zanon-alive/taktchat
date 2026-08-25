@@ -354,8 +354,9 @@ Player: `/apresentacoes` (**login obrigatório** — super, admin da plataforma 
 - [x] **Prints do player (signup da filha)** — captura real de `pendente-signup-partner.png` e `pendente-signup-token.png`. Celular continua ilustração de IA (`pendente-whatsapp-celular.png`).
 - [x] **Seed demo não vai para produção** — SQL só em `.docs/kit-produto/scripts/` (não é migration).
 - [x] **Copy do kit alinhado ao Kanban #21** — ticket novo na lane de entrada; Encerrar aplica lane; overlay/token não são mais pegadinha da demo.
+- [x] **Copy dos slides (login comercial + 6 colunas)** — logins `@taktchat.local` na capa; funil Lead → … → Fechado ganho/perdido no player.
 
-Pendências 1–5, 8 e 10: resolvidas. Restam captura real do celular, copy fino, demanda 16 (A6–A9 / B) e quadro listar `closed` (2b). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
+Pendências 1–5, 8 e 10: resolvidas. Restam captura real do celular, demanda 16 (A6–A9 / B) e quadro listar `closed` (2b). Lista: [kit-produto/15-pendencias-produto-outras-branches.md](../kit-produto/15-pendencias-produto-outras-branches.md).
 
 ## 🎫 Tickets, tags e Kanban
 

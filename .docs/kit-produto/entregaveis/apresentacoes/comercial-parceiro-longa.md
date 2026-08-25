@@ -28,7 +28,11 @@ Iguais ao padrão (inclui o argumento do ticket).
 
 ## Slide 17 — Demo
 
-**Para falar:** Ana (empresas + licenças) e depois Carlos/Beatriz no ticket da filha. Os dois lados na mesma reunião.
+**Para falar:** Ana (empresas + licenças) e depois Carlos/Beatriz no ticket da filha. Os dois lados na mesma reunião. Senha: `LocalTest#2026`.
+
+- `parceiro@taktchat.local` — Minhas empresas e Licenças.
+- `admin.cliente@taktchat.local` — tickets, filas e o quadro de 6 colunas.
+- `atendente@taktchat.local` — aceite e chat.
 
 ## Slide 18 — Limites honestos
 
