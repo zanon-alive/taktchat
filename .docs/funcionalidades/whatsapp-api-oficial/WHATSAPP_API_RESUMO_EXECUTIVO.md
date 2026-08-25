@@ -1,5 +1,7 @@
 # 📊 WhatsApp Business API Oficial - Resumo Executivo
 
+> **Documento histórico (2024).** Valores, SLA, limites e cronograma abaixo não são promessa vigente. A referência funcional v1.8 é [../whatsapp-api-oficial.md](../whatsapp-api-oficial.md).
+
 ## 🎯 Objetivo
 
 Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo aos clientes a escolha entre:
@@ -10,10 +12,9 @@ Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo 
 
 ## 💼 Benefícios para o Negócio
 
-### ✅ **Confiabilidade Empresarial**
-- SLA garantido pela Meta
-- Sem risco de banimento
-- Uptime 99.9%
+### ✅ **Canal oficial**
+- Credenciais, templates e suporte conforme a conta Meta
+- Políticas, qualidade da conta e limites continuam aplicáveis
 
 ### 📈 **Escalabilidade**
 - Suporte a milhares de conversas simultâneas
@@ -39,8 +40,8 @@ Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo 
 |---------|---------|-------------|
 | **Setup** | QR Code (2 min) | Credenciais Meta (30 min) |
 | **Custo** | R$ 0 | R$ 0,17-0,34/conversa* |
-| **Banimento** | Risco moderado | Sem risco |
-| **Limite msg/dia** | ~150-500** | Ilimitado |
+| **Bloqueio/restrição** | Risco do canal não oficial | Sujeito às políticas e à qualidade da conta Meta |
+| **Limite de envio** | Varia por sessão e comportamento | Limites vigentes da conta/Meta |
 | **Multi-agente** | Problemático | Nativo |
 | **Templates** | ❌ | ✅ |
 | **Botões interativos** | Limitado | Completo |
@@ -48,7 +49,7 @@ Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo 
 | **SLA/Suporte** | Comunidade | Meta oficial |
 
 *\* Primeiras 1.000 conversas/mês grátis*  
-*\*\* Com anti-ban configurado*
+*\*\* Cadência reduz risco, sem garantia anti-ban.*
 
 ---
 
@@ -64,7 +65,7 @@ Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo 
 
 #### Empresa Pequena (50 conversas/dia)
 - **Custo mensal**: R$ 0 (dentro do free tier)
-- **Economia**: Sem custos de banimento
+- **Observação**: consultar preços e franquias vigentes da Meta
 
 #### Empresa Média (200 conversas/dia)
 - **Total mês**: ~6.000 conversas
@@ -74,7 +75,7 @@ Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo 
 #### Empresa Grande (1.000 conversas/dia)
 - **Total mês**: ~30.000 conversas
 - **Custo**: (30.000 - 1.000) × R$ 0,17 = **R$ 4.930/mês**
-- **ROI**: Economia de tempo operacional + Zero banimentos
+- **ROI**: deve ser recalculado com preços e volume reais
 
 ---
 
@@ -153,10 +154,10 @@ Adicionar suporte à **WhatsApp Business API Oficial** no Whaticket, oferecendo 
 - **Solução:** API Oficial
 
 ### Cenário 2: Suporte Técnico
-**Necessidade:** Múltiplos atendentes, SLA garantido
+**Necessidade:** Múltiplos atendentes e canal oficial
 - ✅ Multi-agente nativo
 - ✅ Webhooks para notificações
-- ✅ Confiabilidade 99.9%
+- ✅ Canal oficial e webhooks
 - **Solução:** API Oficial
 
 ### Cenário 3: Pequena Empresa

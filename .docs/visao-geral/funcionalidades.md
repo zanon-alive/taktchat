@@ -1,85 +1,97 @@
-## Funcionalidades do Taktchat
+# Funcionalidades do Taktchat
 
-Este documento consolida as principais capacidades da plataforma considerando o código atual (frontend React, backend Node/TypeScript) e os fluxos descritos nos demais arquivos de `.docs/`.
+Mapa funcional da revisão documental v1.8. Os estados abaixo descrevem o código encontrado, não uma confirmação de deploy ou disponibilidade em produção.
 
-### 1. Atendimento omnichannel
-- **Tickets em tempo real**: interface de múltiplas colunas (`Tickets`, `TicketsAdvanced`, `TicketsCustom`, `TicketResponsiveContainer`) com suporte a filtros por status, fila, tags, responsável, SLA e **canal de origem (entrySource)**.
-- **EntrySource e canais de entrada**: tickets possuem `entrySource` (whatsapp, lead, revendedor, site_chat, channel). Canais configuráveis em **Configurações > Canais de entrada** (fila, tag, WhatsApp, mensagem de boas-vindas). Formulários Lead e Revendedor na landing; chat do site via API e widget embarcável.
-- **Chat unificado**: visualização de mensagens, anexos, notas internas, widgets de informações do contato e histórico completo por `companyId`.
-- **Transferências e roteamento**: mudança manual ou automática entre filas/atendentes, com modais personalizados (`TransferTicketModalCustom`, `TicketActionButtonsCustom`).
-- **Kanban & Backlog**: painéis `Kanban` e `TagsKanban` para organizar tickets por estágio, prioridade e tags. Lanes automáticas: ticket novo na coluna de entrada; Encerrar move para a lane configurada (o card não some do funil). Uma tag `kanban=1` por ticket. Detalhe: `.docs/funcionalidades/kanban-lanes.md`.
+## Atendimento e Kanban
 
-### 2. Conexões e sessões WhatsApp
-- **Múltiplas conexões**: gerenciamento de dispositivos via páginas `Connections`, `WhatsAppModal`, `WhatsAppModalAdmin` e jobs `WbotServices`.
-- **Dual Channel Support**: suporte simultâneo a **Baileys** (não oficial, gratuito) e **WhatsApp Business API Oficial** (Meta, pago, profissional).
-  - Baileys: Conexão via QR Code, ideal para pequenas empresas (< 150 msg/dia)
-  - API Oficial: Conexão via credenciais Meta, ideal para empresas maiores, sem risco de banimento, uptime 99.9%, templates aprovados
-  - Arquitetura unificada com Adapter Pattern permite escolher o canal por conexão
-  - Documentação completa: `.docs/funcionalidades/whatsapp-api-oficial/`
-- **Monitoramento de status**: dashboards internos (Announcements, AuditLogs) e filas (`queueMonitor`) para acompanhar desconexões, reautenticações e métricas de envio.
-- **APIs de mensagens**: endpoints `MessagesAPI`, `External API` e `Webhooks` permitem integração com sistemas terceiros.
-- **Sistema de webhooks**: recebimento de eventos em tempo real da Meta via `/webhooks/whatsapp` para API Oficial.
+- Tickets por status, fila, atendente, tags e origem (`entrySource`), com mensagens de texto, mídia, áudio e mensagens especiais.
+- Chat em tempo real, transferência, respostas rápidas e histórico por empresa.
+- Kanban de **conversas**: `/ticket/kanban`, quadro `/kanban`, popup de desfecho ao encerrar e estatísticas em `/ticket/kanban/stats` e `/kanban/stats`.
+- Lanes automáticas de entrada e encerramento; uma tag `kanban=1` por ticket. Não é pipeline financeiro de oportunidades.
 
-### 3. Campanhas e fluxos automatizados
-- **Campanhas segmentadas**: módulos `Campaigns`, `CampaignReport`, `CampaignDetailedReport`, `CampaignsPhrase`, `CampaignsConfig`, `ContactLists`, `ContactListItems` e `Moments` controlam disparos, templates, throttling e agendamentos.
-- **Flow Builder**: editor visual (`FlowBuilder`, `FlowBuilderConfig`, nodes customizados) para construir jornadas, condicionais, perguntas, integração com OpenAI, Typebot e menus multi passo.
-- **Smart automations**: recursos `FlowDefault`, `QueueIntegration`, `Moments` e `SystemConfig` alimentam gatilhos por filas, horários e respostas.
+## Contatos
 
-### 4. IA e automação cognitiva
-- **Prompts e Assistentes**: página `Prompts`, serviços `IA/*` e RAG (`backend/src/services/RAG`) habilitam criação de assistentes, registro de uso (`AIUsageLogger`) e configuração de modelos OpenAI/GG.
-- **RAG / Smart Files**: módulo `SmartFilesDashboard` + jobs `RAGIndexService` indexam documentos, permitem busca semântica e sugestões em tempo real dentro dos tickets.
-- **Automação de atendente**: `QueueAIService`, `AIAnalyticsService` e integrações `OpenAiService` orquestram respostas automáticas, transcrição de áudio (`TranscribeAudioMessageService`) e classificação.
+- Cadastro enriquecido, campos comerciais, carteira (`ContactWallet`) e tags.
+- Importação assíncrona, importação de contatos do dispositivo e deduplicação.
+- Regras automáticas de tags e filtros. Processamentos em fila exigem Redis.
 
-### 5. Gestão de contatos, tags e arquivos
-- **Contacts & Lists**: importação, deduplicação (`ProcessDuplicateContactsService`), enriquecimento e tags, com UI dedicada (`Contacts`, `ContactLists`, `ContactListItems`).
-- **Tags & regras**: módulos `Tags`, `TagModal`, `Rules`, `TagRulesCron` aplicam segmentações automáticas, posicionamento em Kanban e filtros dinâmicos.
-- **Smart Files**: upload, categorização e reaproveitamento via `Files`, `SmartFilesDashboard` e APIs de mídia (com suporte a transcrição, validação e LGPD).
+## WhatsApp dual channel
 
-### 6. Dashboards, relatórios e métricas
-- **Visão executiva**: páginas `Dashboard`, `Reports`, `CampaignReport` e `CampaignDetailedReport` consolidadas com filtros por período, fila, usuário e canal.
-- **Indicadores operacionais**: componentes (`DashTickets*`, `ContactsReportService`, `Statistics/*`) fornecem métricas de atendimento, campanhas, filas, IA e uso de conexões.
-- **Relatório de cobrança por parceiro (whitelabel)**: página `/partner-billing-report` (apenas Dono da Plataforma) com resumo por whitelabel (empresas-filhas, licenças ativas, valor devido), lista de cobranças registradas (snapshots) e botão para calcular/registrar cobrança do período. Configuração `licenseWarningDays` em Options para avisos de vencimento. Endpoints: GET `/dashboard/partner-billing-report`, GET `/dashboard/partner-billing-snapshots`, POST `/dashboard/partner-billing-report/calculate`.
-- **Helps & Tutoriais**: módulo `Helps` centraliza documentação in-app (ex.: IA Tutorial, fluxos de onboarding).
+- Baileys por QR e WhatsApp Business API Oficial por credenciais Meta.
+- Labels do WhatsApp Web têm integração separada do sistema de tags.
+- API Oficial suporta webhooks e templates conforme configuração Meta.
+- Baileys é canal não oficial e **não possui garantia anti-ban**. Cadência reduz risco, mas não elimina bloqueios.
 
-### 7. Permissões, multi-empresa e planos
-- **Multi-tenant nativo**: todo recurso é segmentado por `companyId` com limites definidos em `Plan` (`users`, `connections`, `queues`, flags de recursos). `Companies` e `CompaniesManager` permitem gestão de contas.
-- **Modo Whitelabel (Fase 2)**: hierarquia de empresas (plataforma → whitelabels → clientes diretos). Dono da plataforma (`super`) cria whitelabels e vê tudo; whitelabel gerencia apenas empresas-filhas e planos próprios; cliente direto vê só a própria empresa. Modelo `License` (CRUD com filtro por nível), endpoint `/dashboard/summary` por perfil, menus e abas (Empresas, Licenças, Planos) condicionados a super/whitelabel. Ver `.docs/visao-geral/whitelabel-architecture.md`.
-  - **Relatório de cobrança**: página `/partner-billing-report` para super; snapshots de cobrança por período (`PartnerBillingSnapshot`); cálculo e registro via POST `/dashboard/partner-billing-report/calculate`; configuração `licenseWarningDays` para avisos de vencimento.
-  - **Cadastro direto na landing**: configuração `enableLandingSignup` (CompaniesSettings); formulário de cadastro na landing (`/landing`) quando habilitado; criação de empresa direct, usuário admin e licença trial (14 dias) via `DirectSignupService` e endpoints públicos `/public/direct-signup/config`, `/public/direct-signup`.
-  - **Cadastro por parceiro (signup parceiro)**: página pública `/signup-partner` com token ou ID do parceiro; criação de empresa direct filha do whitelabel com trial configurável (`trialDaysForChildCompanies`); endpoints `/public/partner-signup/config`, `/public/partner-signup`.
-  - **Bloqueio por cobrança**: plataforma pode suspender licença do parceiro (bloqueando parceiro e todas empresas-filhas); parceiro pode bloquear/liberar acesso de cada empresa-filha via PATCH `/companies/:id/block-access`. Verificação em login e refresh (`CompanyAccessService`); mensagens específicas (ERR_ACCESS_BLOCKED_*). Campo `accessBlockedByParent` em Company.
-- **Perfis e escopos**: permissões granulares (`permissions`, `roles`, middlewares `checkPermission`, `isSuper`, `isAuthCompany`). UI com `Users`, `PermissionTransferList`, `SettingsCustom`.
-- **Admin global**: usuários com `super=true` acessam módulos como `Companies`, `AuditLogs`, `AllConnections`, `Subscription`, `PartnerBillingReport` para controlar todo o tenant.
+## Campanhas, filas e automações
 
-### 8. Financeiro e assinatura
-- **Painel Financeiro**: página `Financeiro`/`Subscription` lista invoices, limites de plano, status de pagamento, trilhas de upgrade/downgrade.
-- **Planos e billing**: APIs `PlanController`, `InvoicesService`, `FindAllPlanService` mantêm catálogo e associação aos `companyId`, suportando trials, recorrência e quotas automáticas.
+- Campanhas com listas, filtros salvos, custo, cadência/controles anti-ban, agendamento e relatório detalhado.
+- Filas humanas, bots, Typebot e integrações por fila.
+- Flow Builder visual com importação e exportação em ZIP.
+- Controllers `QueueAdvanced` sem ligação ao fluxo ativo são classificados como **órfãos**, não como recurso entregue.
+- Campanhas e jobs dependem de Redis e dos gates de plano/permissão.
 
-### 9. Integrações e APIs externas
-- **Chat do site e widget**: API pública `/public/site-chat/submit`, `/message`, `/messages` para criar tickets e trocar mensagens. Widget JavaScript (`widget.js`) embarcável em qualquer site; suporte a `companyId`, `companyToken` (signupToken ou siteChatToken) e `data-api-url` para páginas externas. Configuração em **Configurações > Widget Chat do Site** e **Canais de entrada**. Ver `.docs/funcionalidades/widget-chat-site.md`.
-- **Webhooks e APIs**: `WebhookService`, `External API`, `MessagesAPI` expõem eventos e endpoints REST para CRM/ERP.
-- **Queue Integration / Typebot / FlowBuilder**: conectores prontos para bots externos, automações RPA e pipelines customizados.
-- **Monitoramento programático**: serviços `QueueMonitor`, `SavedFilterCronManager`, `TagRulesCron` e hooks de auditoria facilitam integrações com ferramentas de observabilidade.
+## IA
 
-### 10. Operação e monitoramento
-- **Audit logs**: módulo `AuditLogs` + `AuditMiddleware` registram ações sensíveis (login, alterações de configurações, billing).
-- **Announcements e Helps**: broadcasting de comunicados e guias diretamente no frontend (`Announcements`, `Helps`).
-- **Diagnósticos**: scripts em `backend/scripts`, docs em `.docs/diagnosticos/` e páginas in-app (`Diagnostics`, `SystemConfig`) para checar filas, conexões, memória e jobs.
+- Provedores OpenAI e Gemini, prompts, orquestração e transcrição de áudio.
+- RAG com indexação e busca semântica exige PostgreSQL com extensão `pgvector`.
+- `SmartFilesDashboard` existe como página, mas não possui rota no frontend; a capacidade técnica não equivale a uma tela entregue.
 
-### 11. Anti-ban e governança
-- **Limites adaptativos**: parâmetros como `CAP_HOURLY`, `CONTACT_FILTER_*`, `MESSAGE_INTERVAL_SEC` e rotinas `TagRulesCron`, `validateWhatsappContactsQueue` ajustam cadência de disparos.
-- **Auditoria de contatos**: validação assíncrona, filtros SQL e deduplicação reduzem risco de spam.
-- **Documentação dedicada**: `.docs/funcionalidades/anti-ban.md` e arquivos `legacy/ANTI-BAN-*.md` descrevem políticas de uso, integrações com Baileys e checklists de segurança.
+## Chat do site e entradas públicas
 
-### 12. Recursos auxiliares
-- **Validação i18n**: mensagens de validação de formulários (campo obrigatório, muito curto, e-mail inválido, etc.) internacionalizadas via namespace `validation` em pt-BR, en, es e tr. Formulários Formik utilizam `noValidate` para evitar mensagens nativas do navegador em inglês. Detalhes em `.docs/plano-analise-mensagens-campo-requerido.md`.
-- **Uploads e LGPD**: configuração de `FILESYSTEM_DRIVER`, sanitização de mídia, opções de anonimização (`LGPD` flags).
-- **Ferramentas de suporte**: `Helps`, `ToDoList`, `Announcements`, `AuditLogs`, `SettingsCustom` centralizam governança e comunicação com clientes.
-- **Scripts e diagnósticos**: diretórios `lib/`, `utils/`, `backend/scripts/` e `.docs/sql/` oferecem automações para migrações, correções e análises.
+- Widget e API de site chat com `useSiteChat` e token por empresa.
+- Canais de entrada configuram fila, tag, conexão e mensagem inicial.
+- Lead, revendedor, site chat e WhatsApp alimentam `entrySource`.
+- Limitação: o fluxo público de Lead escolhe a primeira empresa quando não há seleção explícita; não prometer roteamento público multiempresa.
 
-### 13. Próximas evoluções (relacionadas)
-- Melhorias futuras: `.docs/visao-geral/roadmap.md`.
-- **Otimizações de build** (docker multi-stage, Buildx, `.dockerignore`) documentadas em `.docs/docker-build.md` (fluxo legado Docker Hub).
+## Whitelabel, licenças e cobrança
 
-> Atualize este documento sempre que uma nova funcionalidade chegar ao repositório ou quando fluxos existentes forem alterados significativamente.
+- Hierarquia `platform` → `whitelabel` → `direct`, planos, licenças, bloqueios, crons e registro de pagamento (`register-payment`).
+- Relatório de cobrança do parceiro e snapshots para `super`.
+- Mercado Pago possui integração funcional.
+- O gateway de pagamento genérico permanece **manual/stub**; não representa cobrança automática multi-gateway.
+
+## APIs e autenticação
+
+As APIs combinam três superfícies:
+
+1. rotas autenticadas por sessão/JWT;
+2. APIs externas com token ou chave de empresa;
+3. rotas públicas explicitamente destinadas a signup, landing, webhooks e site chat.
+
+Cada integração deve documentar sua camada; “API disponível” não significa endpoint público sem autenticação.
+
+## Agendamentos
+
+Existem dois conceitos distintos:
+
+- agendamento de mensagens/ações em `/schedules`;
+- horários e jornada de atendimento configurados na empresa.
+
+Ambos dependem de plano, permissão e execução dos jobs correspondentes.
+
+## Frontend, perfis e planos
+
+- O mapa completo está em [mapa-frontend.md](../funcionalidades/mapa-frontend.md).
+- O acesso combina `super`, `profile` (`admin`/`user`), `permissions[]`, wildcards, flags legadas e gates de plano.
+- Não há `Role` central que represente supervisor: supervisor é uma persona montada por permissões e flags.
+- `/apresentacoes` é privado e restrito à empresa `platform`.
+- `/reports`, `/todolist` e `/TagsKanban` têm rota, mas não item de menu; `/TagsKanban` é case-sensitive.
+- `AuditLogs`, `SmartFilesDashboard`, `FlowDefault`, `CampaignReport` e `Subscription` têm páginas sem rota.
+- `/financeiro-aberto` não existe.
+
+## Operação e observabilidade
+
+- Health check, Bull Board, filas Bull/Redis, crons e diagnósticos operacionais.
+- Redis é requisito para filas; indisponibilidade afeta jobs e automações.
+- Facebook/Instagram possuem implementação parcial e **não são canais maduros para promessa comercial**.
+
+## Pendências de segurança
+
+- Dashboards/endpoints `ticketsUsers` e `ticketsDay` estão sem autenticação.
+- Helmet está comentado.
+- Esses itens são pendências de hardening, não funcionalidades.
+
+## Legado
+
+Documentos em `.docs/legacy/` preservam histórico e podem divergir do estado atual. Afirmações de “pronto para produção”, garantia de uptime/anti-ban ou telas não roteadas não devem ser reutilizadas sem nova validação.
 

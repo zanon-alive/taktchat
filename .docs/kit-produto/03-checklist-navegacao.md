@@ -66,7 +66,7 @@ Detalhe conceitual: `10-fluxo-do-ticket.md`.
 | V | `/quick-messages` | Respostas rápidas | `/saudacao`, `/aguardar` |
 | V | `/kanban` | Kanban | 6 colunas; botão Funil → `/kanban/stats` |
 | V | `/kanban/stats` | Funil (lanes) | Quantidade e idade média por coluna |
-| V | `/TagsKanban` | Kanban tags | Texto operacional vs coluna; aviso de 8 só com >8 lanes |
+| V | `/TagsKanban` | Sem item de menu | Texto operacional vs coluna; aviso de 8 só com >8 lanes. `/tagsKanban` não existe |
 | V | `/contacts` | Contatos | Admin 7; atendente 2 (tag `#Beatriz`) |
 | N | `/contacts/import` | Importação | — |
 | N | `/schedules` | Agendamentos | Menu no admin |
@@ -89,7 +89,13 @@ Detalhe conceitual: `10-fluxo-do-ticket.md`.
 | V | `/companies` | Empresas | Parceiro: Cliente Demo Kit |
 | V | `/licenses` | Licenças | Parceiro: Ativa até 2027 |
 | N | `/partner-billing-report` | Cobrança | super |
-| N | `/reports` | Relatórios | — |
+| N | `/reports` | Sem item de menu | Rota direta existente |
+
+## 4.1 Rotas e páginas sem navegação
+
+- `/todolist`: rota existente; item do menu está comentado.
+- `/financeiro-aberto`: rota inexistente.
+- `AuditLogs`, `SmartFilesDashboard`, `FlowDefault`, `CampaignReport` e `Subscription`: páginas sem rota.
 
 ## 5. Jornadas settings / widget / landing
 
@@ -103,3 +109,8 @@ Detalhe conceitual: `10-fluxo-do-ticket.md`.
 ## 6. Encerramento da sessão de navegação
 
 Preenchido em `11-diario-navegacao.md`.
+
+## 7. Correção funcional v1.8
+
+- Popup de desfecho ao encerrar: **implementado**.
+- Estatísticas do Kanban: **implementadas** em `/kanban/stats`, API `/ticket/kanban/stats`.

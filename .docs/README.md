@@ -4,16 +4,17 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 
 ## Como navegar
 
-- `kit-produto/`: **kit por audiência (v1.7)** — catálogo, manuais por role, comercial/técnica, screenshots e player em `/apresentacoes`. Comece por `kit-produto/README.md`. Caminho A da demanda 16 (quadro de conversas) feito; caminho B (CRM de mercado) permanece fora: `kit-produto/16-demanda-crm-conversa-ou-mercado.md`.
+- `kit-produto/`: **kit por audiência (v1.8 documental)** — catálogo, manuais por persona, comercial/técnica, screenshots e player privado em `/apresentacoes`. Esta revisão descreve o código e **não confirma deploy em produção**.
 - `visao-geral/`: contexto do produto, arquitetura, fluxos críticos e roadmap.
   - **Roadmap centralizado:** `visao-geral/roadmap.md` - Melhorias futuras e funcionalidades pendentes do projeto
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.
 - `configuracao/`: variáveis de ambiente, parâmetros sensíveis e políticas de segurança.
 - `operacao/`: rotinas diárias, monitoramento, backup/restore e troubleshooting.
-  - **Atualizar a VPS:** `operacao/como-atualizar-vps.md` — git pull + `update-taktchat.sh` (stack volumes).
+  - **Release/deploy/rollback:** `operacao/release-deploy-rollback-swarm.md` — GHCR por digest e atualização da stack no Portainer.
   - **Drift Sequelize / Postgres:** `operacao/recuperacao-migrations-banco.md` — quando `SequelizeMeta` não reflete o schema real.
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
+  - **Mapa real de rotas, menu, personas e gates:** `funcionalidades/mapa-frontend.md`
   - **Frontend — assets em `public/` vs imports:** `funcionalidades/frontend-assets-estaticos.md`
   - **Kanban (lanes automáticas):** `funcionalidades/kanban-lanes.md` – Lane de entrada, Encerrar no funil, uma tag por card.
   - **EntrySource e Chat do Site:** `funcionalidades/widget-chat-site.md` – Widget, API e canais de entrada.
@@ -35,14 +36,14 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 
 ### Para desenvolvedores
 
-- **🔄 Atualização do servidor:** `ATUALIZACAO_SERVIDOR.md` - stack atual da VPS (volumes, `14_taktchat.yml`)
-- **📦 Stack de produção (VPS):** `infraestrutura/stack-producao.md` e `../14_taktchat.yml`
-- **🏗️ Stack GHCR (alternativa):** `infraestrutura/stack-producao-ghcr.md`
+- **🔄 Atualização do servidor:** `ATUALIZACAO_SERVIDOR.md` - imagens GHCR por digest via Portainer
+- **📦 Stack de produção (VPS):** `infraestrutura/stack-producao.md`
+- **🏗️ Imagens GHCR atuais:** `infraestrutura/stack-producao-ghcr.md`
 - **⚙️ PM2 híbrido (exemplo, não é a VPS):** `infraestrutura/pm2-hibrido.md`
 
 ### Para produto, venda e operação por persona
 
-- **Kit por audiência (v1.5):** `kit-produto/README.md` — catálogo, manuais, comercial/técnica, prints e player `http://localhost:3000/apresentacoes`.
+- **Kit por audiência (v1.8 documental):** `kit-produto/README.md` — catálogo, manuais e player privado `/apresentacoes`.
 
 ### Para operação
 

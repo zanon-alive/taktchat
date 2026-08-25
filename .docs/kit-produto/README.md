@@ -1,9 +1,9 @@
 # Kit de documentação por audiência
 
-Fonte da verdade desta demanda. Se algo divergir da pasta gitignored `.docs/branchs/docs/kit-documentacao-produto/`, **vale este kit**.
+Fonte funcional do kit. A análise v1.8 está em `.docs/branchs/docs/documentacao-completa-v1.8/01-INVENTARIO-FUNCIONALIDADES.md`.
 
-**Branch:** `docs/kit-documentacao-produto`  
-**Status:** v1.7 — overlay no Painel, Tags Kanban com texto do aviso de 8 colunas, atalho do relatório no quadro, login sem tag `#` e heap do frontend.
+**Branch da revisão:** `docs/documentacao-completa-v1.8`
+**Status:** v1.8 documental — catálogo alinhado ao backend, às rotas/menu do frontend e às limitações confirmadas. Não confirma deploy em produção.
 
 ## Decisões travadas
 
@@ -46,6 +46,7 @@ Fonte da verdade desta demanda. Se algo divergir da pasta gitignored `.docs/bran
 | [14-roadmap-execucao.md](14-roadmap-execucao.md) | O que esta branch entregou |
 | [15-pendencias-produto-outras-branches.md](15-pendencias-produto-outras-branches.md) | Caminho A resolvido; restam captura do celular e caminho B |
 | [16-demanda-crm-conversa-ou-mercado.md](16-demanda-crm-conversa-ou-mercado.md) | Caminho A feito; CRM de mercado (B) fora desta geração |
+| [../funcionalidades/mapa-frontend.md](../funcionalidades/mapa-frontend.md) | Rotas, menu, personas, permissões e gates reais |
 
 ## Entregáveis finais (v1)
 

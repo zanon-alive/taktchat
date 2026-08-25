@@ -57,6 +57,28 @@
 
 - Templates versionados: `backend/.env.example` e `frontend/.env.example`.
 - Nunca commite `.env` reais; confirme se `.gitignore` está configurado.
-- Em produção, prefira secrets do provedor (Docker Swarm, Kubernetes, etc.).
+- Em produção, use secrets do Portainer/Docker Swarm e conceda acesso somente aos serviços consumidores.
 - Registre mudanças relevantes em `anexos/notas-de-versao.md`.
+
+### Política de secrets na produção Swarm
+
+A stack canônica atual contém valores sensíveis versionados. Os valores não devem ser reproduzidos nesta documentação nem copiados para chat, issue, ticket, log ou comando compartilhado.
+
+Plano de correção:
+
+1. inventariar nomes e serviços consumidores, sem exportar valores;
+2. criar secrets no Portainer/Swarm;
+3. disponibilizá-los aos containers por arquivos em `/run/secrets/...`;
+4. adaptar a aplicação somente em demanda revisada, caso ela ainda exija variáveis de ambiente;
+5. testar a leitura e a rotação em janela controlada;
+6. rotacionar todas as credenciais que já estiveram no Git;
+7. remover valores da stack e avaliar o histórico Git em atividade coordenada.
+
+Regras:
+
+- frontend não recebe secret: variáveis `REACT_APP_*` são incorporadas ao bundle e são públicas;
+- não usar valor de produção em `.env.example`;
+- não exibir environment completo de containers em evidências;
+- backups de configuração com secrets devem ser criptografados e ter acesso restrito;
+- rotação deve considerar dependências externas e possibilidade de rollback.
 

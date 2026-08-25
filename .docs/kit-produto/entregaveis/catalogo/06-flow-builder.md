@@ -2,7 +2,7 @@
 
 ## Para que serve
 
-Montar jornada visual (perguntas, menus, integrações) que atende sozinha ou encaminha para fila.
+Montar jornada visual (perguntas, menus, integrações) que atende sozinha ou encaminha para fila, com importação e exportação de fluxos em ZIP.
 
 ## Onde fica
 
@@ -10,4 +10,6 @@ Montar jornada visual (perguntas, menus, integrações) que atende sozinha ou en
 
 ## Status
 
-UI existente. **Não exercitado** nesta versão.
+**Implementado:** editor e importação/exportação ZIP.
+**Condicional:** nós de IA, Typebot e serviços externos dependem de credenciais e infraestrutura.
+**Sem rota:** a página `FlowDefault` existe no código, mas não integra a navegação atual.

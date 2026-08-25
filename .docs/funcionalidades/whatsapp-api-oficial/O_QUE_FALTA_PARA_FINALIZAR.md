@@ -1,6 +1,6 @@
 # ✅ O Que Falta Para Finalizar o Projeto
 
-> Snapshot histórico da implementação da API Oficial. O **deploy da VPS já existe** (`14_taktchat.yml`, volumes). Itens abaixo de “Deploy 0%” não refletem o estado atual da infraestrutura.
+> Snapshot histórico da implementação da API Oficial. O deploy atual usa Swarm/Portainer e imagens GHCR por digest; `14_taktchat.yml` local não foi confirmado como definição ativa. Itens abaixo de “Deploy 0%” não refletem o estado atual da infraestrutura.
 
 ## 📊 Status Atual: 80% Completo (histórico)
 
@@ -491,7 +491,7 @@ Depois fica apenas:
 - ✅ Documentado
 - ✅ Otimizado
 - ✅ Pronto para testes
-- ✅ Pronto para produção (quando configurar servidor)
+- ⚠️ Condicionado a testes, credenciais Meta e validação operacional; este snapshot não confirma produção
 
 ---
 

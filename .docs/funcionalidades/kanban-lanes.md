@@ -10,7 +10,7 @@ Organizar o funil comercial nesse quadro: ticket novo entra na coluna configurad
 
 ## Onde configurar
 
-Na tela **Tags Kanban** (`/tagsKanban` ou **Kanban → Adicionar colunas**), bloco **Lanes automáticas**:
+Na tela **Tags Kanban** (`/TagsKanban` ou **Kanban → Adicionar colunas**), bloco **Lanes automáticas**:
 
 | Campo | Setting (`Setting.key`) | Efeito |
 | --- | --- | --- |

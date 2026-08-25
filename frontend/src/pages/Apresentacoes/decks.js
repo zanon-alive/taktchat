@@ -72,7 +72,7 @@ const comercialClientePadrao = [
   {
     title: "Do contato ao ticket",
     lead:
-      "Sim: um contato que manda WhatsApp gera (ou reabre) um ticket. O backend acha o número na agenda da empresa; se já há conversa aberta naquela conexão, continua nela. Se não há, nasce um ticket novo — em geral pendente na fila.",
+      "Sim: um contato que manda WhatsApp gera atendimento. Se já há uma conversa aberta naquela conexão, a mensagem continua nela. Se o atendimento anterior foi encerrado, nasce um novo — em geral pendente na fila.",
     bullets: [
       "Entrada: mensagem no número conectado (Baileys ou API Oficial).",
       "Contato localizado ou criado pelo telefone.",
@@ -97,23 +97,38 @@ const comercialClientePadrao = [
   {
     title: "Trabalhar o ticket",
     lead:
-      "O dia a dia cabe numa receita. Aceitar tira da fila e coloca dono. Responder, taguear e transferir organizam o caso. Encerrar fecha. Se o cliente falar de novo, o sistema reabre ou cria outro conforme o tempo configurado na conexão.",
+      "O dia a dia cabe numa receita. Aceitar tira da fila e coloca dono. Responder, taguear e transferir organizam o caso. Ao encerrar, o atendente registra o desfecho. Se o cliente falar de novo, começa um novo atendimento para o mesmo contato.",
     bullets: [
       "Aguardando → aceitar → aberto com o seu usuário.",
       "Ler histórico, responder (texto, mídia, /saudacao).",
       "Tag (Urgente, VIP), transferir fila ou colega.",
-      "Encerrar; volta a falar → reabre ou ticket novo (timeCreateNewTicket).",
+      "Encerrar com desfecho; nova mensagem gera novo atendimento.",
     ],
     ...shot("f3-atendente-chat-maria.png", "Chat com histórico: a ficha que o time vê"),
   },
   {
+    title: "Encerrar com desfecho",
+    lead:
+      "Encerrar não é apenas tirar o ticket da lista. O atendente escolhe o resultado do caso: uma coluna de fechamento, como Fechado ganho ou Fechado perdido, ou a saída do quadro. Assim a operação preserva o desfecho sem transformar o Taktchat em CRM de oportunidades.",
+    bullets: [
+      "O botão Encerrar abre a escolha do desfecho.",
+      "A coluna escolhida permanece visível no Kanban mesmo com o atendimento encerrado.",
+      "Sem escolha, a empresa pode usar um desfecho padrão configurado.",
+      "Se o contato voltar a falar, o sistema gera um novo atendimento.",
+    ],
+    ...shot(
+      "pendente-kanban-desfecho.png",
+      "Encerramento do atendimento com escolha do desfecho no Kanban"
+    ),
+  },
+  {
     title: "Funil no Kanban",
     lead:
-      "Não há pipeline de oportunidade (valor, probabilidade nativos). O quadro da demo tem 6 colunas — tags kanban=1, não fases de CRM. Ticket novo entra em Lead; Encerrar aplica Fechado ganho. O time arrasta o card. Depende do plano (useKanban).",
+      "O Kanban organiza o andamento dos atendimentos em 6 colunas configuradas por tags. O ticket novo entra em Lead; o time arrasta o card durante a conversa e escolhe o desfecho ao encerrar. Não é pipeline de oportunidade com valor ou probabilidade.",
     bullets: [
       "Lead — Carla (pendente). Qualificado — João (Vendas).",
       "Negociação — Maria (aberto, Urgente). Aguardando cliente — Ana (supervisor).",
-      "Fechado ganho — Mercado Central. Fechado perdido — Pedro (closed, visível no quadro porque tem lane).",
+      "Fechado ganho — Mercado Central. Fechado perdido — Pedro, mantido no quadro pelo desfecho.",
       "Mais de 8 colunas cansa a leitura; a demo usa 6. Rotas: /kanban e /TagsKanban.",
     ],
     ...shot(
@@ -124,12 +139,12 @@ const comercialClientePadrao = [
   {
     title: "Avanço automático das colunas",
     lead:
-      "Há automação de lane nas 6 colunas. Tempo parado manda para a próxima. Cliente falando de novo, no ticket ainda aberto, volta ao rollback. Ticket novo depois de encerrado cai em Lead — não herda o rollback da conversa fechada.",
+      "As colunas podem avançar automaticamente conforme o tempo parado. Se o cliente responder enquanto o atendimento está aberto, ele pode voltar à coluna configurada. Depois de encerrado, uma nova mensagem gera outro atendimento em Lead.",
     bullets: [
       "Lead: 48h → Qualificado. Qualificado: 72h → Negociação (e pode voltar a Lead).",
       "Negociação: 72h → Aguardando cliente. Fechado ganho/perdido não avançam sozinhos.",
-      "rollbackLane só no ticket aberto. Encerrar aplica Fechado ganho; Fechado perdido é arrastar.",
-      "Conversa encerrada + nova mensagem = ticket novo em Lead.",
+      "A volta de coluna só atua enquanto o atendimento está aberto.",
+      "Encerrado + nova mensagem = novo atendimento na coluna de entrada.",
     ],
     ...shot(
       "pendente-kanban-lane.png",
@@ -197,13 +212,14 @@ const comercialClientePadrao = [
   {
     title: "Próximo passo",
     lead:
-      "A demo de 15 minutos é o ticket, com os logins da Cliente Demo Kit. Maria já está aberta (Negociação); Carla aguarda em Lead. Só depois conectamos o WhatsApp real da empresa — QR na conta deles.",
+      "A demo de 15 minutos percorre um atendimento completo: aceitar Carla em Lead, responder, avançar no quadro, encerrar com desfecho e abrir o relatório do funil. Só depois conectamos o WhatsApp real da empresa — QR na conta deles.",
     bullets: [
       "Entrar como atendente@taktchat.local (Beatriz) / LocalTest#2026.",
-      "Aceitar pendente, responder, ver o quadro de 6 colunas, transferir.",
+      "Aceitar pendente, responder, avançar no Kanban e encerrar com desfecho.",
+      "Abrir Funil em /kanban/stats para ver quantidade e idade média por coluna.",
       "Admin da demo: admin.cliente@taktchat.local. WhatsApp real só na conta de vocês.",
     ],
-    ...shot("f5-atendente-aguardando.png", "Aba Aguardando: ticket pronto para aceitar"),
+    ...shot("pendente-kanban-stats.png", "Funil: quantidade e idade média por coluna do Kanban"),
   },
   {
     title: "CTA",
@@ -233,15 +249,56 @@ const comercialClienteLonga = [
     ...shot("f13-admin-tickets.png", "Visão do admin: tickets e filas"),
   },
   {
+    title: "Funil em números",
+    lead:
+      "O relatório do Kanban transforma as colunas em uma leitura operacional simples: quantos atendimentos estão em cada etapa e há quanto tempo, em média. Ele ajuda a encontrar acúmulo e demora sem prometer valor de pipeline ou previsão de receita.",
+    bullets: [
+      "Acesso pelo botão Funil no Kanban ou por /kanban/stats.",
+      "Quantidade de atendimentos em cada coluna.",
+      "Idade média dos cards por lane.",
+      "Sem valor em reais, probabilidade ou previsão de fechamento.",
+    ],
+    ...shot("pendente-kanban-stats.png", "Relatório do Kanban com quantidade e idade média por coluna"),
+  },
+  {
+    title: "Contatos da atendente",
+    lead:
+      "No perfil de atendente, a agenda é pessoal: ela vê contatos associados a uma tag que começa com #, como #Beatriz. Se nenhuma tag pessoal estiver configurada, a tela explica por que a lista está vazia e orienta procurar o administrador.",
+    bullets: [
+      "Admin e perfis autorizados administram a agenda da empresa.",
+      "Atendente vê os contatos vinculados à sua tag pessoal #.",
+      "A regra evita expor toda a base para qualquer usuário.",
+      "Sem tag pessoal: empty state orientativo, não erro de carregamento.",
+    ],
+    ...shot(
+      "pendente-contatos-empty-tag.png",
+      "Contatos sem tag pessoal: empty state explica a regra para a atendente"
+    ),
+  },
+  {
+    title: "Cadastro comercial",
+    lead:
+      "Durante o atendimento, a ficha lateral mantém três dados comerciais objetivos do contato: situação, última compra e carteira. É contexto para a conversa, não um cadastro completo de oportunidade, pedido ou ERP.",
+    bullets: [
+      "Situação comercial visível no atendimento.",
+      "Data ou referência da última compra.",
+      "Carteira ou responsável comercial.",
+      "Complementa contato e histórico sem prometer CRM completo.",
+    ],
+    ...shot(
+      "pendente-cadastro-comercial.png",
+      "Ficha do atendimento com o bloco Cadastro comercial"
+    ),
+  },
+  {
     title: "Quando o cliente volta a falar",
     lead:
-      "Ticket encerrado não volta sozinho para o mesmo card. Nova mensagem no mesmo número cria outro ticket (FindOrCreate não reusa closed). O contato continua o mesmo; o ticket novo recebe a lane de entrada (Lead, se configurado).",
+      "Quando um atendimento já foi encerrado, uma nova mensagem do mesmo número gera um novo atendimento para o mesmo contato. Ele começa na coluna de entrada do Kanban, como Lead, sem carregar o andamento da conversa anterior.",
     bullets: [
-      "Aberto / pendente / bot: a mensagem entra no mesmo ticket.",
-      "Encerrado: o FindOrCreate não reusa closed — nasce outro ticket.",
-      "Esse ticket novo cai na coluna Kanban de entrada (não herda o rollback da conversa fechada).",
-      "LGPD ligado: pode nascer em lgpd até o consentimento.",
-      "Grupo WhatsApp: status group, se a empresa permitir.",
+      "Enquanto está aberto, as novas mensagens continuam no mesmo atendimento.",
+      "Depois de encerrado, a próxima mensagem cria um novo atendimento.",
+      "O contato e o histórico anterior continuam disponíveis para consulta.",
+      "O novo atendimento entra na coluna inicial configurada.",
     ],
     ...shot("f2-atendente-tickets-lista.png", "A lista é o quadro vivo dos casos, não um protocolo"),
   },
@@ -375,9 +432,10 @@ const comercialParceiroPadrao = [
   {
     title: "O que você vende",
     lead:
-      "O catálogo é o mesmo do cliente final: o WhatsApp vira ticket, com filas, dual channel e campanhas. O parceiro não precisa (e não deve) operar o chat do cliente — senão vira BPO, não revenda.",
+      "O catálogo é o mesmo do cliente final: o WhatsApp vira ticket, com filas, Kanban, desfecho, relatório por coluna, agenda segmentada, dual channel e campanhas. O parceiro não precisa operar o chat do cliente — senão vira BPO, não revenda.",
     bullets: [
       "O que a filha compra: CRM de conversa no WhatsApp (contato → ticket).",
+      "A filha usa atendimento, contatos, cadastro comercial e gestão do Kanban.",
       "Painel do parceiro: empresas e licenças, não a fila do cliente.",
       "Suporte de segundo nível: vocês; incidente de infra: plataforma.",
     ],
@@ -386,7 +444,7 @@ const comercialParceiroPadrao = [
   {
     title: "O argumento do ticket",
     lead:
-      "Na reunião com a filha, o gancho é o mesmo do comercial de cliente: WhatsApp no celular não é CRM. Cada contato que fala gera ticket, com fila e dono. Vocês vendem isso — não um funil de oportunidades genérico.",
+      "Na reunião com a filha, o gancho é o mesmo do comercial de cliente: WhatsApp no celular não é operação. Cada contato que fala gera atendimento, com fila, dono, andamento no Kanban e desfecho. Vocês vendem isso — não um funil de oportunidades genérico.",
     bullets: [
       "Contato fala no número da filha → ticket na fila dela.",
       "Time da filha aceita, responde, transfere, encerra.",
@@ -434,10 +492,10 @@ const comercialParceiroPadrao = [
   {
     title: "Dual channel no argumento de venda",
     lead:
-      "Para o cliente do parceiro: Oficial quando tem volume e orçamento Meta; Baileys para piloto. O aviso de risco de conta pessoal precisa ir no contrato da filha — senão o problema volta em vocês.",
+      "Para o cliente do parceiro: Oficial quando há volume e orçamento Meta; Baileys pode viabilizar o piloto, mas usa uma integração não oficial e mantém risco de bloqueio ou desconexão. Esse risco precisa ser explicado e registrado na venda.",
     bullets: [
       "Oficial: volume, template, menos “conta pessoal”.",
-      "Baileys: QR, custo baixo, risco de ban — falar na venda.",
+      "Baileys: QR, custo baixo, sem garantia de estabilidade ou ausência de ban.",
       "Os dois canais existem no mesmo produto que vocês revendem.",
     ],
     ...shot("f16-admin-conexao-qrcode.png", "Conexão no status QR CODE"),
@@ -541,21 +599,23 @@ const comercialParceiroLonga = [
   {
     title: "Demo",
     lead:
-      "Roteiro curto: painel do parceiro e depois a filha no ticket. O prospect precisa ver os dois lados na mesma reunião. Senha dos @taktchat.local: LocalTest#2026.",
+      "Roteiro v1.8: começar no painel do parceiro e depois entrar na filha para percorrer o atendimento completo. O prospect precisa ver o que o parceiro administra e o que a filha usa. Senha dos @taktchat.local: LocalTest#2026.",
     bullets: [
       "parceiro@taktchat.local — Ana: Minhas empresas e Licenças.",
-      "admin.cliente@taktchat.local — Carlos: tickets, filas e o quadro de 6 colunas.",
-      "atendente@taktchat.local — Beatriz: aceite e chat — o produto que o cliente usa.",
+      "admin.cliente@taktchat.local — Carlos: filas, 6 colunas, Funil e cadastro comercial.",
+      "atendente@taktchat.local — Beatriz: contatos #Beatriz, aceite, chat e desfecho.",
+      "Mostrar o empty state com atendente.vazio@taktchat.local e encerrar um caso no Kanban.",
     ],
-    ...shot("f13-admin-tickets.png", "Carlos (admin da filha) nos tickets"),
+    ...shot("pendente-kanban-desfecho.png", "Demo v1.8: encerramento com desfecho na empresa filha"),
   },
   {
     title: "Limites honestos",
     lead:
-      "Neste ambiente de kit o whitelabel foi ligado no banco local (tipo + parent). Menu de filhas e licenças já foram percorridos. Não vender como se cada parceiro ganhasse infra dedicada.",
+      "Neste ambiente de kit o whitelabel foi ligado no banco local (tipo + parent). Filhas, licenças e o roteiro funcional v1.8 já foram percorridos. Não vender como se cada parceiro ganhasse infra dedicada ou como se Baileys não tivesse risco.",
     bullets: [
       "É o mesmo sistema, fatiado por empresa — não um deploy por cliente.",
-      "Prints de empresas, licenças e billing do dono: já no kit (f23, f24, pendente-partner-billing).",
+      "Desfecho, relatório por lane, tags pessoais e cadastro comercial já têm capturas reais no kit.",
+      "Captura real do WhatsApp no celular permanece fora desta versão.",
     ],
     ...shot("f22-parceiro-tickets-menu.png", "Menu do parceiro no ambiente local"),
   },
@@ -700,11 +760,12 @@ const tecnicaPadrao = [
   {
     title: "Local",
     lead:
-      "Compose sobe Postgres e Redis. Backend npm run dev (ou dev:fast) na 8080, com migrations. Frontend na 3000 — se herdar PORT=8080 do .env do backend, o SPA não sobe. Health em GET /health.",
+      "Compose sobe Postgres e Redis. Backend npm run dev (ou dev:fast) na 8080, com migrations. Frontend na 3000 — se herdar PORT=8080 do .env do backend, o SPA não sobe. Health em GET /health; estatísticas do Kanban em GET /ticket/kanban/stats.",
     bullets: [
       "docker compose up -d postgres redis (porta 5433 se 5432 ocupada).",
       "Backend :8080 · frontend PORT=3000.",
       "GET /health: API + database.",
+      "GET /ticket/kanban/stats: quantidade e idade média por lane (autenticado).",
     ],
     ...shot("pendente-health.png", "GET /health: API e database ok"),
   },
@@ -722,11 +783,12 @@ const tecnicaPadrao = [
   {
     title: "Atenção",
     lead:
-      "Três jeitos clássicos de se machucar: sessão Baileys sumindo (volume sem persistir), job de campanha sem Redis, e .env local apontando para banco de produção. Anti-ban é cadência, não um botão mágico.",
+      "Três jeitos clássicos de se machucar: sessão Baileys sumindo (volume sem persistir), job de campanha sem Redis, e .env local apontando para banco de produção. No frontend, o overlay de indisponibilidade só aparece depois de 3 tentativas de health, em cerca de 8 segundos.",
     bullets: [
       "Sessão WhatsApp é estado em disco — backup do volume importa.",
       "Jobs dependem de Redis saudável.",
       "Nunca apontar DB_HOST de prod no .env de desenvolvimento.",
+      "O health não bloqueia o primeiro paint; o overlay espera as tentativas falharem.",
     ],
     ...shot("f16-admin-conexao-qrcode.png", "Sessão WhatsApp é estado, não config"),
   },
@@ -749,13 +811,30 @@ const tecnicaLonga = [
     title: "Ticket no código",
     kicker: "Extensão da versão longa",
     lead:
-      "Entrada de mensagem usa FindOrCreateTicketService (CRM de conversa: contato + ticket aberto ou novo). Saída usa CreateTicketService. Aceite, transferência e encerramento passam por UpdateTicketService. Status não é só open/pending/closed.",
+      "Entrada de mensagem usa FindOrCreateTicketService: reaproveita o atendimento ativo ou cria outro. Saída usa CreateTicketService. Aceite, transferência e encerramento passam por UpdateTicketService; ao fechar, o desfecho define a tag Kanban terminal.",
     bullets: [
       "FindOrCreate (in) · Create (out) · Update (aceite/transfer/encerra).",
       "Status: pending, open, closed, bot, lgpd, nps, group.",
+      "closed com tag kanban=1 continua no quadro; closed sem lane fica fora.",
+      "Nova mensagem após closed cria outro ticket na lane de entrada.",
       "Sem WhatsApp CONNECTED, Update que manda mensagem no canal falha.",
     ],
-    ...shot("f7-atendente-modal-transferir.png", "Transferência: UpdateTicketService na prática"),
+    ...shot("pendente-kanban-desfecho.png", "Update de encerramento com desfecho Kanban"),
+  },
+  {
+    title: "Kanban no backend",
+    lead:
+      "As colunas do Kanban são tags com kanban=1. O backend garante uma única lane por ticket, inclui encerrados que tenham desfecho e calcula o relatório por coluna. A configuração também define avanço, rollback, entrada e fechamento padrão.",
+    bullets: [
+      "PUT /ticket-tags/:ticketId/:tagId substitui a lane anterior.",
+      "GET /ticket/kanban inclui pending/open e closed com tag kanban=1.",
+      "GET /ticket/kanban/stats devolve quantidade e idade média por lane.",
+      "Tags Kanban configuram timeLane, nextLaneId, rollbackLaneId e desfecho padrão.",
+    ],
+    ...shot(
+      "pendente-tags-kanban-config.png",
+      "Configuração das tags Kanban: avanço, retorno e regras das colunas"
+    ),
   },
   {
     title: "Permissões",
@@ -804,7 +883,7 @@ const tecnicaLonga = [
   {
     title: "Pontos frágeis",
     lead:
-      "Pegadinhas que continuam valendo mesmo com a demo CONNECTED: Baileys sem creds.json, frontend herdando PORT do backend. Overlay de health não bloqueia mais o first paint da landing.",
+      "Pegadinhas que continuam valendo mesmo com a demo CONNECTED: Baileys sem creds.json, frontend herdando PORT do backend e chamadas de tickets sem queueIds. O overlay de health só aparece após 3 falhas, em cerca de 8 segundos, sem bloquear o primeiro paint.",
     bullets: [
       "Sem creds.json a conexão cai e a mensagem real não sai — a Cliente Demo Kit neste ambiente já está CONNECTED.",
       "Frontend: unset PORT && PORT=3000.",
@@ -815,10 +894,11 @@ const tecnicaLonga = [
   {
     title: "Próximas rodadas técnicas",
     lead:
-      "Neste ambiente o QR da Cliente Demo Kit já foi escaneado: sessão CONNECTED, envio e transferência persistidos. Prints de campanha, flow, health e billing já estão no kit. O que ainda é hardware: captura real do WhatsApp no celular (hoje ilustração de IA).",
+      "Neste ambiente o QR da Cliente Demo Kit já foi escaneado: sessão CONNECTED, envio e transferência persistidos. Desfecho, stats, tags pessoais, cadastro comercial e configuração Kanban já têm capturas reais. O que ainda é hardware: captura real do WhatsApp no celular.",
     bullets: [
       "CONNECTED neste kit: print pendente-whatsapp-connected.png.",
-      "Ainda aberto: foto real do aparelho (pendente-whatsapp-celular.png é IA).",
+      "Capturas v1.8: pendente-kanban-desfecho, pendente-kanban-stats, pendente-contatos-empty-tag, pendente-cadastro-comercial e pendente-tags-kanban-config.",
+      "Ainda aberto: foto real do aparelho; pendente-whatsapp-celular.png continua sendo ilustração de IA.",
       "Não tratar count 0 sem queueIds como bug de seed.",
     ],
     ...shot("pendente-whatsapp-connected.png", "Cliente Demo Kit: sessão Baileys CONNECTED"),
@@ -839,7 +919,7 @@ export const DECKS = [
     id: "comercial-cliente-longa",
     audience: "Empresa cliente",
     title: "Proposta e onboarding",
-    usage: "Quando já há interesse: jornada do ticket, papéis, campanha, IA e piloto. CRM de conversa com números.",
+    usage: "Quando já há interesse: jornada, funil em números, contatos, cadastro comercial, campanha e piloto.",
     size: "Reunião longa",
     duration: "proposta / onboarding",
     slides: comercialClienteLonga,
@@ -857,7 +937,7 @@ export const DECKS = [
     id: "comercial-parceiro-longa",
     audience: "Revenda / parceiro",
     title: "Contrato e operação da revenda",
-    usage: "20 slides para fechar parceria: hierarquia, licença, cobrança, risco e primeiro cliente.",
+    usage: "21 slides para fechar parceria: hierarquia, licença, demo v1.8, risco e primeiro cliente.",
     size: "Reunião longa",
     duration: "proposta / onboarding",
     slides: comercialParceiroLonga,
@@ -875,7 +955,7 @@ export const DECKS = [
     id: "tecnica-longa",
     audience: "Dev, infra ou integrador",
     title: "Deep dive técnico",
-    usage: "20 slides: ticket no código, permissões, licença, schema e pontos frágeis deste ambiente.",
+    usage: "22 slides: ticket no código, Kanban no backend, permissões, licença, schema e pontos frágeis.",
     size: "Reunião longa",
     duration: "deep dive",
     slides: tecnicaLonga,

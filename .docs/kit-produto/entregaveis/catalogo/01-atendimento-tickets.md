@@ -10,7 +10,7 @@ Centralizar cada conversa com um cliente num **ticket**: fila, responsável, his
 
 - Menu: Atendimento (ícone WhatsApp)
 - URL: `/tickets`
-- Relacionados: `/moments` (tempo real), `/Kanban`
+- Relacionados: `/moments` (tempo real), `/kanban`, `/kanban/stats`
 
 ## Quem usa
 
@@ -27,7 +27,7 @@ Permissões da Beatriz (API de login): `tickets.view`, `tickets.close`, `contact
 
 ### Cliente fala primeiro (entrada)
 
-Mensagem no WhatsApp (Baileys ou API Oficial) ou no chat do site → contato criado/localizado → o sistema reutiliza ticket ainda aberto ou cria outro (`pending`, `bot` ou `lgpd`). Ticket novo recebe a lane de entrada do Kanban, se configurada. O painel atualiza por Socket.IO.
+Mensagem no WhatsApp (Baileys ou API Oficial), Lead ou chat do site → contato criado/localizado → o sistema reutiliza ticket ainda aberto ou cria outro (`pending`, `bot` ou `lgpd`). `entrySource` registra a origem. Ticket novo recebe a lane de entrada do Kanban, se configurada. O painel atualiza por Socket.IO.
 
 **Nesta versão:** exercitado com WhatsApp CONNECTED (ticket 14 / transferência persistida). Seed continua válido para a demo visual.
 
@@ -52,7 +52,7 @@ Contatos → iniciar conversa. O ticket costuma nascer `open` já com o usuário
 4. Responder com texto ou resposta rápida (`/saudacao`, `/aguardar`).
 5. Aplicar **tag** (Maria = Urgente).
 6. **Transferir** para outra fila ou colega, se não for com você.
-7. **Encerrar** quando o assunto acabar (aplica a lane de encerrar no Kanban, se configurada).
+7. **Encerrar** quando o assunto acabar. O popup permite escolher uma lane de desfecho ou sair do quadro; a configuração da empresa serve de padrão.
 8. Se o cliente falar de novo, o sistema reabre ou cria outro conforme a conexão (`timeCreateNewTicket`); o ticket novo cai na lane de entrada.
 
 ## Dados de demonstração (Cliente Demo Kit)
@@ -67,7 +67,14 @@ Contatos → iniciar conversa. O ticket costuma nascer `open` já com o usuário
 
 ## Dependências
 
-WhatsApp conectado para envio real; filas e usuários vinculados; permissão `tickets.view`.
+WhatsApp conectado para envio real; filas e usuários vinculados; permissão `tickets.view`. Áudio e mensagens especiais são suportados; transcrição exige provedor de IA configurado.
+
+## APIs e status funcional
+
+- Listagem Kanban: `/ticket/kanban`.
+- Estatísticas por lane: `/ticket/kanban/stats`.
+- **Implementado:** ticket, `entrySource`, mensagens especiais/áudio, popup de desfecho e stats.
+- **Condicional:** tempo real, jobs e automações dependem da infraestrutura; filas exigem Redis.
 
 ## O que isto não é
 

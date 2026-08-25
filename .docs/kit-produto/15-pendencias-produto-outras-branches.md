@@ -1,6 +1,6 @@
 # Pendências de produto — Kanban / CRM de conversa
 
-Itens identificados na branch `docs/kit-documentacao-produto`. Atualizado em **2026-08-25** após o lote A6, desfecho ao Encerrar, A8, tags `#` e A7.
+Histórico iniciado na branch `docs/kit-documentacao-produto` e revisado na documentação v1.8 em **2026-08-25**.
 
 Fonte: Tags (`kanban`, `timeLane`, `nextLaneId`, `rollbackLaneId`), `FindOrCreateTicketService`, `UpdateTicketService`, `queues.handleProcessLanes`, `wbotMessageListener`. Como o funil funciona hoje: [`.docs/funcionalidades/kanban-lanes.md`](../funcionalidades/kanban-lanes.md).
 
@@ -57,6 +57,8 @@ A regra `#` **não** foi relaxada. Empty state explica a tag pessoal. Seed: `#Be
 ### Relatório por lane — `feat/relatorio-lanes-kanban`
 
 `GET /ticket/kanban/stats` e menu **Funil (lanes)** (`/kanban/stats`): quantidade e idade média. Sem R$. Atalho no quadro Kanban.
+
+> Correção v1.8: popup de desfecho e estatísticas já existem no código atual; não devem voltar para a lista de pendências.
 
 ### Overlay no Painel — esta branch (v1.7)
 

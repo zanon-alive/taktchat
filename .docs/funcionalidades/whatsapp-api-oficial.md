@@ -4,7 +4,7 @@
 
 **Versão:** 1.0  
 **Data:** 2025-01-27  
-**Status:** ✅ Implementado (Backend e Frontend). Deploy da VPS segue `14_taktchat.yml` (volumes), independente deste canal.
+**Status v1.8 documental:** integração implementada e condicionada a credenciais/configuração Meta. Este documento não confirma deploy nem SLA.
 
 ---
 
@@ -24,18 +24,16 @@ O TaktChat suporta **simultaneamente** dois canais de WhatsApp:
 2. **WhatsApp Business API Oficial** (Meta, pago, profissional)
    - Conexão via credenciais Meta
    - Ideal para empresas médias/grandes
-   - Volume ilimitado (dentro dos limites de cobrança)
-   - Sem risco de banimento
-   - Uptime 99.9%
+   - Volume sujeito aos limites e à cobrança vigentes da Meta
+   - Menor dependência de sessão WhatsApp Web, ainda sujeita às políticas da Meta
 
 ---
 
 ## 🎯 Benefícios Principais
 
-### ✅ Confiabilidade Empresarial
-- SLA garantido pela Meta
-- Sem risco de banimento
-- Uptime 99.9%
+### ✅ Canal oficial
+- Credenciais, templates e suporte conforme a conta e os contratos vigentes da Meta
+- Políticas, qualidade da conta e limites continuam aplicáveis
 
 ### 📈 Escalabilidade
 - Suporte a milhares de conversas simultâneas
@@ -61,17 +59,17 @@ O TaktChat suporta **simultaneamente** dois canais de WhatsApp:
 |---------|---------|-------------|
 | **Setup** | QR Code (2 min) | Credenciais Meta (30 min) |
 | **Custo** | R$ 0 | R$ 0,17-0,34/conversa* |
-| **Banimento** | Risco moderado | Sem risco |
-| **Limite msg/dia** | ~150-500** | Ilimitado |
+| **Bloqueio/restrição** | Risco do canal não oficial | Sujeito às políticas e à qualidade da conta Meta |
+| **Limite de envio** | Varia por sessão e comportamento | Limites vigentes da conta/Meta |
 | **Multi-agente** | Problemático | Nativo |
 | **Templates** | ❌ | ✅ |
 | **Botões interativos** | Limitado | Completo |
 | **Webhooks** | ❌ | ✅ |
 | **SLA/Suporte** | Comunidade | Meta oficial |
-| **Uptime** | ~95% | 99.9% |
+| **Disponibilidade** | Depende da sessão Web | Depende da plataforma Meta e da integração |
 
 *\* Primeiras 1.000 conversas/mês grátis*  
-*\*\* Com anti-ban configurado*
+*\*\* Cadência reduz risco, sem garantia anti-ban.*
 
 ---
 
@@ -144,7 +142,7 @@ Para configuração detalhada passo a passo:
 
 #### Empresa Pequena (50 conversas/dia)
 - **Custo mensal**: R$ 0 (dentro do free tier)
-- **Economia**: Sem custos de banimento
+- **Observação**: preços e franquias mudam; consultar a tabela vigente da Meta
 
 #### Empresa Média (200 conversas/dia)
 - **Total mês**: ~6.000 conversas
@@ -154,7 +152,7 @@ Para configuração detalhada passo a passo:
 #### Empresa Grande (1.000 conversas/dia)
 - **Total mês**: ~30.000 conversas
 - **Custo**: (30.000 - 1.000) × R$ 0,17 = **R$ 4.930/mês**
-- **ROI**: Economia de tempo operacional + Zero banimentos
+- **ROI**: deve ser calculado com preços e volume reais
 
 ---
 
@@ -168,10 +166,10 @@ Para configuração detalhada passo a passo:
 - **Solução:** API Oficial
 
 ### Cenário 2: Suporte Técnico
-**Necessidade:** Múltiplos atendentes, SLA garantido
+**Necessidade:** Múltiplos atendentes e canal oficial
 - ✅ Multi-agente nativo
 - ✅ Webhooks para notificações
-- ✅ Confiabilidade 99.9%
+- ✅ Canal oficial e webhooks
 - **Solução:** API Oficial
 
 ### Cenário 3: Pequena Empresa
@@ -230,9 +228,9 @@ WABA_WEBHOOK_URL=              # URL pública do webhook (HTTPS obrigatório)
 
 ### Vantagens da Migração Gradual
 
-- ✅ Teste sem risco
-- ✅ Zero downtime
-- ✅ Fallback automático (Baileys)
+- ✅ Teste gradual
+- ✅ Redução do impacto da migração
+- ⚠️ Fallback depende da configuração; não é garantia automática
 - ✅ Validação completa antes de migrar tudo
 
 ---
@@ -321,7 +319,7 @@ Para mais detalhes, consulte:
 
 ## ✅ Conclusão
 
-A **WhatsApp Business API Oficial** está implementada e pronta para uso, oferecendo:
+A **WhatsApp Business API Oficial** possui implementação no código, condicionada a credenciais, configuração, testes e políticas da Meta:
 
 - ✅ Dual channel (Baileys + Oficial)
 - ✅ Zero breaking changes

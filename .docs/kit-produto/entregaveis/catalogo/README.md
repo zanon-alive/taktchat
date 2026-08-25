@@ -1,8 +1,8 @@
 # Catálogo de funcionalidades
 
-Índice do kit. Cada módulo é um arquivo. Situações **simuladas** no banco local (seed) + WhatsApp da Cliente Demo Kit **CONNECTED**.
+Índice funcional v1.8. Cada módulo informa capacidades implementadas, condicionais, stubs e órfãos. A revisão descreve código/ambiente local e não confirma deploy em produção.
 
-**Ambiente desta versão:** local, atualizado 2026-08-25. Kanban lanes (PR #21). Overlay de API e token de signup nesta branch. `Companies.type` e Licenses existem no schema local.
+**Ambiente da validação:** local, atualizado em 2026-08-25. Filas dependem de Redis; RAG depende de `pgvector`.
 
 ## Módulos
 

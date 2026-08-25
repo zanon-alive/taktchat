@@ -1,6 +1,8 @@
 # Guia: Build e Publicação dos Dockerfiles (legado)
 
-> Produção atual da VPS usa volumes (`14_taktchat.yml`), não este fluxo Docker Hub.
+> **LEGADO — NÃO USAR NO FLUXO ATUAL.** Docker Hub e `scripts/publish-vps.sh` não fazem parte da operação vigente. Produção usa Docker Swarm/Portainer e imagens GHCR fixadas por digest, sem bind mounts de código. Consulte `.docs/operacao/release-deploy-rollback-swarm.md`.
+>
+> GHCR já está em uso. A definição ativa está no Portainer; YAMLs locais são referências não confirmadas como export da produção.
 
 Este documento descreve como gerar as imagens Docker do Taktchat (frontend e backend) e publicá-las no Docker Hub utilizando os artefatos existentes no repositório.
 

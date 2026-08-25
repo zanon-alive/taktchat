@@ -98,9 +98,8 @@ O TaktChat suporta **dois tipos de conexão WhatsApp**:
 - Validação de webhook garantida pela Meta
 
 **Vantagens:**
-- ✅ Sem risco de banimento
-- ✅ Uptime 99.9% garantido pela Meta
-- ✅ Ilimitado (dentro dos limites de cobrança)
+- ✅ Canal oficial, com webhooks e templates
+- ✅ Limites e suporte conforme a conta Meta
 - ✅ Multi-agente nativo
 - ✅ Templates aprovados para marketing
 - ✅ Botões e listas interativas completos
@@ -148,7 +147,7 @@ O TaktChat suporta **dois tipos de conexão WhatsApp**:
 **Como funciona:**
 - Sistema multi-tenant: cada usuário pertence a uma empresa (`companyId`)
 - Permissões são granulares por recurso
-- Usuários podem ter perfis diferentes (admin, atendente, supervisor)
+- O código usa `admin` e `user`; supervisor é uma persona com permissões/flags ampliadas
 
 #### 2.4. Canais de Entrada e Chat do Site
 
@@ -483,7 +482,7 @@ O sistema suporta integração com:
 
 RAG permite que a IA use documentos internos:
 
-1. Acesse **Smart Files**
+1. Use os endpoints/fluxos de arquivos habilitados; `SmartFilesDashboard` não possui rota no frontend atual
 2. Faça upload de documentos (PDF, DOCX, TXT, etc.)
 3. Sistema indexa automaticamente
 4. Em Flows, use node OpenAI com RAG ativado
@@ -641,11 +640,11 @@ O sistema é multi-tenant nativo:
 
 #### 9.2. Perfis e Permissões
 
-**Perfis disponíveis:**
+**Personas funcionais:**
 - **Super Admin:** Acesso total (todas as empresas)
 - **Admin:** Administrador da empresa
 - **Atendente:** Pode atender tickets
-- **Supervisor:** Pode ver relatórios e gerenciar filas
+- **Supervisor:** não é profile próprio; é atendente com permissões/flags ampliadas
 
 **Permissões granulares:**
 - Criar/editar/delete tickets

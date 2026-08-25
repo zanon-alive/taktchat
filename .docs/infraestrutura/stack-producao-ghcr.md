@@ -1,44 +1,33 @@
-## Stack de Produção (GHCR + tag por SHA) — alternativa
+# Produção com imagens GHCR
 
-> **Não é a stack em uso na VPS hoje.** Produção atual: `14_taktchat.yml` (volumes). Este guia descreve o caminho futuro/alternativa com imagens no GHCR (`14_taktchat_ghcr.yml` neste repo; `15_taktchat_prod_ghcr.yml` no repo de stacks).
+> **Estado atual confirmado em 25/08/2026.** Produção já usa GHCR por digest. O arquivo local `14_taktchat_ghcr.yml` é uma referência/variante não confirmada como export da definição ativa.
 
-Este guia descreve o deploy recomendado para produção estável: **imagens Docker publicadas no GHCR** (GitHub Container Registry), com **tags imutáveis por SHA**, e update via Portainer/Swarm por pull + redeploy.
+## Serviços
 
-### Arquivo de stack
+- backend: `ghcr.io/zanon-alive/taktchat-backend@sha256:<digest>`;
+- frontend: `ghcr.io/zanon-alive/taktchat-frontend@sha256:<digest>`;
+- label-sync: imagem backend-browser por digest;
+- migrate: imagem compatível com a release, executada como serviço one-shot.
 
-- `14_taktchat_ghcr.yml`
+## Persistência observada
 
-### Serviços
+- backend: `taktchat_taktchat_private:/app/private`;
+- backend: `taktchat_taktchat_media:/app/public`;
+- frontend: sem mounts;
+- PostgreSQL e Redis: stacks separadas.
 
-- **`taktchat-backend` (lean, sem Chromium)**:
-  - Exposto no Traefik (`api.taktchat.com.br`)
-  - Monta volumes:
-    - `taktchat_media:/app/public`
-    - `taktchat_private:/app/private`
-  - Faz proxy interno para label sync quando `LABEL_SYNC_INTERNAL_URL` está configurada.
+## Atualização
 
-- **`taktchat-label-sync` (browser, com Chromium)**:
-  - **Não exposto no Traefik** (somente `app_network`)
-  - Monta os mesmos volumes (`/app/private` é obrigatório)
-  - Sobe o servidor interno: `node dist/internal/label-sync-server.js`
-  - Protegido pelo header `X-Internal-Token` (configurado via `LABEL_SYNC_INTERNAL_TOKEN`)
+1. Merge na `main`.
+2. Workflows publicam as imagens.
+3. Confirmar `<sha>`, tag, labels e digest.
+4. Atualizar os digests no Portainer.
+5. Executar migrate quando aplicável.
+6. Validar health e smoke tests.
+7. Fazer rollback restaurando os digests anteriores.
 
-- **`taktchat-frontend`**:
-  - Exposto no Traefik (`taktchat.com.br`)
-  - Buildado no CI e servido via Nginx (imagem pronta).
+Não usar `latest` como identidade da release e não reproduzir digests completos ou secrets em documentação.
 
-- **`taktchat-migrate`**:
-  - Executa `npx sequelize db:migrate` (uma vez) usando a imagem lean.
+## Lacuna de governança
 
-### Variáveis recomendadas no Portainer
-
-- `TAKTCHAT_OWNER`: `zanon-alive`
-- `TAKTCHAT_IMAGE_TAG`: `<sha do commit>` (recomendado) ou `latest`
-- `LABEL_SYNC_INTERNAL_TOKEN`: token forte (mesmo valor em `taktchat-backend` e `taktchat-label-sync`)
-
-### Update (resumo)
-
-1. Merge na `main`
-2. Aguardar workflows publicarem imagens no GHCR (tag por SHA)
-3. No Portainer: atualizar `TAKTCHAT_IMAGE_TAG` e fazer **Update the stack**
-
+Exportar e versionar a stack ativa sem secrets. Até isso ocorrer, a definição no Portainer é a fonte operacional e os YAMLs locais não devem ser apresentados como cópia da produção.

@@ -19,8 +19,12 @@ Marca TaktChat, *Conectando pessoas, acelerando negócios*, e-mail, senha, lembr
 
 ## Widget e canais
 
-Configuração em **Settings** (admin): canais de entrada, snippet do `widget.js`, tokens. Cadastro público `/signup` e `/signup-partner`.
+Configuração em **Settings** (admin): canais de entrada, `useSiteChat`, snippet do `widget.js` e token por empresa. Cadastro público `/signup` e `/signup-partner`.
 
 ## Status
 
-Landing e login: **exercitados**. Widget embarcado em site externo: **não exercitado**.
+Landing e login: **exercitados**. Widget/API: **implementados**, mas o embed em site externo não foi exercitado.
+
+## Limitação
+
+O Lead público escolhe a primeira empresa quando não recebe seleção explícita. Não apresentar esse fluxo como roteamento multiempresa maduro.

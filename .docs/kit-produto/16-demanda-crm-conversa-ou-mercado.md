@@ -50,7 +50,7 @@ O que **não** existe como entidade:
 - Atividade de CRM (ligar, e-mail, reunião) desligada da mensagem WhatsApp.
 - Relatório “quanto está em Negociação este mês”.
 
-O quadro Kanban lista `pending`/`open` e também `closed` **com tag `kanban=1`**. Encerrar grava a lane `closedKanbanTagId` e o card permanece visível (ex.: Fechado ganho). `closed` sem lane não entra no quadro. Popup ganho/perdido e “sair do quadro” continuam fora.
+O quadro Kanban lista `pending`/`open` e também `closed` **com tag `kanban=1`**. Encerrar abre o popup de desfecho para escolher lane Fechado* ou sair do quadro; a setting permanece como fallback. `closed` sem lane não entra no quadro.
 
 ---
 
@@ -64,7 +64,7 @@ Fazer com que contato + ticket + Kanban se comportem como um único sistema:
 
 1. ~~Ticket novo (inclusive pós-`closed`) cai na lane padrão (Lead), se o plano tiver Kanban.~~ **Feito (PR #21).**
 2. ~~Uma tag `kanban = 1` por ticket; arrastar **substitui** a coluna.~~ **Feito (PR #21).**
-3. ~~Encerrar tem regra visível (`closedKanbanTagId`); o quadro lista o card `closed` com lane.~~ **Feito (PR #21 + 2b nesta branch).** Popup ganho/perdido e “sair do quadro” continuam fora.
+3. ~~Encerrar tem regra visível (`closedKanbanTagId`); o quadro lista o card `closed` com lane.~~ **Feito (PR #21 + 2b + popup de desfecho).**
 4. ~~Cron de lane não depende de `fromMe: true`; não avança coluna terminal.~~ **Feito (PR #21).**
 5. Ficha do contato e ficha do ticket lado a lado no atendimento (o que já existe na ficha, **usado** de propósito: situação, última compra, carteira, tags operacionais ≠ colunas do funil).
 6. Relatório operacional: volume por lane, tempo médio na coluna, tickets sem dono, sem inventar “R$ em pipeline”.
@@ -161,8 +161,8 @@ Não misturar B1–B6 na mesma PR que A1–A5.
 - [x] Arrastar no quadro troca a coluna; não acumula duas `kanban=1`. *(PR #21)*
 - [x] Encerrar segue a setting **e** o comercial vê o card na coluna Fechado. *(tag: PR #21; listagem: 2b nesta branch)*
 - [x] Nova mensagem após `closed` abre ticket **novo** já no Lead (não no rollback antigo). *(PR #21)*
-- [ ] Relatório por lane sem campo de dinheiro.
-- [ ] Docs e glossário usam “quadro de conversas” / CRM de conversa.
+- [x] Relatório por lane sem campo de dinheiro (`/kanban/stats`; API `/ticket/kanban/stats`).
+- [x] Docs e glossário usam “quadro de conversas” / CRM de conversa.
 
 ### Se caminho B
 

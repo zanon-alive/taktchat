@@ -17,4 +17,6 @@ Separar o trabalho (Suporte, Vendas, Financeiro) e opcionalmente atender com bot
 
 ## Status
 
-Simulado. Bot/Typebot **não exercitado**.
+**Implementado/condicional:** filas, bots, Typebot e integração por fila; processamento assíncrono exige Redis e credenciais externas quando aplicável.
+**Não exercitado no demo:** Bot/Typebot.
+**Órfão:** controllers `QueueAdvanced` sem ligação confirmada a rota/fluxo ativo não são funcionalidade entregue.

@@ -1,6 +1,8 @@
-# Melhorias Frontend - Stack Rápida
+# Melhorias de frontend da stack rápida — histórico
 
-Este documento descreve as melhorias aplicadas no frontend para funcionar igual ao backend na stack `14_taktchat_rapido.yml` (volumes montados + build em runtime).
+> **Documento histórico.** Registra decisões de variantes antigas com bind mounts. Não descreve a produção atual.
+>
+> Produção usa frontend em imagem GHCR fixada por digest e sem mounts. A definição ativa está no Portainer; `14_taktchat.yml` local é referência não confirmada. Não use este arquivo como runbook.
 
 ---
 
@@ -10,7 +12,7 @@ Este documento descreve as melhorias aplicadas no frontend para funcionar igual 
 
 **Antes**: Frontend usava imagem pré-construída (`zanonalivesolucoes/taktchat-frontend:latest`)
 
-**Agora**: Frontend usa `node:20-bookworm-slim` com volumes montados, igual ao backend:
+**Na variante histórica**: o frontend passou a usar `node:20-bookworm-slim` com volumes montados:
 
 ```yaml
 taktchat-frontend:
@@ -28,11 +30,11 @@ taktchat-frontend:
 
 ---
 
-### 2. Script de Startup do Frontend
+### 2. Script de startup do frontend (histórico)
 
 Criado script `/root/stacks/scripts/taktchat-frontend-startup.sh` que:
 - Instala dependências automaticamente (se necessário)
-- Faz build do React em runtime
+- Fazia build do React em runtime
 - Serve arquivos estáticos via Express (`server.js`)
 
 **Ver documentação completa**: `.docs/SCRIPTS_STARTUP_EXEMPLO.md`
@@ -78,15 +80,17 @@ environment:
 
 ---
 
-### 5. Porta do Servidor Ajustada
+### 5. Porta usada pela variante histórica
 
 **Antes**: `server.js` usava porta `3001`
 
-**Agora**: `server.js` usa porta `3000` (conforme Traefik)
+**Variante histórica**: `server.js` usava porta `3000`.
+
+**Stack atual**: o Traefik encaminha para a porta interna `80`.
 
 ```javascript
 // frontend/server.js
-const PORT = process.env.PORT || 3000;  // ← Ajustado
+const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
   console.log(`Frontend servindo na porta ${PORT}`);
 });
@@ -108,9 +112,9 @@ volumes:
 
 ---
 
-## 🔄 Processo de Atualização
+## Processo atual
 
-### Atualização Rápida (Frontend + Backend)
+O fluxo abaixo não é mais recomendado, pois reiniciar o frontend sem build prévio pode publicar artefatos antigos ou incompletos. Siga o runbook canônico, faça o build do frontend no host e atualize apenas os serviços afetados.
 
 ```bash
 # No servidor (SSH)
@@ -121,12 +125,13 @@ git pull origin main
 cd backend && npm install --legacy-peer-deps
 cd ../frontend && npm install --legacy-peer-deps
 
-# Reiniciar serviços
+# Antes do restart do frontend, produzir e validar o build no host.
+# Atualizar serviços afetados:
 docker service update --force taktchat_taktchat-backend
 docker service update --force taktchat_taktchat-frontend
 ```
 
-**Tempo estimado**: 10-30 segundos (muito mais rápido que rebuild de imagens!)
+O tempo depende de dependências, build, migrations e convergência do Swarm.
 
 ---
 
@@ -135,7 +140,7 @@ docker service update --force taktchat_taktchat-frontend
 | Aspecto | Antes (Imagem Pré-construída) | Depois (Volumes Montados) |
 |---------|-------------------------------|---------------------------|
 | **Atualização** | Build imagem Docker (15-30 min) | Git pull + restart (10-30 seg) |
-| **Build** | No Docker Hub / servidor build | Em runtime (no container) |
+| **Build** | No Docker Hub / servidor build | Histórico: runtime; atual: host |
 | **Consistência** | Backend e frontend diferentes | Backend e frontend iguais |
 | **Flexibilidade** | Precisa rebuild para mudanças | Mudanças imediatas |
 | **Recursos** | Baixo (apenas servir estáticos) | Médio (compilação em runtime) |
@@ -188,7 +193,7 @@ docker service logs taktchat_taktchat-frontend --tail 50
 Deve mostrar:
 - Instalação de dependências (se necessário)
 - Build do React
-- Servidor Express iniciando na porta 3000
+- Servidor de arquivos iniciando na porta interna 80
 
 ### 3. Testar Frontend
 
@@ -205,11 +210,12 @@ Deve retornar `HTTP/2 200`.
 - **Scripts de startup**: `.docs/SCRIPTS_STARTUP_EXEMPLO.md`
 - **Deploy no Portainer**: `.docs/PORTAINER_GITHUB_DEPLOY.md`
 - **Atualização no servidor**: `.docs/ATUALIZACAO_SERVIDOR.md`
-- **Stack rápida**: `14_taktchat_rapido.yml`
+- **Referência histórica usada neste documento**: `14_taktchat.yml` com bind mounts; não existe nesse caminho na VPS auditada.
+- **Stack rápida histórica**: `14_taktchat_rapido.yml`
 
 ---
 
-## 💡 Próximos Passos
+## Registro histórico
 
 1. ✅ Criar scripts de startup no servidor
 2. ✅ Ajustar `server.js` para porta 3000
@@ -218,4 +224,4 @@ Deve retornar `HTTP/2 200`.
 
 ---
 
-**Status**: ✅ Frontend agora funciona igual ao backend (volumes montados + build em runtime)
+**Status:** substituído pela stack canônica. O conteúdo permanece apenas para rastreabilidade.
