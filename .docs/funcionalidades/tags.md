@@ -11,6 +11,7 @@
 - Associação manual ou automática durante fluxos de atendimento.
 - Regras de automação frontend (ver `legacy/AUTOMACAO_TAGS_FRONTEND.md`).
 - Exportação/Importação preservando mapeamento de tags.
+- **Lanes Kanban** (`kanban=1`): uma coluna por ticket; lane de entrada e lane ao encerrar configuráveis em Tags Kanban. Ver `kanban-lanes.md`.
 
 ### Boas práticas
 

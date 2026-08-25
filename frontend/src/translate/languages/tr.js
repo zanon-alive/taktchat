@@ -1524,6 +1524,13 @@ const messages = {
         toasts: {
           deleted: "Şerit başarıyla silindi.",
         },
+        settings: {
+          title: "Otomatik şeritler",
+          hint: "Yeni ticket ilk sütuna gider. Kapatınca kart seçilen şeride taşınır.",
+          entryLane: "Giriş şeridi",
+          closedLane: "Kapatınca taşı",
+          none: "Tanımsız",
+        },
       },
       files: {
         title: "Dosya Listesi",

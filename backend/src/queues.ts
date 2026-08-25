@@ -42,6 +42,11 @@ import TicketTag from "./models/TicketTag";
 import Tag from "./models/Tag";
 // delay não está sendo usado - removido
 import Plan from "./models/Plan";
+import {
+  getKanbanLaneSettings,
+  isTerminalKanbanLane,
+  replaceKanbanLane
+} from "./helpers/kanbanTicketTags";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -2034,16 +2039,18 @@ async function handleProcessLanes() {
           model: Plan,
           as: "plan",
           attributes: ["id", "name", "useKanban"],
-          where: {
-            useKanban: true
-          }
+          required: false
         },
       ]
     });
-    companies.map(async c => {
+    const kanbanCompanies = companies.filter(
+      c => c.plan?.useKanban === true || c.type === "platform"
+    );
+    kanbanCompanies.map(async c => {
 
       try {
         const companyId = c.id;
+        const { closedTagId } = await getKanbanLaneSettings(companyId);
 
         const ticketTags = await TicketTag.findAll({
           include: [{
@@ -2051,32 +2058,35 @@ async function handleProcessLanes() {
             as: "ticket",
             where: {
               status: "open",
-              fromMe: true,
               companyId
             },
             attributes: ["id", "contactId", "updatedAt", "whatsappId"]
           }, {
             model: Tag,
             as: "tag",
-            attributes: ["id", "timeLane", "nextLaneId", "greetingMessageLane"],
+            attributes: ["id", "name", "timeLane", "nextLaneId", "greetingMessageLane"],
             where: {
-              companyId
+              companyId,
+              kanban: 1
             }
           }]
         })
 
         if (ticketTags.length > 0) {
           ticketTags.map(async t => {
+            if (isTerminalKanbanLane(t?.tag, closedTagId)) {
+              return;
+            }
             if (!isNil(t?.tag.nextLaneId) && t?.tag.nextLaneId > 0 && t?.tag.timeLane > 0) {
               const nextTag = await Tag.findByPk(t?.tag.nextLaneId);
+              if (!nextTag) return;
 
               const dataLimite = new Date();
               dataLimite.setHours(dataLimite.getHours() - Number(t.tag.timeLane));
               const dataUltimaInteracaoChamado = new Date(t.ticket.updatedAt)
 
               if (dataUltimaInteracaoChamado < dataLimite) {
-                await TicketTag.destroy({ where: { ticketId: t.ticketId, tagId: t.tagId } });
-                await TicketTag.create({ ticketId: t.ticketId, tagId: nextTag.id });
+                await replaceKanbanLane(t.ticketId, companyId, nextTag.id);
 
                 const whatsapp = await Whatsapp.findByPk(t.ticket.whatsappId);
 

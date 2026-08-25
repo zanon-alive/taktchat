@@ -14,6 +14,7 @@ import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 
 import CreateLogTicketService from "./CreateLogTicketService";
 import ShowTicketService from "./ShowTicketService";
+import { applyDefaultKanbanLane } from "../../helpers/kanbanTicketTags";
 
 interface Request {
   contactId: number;
@@ -69,6 +70,10 @@ const CreateTicketService = async ({
     status: isGroup ? "group" : "open",
     isActiveDemand: true
   });
+
+  try {
+    await applyDefaultKanbanLane(ticket.id, companyId);
+  } catch (_) {}
 
   // Marca contato como WhatsApp válido quando uma conversa é criada (canal whatsapp, não grupo)
   if (!isGroup && defaultWhatsapp.channel === "whatsapp") {

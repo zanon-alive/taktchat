@@ -27,6 +27,7 @@ import sendFacebookMessage from "./sendFacebookMessage";
 import { Mutex } from "async-mutex";
 import TicketTag from "../../models/TicketTag";
 import Tag from "../../models/Tag";
+import { findKanbanTicketTag } from "../../helpers/kanbanTicketTags";
 import ShowQueueIntegrationService from "../QueueIntegrationServices/ShowQueueIntegrationService";
 import { ActionsWebhookService } from "../WebhookService/ActionsWebhookService";
 import { FlowBuilderModel } from "../../models/FlowBuilder";
@@ -575,11 +576,7 @@ export const handleMessage = async (
       let ticketTag = undefined;
       // console.log(ticket.id)
       if (ticket?.company?.plan?.useKanban || ticket?.company?.type === "platform") {
-        ticketTag = await TicketTag.findOne({
-          where: {
-            ticketId: ticket.id
-          }
-        })
+        ticketTag = await findKanbanTicketTag(ticket.id)
 
         if (ticketTag) {
           const tag = await Tag.findByPk(ticketTag.tagId)
@@ -612,7 +609,12 @@ export const handleMessage = async (
       )
         return;
 
-      if (rollbackTag && formatBody(bodyNextTag, ticket) !== bodyMessage && formatBody(bodyRollbackTag, ticket) !== bodyMessage) {
+      const skipRollbackOnNewTicketAfterClose =
+        isFirstMsg &&
+        isFirstMsg.id !== ticket.id &&
+        isFirstMsg.status === "closed";
+
+      if (!skipRollbackOnNewTicketAfterClose && rollbackTag && formatBody(bodyNextTag, ticket) !== bodyMessage && formatBody(bodyRollbackTag, ticket) !== bodyMessage) {
         await TicketTag.destroy({ where: { ticketId: ticket.id, tagId: ticketTag.tagId } });
         await TicketTag.create({ ticketId: ticket.id, tagId: rollbackTag.id });
       }

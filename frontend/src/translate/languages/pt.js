@@ -1618,6 +1618,13 @@ const messages = {
         toasts: {
           deleted: "Lane excluída com sucesso.",
         },
+        settings: {
+          title: "Lanes automáticas",
+          hint: "Ticket novo entra na primeira coluna. Encerrar move o card para a lane escolhida (não some do funil).",
+          entryLane: "Lane de entrada",
+          closedLane: "Ao encerrar, mover para",
+          none: "Não definido",
+        },
       },
       kanban: {
         unread: "não lidas",

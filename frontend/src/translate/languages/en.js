@@ -1532,6 +1532,13 @@ const messages = {
 		  toasts: {
 			deleted: "Lane deleted successfully.",
 		  },
+		  settings: {
+			title: "Automatic lanes",
+			hint: "New tickets start in the first column. Closing a ticket moves the card to the selected lane.",
+			entryLane: "Entry lane",
+			closedLane: "On close, move to",
+			none: "Not set",
+		  },
 		},
 		files: {
 		  title: "File List",

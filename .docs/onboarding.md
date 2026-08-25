@@ -210,8 +210,9 @@ O sistema oferece diferentes visualizações:
 - Atualização em tempo real via Socket.IO
 
 **Kanban:**
-- Visualização em colunas (como Trello)
-- Arraste e solte para mudar status
+- Visualização em colunas (como Trello) por **lanes** (tags Kanban)
+- Arraste e solte para mudar de coluna
+- Ticket novo entra na lane configurada; Encerrar move para a lane de fechamento (não some do funil)
 - Filtros avançados
 
 **Como funciona:**
@@ -577,12 +578,16 @@ Regras aplicam tags automaticamente:
 - Aplicam tags automaticamente
 - Podem ser agendadas
 
-#### 7.3. Kanban por Tags
+#### 7.3. Kanban por Tags (lanes)
 
-Visualize tickets organizados por tags:
-1. Acesse **Kanban de Tags**
-2. Veja tickets agrupados por tag
-3. Arraste entre colunas
+Visualize tickets organizados por lanes (tags com Kanban):
+
+1. Acesse **Kanban** e, se precisar criar/editar colunas, **Adicionar colunas** (tela Tags Kanban)
+2. Em **Lanes automáticas**, escolha a **lane de entrada** (ticket novo) e **Ao encerrar, mover para** (ex.: Fechado ganho)
+3. No quadro, arraste o card entre colunas — o ticket fica em **uma** lane por vez
+4. Encerrar **não remove** o card do funil: ele vai para a lane de encerrar configurada
+
+**Como funciona:** settings `defaultKanbanTagId` e `closedKanbanTagId` por empresa. Documentação: `.docs/funcionalidades/kanban-lanes.md`.
 
 ---
 

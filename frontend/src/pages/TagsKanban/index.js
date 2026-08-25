@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material";
-import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery } from "@mui/material";
+import { Paper, Button, IconButton, TextField, InputAdornment, Box, Grid, Tooltip, Chip, useMediaQuery, FormControl, InputLabel, Select, MenuItem, Typography } from "@mui/material";
 import CardSkeleton from "../../components/CardSkeleton";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -31,6 +31,7 @@ import toastError from "../../errors/toastError";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { CheckCircle } from "@mui/icons-material";
+import useSettings from "../../hooks/useSettings";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_TAGS") {
@@ -135,6 +136,14 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     color: theme.palette.text.secondary,
   },
+  settingsPaper: {
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
+  settingsHint: {
+    marginBottom: theme.spacing(2),
+    color: theme.palette.text.secondary,
+  },
 }));
 
 const CustomTooltipProps = {
@@ -162,6 +171,10 @@ const Tags = () => {
   const [searchParam, setSearchParam] = useState("");
   const [tags, dispatch] = useReducer(reducer, []);
   const [tagModalOpen, setTagModalOpen] = useState(false);
+  const [defaultKanbanTagId, setDefaultKanbanTagId] = useState("");
+  const [closedKanbanTagId, setClosedKanbanTagId] = useState("");
+  const { getAll: getAllSettings, update: updateSetting } = useSettings();
+  const canEditLanes = user?.profile === "admin" || user?.super;
 
   useEffect(() => {
     setLoading(true);
@@ -187,6 +200,40 @@ const Tags = () => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
   }, [searchParam]);
+
+  useEffect(() => {
+    const loadLaneSettings = async () => {
+      try {
+        const list = await getAllSettings();
+        if (!Array.isArray(list)) return;
+        const defaultSetting = list.find((item) => item.key === "defaultKanbanTagId");
+        const closedSetting = list.find((item) => item.key === "closedKanbanTagId");
+        const toSelectValue = (value) => (!value || value === "0" ? "" : String(value));
+        setDefaultKanbanTagId(toSelectValue(defaultSetting?.value));
+        setClosedKanbanTagId(toSelectValue(closedSetting?.value));
+      } catch (err) {
+        toastError(err);
+      }
+    };
+    loadLaneSettings();
+    // Carrega uma vez ao montar; getAllSettings é recriado a cada render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLaneSettingChange = (key) => async (event) => {
+    const value = event.target.value;
+    if (key === "defaultKanbanTagId") {
+      setDefaultKanbanTagId(value);
+    } else {
+      setClosedKanbanTagId(value);
+    }
+    try {
+      await updateSetting({ key, value: value || "" });
+      toast.success(i18n.t("settings.success"));
+    } catch (err) {
+      toastError(err);
+    }
+  };
 
   useEffect(() => {
     // const socket = socketManager.GetSocket(user.companyId, user.id);
@@ -342,6 +389,62 @@ const Tags = () => {
               </Grid>
             </Grid>
       </MainHeader>
+          <Paper className={classes.settingsPaper} variant="outlined">
+            <Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 4 }}>
+              {i18n.t("tagsKanban.settings.title")}
+            </Typography>
+            <Typography variant="body2" className={classes.settingsHint}>
+              {i18n.t("tagsKanban.settings.hint")}
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small" variant="outlined">
+                  <InputLabel id="kanban-entry-lane-label">
+                    {i18n.t("tagsKanban.settings.entryLane")}
+                  </InputLabel>
+                  <Select
+                    labelId="kanban-entry-lane-label"
+                    value={defaultKanbanTagId}
+                    label={i18n.t("tagsKanban.settings.entryLane")}
+                    onChange={handleLaneSettingChange("defaultKanbanTagId")}
+                    disabled={!canEditLanes}
+                  >
+                    <MenuItem value="">
+                      <em>{i18n.t("tagsKanban.settings.none")}</em>
+                    </MenuItem>
+                    {tags.map((tag) => (
+                      <MenuItem key={`entry-${tag.id}`} value={String(tag.id)}>
+                        {tag.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small" variant="outlined">
+                  <InputLabel id="kanban-closed-lane-label">
+                    {i18n.t("tagsKanban.settings.closedLane")}
+                  </InputLabel>
+                  <Select
+                    labelId="kanban-closed-lane-label"
+                    value={closedKanbanTagId}
+                    label={i18n.t("tagsKanban.settings.closedLane")}
+                    onChange={handleLaneSettingChange("closedKanbanTagId")}
+                    disabled={!canEditLanes}
+                  >
+                    <MenuItem value="">
+                      <em>{i18n.t("tagsKanban.settings.none")}</em>
+                    </MenuItem>
+                    {tags.map((tag) => (
+                      <MenuItem key={`closed-${tag.id}`} value={String(tag.id)}>
+                        {tag.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
           {isDesktop ? (
             <Paper className={classes.mainPaper} variant="outlined">
               <Box style={{ overflowX: "auto" }}>

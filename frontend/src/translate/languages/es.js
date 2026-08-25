@@ -1497,6 +1497,13 @@ const messages = {
         },
         toasts: {
           deleted: "Lane excluida con éxito."
+        },
+        settings: {
+          title: "Lanes automáticas",
+          hint: "El ticket nuevo entra en la primera columna. Al cerrar, el card se mueve a la lane elegida.",
+          entryLane: "Lane de entrada",
+          closedLane: "Al cerrar, mover a",
+          none: "No definido"
         }
       },
       files: {
