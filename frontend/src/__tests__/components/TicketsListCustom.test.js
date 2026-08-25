@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TicketsListCustom from '../../components/TicketsListCustom';
 import { AuthContext } from '../../context/Auth/AuthContext';
 import {
@@ -19,20 +20,27 @@ jest.mock('../../services/api', () => ({
   get: jest.fn(() => Promise.resolve({ data: { records: [], hasMore: false } })),
 }));
 
-const renderWithProviders = (component, { socket, user, ...authOverrides } = {}) => {
+const theme = createTheme();
+
+const renderWithProviders = (component, options = {}) => {
+  const { user, ...authOverrides } = options;
   const mockUser = user || createMockUser();
   const mockAuthContext = {
     user: mockUser,
-    socket: socket || createMockSocket().mockSocket,
+    socket: Object.prototype.hasOwnProperty.call(options, 'socket')
+      ? options.socket
+      : createMockSocket().mockSocket,
     isAuth: true,
     loading: false,
     ...authOverrides,
   };
 
   return render(
-    <AuthContext.Provider value={mockAuthContext}>
-      {component}
-    </AuthContext.Provider>
+    <ThemeProvider theme={theme}>
+      <AuthContext.Provider value={mockAuthContext}>
+        {component}
+      </AuthContext.Provider>
+    </ThemeProvider>
   );
 };
 
@@ -96,13 +104,11 @@ describe('TicketsListCustom Component - Socket Verifications', () => {
       { socket: mockSocket }
     );
 
-    waitFor(() => {
-      expect(mockSocket.on).toHaveBeenCalled();
-    });
+    expect(mockSocket.on).toHaveBeenCalled();
   });
 
   test('deve verificar socket.emit antes de chamar joinTickets', () => {
-    const { mockSocket } = createMockSocket();
+    const { mockSocket, onHandlers } = createMockSocket();
     mockSocket.emit = jest.fn();
     
     renderWithProviders(
@@ -113,12 +119,8 @@ describe('TicketsListCustom Component - Socket Verifications', () => {
       { socket: mockSocket }
     );
 
-    waitFor(() => {
-      // Verifica que emit só é chamado se socket.emit é uma função
-      if (typeof mockSocket.emit === 'function') {
-        expect(mockSocket.emit).toHaveBeenCalled();
-      }
-    });
+    onHandlers.connect();
+    expect(mockSocket.emit).toHaveBeenCalledWith('joinTickets', 'open');
   });
 
   test('deve chamar socket.off no cleanup quando socket é válido', () => {
@@ -134,9 +136,7 @@ describe('TicketsListCustom Component - Socket Verifications', () => {
 
     unmount();
 
-    waitFor(() => {
-      expect(mockSocket.off).toHaveBeenCalled();
-    });
+    expect(mockSocket.off).toHaveBeenCalled();
   });
 
   test('não deve quebrar quando socket.off não é uma função no cleanup', () => {
@@ -172,14 +172,7 @@ describe('TicketsListCustom Component - Socket Verifications', () => {
 
     unmount();
 
-    waitFor(() => {
-      if (typeof mockSocket.emit === 'function') {
-        expect(mockSocket.emit).toHaveBeenCalledWith(
-          expect.stringContaining('leave'),
-          expect.anything()
-        );
-      }
-    });
+    expect(mockSocket.emit).toHaveBeenCalledWith('leaveTickets', 'open');
   });
 });
 

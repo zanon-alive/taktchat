@@ -1,4 +1,4 @@
-import { Server as SocketIO } from "socket.io";
+import { Server as SocketIO, Socket } from "socket.io";
 import { Server } from "http";
 import AppError from "../errors/AppError";
 import logger from "../utils/logger";
@@ -24,10 +24,11 @@ const validateJWTPayload = (payload: any): { userId: string; iat?: number; exp?:
   if (!payload || typeof payload !== "object") {
     throw new Error("Payload inválido");
   }
-  if (!payload.userId || !isValidUUID(payload.userId)) {
+  const userId = String(payload.userId ?? payload.id ?? "");
+  if (!isValidUUID(userId)) {
     throw new Error("userId inválido");
   }
-  return payload;
+  return { ...payload, userId };
 };
 
 // Origens CORS permitidas
@@ -44,6 +45,38 @@ class SocketCompatibleAppError extends Error {
     Error.captureStackTrace?.(this, SocketCompatibleAppError);
   }
 }
+
+const authenticateSocket = (required: boolean) => (socket: Socket, next: (error?: Error) => void) => {
+  const authToken = socket.handshake.auth?.token;
+  const queryToken = socket.handshake.query.token;
+  const token = typeof authToken === "string"
+    ? authToken
+    : typeof queryToken === "string"
+      ? queryToken
+      : "";
+
+  if (!token) {
+    if (required) {
+      return next(new SocketCompatibleAppError("Autenticação obrigatória", 401));
+    }
+    return next();
+  }
+
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    logger.error("[SOCKET AUTH] JWT_SECRET não configurado");
+    return next(new SocketCompatibleAppError("Socket indisponível", 503));
+  }
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    socket.data.user = validateJWTPayload(decoded);
+    return next();
+  } catch {
+    logger.warn("[SOCKET AUTH] Token inválido no handshake");
+    return next(new SocketCompatibleAppError("Token inválido", 401));
+  }
+};
 
 let io: SocketIO;
 
@@ -91,29 +124,8 @@ export const initIO = (httpServer: Server): SocketIO => {
     logger.error("Falha ao configurar Socket.IO Redis adapter", err);
   }
 
-  // Middleware de autenticação JWT (permissivo durante diagnóstico)
-  io.use((socket, next) => {
-    try {
-      const token = socket.handshake.query.token as string;
-      if (!token) {
-        logger.warn("[SOCKET AUTH] Conexão sem token no handshake: permitindo (diagnóstico)");
-        return next();
-      }
-
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
-        const validatedPayload = validateJWTPayload(decoded);
-        socket.data.user = validatedPayload;
-        return next();
-      } catch (err) {
-        logger.warn("[SOCKET AUTH] Token inválido no handshake: permitindo (diagnóstico)");
-        return next();
-      }
-    } catch (e) {
-      logger.warn("[SOCKET AUTH] Erro inesperado no middleware: permitindo (diagnóstico)");
-      return next();
-    }
-  });
+  // O namespace raiz mantém compatibilidade com conexões públicas sem token.
+  io.use(authenticateSocket(false));
 
   // Admin UI apenas em desenvolvimento
   const isAdminEnabled = process.env.SOCKET_ADMIN === "true" && process.env.NODE_ENV !== "production";
@@ -145,12 +157,15 @@ export const initIO = (httpServer: Server): SocketIO => {
       next(new SocketCompatibleAppError("Namespace inválido", 403), false);
     }
   });
+  workspaces.use(authenticateSocket(true));
 
   workspaces.on("connection", (socket) => {
     const clientIp = socket.handshake.address;
-    try {
-      logger.info(`[SOCKET] Cliente conectado ao namespace ${socket.nsp.name} (IP: ${clientIp}) query=${JSON.stringify(socket.handshake.query)}`);
-    } catch {}
+    const authenticatedUserId = socket.data.user?.userId || "desconhecido";
+    logger.info(
+      `[SOCKET] Cliente conectado ao namespace ${socket.nsp.name} ` +
+      `(IP: ${clientIp}, userId: ${authenticatedUserId}, transporte: ${socket.conn.transport.name})`
+    );
 
     // Valida userId
     const userId = socket.handshake.query.userId as string;
