@@ -6,7 +6,7 @@
 
 ## Estado
 
-Kit **v1.7** (polish da demo) em cima do v1.6. Caminho A encerrado. Melhorias validadas; usuário solicitou commits e merge local em `main`.
+Kit **v1.7** (polish da demo) em cima do v1.6. Caminho A encerrado. Melhorias validadas, commitadas e incorporadas localmente em `main`.
 
 Este repositório **não** é projeto Telecontrol.
 
@@ -19,4 +19,4 @@ Este repositório **não** é projeto Telecontrol.
 
 ## Próximo passo
 
-Finalizar os commits da v1.7, fazer merge local em `main` e pedir autorização antes de push/PR.
+Branches locais `docs/kit-documentacao-produto` e `main` ainda não foram enviadas. Pedir autorização antes de qualquer push/PR.
