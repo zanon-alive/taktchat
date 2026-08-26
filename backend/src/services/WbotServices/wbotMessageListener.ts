@@ -73,7 +73,7 @@ import QueueRAGService from "../QueueServices/QueueRAGService";
 import ShowQueueIntegrationService from "../QueueIntegrationServices/ShowQueueIntegrationService";
 import { createDialogflowSessionWithModel } from "../QueueIntegrationServices/CreateSessionDialogflow";
 import { queryDialogFlow } from "../QueueIntegrationServices/QueryDialogflow";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import CreateLogTicketService from "../TicketServices/CreateLogTicketService";
 import Whatsapp from "../../models/Whatsapp";
 import QueueIntegrations from "../../models/QueueIntegrations";
@@ -4624,11 +4624,9 @@ const handleMessage = async (
       );
     }
 
-    const settings = await CompaniesSettings.findOne({
-      where: { companyId }
-    });
+    const { settings } = await EnsureCompanySettingsService({ companyId });
 
-    const enableLGPD = settings.enableLGPD === "enabled";
+    const enableLGPD = settings?.enableLGPD === "enabled";
 
     const isFirstMsg = await Ticket.findOne({
       where: {
