@@ -29,6 +29,7 @@ import defaultLogoDark from "./assets/logo-black.png";
 import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
 import logger from "./utils/logger";
+import { resolvePublicAssetUrl } from "./utils/publicAssetUrl";
 
 const queryClient = new QueryClient();
 
@@ -420,21 +421,21 @@ const App = () => {
       });
     getPublicSetting("appLogoLight")
       .then((file) => {
-        setAppLogoLight(file ? backendUrl + "/public/" + file : defaultLogoLight);
+        setAppLogoLight(resolvePublicAssetUrl(backendUrl, file) || defaultLogoLight);
       })
       .catch((error) => {
         logger.error("Error reading setting", error);
       });
     getPublicSetting("appLogoDark")
       .then((file) => {
-        setAppLogoDark(file ? backendUrl + "/public/" + file : defaultLogoDark);
+        setAppLogoDark(resolvePublicAssetUrl(backendUrl, file) || defaultLogoDark);
       })
       .catch((error) => {
         logger.error("Error reading setting", error);
       });
     getPublicSetting("appLogoFavicon")
       .then((file) => {
-        setAppLogoFavicon(file ? backendUrl + "/public/" + file : defaultLogoFavicon);
+        setAppLogoFavicon(resolvePublicAssetUrl(backendUrl, file) || defaultLogoFavicon);
       })
       .catch((error) => {
         logger.error("Error reading setting", error);
@@ -473,7 +474,7 @@ const App = () => {
 
   return (
     <>
-      <Favicon url={appLogoFavicon ? backendUrl + "/public/" + appLogoFavicon : defaultLogoFavicon} />
+      <Favicon url={resolvePublicAssetUrl(backendUrl, appLogoFavicon) || defaultLogoFavicon} />
       <ColorModeContext.Provider value={{ colorMode }}>
         <ThemeProvider theme={theme}>
           <QueryClientProvider client={queryClient}>

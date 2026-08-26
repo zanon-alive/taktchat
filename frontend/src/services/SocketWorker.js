@@ -54,7 +54,7 @@ class SocketWorker {
       reconnectionAttempts: Infinity,
       pingTimeout: 20000,
       pingInterval: 25000,
-      query: { userId: String(this.userId) },
+      // Identidade só via JWT em auth (não expor userId na query da URL).
       auth: token ? { token } : {},
     });
 

@@ -1,7 +1,6 @@
 # Etapa de build
-# Usando node:20 (Debian) ao invés de Alpine para builds mais rápidos,
-# especialmente em cross-compilation (AMD64 -> ARM64)
-FROM node:20 AS build
+# node:22 (Debian) — alinhado ao backend; evita Alpine em cross-compile.
+FROM node:22 AS build
 WORKDIR /app
 
 # Copia o package.json e instala as dependências

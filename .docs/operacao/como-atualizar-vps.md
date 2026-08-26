@@ -6,9 +6,9 @@ Não existe checkout `/root/taktchat` nem script `update-taktchat.sh`. Produçã
 
 ## Passos
 
-1. Merge na `main`.
-2. Aguardar builds GHCR e o workflow `update-prod-stack (GHCR digests)` (secret `STACKS_DEPLOY_TOKEN`).
-3. No Portainer: GitOps/webhook ou **Pull and redeploy** (Prune off). Não editar o YAML na mão.
+1. Merge na `main` (só alterações em `backend/**` e/ou `frontend/**` disparam build GHCR).
+2. Aguardar builds GHCR. O workflow `update-prod-stack (GHCR digests)` roda **sozinho** após build verde (`workflow_run`; secret `STACKS_DEPLOY_TOKEN`). Merge só de docs/CI **não** pinha imagem.
+3. Portainer: GitOps polling (ex.: 5m) ou webhook; Prune **off**. Sem GitOps: **Pull and redeploy**. Não editar o YAML na mão.
 4. Aguardar backend, frontend e label-sync convergirem.
 5. Executar e acompanhar `taktchat_taktchat-migrate` quando aplicável.
 6. Validar:
@@ -29,4 +29,5 @@ Revert do commit no repo das stacks e pull no Portainer. Não remover a stack. M
 - A definição ativa do Portainer é a fonte operacional.
 - `14_taktchat.yml` local é referência/variante não confirmada.
 - Não reproduzir digests completos ou secrets.
-- Falta exportar/versionar a stack sanitizada e confirmar a política de tags/labels.
+- Garantir no Portainer (env do backend): `LICENSE_SUPABASE_URL` e `LICENSE_SUPABASE_ANON_KEY` (sem isso a verificação de licença é pulada).
+- Preferir webhook Portainer se o poll de 5m atrasar demais o deploy.

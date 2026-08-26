@@ -20,6 +20,7 @@ import ColorPicker from "../ColorPicker";
 import ColorModeContext from "../../layout/themeContext";
 import api from "../../services/api";
 import { getBackendUrl } from "../../config";
+import { resolvePublicAssetUrl } from "../../utils/publicAssetUrl";
 
 import defaultLogoLight from "../../assets/logo.png";
 import defaultLogoDark from "../../assets/logo-black.png";
@@ -222,7 +223,10 @@ export default function Whitelabel(props) {
       },
     }).then((response) => {
       updateSettingsLoaded(`appLogo${mode}`, response.data);
-      colorMode[`setAppLogo${mode}`](getBackendUrl() + "/public/" + response.data);
+      colorMode[`setAppLogo${mode}`](
+        resolvePublicAssetUrl(getBackendUrl(), response.data) ||
+          (mode === "Light" ? defaultLogoLight : mode === "Dark" ? defaultLogoDark : defaultLogoFavicon)
+      );
     }).catch((err) => {
       console.error(
         `Houve um problema ao realizar o upload da imagem.`

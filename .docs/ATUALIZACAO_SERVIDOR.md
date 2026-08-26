@@ -10,10 +10,13 @@ Produção usa Docker Swarm administrado pelo Portainer e imagens imutáveis do 
 
 1. Abrir, revisar e aprovar o PR.
 2. Fazer merge na `main`.
-3. Aguardar os workflows GHCR e `update-prod-stack (GHCR digests)` (secret `STACKS_DEPLOY_TOKEN`).
-4. Aplicar o Git no Portainer (GitOps/webhook ou Pull and redeploy; Prune off).
-6. Aguardar convergência, validar health e executar smoke tests.
-7. Rollback: revert no repo das stacks e pull no Portainer.
+3. Aguardar builds GHCR. O `update-prod-stack` pinha digests no repo das stacks automaticamente após build verde (secret `STACKS_DEPLOY_TOKEN`).
+4. Portainer aplica via GitOps (polling/webhook) ou **Pull and redeploy**; Prune off.
+5. Executar `taktchat_taktchat-migrate` quando houver migration.
+6. Aguardar convergência, validar health e smoke tests.
+7. Rollback: revert no repo das stacks + pull/GitOps no Portainer.
+
+**Incidente conhecido (resolvido em #25):** Node 20 + `@supabase/supabase-js` sem `ws` derrubava o backend no boot. Correção: `realtime.transport = ws` em `GetWhatsapp.ts`.
 
 ## Topologia relevante
 
