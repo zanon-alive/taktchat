@@ -2,20 +2,16 @@
 
 **Projeto:** Taktchat  
 **Repositório:** https://github.com/zanon-alive/taktchat.git  
-**Branch atual:** `fix/producao-supabase-ws-node20`
-
-## Encerrado
-
-PR [#24](https://github.com/zanon-alive/taktchat/pull/24): pin automático de digest nas stacks. Validado com `workflow_dispatch` e commit do bot. Portainer aplicou a imagem `b3d853e`.
-
-## Produção
-
-Backend **fora** de propósito até este fix: crash `@supabase/realtime-js` em Node 20 sem `ws`. Sem rollback para a imagem de abril.
+**Branch atual:** `fix/melhorias-producao-pos-25`
 
 ## Em andamento
 
-`GetWhatsapp.ts`: `ws` no transport do Realtime + client lazy. Depois: testes, PR, build GHCR, pin, Pull and redeploy.
+Melhorias pós-#25: GetWhatsapp (env, sem rm -rf), favicon URL, socket sem userId na query, Node 22, smoke pós-pin, docs GitOps.
 
-## Ainda aberto (não desta branch)
+## Antes do deploy desta branch
 
-Login `ERR_INVALID_CREDENTIALS`; rotacionar JWTs.
+Configurar no Portainer (backend): `LICENSE_SUPABASE_URL` e `LICENSE_SUPABASE_ANON_KEY` (antes estavam hardcoded).
+
+## Ainda aberto
+
+JWT rotate; demanda CRM 16; captura celular.

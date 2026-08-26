@@ -115,23 +115,15 @@ Documentos anteriores permanecem disponíveis como referência em `.docs/legacy/
 - Siga convenções de código (ESLint/Prettier) e mantenha testes atualizados.
 - Atualize a documentação ao entregar novas funcionalidades ou processos.
 
-#### 🔄 Processo de Deploy após Pull Request
+#### Processo de deploy após Pull Request
 
-**Após fazer merge do PR na branch `main`, siga o guia de atualização do servidor:**
+Após merge na `main` com mudanças em `backend/**` ou `frontend/**`:
 
-1. ✅ **PR aprovado e mergeado na branch `main`**
-2. ✅ **Código commitado e enviado ao repositório**
-3. 📖 **Seguir o guia completo:** `.docs/ATUALIZACAO_SERVIDOR.md` - **Guia Completo de Atualização do TaktChat no Servidor**
+1. Workflows GHCR publicam as imagens.
+2. `update-prod-stack` grava os digests em `15_taktchat_prod_ghcr.yml` no repo das stacks.
+3. Portainer (GitOps ou Pull and redeploy) aplica a stack — **sem** `git pull` da app na VPS.
 
-O guia inclui:
-- Atualização do código no servidor (`git pull`)
-- Atualização do backend (com dependências e compilação TypeScript)
-- Build e atualização do frontend (recomendado: build fora do container)
-- Verificação e monitoramento dos serviços
-- Troubleshooting de problemas comuns
-- Checklist de atualização
-
-> **📌 Importante:** Sempre consulte o guia `.docs/ATUALIZACAO_SERVIDOR.md` antes de atualizar o servidor de produção. Este processo garante que as atualizações sejam feitas corretamente e de forma segura.
+Guia: `.docs/operacao/release-deploy-rollback-swarm.md` (resumo: `.docs/ATUALIZACAO_SERVIDOR.md`).
 
 ### Contato e suporte
 

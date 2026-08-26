@@ -51,9 +51,13 @@ Após merge na `main` e builds GHCR verdes, o workflow `update-prod-stack (GHCR 
 
 No Portainer:
 
-1. Com GitOps/webhook ligado: o pull aplica o commit do bot; conferir convergência.
+1. Com GitOps ligado (polling, ex. 5m, ou **webhook**): o pull aplica o commit do bot; conferir convergência. Produção atual usa polling 5m com Prune **off**. Webhook reduz atraso: no Portainer copie a URL do webhook e cadastre em GitHub → repo das stacks → Settings → Webhooks.
 2. Sem GitOps: **Pull and redeploy** (Prune **off**). Não editar o YAML na mão.
 3. Conferir que volumes, Postgres/Redis e secrets não foram alterados no diff.
+
+**Secrets de licença (backend):** a partir da imagem pós-hardening, o backend exige `LICENSE_SUPABASE_URL` e `LICENSE_SUPABASE_ANON_KEY` no ambiente da stack (Portainer). Sem eles o app sobe, mas a verificação de licença é pulada.
+
+**Rollback / digests:** o histórico de commits em `stacks_producao-main-server` (`15_taktchat_prod_ghcr.yml`) é a fonte dos digests anteriores. Guarde o SHA curto do pin anterior em local operacional restrito se a janela exigir rollback rápido.
 
 Não aplicar `/root/stacks/14_taktchat.yml`. Não usar `latest` no YAML de produção.
 
@@ -125,4 +129,6 @@ Se houve migration incompatível, não improvisar down migration ou restauraçã
 
 - Exportar e versionar a stack ativa sem secrets.
 - Confirmar a política de tags e labels OCI das imagens.
-- Formalizar retenção dos digests anteriores necessários para rollback.
+- Preferir webhook Portainer em vez de só polling quando o atraso de 5m for problemático.
+- Formalizar retenção dos digests anteriores necessários para rollback (hoje: histórico Git das stacks).
+- Garantir `LICENSE_SUPABASE_*` no ambiente da stack em cada ambiente.

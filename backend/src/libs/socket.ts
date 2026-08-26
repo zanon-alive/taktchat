@@ -167,12 +167,10 @@ export const initIO = (httpServer: Server): SocketIO => {
       `(IP: ${clientIp}, userId: ${authenticatedUserId}, transporte: ${socket.conn.transport.name})`
     );
 
-    // Valida userId
+    // userId autenticado vem do JWT (socket.data.user); query.userId é opcional/legado.
     const userId = socket.handshake.query.userId as string;
-    if (userId && userId !== "undefined" && !isValidUUID(userId)) { // Adicionado verificação para "undefined" string
-      socket.disconnect(true);
-      logger.warn(`userId inválido de ${clientIp}`);
-      return;
+    if (userId && userId !== "undefined" && !isValidUUID(userId)) {
+      logger.warn(`userId inválido na query de ${clientIp} (ignorado; JWT prevalece)`);
     }
 
     // logger.info(`Cliente conectado ao namespace ${socket.nsp.name} (IP: ${clientIp})`);

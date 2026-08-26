@@ -1,4 +1,4 @@
-FROM node:20-bullseye AS build
+FROM node:22-bullseye AS build
 WORKDIR /app
 ENV NODE_ENV=development
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -62,7 +62,7 @@ RUN npm prune --omit=dev \
   && npm cache clean --force
 
 # --- Runtime ---
-FROM node:20-bullseye-slim AS runtime-base
+FROM node:22-bullseye-slim AS runtime-base
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

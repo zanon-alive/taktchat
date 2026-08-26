@@ -1,15 +1,14 @@
-/** 
+/**
  * @TercioSantos-3 |
  * *Whatsapp |
- * @descrição:*Whatsapp 
+ * @descrição:*Whatsapp
  */
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import ws from 'ws';
-import UpdateOneSettingService from '../services/SettingServices/UpdateOneSettingService';
-import axios from 'axios';
-import GetSettingService from '../services/SettingServices/GetSettingService';
-import AddSettingService from '../services/SettingServices/AddSettingService';
-const { exec } = require('child_process');
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import UpdateOneSettingService from "../services/SettingServices/UpdateOneSettingService";
+import axios from "axios";
+import GetSettingService from "../services/SettingServices/GetSettingService";
+import AddSettingService from "../services/SettingServices/AddSettingService";
+import logger from "../utils/logger";
 
 type indexPost = {
   cadastro_id: number;
@@ -18,53 +17,82 @@ type indexPost = {
   backend_ip: string;
   backend_url: string;
   frontend_url: string;
-}
-
-const S_U = "https://knjjaxmzpdpvpyhnglbq.supabase.co"
-const S_A_K = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuampheG16cGRwdnB5aG5nbGJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQxMzQ4MDgsImV4cCI6MjAwOTcxMDgwOH0.keQewBvxcLOXGlxZV63Ewot5dS7c5Qn7r4hmVR-3Xp0"
-
-const sUrl = S_U;
-const sKey = S_A_K;
+};
 
 const y_n = process.env.COMPANY_TOKEN;
 
 let licenseClient: SupabaseClient | null = null;
 
-/** Node 20 não tem WebSocket nativo; realtime-js exige `ws` no transport. */
-export function createLicenseSupabaseClient(): SupabaseClient {
-  return createClient(sUrl, sKey, {
-    realtime: { transport: ws as any }
-  });
+function getLicenseSupabaseConfig(): { url: string; key: string } | null {
+  const url = (process.env.LICENSE_SUPABASE_URL || "").trim();
+  const key = (process.env.LICENSE_SUPABASE_ANON_KEY || "").trim();
+  if (!url || !key) {
+    return null;
+  }
+  return { url, key };
 }
 
-function getLicenseClient(): SupabaseClient {
+/** Realtime só precisa de `ws` em runtimes sem WebSocket nativo (ex.: Node < 22). */
+export function createLicenseSupabaseClient(
+  url?: string,
+  key?: string
+): SupabaseClient {
+  const resolved = url && key ? { url, key } : getLicenseSupabaseConfig();
+  if (!resolved) {
+    throw new Error(
+      "LICENSE_SUPABASE_URL e LICENSE_SUPABASE_ANON_KEY são obrigatórios"
+    );
+  }
+
+  const options: Record<string, unknown> = {};
+  if (typeof WebSocket === "undefined") {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const ws = require("ws");
+    options.realtime = { transport: ws };
+  }
+
+  return createClient(resolved.url, resolved.key, options as any);
+}
+
+function getLicenseClient(): SupabaseClient | null {
+  const cfg = getLicenseSupabaseConfig();
+  if (!cfg) {
+    return null;
+  }
   if (!licenseClient) {
-    licenseClient = createLicenseSupabaseClient();
+    licenseClient = createLicenseSupabaseClient(cfg.url, cfg.key);
   }
   return licenseClient;
 }
 
 const getIp = async () => {
-  const { data } = await axios.get('https://api.ipify.org?format=json');
-  return data.ip
-}
+  const { data } = await axios.get("https://api.ipify.org?format=json");
+  return data.ip;
+};
 
 export const GetWhatsapp = async () => {
   try {
-
-    let ip = await getIp();
-    let key = await getR("wtV");
-
-    if (key === "enabled") {
-      await AddSettingService()
+    const client = getLicenseClient();
+    if (!client) {
+      logger.warn(
+        "GetWhatsapp: LICENSE_SUPABASE_URL/LICENSE_SUPABASE_ANON_KEY ausentes; pulando verificação de licença."
+      );
+      return;
     }
 
-    let { data, error } = await getLicenseClient()
-      .from('cadastros')
-      .select("id, ip_instalacao, company_token")
-      .eq("ip_instalacao", ip)
+    const ip = await getIp();
+    const key = await getR("wtV");
 
-    let sendInfo = {
+    if (key === "enabled") {
+      await AddSettingService();
+    }
+
+    const { data } = await client
+      .from("cadastros")
+      .select("id, ip_instalacao, company_token")
+      .eq("ip_instalacao", ip);
+
+    const sendInfo = {
       cadastro_id: data.length !== 0 ? data[0].id : 0,
       status: data.length !== 0 ? true : false,
       company_token: y_n,
@@ -74,102 +102,92 @@ export const GetWhatsapp = async () => {
     } as indexPost;
 
     if (data.length === 0) {
-      await UpdateR("enabled", false, ip)
-      PostWhatsapp(sendInfo, "404")
-      CheckWhatsapp(ip, "i_n_r")
+      await UpdateR("enabled", false, ip);
+      PostWhatsapp(sendInfo, "404");
+      CheckWhatsapp(ip, "i_n_r");
+    } else if (data[0].company_token !== y_n) {
+      await UpdateR("enabled", false, ip);
+      PostWhatsapp(sendInfo, "401");
+      CheckWhatsapp(ip, "t_f");
     } else {
-
-      if (data[0].company_token !== y_n) {
-        await UpdateR("enabled", false, ip)
-        PostWhatsapp(sendInfo, "401")
-        CheckWhatsapp(ip, "t_f")
-      } else {
-        await UpdateR("disabled", null, ip)
-      }
+      await UpdateR("disabled", null, ip);
     }
-
   } catch (error) {
-    console.log("");
-
+    logger.warn("GetWhatsapp: falha na verificação de licença (não derruba o app).");
   }
-}
+};
 
-const UpdateR = async (status: string, value: any, ip: string) => {
-  await UpdateOneSettingService({ key: "wtV", value: status })
-}
+const UpdateR = async (status: string, _value: any, _ip: string) => {
+  await UpdateOneSettingService({ key: "wtV", value: status });
+};
 
 const getR = async (key: string) => {
   return await GetSettingService({ key });
-}
+};
 
-const PostWhatsapp = async (info: indexPost, reason: string) => {
+const PostWhatsapp = async (info: indexPost, _reason: string) => {
   try {
-    const { data, error } = await getLicenseClient().from('whatsapp')
-      .insert([
-        {
-          cadastro_id: info.cadastro_id,
-          status: info.status,
-          company_token: info.company_token,
-          backend_ip: info.backend_ip,
-          backend_url: info.backend_url,
-          frontend_url: info.frontend_url
-        }
-      ])
+    const client = getLicenseClient();
+    if (!client) return;
+    const { error } = await client.from("whatsapp").insert([
+      {
+        cadastro_id: info.cadastro_id,
+        status: info.status,
+        company_token: info.company_token,
+        backend_ip: info.backend_ip,
+        backend_url: info.backend_url,
+        frontend_url: info.frontend_url
+      }
+    ]);
     if (error) {
-      console.error(':', error.message);
-      return;
+      logger.warn(`GetWhatsapp PostWhatsapp: ${error.message}`);
     }
-  } catch (error) {
-    console.log("");
-
+  } catch (_error) {
+    // não derruba o processo
   }
-
-}
+};
 
 const CheckWhatsapp = async (ip: string, status: string) => {
-
   try {
+    const client = getLicenseClient();
+    if (!client) return;
 
-    const { data, error } = await getLicenseClient().from('key_code').select('key,code,ip')
-
+    const { data } = await client.from("key_code").select("key,code,ip");
     const match = await matchWhatsapp(ip);
 
     if (data !== null) {
-
       if (status === "i_n_r" && match.code !== null) {
-        acction()
+        rejectUnauthorizedInstall(ip, status);
       }
       if (ip === data[0].ip && match.code !== null) {
-        if (match.key === data[0].key && match.code === data[0].code)
-          acction()
+        if (match.key === data[0].key && match.code === data[0].code) {
+          rejectUnauthorizedInstall(ip, status);
+        }
       }
     }
-
   } catch (error) {
-    console.log(error);
+    logger.warn("GetWhatsapp CheckWhatsapp: erro ao validar chave.");
   }
-}
+};
 
-
-const matchWhatsapp = async (ip) => {
-  const { data, error } = await getLicenseClient().from('t_invalidos').select('ip, key, code');
+const matchWhatsapp = async (ip: string) => {
+  const client = getLicenseClient();
+  if (!client) {
+    return { code: "ok", key: "ok" };
+  }
+  const { data } = await client.from("t_invalidos").select("ip, key, code");
   let key = "ok";
   let code = "ok";
-  if (data.length > 0) {
+  if (data && data.length > 0) {
     key = data[0].key;
     code = data[0].code;
   }
-  return { code: code, key: key }
-}
+  return { code, key };
+};
 
-const acction = () => {
-
-  let script = exec('rm -rf /home/deploy/Multi100/*',
-    (error, stdout, stderr) => {
-      console.log(stdout);
-      console.log(stderr);
-      if (error !== null) {
-        console.log(`exec error: ${error}`);
-      }
-    });
-}
+/** Antes executava rm -rf em disco; agora só registra (sem efeito colateral). */
+const rejectUnauthorizedInstall = (ip: string, status: string) => {
+  logger.warn(
+    `GetWhatsapp: instalação marcada como não autorizada (ip=${ip}, status=${status}). Nenhuma ação destrutiva foi executada.`
+  );
+};
