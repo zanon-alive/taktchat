@@ -1,22 +1,17 @@
-/** 
- * @TercioSantos-0 |
- * serviço/atualizar 1 configuração da empresa |
- * @params:companyId/column(name)/data
- */
 import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "./EnsureCompanySettingsService";
 
-/** Colunas que são boolean no modelo - normalizar valor vindo da API */
 const BOOLEAN_COLUMNS = new Set([
   "DirectTicketsToWallets",
   "closeTicketOnTransfer",
   "showNotificationPending",
-  "enableLandingSignup",
+  "enableLandingSignup"
 ]);
 
 type Params = {
-  companyId: number,
-  column: string,
-  data: any // Permite qualquer tipo (string, boolean, number, null)
+  companyId: number;
+  column: string;
+  data: any;
 };
 
 function normalizeValue(column: string, data: any): any {
@@ -32,20 +27,24 @@ function normalizeValue(column: string, data: any): any {
   return data;
 }
 
-const UpdateCompanySettingsService = async ({companyId, column, data}: Params): Promise<any> => {
+const UpdateCompanySettingsService = async ({
+  companyId,
+  column,
+  data
+}: Params): Promise<CompaniesSettings | null> => {
+  await EnsureCompanySettingsService({ companyId });
+
   const normalized = normalizeValue(column, data);
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
   updateData[column] = normalized;
 
   await CompaniesSettings.update(updateData, {
     where: { companyId }
   });
 
-  const updated = await CompaniesSettings.findOne({
+  return CompaniesSettings.findOne({
     where: { companyId }
   });
-
-  return updated;
 };
 
 export default UpdateCompanySettingsService;

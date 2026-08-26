@@ -4,6 +4,7 @@ import Company from "../../models/Company";
 import User from "../../models/User";
 import sequelize from "../../database";
 import CompaniesSettings from "../../models/CompaniesSettings";
+import { getCompanySettingsDefaults } from "../CompaniesSettings/EnsureCompanySettingsService";
 import Queue from "../../models/Queue";
 import UserQueue from "../../models/UserQueue";
 import Plan from "../../models/Plan";
@@ -135,34 +136,10 @@ const CreateCompanyService = async (
       { transaction: t }
     );
 
-    const settings = await CompaniesSettings.create({
-          companyId: company.id,
-          hoursCloseTicketsAuto: "9999999999",
-          chatBotType: "text",
-          acceptCallWhatsapp: "enabled",
-          userRandom: "enabled",
-          sendGreetingMessageOneQueues: "enabled",
-          sendSignMessage: "enabled",
-          sendFarewellWaitingTicket: "disabled",
-          userRating: "disabled",
-          sendGreetingAccepted: "enabled",
-          CheckMsgIsGroup: "enabled",
-          sendQueuePosition: "disabled",
-          scheduleType: "disabled",
-          acceptAudioMessageContact: "enabled",
-          sendMsgTransfTicket:"disabled",
-          enableLGPD: "disabled",
-          requiredTag: "disabled",
-          lgpdDeleteMessage: "disabled",
-          lgpdHideNumber: "disabled",
-          lgpdConsent: "disabled",
-          lgpdLink:"",
-          lgpdMessage:"",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          closeTicketOnTransfer: false,
-          DirectTicketsToWallets: false
-    },{ transaction: t });
+    const settings = await CompaniesSettings.create(
+      getCompanySettingsDefaults(company.id),
+      { transaction: t }
+    );
 
     const plan = planId ? await Plan.findByPk(planId) : null;
     const canCreateQueue = plan && Number(plan.queues) >= 1;

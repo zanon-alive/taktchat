@@ -38,12 +38,14 @@ export const show = async (
     const { column } = req.query as IndexGetCompanySettingOneQuery;
     const { companyId } = req.user;
     
+    await FindCompanySettingsService({ companyId });
+
     const setting = await FindCompanySettingOneService({
       companyId,
       column
     });
-    
-    return res.status(200).json(setting[0]);
+
+    return res.status(200).json(setting[0] ?? null);
   };
 
 export const update = async(

@@ -122,7 +122,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     entrySources = typeof entrySourceParam === "string" ? [entrySourceParam] : entrySourceParam;
   }
 
-  const { tickets, count, hasMore } = await ListTicketsService({
+  const { tickets, count, hasMore, settingsCreated } = await ListTicketsService({
     searchParam,
     tags: tagsIds,
     users: usersIds,
@@ -144,7 +144,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     entrySources
   });
 
-  return res.status(200).json({ tickets, count, hasMore });
+  return res.status(200).json({ tickets, count, hasMore, settingsCreated });
 };
 
 export const report = async (req: Request, res: Response): Promise<Response> => {
