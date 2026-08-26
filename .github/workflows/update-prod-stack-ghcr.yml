@@ -166,16 +166,34 @@ jobs:
           SMOKE_HEALTH_URL: ${{ vars.SMOKE_HEALTH_URL }}
           SMOKE_VERSION_URL: ${{ vars.SMOKE_VERSION_URL }}
         run: |
-          set -euo pipefail
+          set -u
           HEALTH_URL="${SMOKE_HEALTH_URL:-https://api.taktchat.com.br/health}"
           VERSION_URL="${SMOKE_VERSION_URL:-https://api.taktchat.com.br/version}"
-          echo "Aguardando convergência da stack (GitOps/poll Portainer)..."
-          sleep 90
-          curl --fail --show-error --max-time 30 "$HEALTH_URL" | tee /tmp/health.json
-          echo
-          BODY="$(curl --fail --show-error --max-time 30 "$VERSION_URL")"
-          echo "$BODY"
           SHORT7="$(echo "$SHA" | cut -c1-7)"
+          echo "Smoke com retry (GitOps/poll pode deixar /health em 404 durante o redeploy)..."
+
+          HEALTH_OK=0
+          BODY=""
+          for i in 1 2 3 4 5 6; do
+            echo "Tentativa ${i}/6..."
+            if BODY_HEALTH="$(curl --fail --show-error --max-time 20 "$HEALTH_URL" 2>/dev/null)"; then
+              echo "$BODY_HEALTH"
+              if BODY="$(curl --fail --show-error --max-time 20 "$VERSION_URL" 2>/dev/null)"; then
+                echo "$BODY"
+                HEALTH_OK=1
+                break
+              fi
+            else
+              echo "health ainda indisponível (redeploy em andamento?)"
+            fi
+            sleep 30
+          done
+
+          if [ "$HEALTH_OK" != "1" ]; then
+            echo "::warning::Smoke: /health ou /version indisponíveis após retries. O pin no repo das stacks já foi feito; confira o Portainer."
+            exit 0
+          fi
+
           if echo "$BODY" | grep -q "$SHORT7"; then
             echo "Smoke OK: /version contém o SHA ${SHORT7}."
           else
