@@ -31,5 +31,6 @@ describe("LandingNav", () => {
 
     const login = screen.getByRole("link", { name: "Login" });
     expect(login).toHaveAttribute("href", "/login");
+    expect(screen.getByRole("link", { name: "Tour" })).toHaveAttribute("href", "/tour");
   });
 });

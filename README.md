@@ -60,7 +60,8 @@ Consulte `.docs/instalacao/` para requisitos e variações (Docker completo, pro
 
 A vitrine pública está em `/landing` (`https://taktchat.com.br/landing`):
 - **Funil:** hero com print real do produto visível no viewport, galeria (tickets, kanban, fluxos), proposta, funcionalidades, planos, cadastro (se habilitado) + lead, FAQ
-- **CTAs (v2):** nav “Começar”, hero “Começar agora”, formulário de lead, FAB WhatsApp e “Seja revendedor” no rodapé — sem botões extras no meio da página
+- **Tour:** `/tour` (5 slides, sem login, pitch de problema/para quem); `/p/tour` redireciona para `/tour`. Links na v2: hero **Ver em 1 min**, menu **Tour**, galeria e rodapé
+- **CTAs (v2):** nav “Começar”, hero “Começar agora” + “Ver em 1 min”, formulário de lead, FAB WhatsApp e “Seja revendedor” no rodapé — sem botões extras no meio da página
 - **Copy (v2):** sem números inventados (“centenas de empresas”, “1 milhão de conversas”, “Uptime 99.9%”); a v1 arquivada pode manter o texto antigo
 - **Histórico:** a landing anterior permanece em `/landing/v1` com `noindex`
 - **Entrada:** visitante sem login que abre `/` vai para `/landing`; quem já entrou segue no Dashboard

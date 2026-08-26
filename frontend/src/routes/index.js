@@ -16,6 +16,7 @@ import ResetPassword from "../pages/ResetPassword";
 import LandingPage from "../pages/LandingPage";
 import LandingPageV1 from "../pages/LandingPageV1";
 import LgpdPage from "../pages/Lgpd";
+import PublicTour from "../pages/PublicTour";
 
 // Lazy loading para todas as outras páginas (code splitting automático)
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -80,6 +81,14 @@ const Routes = () => {
         <RouterRoute exact path="/landing" component={LandingPage} />
         <RouterRoute exact path="/landing/v1" component={LandingPageV1} />
         <RouterRoute exact path="/lgpd" component={LgpdPage} />
+        <RouterRoute exact path="/tour" component={PublicTour} />
+        <RouterRoute
+          exact
+          path="/p/tour"
+          render={({ location }) => (
+            <Redirect to={{ pathname: "/tour", search: location.search }} />
+          )}
+        />
         <AuthProvider>
           <TicketsContextProvider>
             <Route exact path="/docs" component={OnboardingDocs} />

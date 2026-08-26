@@ -1,6 +1,7 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Container, Button, Box, Grid } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 const useStyles = makeStyles((theme) => ({
@@ -41,13 +42,29 @@ const useStyles = makeStyles((theme) => ({
   subtitle: {
     margin: 0,
     fontSize: "1.35rem",
-    marginBottom: theme.spacing(4),
+    marginBottom: theme.spacing(2),
     opacity: 0.95,
     maxWidth: "560px",
     lineHeight: 1.6,
     color: "#ffffff",
     [theme.breakpoints.down("sm")]: {
       fontSize: "1.1rem",
+      textAlign: "center",
+      margin: "0 auto",
+      marginBottom: theme.spacing(2),
+    },
+  },
+  pitch: {
+    margin: 0,
+    fontSize: "1.1rem",
+    marginBottom: theme.spacing(4),
+    opacity: 0.95,
+    maxWidth: "560px",
+    lineHeight: 1.5,
+    fontWeight: 600,
+    color: "#ffffff",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "1rem",
       textAlign: "center",
       margin: "0 auto",
       marginBottom: theme.spacing(3),
@@ -92,9 +109,27 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
   ctaContainer: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(2),
     [theme.breakpoints.down("sm")]: {
-      display: "flex",
       justifyContent: "center",
+    },
+  },
+  secondaryCta: {
+    padding: theme.spacing(1.5, 4),
+    fontSize: "1.1rem",
+    borderRadius: "12px",
+    textTransform: "none",
+    fontWeight: 700,
+    color: "#ffffff",
+    borderColor: "rgba(255,255,255,0.85)",
+    "&:hover": {
+      borderColor: "#ffffff",
+      backgroundColor: "rgba(255,255,255,0.1)",
+    },
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
     },
   },
 }));
@@ -120,6 +155,9 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
             <p className={classes.subtitle}>
               Centralize conversas, organize a equipe e automatize o que se repetir — com a tela real do produto, não um mockup genérico.
             </p>
+            <p className={classes.pitch}>
+              O cliente continua no WhatsApp dele. A empresa ganha fila, dono e histórico.
+            </p>
             <Box className={classes.ctaContainer}>
               <Button
                 className={classes.ctaButton}
@@ -129,6 +167,15 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
                 aria-label="Começar agora"
               >
                 Começar agora
+              </Button>
+              <Button
+                className={classes.secondaryCta}
+                variant="outlined"
+                component={RouterLink}
+                to="/tour"
+                size="large"
+              >
+                Ver em 1 min
               </Button>
             </Box>
           </Grid>

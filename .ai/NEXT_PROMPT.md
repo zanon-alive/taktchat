@@ -1,10 +1,10 @@
 # Taktchat — continuidade de sessão
 
-**Branch:** `feat/landing-cta-login`
+**Branch:** `feat/landing-tour-publico`
 
 ## Estado
-- Landing: chip de trial só com cadastro direto ligado; senão CTA “Falar com especialista”.
-- Botão Login no header (v2 e v1).
+- Tour público `/tour` implementado (5 slides + pitch). Commit e PR desta sessão.
 
 ## Não fazer
-- PM2 na VPS, SQL manual, mover servidor para o Brasil.
+- Expor `/apresentacoes` sem login.
+- Criar pasta `public/tour/`.

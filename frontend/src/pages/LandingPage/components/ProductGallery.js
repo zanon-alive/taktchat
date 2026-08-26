@@ -1,6 +1,8 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
-import { Container, Typography, Box, Grid } from "@mui/material";
+import { Container, Typography, Box, Grid, Link } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
+import { GALLERY_TOUR_SLIDE, TOUR_PATH, tourSearchForIndex } from "../../PublicTour/slides";
 
 const shots = [
   {
@@ -33,8 +35,16 @@ const useStyles = makeStyles((theme) => ({
   },
   subtitle: {
     textAlign: "center",
-    marginBottom: theme.spacing(5),
+    marginBottom: theme.spacing(2),
     color: theme.palette.text.secondary,
+  },
+  tourLinkWrap: {
+    textAlign: "center",
+    marginBottom: theme.spacing(5),
+  },
+  tourLink: {
+    fontWeight: 700,
+    color: "#1E3A8A",
   },
   frame: {
     borderRadius: "12px",
@@ -56,6 +66,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const ShotCard = ({ shot, classes, to }) => {
+  const body = (
+    <>
+      <Box className={classes.frame}>
+        <img src={shot.src} alt={shot.alt} className={classes.img} />
+      </Box>
+      <Typography className={classes.caption}>{shot.caption}</Typography>
+    </>
+  );
+
+  if (!to) {
+    return body;
+  }
+
+  return (
+    <Link component={RouterLink} to={to} underline="none" color="inherit" aria-label={shot.caption}>
+      {body}
+    </Link>
+  );
+};
+
 const ProductGallery = () => {
   const classes = useStyles();
 
@@ -68,15 +99,23 @@ const ProductGallery = () => {
         <Typography className={classes.subtitle}>
           Telas reais do TaktChat — atendimento, kanban e automação.
         </Typography>
+        <Box className={classes.tourLinkWrap}>
+          <Link component={RouterLink} to={TOUR_PATH} className={classes.tourLink}>
+            Ver as telas em sequência
+          </Link>
+        </Box>
         <Grid container spacing={4}>
-          {shots.map((shot) => (
-            <Grid item xs={12} md={4} key={shot.src}>
-              <Box className={classes.frame}>
-                <img src={shot.src} alt={shot.alt} className={classes.img} />
-              </Box>
-              <Typography className={classes.caption}>{shot.caption}</Typography>
-            </Grid>
-          ))}
+          {shots.map((shot) => {
+            const slideNumber = GALLERY_TOUR_SLIDE[shot.src];
+            const to = slideNumber
+              ? `${TOUR_PATH}${tourSearchForIndex(slideNumber - 1)}`
+              : null;
+            return (
+              <Grid item xs={12} md={4} key={shot.src}>
+                <ShotCard shot={shot} classes={classes} to={to} />
+              </Grid>
+            );
+          })}
         </Grid>
       </Container>
     </Box>

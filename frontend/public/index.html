@@ -91,30 +91,53 @@
 	<noscript>Você precisa habilitar o JavaScript para executar este app.</noscript>
 
 	<script>
-		let progress = 0;
-		const progressBar = document.getElementById('progress-bar');
-		const interval = setInterval(() => {
-			if (progress < 50) {
-				progress += 10;
-			} else if (progress < 80) {
-				progress += 3;
-			} else if (progress < 99) {
-				progress += ((99 - progress) / 20);
-			}
-			progressBar.style.width = progress + '%';
+		(function () {
+			var path = (window.location.pathname || "").replace(/\/+$/, "") || "/";
+			var marketing =
+				path === "/landing" ||
+				path === "/landing/v1" ||
+				path === "/lgpd" ||
+				path === "/tour" ||
+				path === "/p/tour";
 
-			if (progress >= 100) {
+			function hideSplash() {
 				clearInterval(interval);
-				setTimeout(() => {
-					const splashScreen = document.getElementById('splash-screen');
+				var splashScreen = document.getElementById("splash-screen");
+				if (splashScreen) {
 					splashScreen.remove();
-				}, 500);
+				}
 			}
-		}, 1000);
 
-		window.finishProgress = () => {
-			progress = 100;
-		};
+			var progress = 0;
+			var progressBar = document.getElementById("progress-bar");
+			var interval = setInterval(function () {
+				if (progress < 50) {
+					progress += 10;
+				} else if (progress < 80) {
+					progress += 3;
+				} else if (progress < 99) {
+					progress += (99 - progress) / 20;
+				}
+				if (progressBar) {
+					progressBar.style.width = progress + "%";
+				}
+				if (progress >= 100) {
+					hideSplash();
+				}
+			}, 1000);
+
+			window.finishProgress = function () {
+				progress = 100;
+				if (progressBar) {
+					progressBar.style.width = "100%";
+				}
+				hideSplash();
+			};
+
+			if (marketing) {
+				window.finishProgress();
+			}
+		})();
 	</script>
 </body>
 

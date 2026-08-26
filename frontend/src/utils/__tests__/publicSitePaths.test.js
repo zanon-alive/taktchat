@@ -1,10 +1,13 @@
 import { getPrivateGuestPath, isPublicMarketingPath } from "../publicSitePaths";
 
 describe("isPublicMarketingPath", () => {
-  it("reconhece landing, arquivo v1 e lgpd", () => {
+  it("reconhece landing, arquivo v1, lgpd e tour", () => {
     expect(isPublicMarketingPath("/landing")).toBe(true);
     expect(isPublicMarketingPath("/landing/v1")).toBe(true);
     expect(isPublicMarketingPath("/lgpd")).toBe(true);
+    expect(isPublicMarketingPath("/tour")).toBe(true);
+    expect(isPublicMarketingPath("/tour/")).toBe(true);
+    expect(isPublicMarketingPath("/p/tour")).toBe(true);
   });
 
   it("nao trata login nem dashboard como marketing", () => {
