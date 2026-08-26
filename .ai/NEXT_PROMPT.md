@@ -2,15 +2,16 @@
 
 **Projeto:** Taktchat  
 **Repositório:** https://github.com/zanon-alive/taktchat.git  
-**Branch atual:** `fix/melhorias-producao-pos-25`
+**Branch atual:** `main`
 
-## Em andamento
+## Acabou de mergear
 
-Melhorias pós-#25: GetWhatsapp (env, sem rm -rf), favicon URL, socket sem userId na query, Node 22, smoke pós-pin, docs GitOps.
+- PR [#26](https://github.com/zanon-alive/taktchat/pull/26) — melhorias pós-#25 (`1ee1c5e`).
+- Stacks: `LICENSE_SUPABASE_*` em `15_taktchat_prod_ghcr.yml` (`e2daa45`).
 
-## Antes do deploy desta branch
+## Acompanhar agora
 
-Configurar no Portainer (backend): `LICENSE_SUPABASE_URL` e `LICENSE_SUPABASE_ANON_KEY` (antes estavam hardcoded).
+Builds GHCR backend+frontend → `update-prod-stack` → Portainer GitOps (~5m). Validar health/version/login/socket/favicon.
 
 ## Ainda aberto
 
