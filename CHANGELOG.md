@@ -10,6 +10,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 
 ### Corrigido (fix)
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).
+- Warnings CSS do Firefox de `-ms-input-placeholder` (seletores IE do Emotion/MUI).
 
 ### Alterado (refactor/chore)
 

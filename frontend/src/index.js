@@ -1,6 +1,7 @@
 import { Buffer } from "buffer";
 import React from "react";
 import ReactDOM from "react-dom";
+import { CacheProvider } from "@emotion/react";
 import { StylesProvider } from "@mui/styles";
 import "./index.css";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -8,21 +9,25 @@ import { ToastContainer } from "react-toastify";
 import * as serviceworker from './serviceWorker';
 import App from "./App";
 import { createAppJss } from "./utils/createAppJss";
+import { createEmotionCache } from "./utils/createEmotionCache";
 
 window.Buffer = Buffer;
 
 const jss = createAppJss();
+const emotionCache = createEmotionCache();
 
 ReactDOM.render(
-	<StylesProvider jss={jss}>
-		<CssBaseline />
-		<App />
-		<ToastContainer
-			position="top-center"
-			autoClose={3000}
-			style={{ zIndex: 99999 }}
-		/>
-	</StylesProvider>,
+	<CacheProvider value={emotionCache}>
+		<StylesProvider jss={jss}>
+			<CssBaseline />
+			<App />
+			<ToastContainer
+				position="top-center"
+				autoClose={3000}
+				style={{ zIndex: 99999 }}
+			/>
+		</StylesProvider>
+	</CacheProvider>,
 	document.getElementById("root"),
 	() => {
 		window.finishProgress();
