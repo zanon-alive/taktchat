@@ -8,12 +8,15 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 
 ### Adicionado (feat)
 - Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, página `/lgpd` e redirect de visitante `/` → `/landing` (#30).
+- Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
 ### Corrigido (fix)
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).
 - Warnings CSS do Firefox de `-ms-input-placeholder` (seletores IE do Emotion/MUI).
+- Lista de tickets não quebra mais se a empresa não tiver `CompaniesSettings` (cria defaults).
 
 ### Alterado (refactor/chore)
 - Landing v2: print do hero cabe no viewport, CTAs extras do meio da página saíram, claim de uptime 99,9% só na v1, dependência `react-ga4` não usada removida (#30).
+- Frontend em produção: gzip nos estáticos do Nginx (`vendor.js` e demais JS/CSS).
 ### Quebra de compatibilidade (BREAKING)
 - Visitante sem sessão em `/` passa a ir para `/landing` em vez de `/login` (#30).
 ---

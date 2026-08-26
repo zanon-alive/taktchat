@@ -49,6 +49,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 ### Para operação
 
 - **🔧 Operação e monitoramento:** `operacao/` - Rotinas diárias, monitoramento, backup/restore e troubleshooting
+  - **CDN / HTTP/3 (latência BR):** `operacao/cdn-e-http3-frontend.md`
 - **🔍 Diagnósticos:** `diagnosticos/` - Procedimentos para investigação e correção de problemas
 
 ## Próximos passos sugeridos
