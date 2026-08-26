@@ -25,7 +25,20 @@ Isso acelera a **primeira carga** do painel. Tickets, login e socket continuam n
 
 Alteração de DNS/CDN **não** está neste repositório. Fazer no provedor DNS e, se preciso, nos labels Traefik.
 
-## HTTP/3 no Traefik
+## Compressão no Traefik (rede de segurança)
+
+A origem Nginx já faz gzip. Um middleware `compress` no Traefik ajuda se uma imagem frontend antiga subir sem gzip.
+
+A stack **ativa** está no Portainer / `stacks_producao-main-server`, não neste Git. Referência local: labels em `14_taktchat_ghcr.yml`.
+
+No serviço do frontend:
+
+```
+traefik.http.middlewares.taktchat-compress.compress=true
+traefik.http.routers.taktchat-app.middlewares=taktchat-compress
+```
+
+Não aplicar `14_taktchat.yml` (bind mount / compile na VPS). Depois do pin no repo das stacks, conferir `Content-Encoding` como acima.
 
 O Traefik de produção vive na stack compartilhada (`stacks_producao-main-server`), não neste Git. HTTP/3 (QUIC) pode encurtar o handshake TLS; o ganho é menor que CDN + gzip.
 

@@ -181,6 +181,8 @@ services:
         - "traefik.http.routers.taktchat-app.tls.certresolver=letsencrypt"
         - "traefik.http.services.taktchat-app.loadbalancer.server.port=80"
         - "traefik.http.services.taktchat-app.loadbalancer.passHostHeader=true"
+        - "traefik.http.middlewares.taktchat-compress.compress=true"
+        - "traefik.http.routers.taktchat-app.middlewares=taktchat-compress"
 
 networks:
   app_network:
