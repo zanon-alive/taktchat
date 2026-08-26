@@ -7,6 +7,11 @@ import CheckIcon from "@mui/icons-material/Check";
 import StarIcon from "@mui/icons-material/Star";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import {
+  getPlanCardCtaLabel,
+  getPlanTableCtaLabel,
+  shouldShowTrialChip,
+} from "./planCta";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {
@@ -187,7 +192,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Plans = ({ plans, loading, ctaAnchorId = "lead-form", showPlanCta = true }) => {
+const Plans = ({
+  plans,
+  loading,
+  ctaAnchorId = "lead-form",
+  showPlanCta = true,
+  signupEnabled = false,
+}) => {
   const classes = useStyles();
   const [viewMode, setViewMode] = useState("cards");
 
@@ -400,7 +411,7 @@ const Plans = ({ plans, loading, ctaAnchorId = "lead-form", showPlanCta = true }
                         size="small"
                         onClick={scrollToForm}
                       >
-                        {isFeatured ? "Assinar" : "Escolher"}
+                        {getPlanTableCtaLabel(signupEnabled, isFeatured)}
                       </Button>
                     </TableCell>
                   );
@@ -485,7 +496,7 @@ const Plans = ({ plans, loading, ctaAnchorId = "lead-form", showPlanCta = true }
                   </ul>
 
                   <Box mt="auto">
-                    {plan.trial && (
+                    {shouldShowTrialChip(signupEnabled, plan) && (
                       <Box mb={2} display="flex" justifyContent="center">
                         <Chip
                           label={`Teste Grátis por ${plan.trialDays || 14} dias`}
@@ -503,7 +514,7 @@ const Plans = ({ plans, loading, ctaAnchorId = "lead-form", showPlanCta = true }
                         className={classes.planButton}
                         onClick={scrollToForm}
                       >
-                        {isFeatured ? "Assinar Agora" : "Escolher este Plano"}
+                        {getPlanCardCtaLabel(signupEnabled, isFeatured)}
                       </Button>
                     )}
                   </Box>

@@ -1,10 +1,10 @@
 # Taktchat — continuidade de sessão
 
-**Branch:** `fix/landing-nginx-403`
+**Branch:** `feat/landing-cta-login`
 
 ## Estado
-- Hotfix: Nginx 403 em `/landing` por causa da pasta `public/landing/` (PNGs).
-- Sem deploy até rebuild GHCR da imagem frontend + Portainer.
+- Landing: chip de trial só com cadastro direto ligado; senão CTA “Falar com especialista”.
+- Botão Login no header (v2 e v1).
 
 ## Não fazer
 - PM2 na VPS, SQL manual, mover servidor para o Brasil.

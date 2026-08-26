@@ -9,6 +9,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ### Adicionado (feat)
 - Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, página `/lgpd` e redirect de visitante `/` → `/landing` (#30).
 - Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
+- Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
 ### Corrigido (fix)
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).
 - Warnings CSS do Firefox de `-ms-input-placeholder` (seletores IE do Emotion/MUI).
