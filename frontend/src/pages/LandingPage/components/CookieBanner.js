@@ -1,21 +1,10 @@
 import React from "react";
 import CookieConsent from "react-cookie-consent";
 import { makeStyles } from "@mui/styles";
-import { Button, Typography, Link } from "@mui/material";
+import { Typography, Link } from "@mui/material";
+import "./CookieBanner.css";
 
 const useStyles = makeStyles((theme) => ({
-    container: {
-        alignItems: "center",
-        background: "#2C5364 !important",
-        color: "#fff !important",
-        padding: "16px 32px !important",
-        boxShadow: "0 -4px 10px rgba(0,0,0,0.2)",
-        zIndex: "9999 !important",
-        [theme.breakpoints.down("sm")]: {
-            flexDirection: "column !important",
-            padding: "16px !important",
-        },
-    },
     content: {
         flex: "1 1 auto",
         marginRight: "16px",
@@ -37,32 +26,6 @@ const useStyles = makeStyles((theme) => ({
             color: "#81d4fa",
         },
     },
-    buttonWrapper: {
-        display: "flex",
-        gap: "10px",
-    },
-    acceptButton: {
-        background: "#4caf50 !important",
-        color: "#fff !important",
-        fontWeight: "bold !important",
-        borderRadius: "8px !important",
-        padding: "8px 24px !important",
-        textTransform: "none !important",
-        "&:hover": {
-            background: "#43a047 !important",
-        },
-    },
-    declineButton: {
-        background: "transparent !important",
-        border: "1px solid rgba(255,255,255,0.5) !important",
-        color: "#fff !important",
-        borderRadius: "8px !important",
-        padding: "8px 16px !important",
-        textTransform: "none !important",
-        "&:hover": {
-            background: "rgba(255,255,255,0.1) !important",
-        },
-    },
 }));
 
 const CookieBanner = () => {
@@ -75,15 +38,11 @@ const CookieBanner = () => {
             declineButtonText="Recusar"
             enableDeclineButton
             cookieName="taktchat_cookie_consent"
-            containerClasses={classes.container}
+            containerClasses="taktchat-cookie-banner"
             contentClasses={classes.content}
-            buttonClasses={classes.acceptButton}
-            declineButtonClasses={classes.declineButton}
+            buttonClasses="taktchat-cookie-accept"
+            declineButtonClasses="taktchat-cookie-decline"
             expires={150}
-            onAccept={() => {
-                // Aqui você pode inicializar scripts de tracking se necessário
-                console.log("Cookies aceitos");
-            }}
         >
             <Typography variant="body2" className={classes.text}>
                 Nós usamos cookies para melhorar sua experiência de navegação e analisar o tráfego do site.

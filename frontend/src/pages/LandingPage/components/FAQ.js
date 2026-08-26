@@ -18,14 +18,6 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(6),
         color: theme.palette.text.secondary,
     },
-    accordion: {
-        marginBottom: theme.spacing(2),
-        borderRadius: "8px !important",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        "&:before": {
-            display: "none",
-        },
-    },
     heading: {
         fontSize: theme.typography.pxToRem(16),
         fontWeight: 600,
@@ -36,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
         lineHeight: 1.6,
     },
     searchContainer: {
-        marginBottom: theme.spacing(4),
         maxWidth: "500px",
         margin: "0 auto",
         marginBottom: theme.spacing(4),
@@ -55,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     },
     accordion: {
         marginBottom: theme.spacing(2),
-        borderRadius: "8px !important",
+        borderRadius: [["8px"], "!important"],
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         transition: "opacity 0.3s ease, transform 0.3s ease",
         opacity: 1,

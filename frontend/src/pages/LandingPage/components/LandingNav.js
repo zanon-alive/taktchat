@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     backgroundColor: "rgba(30, 58, 138, 0.95)",
     backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
     boxShadow: "0 2px 20px rgba(0, 0, 0, 0.1)",
   },
   toolbar: {

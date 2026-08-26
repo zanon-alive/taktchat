@@ -1,0 +1,41 @@
+.taktchat-cookie-banner {
+  align-items: center !important;
+  background: #2c5364 !important;
+  color: #fff !important;
+  padding: 16px 32px !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 9999 !important;
+}
+
+@media (max-width: 600px) {
+  .taktchat-cookie-banner {
+    flex-direction: column !important;
+    padding: 16px !important;
+  }
+}
+
+.taktchat-cookie-accept {
+  background: #4caf50 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  padding: 8px 24px !important;
+  text-transform: none !important;
+}
+
+.taktchat-cookie-accept:hover {
+  background: #43a047 !important;
+}
+
+.taktchat-cookie-decline {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  text-transform: none !important;
+}
+
+.taktchat-cookie-decline:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}

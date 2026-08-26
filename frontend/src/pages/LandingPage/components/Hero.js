@@ -53,8 +53,10 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "4rem",
     lineHeight: 1.1,
     background: "linear-gradient(45deg, #25D366 30%, #20BA5A 90%)", // Verde vibrante do logo
+    backgroundClip: "text",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
+    color: "transparent",
     [theme.breakpoints.down("md")]: {
       fontSize: "3.2rem",
     },
@@ -117,6 +119,7 @@ const useStyles = makeStyles((theme) => ({
     color: "#ffffff",
     border: "1px solid rgba(255, 255, 255, 0.3)",
     backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     "&:hover": {
       backgroundColor: "rgba(255, 255, 255, 0.2)",
     },
@@ -184,6 +187,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: "50px",
     backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     border: "1px solid rgba(255, 255, 255, 0.2)",
     fontSize: "0.95rem",
     fontWeight: 600,
