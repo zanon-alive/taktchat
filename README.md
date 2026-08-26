@@ -58,23 +58,18 @@ Consulte `.docs/instalacao/` para requisitos e variações (Docker completo, pro
 
 ### Landing Page de Vendas
 
-A plataforma inclui uma landing page pública de vendas acessível em `/landing` que apresenta:
-- **Design moderno**: Hero com gradiente escuro, tipografia aprimorada e elementos visuais abstratos
-- **Componentes essenciais**:
-  - FAQ com accordion (6 perguntas frequentes)
-  - ChatWidget flutuante para contato WhatsApp
-  - Widget Chat do Site (opcional, em Configurações > Opções)
-  - CookieBanner para conformidade LGPD
-- **Planos dinâmicos**: Cards modernizados com destaque visual para plano recomendado
-- **Formulário de leads**: Validação aprimorada com Yup, feedback visual e máscara de telefone
-- **SEO otimizado**:
-  - Meta tags avançadas (Open Graph, Twitter Cards, Mobile)
-  - Dados estruturados Schema.org (SoftwareApplication, Organization, FAQPage)
-  - Lazy loading com React.lazy para melhor performance
-- **Performance**: Code splitting, lazy load de componentes pesados (PDF) e carregamento sob demanda
-- **Responsivo**: Design adaptado para todos os dispositivos
+A vitrine pública está em `/landing` (`https://taktchat.com.br/landing`):
+- **Funil:** hero com print real do produto visível no viewport, galeria (tickets, kanban, fluxos), proposta, funcionalidades, planos, cadastro (se habilitado) + lead, FAQ
+- **CTAs (v2):** nav “Começar”, hero “Começar agora”, formulário de lead, FAB WhatsApp e “Seja revendedor” no rodapé — sem botões extras no meio da página
+- **Copy (v2):** sem números inventados (“centenas de empresas”, “1 milhão de conversas”, “Uptime 99.9%”); a v1 arquivada pode manter o texto antigo
+- **Histórico:** a landing anterior permanece em `/landing/v1` com `noindex`
+- **Entrada:** visitante sem login que abre `/` vai para `/landing`; quem já entrou segue no Dashboard
+- **Formulários:** cadastro direto (quando a API `direct-signup` está ligada) e lead; revendedor abre modal no rodapé
+- **Legal:** `/lgpd` (texto genérico, em revisão); cookie e rodapé apontam para essa rota
+- **Widgets:** FAB WhatsApp e, se habilitado nas configurações, Chat do Site
+- **SEO:** canonical em `/landing`; sem prova social inventada (depoimentos/nota); sem Google Analytics até existir ID real (`react-ga4` não está no frontend)
 
-> Detalhes da implementação da landing: `.docs/visao-geral/funcionalidades.md` (seção Landing).
+> Detalhes: `.docs/funcionalidades/mapa-frontend.md` e `.docs/pendencias/termos-privacidade-lgpd.md`.
 
 ### Documentação
 

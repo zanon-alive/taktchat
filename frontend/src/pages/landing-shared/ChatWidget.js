@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Fab, Tooltip } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { getNumberSupport } from "../../../config";
+import { getNumberSupport } from "../../config";
 
 const useStyles = makeStyles((theme) => ({
     fab: {

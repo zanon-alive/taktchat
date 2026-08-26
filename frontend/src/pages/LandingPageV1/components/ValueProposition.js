@@ -133,7 +133,7 @@ const pillars = [
   },
 ];
 
-const ValueProposition = () => {
+const ValueProposition = ({ showSocialProof = true, showCta = true }) => {
   const classes = useStyles();
   const [sectionRef, isSectionVisible] = useScrollAnimation({ threshold: 0.1 });
 
@@ -187,20 +187,24 @@ const ValueProposition = () => {
         </Box>
       </Box>
 
-      <Typography variant="body2" className={classes.socialProof}>
-        {i18n.t("valueProposition.socialProof")}
-      </Typography>
+      {showSocialProof && (
+        <Typography variant="body2" className={classes.socialProof}>
+          {i18n.t("valueProposition.socialProof")}
+        </Typography>
+      )}
 
-      <Box display="flex" justifyContent="center">
-        <Button
-          variant="outlined"
-          color="primary"
-          className={classes.ctaButton}
-          onClick={scrollToForm}
-        >
-          {i18n.t("valueProposition.ctaLabel")}
-        </Button>
-      </Box>
+      {showCta && (
+        <Box display="flex" justifyContent="center">
+          <Button
+            variant="outlined"
+            color="primary"
+            className={classes.ctaButton}
+            onClick={scrollToForm}
+          >
+            {i18n.t("valueProposition.ctaLabel")}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

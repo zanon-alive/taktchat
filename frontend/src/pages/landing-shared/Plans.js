@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Grid, Box, Card, CardContent, Button, Chip, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import { i18n } from "../../../translate/i18n";
+import { i18n } from "../../translate/i18n";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import StarIcon from "@mui/icons-material/Star";
@@ -187,7 +187,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Plans = ({ plans, loading }) => {
+const Plans = ({ plans, loading, ctaAnchorId = "lead-form", showPlanCta = true }) => {
   const classes = useStyles();
   const [viewMode, setViewMode] = useState("cards");
 
@@ -227,7 +227,7 @@ const Plans = ({ plans, loading }) => {
   };
 
   const scrollToForm = () => {
-    const formElement = document.getElementById("lead-form");
+    const formElement = document.getElementById(ctaAnchorId);
     if (formElement) {
       formElement.scrollIntoView({ behavior: "smooth" });
     }
@@ -381,6 +381,7 @@ const Plans = ({ plans, loading }) => {
                   })}
                 </TableRow>
               ))}
+              {showPlanCta && (
               <TableRow>
                 <TableCell className={classes.tableCell} component="th" scope="row">
                   Ação
@@ -405,6 +406,7 @@ const Plans = ({ plans, loading }) => {
                   );
                 })}
               </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -493,15 +495,17 @@ const Plans = ({ plans, loading }) => {
                         />
                       </Box>
                     )}
-                    <Button
-                      variant={isFeatured ? "contained" : "outlined"}
-                      color="primary"
-                      fullWidth
-                      className={classes.planButton}
-                      onClick={scrollToForm}
-                    >
-                      {isFeatured ? "Assinar Agora" : "Escolher este Plano"}
-                    </Button>
+                    {showPlanCta && (
+                      <Button
+                        variant={isFeatured ? "contained" : "outlined"}
+                        color="primary"
+                        fullWidth
+                        className={classes.planButton}
+                        onClick={scrollToForm}
+                      >
+                        {isFeatured ? "Assinar Agora" : "Escolher este Plano"}
+                      </Button>
+                    )}
                   </Box>
                 </CardContent>
               </Card>

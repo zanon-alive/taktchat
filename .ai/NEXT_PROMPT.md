@@ -1,18 +1,13 @@
 # Taktchat — continuidade de sessão
 
-**Projeto:** Taktchat  
-**Repositório:** https://github.com/zanon-alive/taktchat.git  
-**Branch atual:** `main`
+**Branch:** `feat/landing-conversao` (demanda **finalizada**)
 
-## Acabou de mergear
+## Estado
+- PR aberto, ainda não mergeado: https://github.com/zanon-alive/taktchat/pull/30
+- Entrega local: `.docs/branchs/feat/landing-conversao/03-ENTREGA.md`
+- Revisão jurídica de `/lgpd`: `.docs/pendencias/termos-privacidade-lgpd.md`
 
-- PR [#26](https://github.com/zanon-alive/taktchat/pull/26) — melhorias pós-#25 (`1ee1c5e`).
-- Stacks: `LICENSE_SUPABASE_*` em `15_taktchat_prod_ghcr.yml` (`e2daa45`).
-
-## Acompanhar agora
-
-Builds GHCR backend+frontend → `update-prod-stack` → Portainer GitOps (~5m). Validar health/version/login/socket/favicon.
-
-## Ainda aberto
-
-JWT rotate; demanda CRM 16; captura celular.
+## Próximo (fora desta demanda)
+- Merge do PR #30 (não fazer automaticamente).
+- Depois do merge: seguir `.docs/ATUALIZACAO_SERVIDOR.md` — o agente **não** faz deploy.
+- Não iniciar Google Analytics sem ID real.

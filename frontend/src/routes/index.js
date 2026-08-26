@@ -14,6 +14,8 @@ import SignupPartner from "../pages/SignupPartner";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
 import LandingPage from "../pages/LandingPage";
+import LandingPageV1 from "../pages/LandingPageV1";
+import LgpdPage from "../pages/Lgpd";
 
 // Lazy loading para todas as outras páginas (code splitting automático)
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -76,6 +78,8 @@ const Routes = () => {
     <BrowserRouter>
       <Switch>
         <RouterRoute exact path="/landing" component={LandingPage} />
+        <RouterRoute exact path="/landing/v1" component={LandingPageV1} />
+        <RouterRoute exact path="/lgpd" component={LgpdPage} />
         <AuthProvider>
           <TicketsContextProvider>
             <Route exact path="/docs" component={OnboardingDocs} />
@@ -94,7 +98,7 @@ const Routes = () => {
                 <Route exact path="/companies" component={Companies} isPrivate />
                 <Route exact path="/licenses" component={Licenses} isPrivate />
                 <Route exact path="/partner-billing-report" component={PartnerBillingReport} isPrivate />
-                <Route exact path="/" component={Dashboard} isPrivate />
+                <Route exact path="/" component={Dashboard} isPrivate guestRedirect="/landing" />
                 <Route exact path="/tickets/:ticketId?" component={TicketResponsiveContainer} isPrivate />
                 <Route exact path="/connections" component={Connections} isPrivate />
                 <Route exact path="/quick-messages" component={QuickMessages} isPrivate />

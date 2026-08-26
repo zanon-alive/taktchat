@@ -22,10 +22,10 @@ import PersonIcon from "@mui/icons-material/Person";
 import BusinessIcon from "@mui/icons-material/Business";
 import PhoneIcon from "@mui/icons-material/Phone";
 import ReCAPTCHA from "react-google-recaptcha";
-import api from "../../../services/api";
+import api from "../../services/api";
 import { toast } from "react-toastify";
-import { i18n } from "../../../translate/i18n";
-import { getNumberSupport } from "../../../config";
+import { i18n } from "../../translate/i18n";
+import { getNumberSupport } from "../../config";
 
 // Lista de países com código e bandeira
 const countries = [

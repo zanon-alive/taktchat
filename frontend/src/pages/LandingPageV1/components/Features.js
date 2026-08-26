@@ -177,8 +177,18 @@ const features = [
   },
 ];
 
-const Features = () => {
+const Features = ({ ctaAnchorId = "lead-form", showCta = true, hideUptimeClaim = false }) => {
   const classes = useStyles();
+  const visibleFeatures = hideUptimeClaim
+    ? features.map((feature) => ({
+        ...feature,
+        items: feature.items.map((item) =>
+          item.includes("Uptime 99.9%")
+            ? "Canal pela API Oficial da Meta"
+            : item
+        ),
+      }))
+    : features;
 
   return (
     <Box>
@@ -189,7 +199,7 @@ const Features = () => {
         Tudo que você precisa para transformar seu atendimento
       </Typography>
       <Grid container spacing={4}>
-        {features.map((feature, index) => {
+        {visibleFeatures.map((feature, index) => {
           return (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card 
@@ -245,27 +255,29 @@ const Features = () => {
           );
         })}
       </Grid>
-      <Box display="flex" justifyContent="center" marginTop={4}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={() => {
-            const formElement = document.getElementById("lead-form");
-            if (formElement) {
-              formElement.scrollIntoView({ behavior: "smooth" });
-            }
-          }}
-          style={{
-            padding: "12px 32px",
-            fontSize: "1.1rem",
-            fontWeight: 700,
-            borderRadius: "50px",
-          }}
-        >
-          Começar Agora - Teste Grátis
-        </Button>
-      </Box>
+      {showCta && (
+        <Box display="flex" justifyContent="center" marginTop={4}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => {
+              const formElement = document.getElementById(ctaAnchorId);
+              if (formElement) {
+                formElement.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            style={{
+              padding: "12px 32px",
+              fontSize: "1.1rem",
+              fontWeight: 700,
+              borderRadius: "50px",
+            }}
+          >
+            Começar Agora - Teste Grátis
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

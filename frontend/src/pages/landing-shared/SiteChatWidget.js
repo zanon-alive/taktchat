@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getBackendUrl } from "../../../config";
-import useSettings from "../../../hooks/useSettings";
+import { getBackendUrl } from "../../config";
+import useSettings from "../../hooks/useSettings";
 
 /**
  * Componente que carrega o widget de chat do site dinamicamente

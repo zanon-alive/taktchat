@@ -7,6 +7,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `kit-produto/`: **kit por audiência (v1.8 documental)** — catálogo, manuais por persona, comercial/técnica, screenshots e player privado em `/apresentacoes`. Esta revisão descreve o código e **não confirma deploy em produção**.
 - `visao-geral/`: contexto do produto, arquitetura, fluxos críticos e roadmap.
   - **Roadmap centralizado:** `visao-geral/roadmap.md` - Melhorias futuras e funcionalidades pendentes do projeto
+- `pendencias/`: itens abertos urgentes (ex.: `pendencias/termos-privacidade-lgpd.md`)
 - `instalacao/`: requisitos, preparação de ambiente, passo a passo para rodar localmente e via Docker.
 - `configuracao/`: variáveis de ambiente, parâmetros sensíveis e políticas de segurança.
 - `operacao/`: rotinas diárias, monitoramento, backup/restore e troubleshooting.

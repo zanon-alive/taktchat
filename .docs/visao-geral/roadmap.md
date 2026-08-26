@@ -1,6 +1,6 @@
 # 🗺️ Roadmap e Melhorias Futuras - TaktChat
 
-**Última atualização:** 2026-08-25
+**Última atualização:** 2026-08-26
 **Status:** Documento centralizado de melhorias futuras do projeto
 
 ---
@@ -53,8 +53,11 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 **Documentação completa:** este roadmap (seção Landing) e `.docs/funcionalidades/widget-chat-site.md`.
 
+### Prioridade urgente
+- [ ] **Revisão jurídica** de Termos / Privacidade / LGPD (fase 2). A rota `/lgpd` genérica entra na `feat/landing-conversao`. Detalhe: `.docs/pendencias/termos-privacidade-lgpd.md`.
+
 ### Prioridade Alta
-- [x] LGPD Compliance (banner de cookies, política de privacidade, termos de uso)
+- [ ] LGPD Compliance completo (textos jurídicos + rotas; o banner sozinho não basta)
 - [x] Proteção contra Spam (CAPTCHA - reCAPTCHA v3 ou hCaptcha)
 
 ### Prioridade Média
@@ -449,6 +452,7 @@ Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do 
 
 ## 📝 Histórico de Atualizações
 
+- **2026-08-26:** Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, `/lgpd` genérica, visitante em `/` vai para a vitrine. GA real e revisão jurídica seguem pendentes.
 - **2026-08-24:** Player `/apresentacoes` exige login; PNG fora de `public/`. Seed do kit não vai para produção.
 - **2026-08-24:** Ilustração de IA para o celular (`pendente-whatsapp-celular.png`). Não é print do aparelho.
 - **2026-08-24:** Kit v1.4: WhatsApp CONNECTED, transferência persistida, maioria dos prints `pendente-*` gravados. Restam captura real do celular/signup e migration Sequelize do seed.
@@ -472,7 +476,7 @@ Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do 
 
 ## 🔗 Referências
 
-- **Landing Page:** landing em `/landing` (cookies, reCAPTCHA, SEO). Widget: `.docs/funcionalidades/widget-chat-site.md`
+- **Landing Page:** `/landing` (v2 canônica) e arquivo `/landing/v1`. Privacidade genérica em `/lgpd`. Widget: `.docs/funcionalidades/widget-chat-site.md`. Pendência jurídica: `.docs/pendencias/termos-privacidade-lgpd.md`.
 - **WhatsApp API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/status-completo.md`
 - **Campanhas:** `.docs/legacy/raiz/MELHORIAS_CAMPANHAS_IMPLEMENTACAO.md`, `.docs/legacy/raiz/RESUMO_MELHORIAS_CAMPANHAS.md`
 - **Pendências gerais:** este arquivo (`visao-geral/roadmap.md`)

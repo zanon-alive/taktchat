@@ -6,14 +6,16 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 
 | Rota | Finalidade |
 |---|---|
-| `/landing` | Página comercial e entrada de leads |
+| `/landing` | Vitrine comercial (v2): funil de conversão, print do produto no hero, lead e cadastro direto se habilitado. CTAs só na nav, hero, lead, FAB e rodapé. Sem números inventados nem `react-ga4`. |
+| `/landing/v1` | Arquivo da landing anterior (`noindex`); copy antiga (prova social / uptime) pode permanecer |
+| `/lgpd` | Texto genérico de privacidade/cookies/LGPD (em revisão jurídica) |
 | `/login` | Autenticação |
 | `/signup` | Cadastro público |
 | `/signup-partner` | Cadastro vinculado a parceiro |
 | `/docs` | Documentação de onboarding |
 | `/docs_admin` | Documentação administrativa |
 
-`/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`.
+Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing` e `/lgpd` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine.
 
 ## Rotas privadas por área
 

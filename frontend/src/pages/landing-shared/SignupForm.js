@@ -16,8 +16,8 @@ import {
   Alert,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { openApi } from "../../../services/api";
-import toastError from "../../../errors/toastError";
+import { openApi } from "../../services/api";
+import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles((theme) => ({
   formContainer: {
@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SignupForm = () => {
+const SignupForm = ({ onEnabledChange }) => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(true);
@@ -83,25 +83,33 @@ const SignupForm = () => {
   });
 
   useEffect(() => {
-    checkConfig();
-  }, []);
-
-  const checkConfig = async () => {
-    try {
-      const { data } = await openApi.get("/public/direct-signup/config");
-      if (data.enabled && data.plans && data.plans.length > 0) {
-        setEnabled(true);
-        setPlans(data.plans);
-        setTrialDays(data.trialDays || 14);
-      } else {
+    let cancelled = false;
+    const checkConfig = async () => {
+      try {
+        const { data } = await openApi.get("/public/direct-signup/config");
+        if (cancelled) return;
+        if (data.enabled && data.plans && data.plans.length > 0) {
+          setEnabled(true);
+          setPlans(data.plans);
+          setTrialDays(data.trialDays || 14);
+          if (onEnabledChange) onEnabledChange(true);
+        } else {
+          setEnabled(false);
+          if (onEnabledChange) onEnabledChange(false);
+        }
+      } catch (e) {
+        if (cancelled) return;
         setEnabled(false);
+        if (onEnabledChange) onEnabledChange(false);
+      } finally {
+        if (!cancelled) setValidating(false);
       }
-    } catch (e) {
-      setEnabled(false);
-    } finally {
-      setValidating(false);
-    }
-  };
+    };
+    checkConfig();
+    return () => {
+      cancelled = true;
+    };
+  }, [onEnabledChange]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
