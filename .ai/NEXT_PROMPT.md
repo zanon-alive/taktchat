@@ -1,11 +1,13 @@
 # Taktchat — continuidade de sessão
 
-**Branch:** `feat/landing-conversao`
+**Branch:** `feat/landing-conversao` (demanda **finalizada**)
 
 ## Estado
-- PR aberto: https://github.com/zanon-alive/taktchat/pull/30
-- Melhorias 1, 2, 4 e 5 no PR (hero visível, copy sem números inventados, CTAs únicos, `react-ga4` removido).
-- Revisão jurídica de `/lgpd` continua em `.docs/pendencias/termos-privacidade-lgpd.md` (item 3, não implementado).
+- PR aberto, ainda não mergeado: https://github.com/zanon-alive/taktchat/pull/30
+- Entrega local: `.docs/branchs/feat/landing-conversao/03-ENTREGA.md`
+- Revisão jurídica de `/lgpd`: `.docs/pendencias/termos-privacidade-lgpd.md`
 
-## Próximo
-- Aguardar merge do PR #30. Não fazer deploy.
+## Próximo (fora desta demanda)
+- Merge do PR #30 (não fazer automaticamente).
+- Depois do merge: seguir `.docs/ATUALIZACAO_SERVIDOR.md` — o agente **não** faz deploy.
+- Não iniciar Google Analytics sem ID real.

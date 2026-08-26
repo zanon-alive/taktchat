@@ -6,8 +6,8 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 
 | Rota | Finalidade |
 |---|---|
-| `/landing` | Vitrine comercial (v2): funil de conversão, prints do produto, lead e cadastro direto se habilitado |
-| `/landing/v1` | Arquivo da landing anterior (`noindex`) |
+| `/landing` | Vitrine comercial (v2): funil de conversão, print do produto no hero, lead e cadastro direto se habilitado. CTAs só na nav, hero, lead, FAB e rodapé. Sem números inventados nem `react-ga4`. |
+| `/landing/v1` | Arquivo da landing anterior (`noindex`); copy antiga (prova social / uptime) pode permanecer |
 | `/lgpd` | Texto genérico de privacidade/cookies/LGPD (em revisão jurídica) |
 | `/login` | Autenticação |
 | `/signup` | Cadastro público |

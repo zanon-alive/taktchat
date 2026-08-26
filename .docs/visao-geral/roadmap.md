@@ -452,6 +452,7 @@ Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do 
 
 ## 📝 Histórico de Atualizações
 
+- **2026-08-26:** Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, `/lgpd` genérica, visitante em `/` vai para a vitrine. GA real e revisão jurídica seguem pendentes.
 - **2026-08-24:** Player `/apresentacoes` exige login; PNG fora de `public/`. Seed do kit não vai para produção.
 - **2026-08-24:** Ilustração de IA para o celular (`pendente-whatsapp-celular.png`). Não é print do aparelho.
 - **2026-08-24:** Kit v1.4: WhatsApp CONNECTED, transferência persistida, maioria dos prints `pendente-*` gravados. Restam captura real do celular/signup e migration Sequelize do seed.
@@ -475,7 +476,7 @@ Lista: `.docs/kit-produto/15-pendencias-produto-outras-branches.md`. Detalhe do 
 
 ## 🔗 Referências
 
-- **Landing Page:** landing em `/landing` (cookies, reCAPTCHA, SEO). Widget: `.docs/funcionalidades/widget-chat-site.md`
+- **Landing Page:** `/landing` (v2 canônica) e arquivo `/landing/v1`. Privacidade genérica em `/lgpd`. Widget: `.docs/funcionalidades/widget-chat-site.md`. Pendência jurídica: `.docs/pendencias/termos-privacidade-lgpd.md`.
 - **WhatsApp API Oficial:** `.docs/funcionalidades/whatsapp-api-oficial/status-completo.md`
 - **Campanhas:** `.docs/legacy/raiz/MELHORIAS_CAMPANHAS_IMPLEMENTACAO.md`, `.docs/legacy/raiz/RESUMO_MELHORIAS_CAMPANHAS.md`
 - **Pendências gerais:** este arquivo (`visao-geral/roadmap.md`)

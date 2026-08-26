@@ -33,7 +33,9 @@ check_200 "/login"
 
 echo
 echo "Checklist no navegador (sem sessão):"
-echo "  [ ] / cai em /landing (v2, print no hero, sem depoimentos)"
+echo "  [ ] / cai em /landing (v2, print no hero visível no viewport, sem depoimentos)"
+echo "  [ ] v2 sem 'Quero conhecer', 'Veja como resolver' nem 'Escolher este Plano'"
+echo "  [ ] v2 sem '1 milhão de conversas' e sem 'Uptime 99.9%'"
 echo "  [ ] /landing/v1 é a landing antiga e o HTML tem noindex"
 echo "  [ ] /lgpd mostra aviso de revisão, sem DPO/prazos inventados"
 echo "  [ ] /tickets cai em /login"
