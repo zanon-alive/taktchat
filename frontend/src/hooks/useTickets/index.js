@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
 import { format, sub } from 'date-fns'
@@ -29,6 +30,7 @@ const useTickets = ({
   const [tickets, setTickets] = useState([]);
   const [count, setCount] = useState(0);
   const isMountedRef = useRef(true);
+  const history = useHistory();
 
   useEffect(() => {
     return () => {
@@ -97,7 +99,7 @@ const useTickets = ({
                   toastId: "company-settings-created",
                   autoClose: 8000,
                   onClick: () => {
-                    window.location.assign("/settings");
+                    history.push("/settings");
                   },
                 }
               );
