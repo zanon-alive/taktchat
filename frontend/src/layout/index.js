@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import clsx from "clsx";
 // import moment from "moment";
 
@@ -55,6 +55,7 @@ import { getBackendUrl } from "../config";
 import useSettings from "../hooks/useSettings";
 import useVersion from "../hooks/useVersion";
 import pkg from "../../package.json";
+import { isStandaloneDisplay, shouldUseMobileInboxChrome } from "../utils/mobileInbox";
 
 // import { SocketContext } from "../context/Socket/SocketContext";
 
@@ -241,6 +242,30 @@ const useStyles = makeStyles((theme) => ({
   hideLogo: {
     display: "none",
   },
+  appBarInbox: {
+    marginLeft: 0,
+    width: "100%",
+    paddingTop: "env(safe-area-inset-top, 0px)",
+  },
+  contentInbox: {
+    marginLeft: 0,
+    width: "100%",
+    maxWidth: "100%",
+  },
+  rootInbox: {
+    height: "100dvh",
+    paddingBottom: "env(safe-area-inset-bottom, 0px)",
+  },
+  inboxLogo: {
+    height: 28,
+    width: "auto",
+    maxWidth: 140,
+    objectFit: "contain",
+    marginRight: theme.spacing(1),
+  },
+  inboxSpacer: {
+    flexGrow: 1,
+  },
   avatar2: {
     width: theme.spacing(4),
     height: theme.spacing(4),
@@ -302,7 +327,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const theme = useTheme();
   const { colorMode } = useContext(ColorModeContext);
+  const history = useHistory();
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
+  const inboxChrome = shouldUseMobileInboxChrome({
+    pathname: location.pathname,
+    isMdUp,
+    standalone: isStandaloneDisplay(),
+  });
 
   // Rotas públicas que não devem mostrar os menus
   // Rotas sem menu do painel
@@ -462,6 +494,16 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     handleLogout();
   };
 
+  const handleToggleTheme = () => {
+    colorMode.toggleColorMode();
+    handleCloseMenu();
+  };
+
+  const handleOpenFullPanel = () => {
+    handleCloseMenu();
+    history.push("/");
+  };
+
   const handleRefreshPage = () => {
     window.location.reload(false);
   };
@@ -518,8 +560,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     return <>{children}</>;
   }
 
+  const inboxLogoSrc =
+    theme.mode === "dark"
+      ? theme.calculatedLogoDark?.()
+      : theme.calculatedLogoLight?.();
+
   return (
-    <div className={classes.root}>
+    <div className={clsx(classes.root, inboxChrome && classes.rootInbox)}>
+      {!inboxChrome && (
       <Drawer
         variant={drawerVariant}
         className={drawerOpen ? classes.drawerPaper : classes.drawerPaperClose}
@@ -552,14 +600,20 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         </List>
         <Divider />
       </Drawer>
+      )}
 
       <AppBar
         ref={appBarRef}
         position="fixed"
-        className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
+        className={clsx(
+          classes.appBar,
+          !inboxChrome && drawerOpen && classes.appBarShift,
+          inboxChrome && classes.appBarInbox
+        )}
         color="primary"
       >
         <Toolbar variant="dense" className={classes.toolbar}>
+          {!inboxChrome && (
           <IconButton
             edge="start"
             variant="contained"
@@ -570,7 +624,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           >
             <MenuIcon />
           </IconButton>
+          )}
 
+          {inboxChrome && inboxLogoSrc ? (
+            <img className={classes.inboxLogo} src={inboxLogoSrc} alt="" />
+          ) : null}
+
+          {!inboxChrome && (
           <Typography
             component="h2"
             variant="h6"
@@ -578,7 +638,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             noWrap
             className={classes.title}
           >
-            {/* {greaterThenSm && user?.profile === "admin" && getDateAndDifDays(user?.company?.dueDate).difData < 7 ? ( */}
             {greaterThenSm &&
               user?.profile === "admin" &&
               user?.company?.dueDate ? (
@@ -597,8 +656,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               </>
             )}
           </Typography>
+          )}
 
-          {(() => {
+          {inboxChrome && <div className={classes.inboxSpacer} />}
+
+          {!inboxChrome && (() => {
             const t = user?.company?.type;
             const label =
               t === "platform" || user?.super
@@ -617,27 +679,15 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             ) : null;
           })()}
 
-          {userToken === "enabled" && user?.companyId === 1 && (
+          {!inboxChrome && userToken === "enabled" && user?.companyId === 1 && (
             <Chip
               className={classes.chip}
               label={i18n.t("mainDrawer.appBar.user.token")}
             />
           )}
 
-          {/* DESABILITADO POIS TEM BUGS */}
-          {<UserLanguageSelector /> }
-          {/* <SoftPhone
-            callVolume={33} //Set Default callVolume
-            ringVolume={44} //Set Default ringVolume
-            connectOnStart={false} //Auto connect to sip
-            notifications={false} //Show Browser Notification of an incoming call
-            config={config} //Voip config
-            setConnectOnStartToLocalStorage={setConnectOnStartToLocalStorage} // Callback function
-            setNotifications={setNotifications} // Callback function
-            setCallVolume={setCallVolume} // Callback function
-            setRingVolume={setRingVolume} // Callback function
-            timelocale={'UTC-3'} //Set time local for call history
-          /> */}
+          {!inboxChrome && <UserLanguageSelector />}
+          {!inboxChrome && (
           <IconButton edge="start" onClick={colorMode.toggleColorMode}>
             {theme.mode === "dark" ? (
               <Brightness7Icon style={{ color: "white" }} />
@@ -645,9 +695,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               <Brightness4Icon style={{ color: "white" }} />
             )}
           </IconButton>
+          )}
 
           <NotificationsVolume setVolume={setVolume} volume={volume} />
 
+          {!inboxChrome && (
           <IconButton
             onClick={handleRefreshPage}
             aria-label={i18n.t("mainDrawer.appBar.refresh")}
@@ -655,31 +707,35 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           >
             <CachedIcon style={{ color: "white" }} />
           </IconButton>
-
-          {/* <DarkMode themeToggle={themeToggle} /> */}
+          )}
 
           {user.id && <NotificationsPopOver volume={volume} />}
 
-          <AnnouncementsPopover />
+          {!inboxChrome && <AnnouncementsPopover />}
 
-          <ChatPopover />
+          {!inboxChrome && <ChatPopover />}
 
           <div>
-            <StyledBadge
-              overlap="circular"
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              variant="dot"
+            <IconButton
               onClick={handleMenu}
+              aria-label={i18n.t("mainDrawer.appBar.user.profile")}
+              size="small"
             >
-              <Avatar
-                alt="Multi100"
-                className={classes.avatar2}
-                src={profileUrl}
-              />
-            </StyledBadge>
+              <StyledBadge
+                overlap="circular"
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                variant="dot"
+              >
+                <Avatar
+                  alt={user?.name || "user"}
+                  className={classes.avatar2}
+                  src={profileUrl}
+                />
+              </StyledBadge>
+            </IconButton>
 
             <UserModal
               open={userModalOpen}
@@ -705,6 +761,16 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               <MenuItem onClick={handleOpenUserModal}>
                 {i18n.t("mainDrawer.appBar.user.profile")}
               </MenuItem>
+              {inboxChrome && (
+                <MenuItem onClick={handleToggleTheme}>
+                  {i18n.t("mainDrawer.appBar.user.toggleTheme")}
+                </MenuItem>
+              )}
+              {inboxChrome && (
+                <MenuItem onClick={handleOpenFullPanel}>
+                  {i18n.t("mainDrawer.appBar.user.fullPanel")}
+                </MenuItem>
+              )}
               <MenuItem onClick={handleClickLogout}>
                 {i18n.t("mainDrawer.appBar.user.logout")}
               </MenuItem>
@@ -712,7 +778,12 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           </div>
         </Toolbar>
       </AppBar>
-      <main className={clsx(classes.content, drawerOpen ? classes.contentShift : classes.contentShiftClose)}>
+      <main className={clsx(
+        classes.content,
+        inboxChrome
+          ? classes.contentInbox
+          : (drawerOpen ? classes.contentShift : classes.contentShiftClose)
+      )}>
         <div className={classes.appBarSpacer} />
         <LicenseExpiryWarning />
         {children ? children : null}
