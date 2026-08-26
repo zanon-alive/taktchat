@@ -19,20 +19,6 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(6),
     color: theme.palette.text.secondary,
   },
-  planCard: {
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    padding: theme.spacing(3),
-    borderRadius: "16px",
-    transition: "all 0.3s ease",
-    position: "relative",
-    border: "1px solid rgba(0,0,0,0.08)",
-    "&:hover": {
-      transform: "translateY(-8px)",
-      boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
-    },
-  },
   planCardFeatured: {
     border: `2px solid ${theme.palette.primary.main}`,
     transform: "scale(1.05)",

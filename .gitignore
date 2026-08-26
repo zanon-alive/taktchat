@@ -181,6 +181,10 @@ commit-msg.txt
 # Locks de sessão do agente (não versionar)
 .ai/*.lock
 
+# Bytecode Python (scripts de CI)
+__pycache__/
+*.py[cod]
+
 backend/private/sessions/
 
 # Propostas/rascunhos locais (não versionar)

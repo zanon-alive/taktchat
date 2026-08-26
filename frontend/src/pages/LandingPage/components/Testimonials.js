@@ -16,18 +16,6 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(6),
     color: theme.palette.text.secondary,
   },
-  testimonialCard: {
-    height: "100%",
-    padding: theme.spacing(3),
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-5px)",
-      boxShadow: theme.shadows[8],
-    },
-    [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(2),
-    },
-  },
   testimonialContent: {
     marginBottom: theme.spacing(2),
     fontStyle: "italic",

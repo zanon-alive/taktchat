@@ -13,7 +13,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  LinearProgress,
 } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -150,14 +149,14 @@ const useStyles = makeStyles((theme) => ({
   fieldValid: {
     "& .MuiOutlinedInput-root": {
       "& fieldset": {
-        borderColor: "#25D366 !important",
+        borderColor: [["#25D366"], "!important"],
       },
     },
   },
   fieldInvalid: {
     "& .MuiOutlinedInput-root": {
       "& fieldset": {
-        borderColor: "#f44336 !important",
+        borderColor: [["#f44336"], "!important"],
       },
     },
   },
