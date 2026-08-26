@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import { Link as RouterLink } from "react-router-dom";
 
 const menuItems = [
   { label: "Funcionalidades", id: "features" },
@@ -59,6 +60,17 @@ const useStyles = makeStyles((theme) => ({
     color: "#ffffff",
     "&:hover": {
       backgroundColor: "#20BA5A",
+    },
+  },
+  loginButton: {
+    marginLeft: theme.spacing(1),
+    textTransform: "none",
+    fontWeight: 600,
+    color: "#ffffff",
+    borderColor: "rgba(255, 255, 255, 0.7)",
+    "&:hover": {
+      borderColor: "#ffffff",
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
     },
   },
   logo: {
@@ -157,6 +169,14 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
                 </Button>
               ))}
               <Button
+                variant="outlined"
+                className={classes.loginButton}
+                component={RouterLink}
+                to="/login"
+              >
+                Login
+              </Button>
+              <Button
                 variant="contained"
                 className={classes.ctaButton}
                 onClick={() => handleNavClick(ctaTargetId)}
@@ -195,6 +215,15 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
               <ListItemText primary={item.label} />
             </ListItem>
           ))}
+          <ListItem
+            button
+            className={classes.drawerItem}
+            component={RouterLink}
+            to="/login"
+            onClick={() => setDrawerOpen(false)}
+          >
+            <ListItemText primary="Login" />
+          </ListItem>
           <ListItem
             button
             className={classes.drawerItem}

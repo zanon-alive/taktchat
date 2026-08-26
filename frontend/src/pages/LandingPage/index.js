@@ -307,7 +307,12 @@ const LandingPage = () => {
 
           <Box id="planos" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
-              <Plans plans={plans} loading={loadingPlans} ctaAnchorId={ctaTargetId} showPlanCta={false} />
+              <Plans
+                plans={plans}
+                loading={loadingPlans}
+                ctaAnchorId={ctaTargetId}
+                signupEnabled={signupEnabled}
+              />
             </Container>
           </Box>
 

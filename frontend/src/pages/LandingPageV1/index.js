@@ -53,6 +53,8 @@ const LandingPage = () => {
   const classes = useStyles();
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
+  const [signupEnabled, setSignupEnabled] = useState(false);
+  const ctaTargetId = signupEnabled ? "cadastro" : "lead-form";
 
   useEffect(() => {
     loadPlans();
@@ -327,13 +329,18 @@ const LandingPage = () => {
 
           <Box id="planos" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
-              <Plans plans={plans} loading={loadingPlans} />
+              <Plans
+                plans={plans}
+                loading={loadingPlans}
+                ctaAnchorId={ctaTargetId}
+                signupEnabled={signupEnabled}
+              />
             </Container>
           </Box>
 
           <Box id="cadastro" className={`${classes.section} ${classes.sectionPrimary}`}>
             <Container>
-              <SignupForm />
+              <SignupForm onEnabledChange={setSignupEnabled} />
             </Container>
           </Box>
 
