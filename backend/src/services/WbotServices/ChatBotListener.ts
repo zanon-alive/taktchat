@@ -20,7 +20,7 @@ import ShowFileService from "../FileServices/ShowService";
 import { isNil, isNull } from "lodash";
 
 import SendWhatsAppMedia, { getMessageOptions } from "./SendWhatsAppMedia";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import TicketTraking from "../../models/TicketTraking";
 
 const fs = require('fs')
@@ -285,9 +285,9 @@ const sendDialog = async (
   if (showChatBots.options) {
 
     let companyId = ticket.companyId;
-    const buttonActive = await CompaniesSettings.findOne({
-      where: { companyId }
-    })
+    const { settings: buttonActive } = await EnsureCompanySettingsService({
+      companyId
+    });
 
 
     const typeBot = buttonActive?.chatBotType || "text";
@@ -430,10 +430,8 @@ const backToMainMenu = async (
 
 
 
-  const buttonActive = await CompaniesSettings.findOne({
-    where: {
-      companyId: ticket.companyId
-    }
+  const { settings: buttonActive } = await EnsureCompanySettingsService({
+    companyId: ticket.companyId
   });
 
   const botText = async () => {
@@ -472,7 +470,7 @@ const backToMainMenu = async (
     return deleteDialog;
   };
 
-  if (buttonActive.chatBotType === "text") {
+  if (buttonActive?.chatBotType === "text") {
     return botText();
   }
 };

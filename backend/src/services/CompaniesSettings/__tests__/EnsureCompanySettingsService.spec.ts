@@ -1,6 +1,8 @@
 import sequelize from "../../../database";
 import FindCompanySettingOneService from "../FindCompanySettingOneService";
-import EnsureCompanySettingsService from "../EnsureCompanySettingsService";
+import EnsureCompanySettingsService, {
+  resolveCompanySettings
+} from "../EnsureCompanySettingsService";
 import CompaniesSettings from "../../../models/CompaniesSettings";
 
 jest.mock("../../../database", () => ({
@@ -80,5 +82,34 @@ describe("EnsureCompanySettingsService", () => {
     const result = await EnsureCompanySettingsService({ companyId: 1 });
 
     expect(result.created).toBe(false);
+  });
+});
+
+describe("resolveCompanySettings", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("devolve o objeto existente sem criar linha", async () => {
+    const existing = { companyId: 1, enableLGPD: "enabled" };
+
+    const result = await resolveCompanySettings(1, existing as any);
+
+    expect(result).toBe(existing);
+    expect(CompaniesSettings.findOrCreate).not.toHaveBeenCalled();
+  });
+
+  it("cria defaults quando settings está ausente", async () => {
+    (CompaniesSettings.findOrCreate as jest.Mock).mockResolvedValue([
+      { companyId: 1, enableLGPD: "disabled" },
+      true
+    ]);
+
+    const result = await resolveCompanySettings(1, null);
+
+    expect(result).toEqual({ companyId: 1, enableLGPD: "disabled" });
+    expect(CompaniesSettings.findOrCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { companyId: 1 } })
+    );
   });
 });

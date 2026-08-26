@@ -13,6 +13,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).
 - Warnings CSS do Firefox de `-ms-input-placeholder` (seletores IE do Emotion/MUI).
 - Lista de tickets não quebra mais se a empresa não tiver `CompaniesSettings` (cria defaults).
+- Primeiro ticket, contato, Encerrar/transferir, Facebook/IG, bot de filas, webhook e cron de rodízio não 500 se settings estiver ausente (`EnsureCompanySettings` / `resolveCompanySettings`).
 
 ### Alterado (refactor/chore)
 - Landing v2: print do hero cabe no viewport, CTAs extras do meio da página saíram, claim de uptime 99,9% só na v1, dependência `react-ga4` não usada removida (#30).

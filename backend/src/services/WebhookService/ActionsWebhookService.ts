@@ -36,7 +36,7 @@ import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATi
 import ShowTicketUUIDService from "../TicketServices/ShowTicketFromUUIDService";
 import logger from "../../utils/logger";
 import CreateLogTicketService from "../TicketServices/CreateLogTicketService";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { delay } from "bluebird";
 import typebotListener from "../TypebotServices/typebotListener";
@@ -399,11 +399,7 @@ export const ActionsWebhookService = async (
           queueId: queue.id
         });
 
-        let settings = await CompaniesSettings.findOne({
-          where: {
-            companyId: companyId
-          }
-        });
+        const { settings } = await EnsureCompanySettingsService({ companyId });
 
         const enableQueuePosition = settings.sendQueuePosition === "enabled";
 

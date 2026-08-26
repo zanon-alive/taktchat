@@ -1,6 +1,6 @@
 import { getIO } from "../../libs/socket";
-import CompaniesSettings from "../../models/CompaniesSettings";
 import Contact from "../../models/Contact";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import ContactCustomField from "../../models/ContactCustomField";
 import ContactWallet from "../../models/ContactWallet";
 import fs from "fs";
@@ -296,7 +296,7 @@ const CreateOrUpdateContactService = async ({
       }
 
     } else if (wbot && ['whatsapp'].includes(channel)) {
-      const settings = await CompaniesSettings.findOne({ where: { companyId } });
+      const { settings } = await EnsureCompanySettingsService({ companyId });
       const { acceptAudioMessageContact } = settings;
       let newRemoteJid = remoteJid;
 

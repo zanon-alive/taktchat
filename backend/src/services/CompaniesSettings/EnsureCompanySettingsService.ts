@@ -48,4 +48,16 @@ const EnsureCompanySettingsService = async ({
   return { settings, created };
 };
 
+export const resolveCompanySettings = async (
+  companyId: number,
+  existing?: CompaniesSettings | null
+): Promise<CompaniesSettings> => {
+  if (existing) {
+    return existing;
+  }
+
+  const { settings } = await EnsureCompanySettingsService({ companyId });
+  return settings;
+};
+
 export default EnsureCompanySettingsService;

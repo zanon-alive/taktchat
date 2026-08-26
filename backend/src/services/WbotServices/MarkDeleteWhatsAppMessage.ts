@@ -3,7 +3,7 @@ import { getIO } from "../../libs/socket";
 import { emitToCompanyRoom } from "../../libs/socketEmit";
 import Ticket from "../../models/Ticket";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 
 const MarkDeleteWhatsAppMessage = async (from: any, timestamp?: any, msgId?: string, companyId?: number): Promise<Message> => {
 
@@ -34,11 +34,7 @@ const MarkDeleteWhatsAppMessage = async (from: any, timestamp?: any, msgId?: str
             });
 
             if (messageToUpdate) {
-                const settings = await CompaniesSettings.findOne({
-                    where: {
-                        companyId: companyId
-                    }
-                });
+                const { settings } = await EnsureCompanySettingsService({ companyId });
 
                 const ticket = await Ticket.findOne({
                     where: {

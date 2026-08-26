@@ -9,7 +9,7 @@ import { isNil } from "lodash";
 import { getIO } from "../../libs/socket";
 import logger from "../../utils/logger";
 import Whatsapp from "../../models/Whatsapp";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import { resolveCompanySettings } from "../CompaniesSettings/EnsureCompanySettingsService";
 import CreateLogTicketService from "./CreateLogTicketService";
 import AppError from "../../errors/AppError";
 import UpdateTicketService from "./UpdateTicketService";
@@ -39,20 +39,22 @@ const FindOrCreateTicketService = async (
   // try {
   // let isCreated = false;
 
+  const companySettings = await resolveCompanySettings(companyId, settings);
+
   let openAsLGPD = false
-  if (settings.enableLGPD) { //adicionar lgpdMessage
+  if (companySettings.enableLGPD) { //adicionar lgpdMessage
 
     openAsLGPD = !isCampaign &&
       !isTransfered &&
-      settings.enableLGPD === "enabled" &&
-      settings.lgpdMessage !== "" &&
-      (settings.lgpdConsent === "enabled" ||
-        (settings.lgpdConsent === "disabled" && isNil(contact?.lgpdAcceptedAt)))
+      companySettings.enableLGPD === "enabled" &&
+      companySettings.lgpdMessage !== "" &&
+      (companySettings.lgpdConsent === "enabled" ||
+        (companySettings.lgpdConsent === "disabled" && isNil(contact?.lgpdAcceptedAt)))
   }
 
   const io = getIO();
 
-  const DirectTicketsToWallets = settings.DirectTicketsToWallets;
+  const DirectTicketsToWallets = companySettings.DirectTicketsToWallets;
 
   const ticketWhere: any = {
     status: {
@@ -182,7 +184,7 @@ const FindOrCreateTicketService = async (
     let initialIsBot = false;
     let initialQueueId = null;
     
-    if (!isImported && !isNil(settings.enableLGPD) && openAsLGPD && !groupContact) {
+    if (!isImported && !isNil(companySettings.enableLGPD) && openAsLGPD && !groupContact) {
       initialStatus = "lgpd";
     } else if (groupContact && whatsapp.groupAsTicket !== "enabled") {
       initialStatus = "group";
@@ -212,7 +214,7 @@ const FindOrCreateTicketService = async (
       const wallet: any = contact;
       const wallets = await wallet.getWallets();
       if (wallets && wallets[0]?.id) {
-        ticketData.status = (!isImported && !isNil(settings.enableLGPD)
+        ticketData.status = (!isImported && !isNil(companySettings.enableLGPD)
           && openAsLGPD && !groupContact) ? //verifica se lgpd está habilitada e não é grupo e se tem a mensagem e link da política
           "lgpd" :  //abre como LGPD caso habilitado parâmetro
           (whatsapp.groupAsTicket === "enabled" || !groupContact) ? // se lgpd estiver desabilitado, verifica se é para tratar ticket como grupo ou se é contato normal
