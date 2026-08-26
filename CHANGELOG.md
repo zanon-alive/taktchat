@@ -16,7 +16,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 
 ### Alterado (refactor/chore)
 - Landing v2: print do hero cabe no viewport, CTAs extras do meio da página saíram, claim de uptime 99,9% só na v1, dependência `react-ga4` não usada removida (#30).
-- Frontend em produção: gzip nos estáticos do Nginx (`vendor.js` e demais JS/CSS).
+- Frontend em produção: gzip nos estáticos do Nginx (`vendor.js` e demais JS/CSS), inclusive `application/x-javascript`.
 ### Quebra de compatibilidade (BREAKING)
 - Visitante sem sessão em `/` passa a ir para `/landing` em vez de `/login` (#30).
 ---
