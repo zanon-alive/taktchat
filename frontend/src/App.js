@@ -30,6 +30,7 @@ import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
 import logger from "./utils/logger";
 import { resolvePublicAssetUrl } from "./utils/publicAssetUrl";
+import { isPublicMarketingPath } from "./utils/publicSitePaths";
 
 const queryClient = new QueryClient();
 
@@ -65,8 +66,8 @@ const App = () => {
     return pathname === '/docs' || pathname === '/docs_admin';
   };
 
-  // Não exibir prompt de instalação PWA na landing (página pública de vendas)
-  const isLandingRoute = () => window.location.pathname === '/landing';
+  // Não exibir prompt de instalação PWA nas páginas públicas de vendas/legais
+  const isLandingRoute = () => isPublicMarketingPath(window.location.pathname);
 
   const SESSION_DISMISS_KEY = "taktchat:pwaPromptDismissedSession";
   const DAILY_SNOOZE_KEY = "taktchat:pwaPromptSnoozeUntil";

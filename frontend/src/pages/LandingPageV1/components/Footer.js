@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Container, Typography, Box, Grid, Link } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import RevendedorDialog from "../../landing-shared/RevendedorDialog";
 
 const useStyles = makeStyles((theme) => ({
   footer: {
     backgroundColor: "#1a1a1a",
     color: "#ffffff",
     padding: theme.spacing(6, 0, 3),
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(8),
   },
   footerContent: {
     marginBottom: theme.spacing(4),
@@ -27,12 +26,6 @@ const useStyles = makeStyles((theme) => ({
     color: "rgba(255, 255, 255, 0.7)",
     textDecoration: "none",
     marginBottom: theme.spacing(1),
-    background: "none",
-    border: "none",
-    padding: 0,
-    cursor: "pointer",
-    font: "inherit",
-    textAlign: "left",
     "&:hover": {
       color: "#ffffff",
       textDecoration: "underline",
@@ -49,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
 const Footer = () => {
   const classes = useStyles();
   const currentYear = new Date().getFullYear();
-  const [resellerOpen, setResellerOpen] = useState(false);
 
   return (
     <Box component="footer" className={classes.footer}>
@@ -61,7 +53,7 @@ const Footer = () => {
                 TaktChat
               </Typography>
               <Typography variant="body2" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                Plataforma de atendimento e campanhas via WhatsApp.
+                Plataforma completa de atendimento e campanhas via WhatsApp. Transforme sua comunicação com automação inteligente.
               </Typography>
             </Box>
           </Grid>
@@ -70,35 +62,33 @@ const Footer = () => {
               <Typography variant="h6" className={classes.footerTitle}>
                 Produto
               </Typography>
-              <Link href="#features" className={classes.footerLink}>
+              <Link component={RouterLink} to="/landing/v1#features" className={classes.footerLink}>
                 Funcionalidades
               </Link>
-              <Link href="#planos" className={classes.footerLink}>
+              <Link component={RouterLink} to="/landing/v1#planos" className={classes.footerLink}>
                 Planos
               </Link>
-              <Link href="#faq" className={classes.footerLink}>
-                FAQ
+              <Link component={RouterLink} to="/docs" className={classes.footerLink}>
+                Documentação
+              </Link>
+              <Link component={RouterLink} to="/login" className={classes.footerLink}>
+                Login
               </Link>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <Box className={classes.footerSection}>
               <Typography variant="h6" className={classes.footerTitle}>
-                Acesso
+                Empresa
               </Typography>
-              <Link component={RouterLink} to="/login" className={classes.footerLink}>
-                Login
+              <Link href="#sobre" className={classes.footerLink}>
+                Sobre Nós
               </Link>
-              <Link component={RouterLink} to="/docs" className={classes.footerLink}>
-                Documentação
+              <Link href="#contato" className={classes.footerLink}>
+                Contato
               </Link>
-              <Link
-                component="button"
-                type="button"
-                className={classes.footerLink}
-                onClick={() => setResellerOpen(true)}
-              >
-                Seja revendedor
+              <Link href="#suporte" className={classes.footerLink}>
+                Suporte
               </Link>
             </Box>
           </Grid>
@@ -119,9 +109,9 @@ const Footer = () => {
           </Typography>
         </Box>
       </Container>
-      <RevendedorDialog open={resellerOpen} onClose={() => setResellerOpen(false)} />
     </Box>
   );
 };
 
 export default Footer;
+

@@ -47,7 +47,7 @@ const CookieBanner = () => {
             <Typography variant="body2" className={classes.text}>
                 Nós usamos cookies para melhorar sua experiência de navegação e analisar o tráfego do site.
                 Ao clicar em "Aceitar todos", você concorda com o uso de cookies conforme nossa{" "}
-                <Link href="/termos" className={classes.link}>
+                <Link href="/lgpd" className={classes.link}>
                     Política de Privacidade
                 </Link>.
             </Typography>

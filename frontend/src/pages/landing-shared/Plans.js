@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Grid, Box, Card, CardContent, Button, Chip, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import { i18n } from "../../../translate/i18n";
+import { i18n } from "../../translate/i18n";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import StarIcon from "@mui/icons-material/Star";
@@ -187,7 +187,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Plans = ({ plans, loading }) => {
+const Plans = ({ plans, loading, ctaAnchorId = "lead-form" }) => {
   const classes = useStyles();
   const [viewMode, setViewMode] = useState("cards");
 
@@ -227,7 +227,7 @@ const Plans = ({ plans, loading }) => {
   };
 
   const scrollToForm = () => {
-    const formElement = document.getElementById("lead-form");
+    const formElement = document.getElementById(ctaAnchorId);
     if (formElement) {
       formElement.scrollIntoView({ behavior: "smooth" });
     }

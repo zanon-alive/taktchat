@@ -177,7 +177,7 @@ const features = [
   },
 ];
 
-const Features = () => {
+const Features = ({ ctaAnchorId = "lead-form" }) => {
   const classes = useStyles();
 
   return (
@@ -251,7 +251,7 @@ const Features = () => {
           color="primary"
           size="large"
           onClick={() => {
-            const formElement = document.getElementById("lead-form");
+            const formElement = document.getElementById(ctaAnchorId);
             if (formElement) {
               formElement.scrollIntoView({ behavior: "smooth" });
             }

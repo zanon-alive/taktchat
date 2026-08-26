@@ -17,9 +17,16 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 
 const menuItems = [
+  { label: "Início", id: "inicio" },
+  { label: "Proposta de Valor", id: "proposta-valor" },
+  { label: "Problemas", id: "problemas" },
   { label: "Funcionalidades", id: "features" },
   { label: "Planos", id: "planos" },
+  { label: "Revendedor", id: "revendedor" },
+  { label: "Depoimentos", id: "depoimentos" },
   { label: "FAQ", id: "faq" },
+  { label: "Cadastro", id: "lead-form" },
+  { label: "Contato", id: "contato" },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -39,32 +46,21 @@ const useStyles = makeStyles((theme) => ({
   },
   navButtons: {
     display: "flex",
-    alignItems: "center",
     gap: theme.spacing(0.5),
+    flexWrap: "wrap",
   },
   navButton: {
     color: "#ffffff",
     textTransform: "none",
     fontWeight: 600,
-    fontSize: "0.95rem",
+    fontSize: "0.9rem",
     "&:hover": {
       backgroundColor: "rgba(255, 255, 255, 0.1)",
-    },
-  },
-  ctaButton: {
-    marginLeft: theme.spacing(1),
-    textTransform: "none",
-    fontWeight: 700,
-    backgroundColor: "#25D366",
-    color: "#ffffff",
-    "&:hover": {
-      backgroundColor: "#20BA5A",
     },
   },
   logo: {
     height: 36,
     marginRight: theme.spacing(2),
-    cursor: "pointer",
     [theme.breakpoints.down("sm")]: {
       height: 32,
     },
@@ -101,7 +97,7 @@ const scrollToSection = (id) => {
   }
 };
 
-const LandingNav = ({ ctaTargetId = "lead-form" }) => {
+const LandingNav = () => {
   const classes = useStyles();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -134,6 +130,7 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
               alt="TaktChat"
               className={classes.logo}
               onClick={() => handleNavClick("inicio")}
+              style={{ cursor: "pointer" }}
             />
           </Box>
 
@@ -156,13 +153,6 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
                   {item.label}
                 </Button>
               ))}
-              <Button
-                variant="contained"
-                className={classes.ctaButton}
-                onClick={() => handleNavClick(ctaTargetId)}
-              >
-                Começar
-              </Button>
             </Box>
           )}
         </Toolbar>
@@ -195,13 +185,6 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
               <ListItemText primary={item.label} />
             </ListItem>
           ))}
-          <ListItem
-            button
-            className={classes.drawerItem}
-            onClick={() => handleNavClick(ctaTargetId)}
-          >
-            <ListItemText primary="Começar" />
-          </ListItem>
         </List>
       </Drawer>
 
