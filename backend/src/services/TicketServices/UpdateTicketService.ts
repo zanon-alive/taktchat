@@ -16,7 +16,7 @@ import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import { verifyMessageFace } from "../FacebookServices/facebookMessageListener";
 import ShowUserService from "../UserServices/ShowUserService";
 import User from "../../models/User";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import CreateLogTicketService from "./CreateLogTicketService";
 import TicketTag from "../../models/TicketTag";
 import Tag from "../../models/Tag";
@@ -91,11 +91,7 @@ const UpdateTicketService = async ({
 
     const io = getIO();
 
-    const settings = await CompaniesSettings.findOne({
-      where: {
-        companyId: companyId
-      }
-    });
+    const { settings } = await EnsureCompanySettingsService({ companyId });
 
     let ticket = await ShowTicketService(ticketId, companyId);
 

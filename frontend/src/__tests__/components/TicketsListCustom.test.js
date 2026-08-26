@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TicketsListCustom from '../../components/TicketsListCustom';
 import { AuthContext } from '../../context/Auth/AuthContext';
@@ -36,11 +37,13 @@ const renderWithProviders = (component, options = {}) => {
   };
 
   return render(
-    <ThemeProvider theme={theme}>
-      <AuthContext.Provider value={mockAuthContext}>
-        {component}
-      </AuthContext.Provider>
-    </ThemeProvider>
+    <MemoryRouter>
+      <ThemeProvider theme={theme}>
+        <AuthContext.Provider value={mockAuthContext}>
+          {component}
+        </AuthContext.Provider>
+      </ThemeProvider>
+    </MemoryRouter>
   );
 };
 

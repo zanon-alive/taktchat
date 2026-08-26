@@ -759,7 +759,9 @@ const messages = {
           resolverd: "Resueltos"
         },
         toasts: {
-          deleted: "El atendimiento que estabas fue eliminado."
+          deleted: "El atendimiento que estabas fue eliminado.",
+          settingsCreated: "Se aplicaron las configuraciones predeterminadas de la empresa. Revíselas en Configuración.",
+          openSettings: "Abrir configuración"
         },
         notification: {
           message: "Mensaje de"

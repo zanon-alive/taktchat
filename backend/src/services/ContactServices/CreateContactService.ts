@@ -1,6 +1,6 @@
 import AppError from "../../errors/AppError";
-import CompaniesSettings from "../../models/CompaniesSettings";
 import Contact from "../../models/Contact";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import ContactCustomField from "../../models/ContactCustomField";
 import logger from "../../utils/logger";
 import ContactWallet from "../../models/ContactWallet";
@@ -166,10 +166,7 @@ const CreateContactService = async ({
     }
   }
 
-  const settings = await CompaniesSettings.findOne({
-    where: { companyId }
-  });
-
+  const { settings } = await EnsureCompanySettingsService({ companyId });
   const { acceptAudioMessageContact } = settings;
 
   // Função auxiliar para converter strings vazias/whitespace em null

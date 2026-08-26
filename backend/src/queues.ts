@@ -33,7 +33,7 @@ import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import { addSeconds, differenceInSeconds } from "date-fns";
 import { GetWhatsapp } from "./helpers/GetWhatsapp";
 const CronJob = require('cron').CronJob;
-import CompaniesSettings from "./models/CompaniesSettings";
+import EnsureCompanySettingsService from "./services/CompaniesSettings/EnsureCompanySettingsService";
 import { verifyMediaMessage, verifyMessage } from "./services/WbotServices/wbotMessageListener";
 import FindOrCreateTicketService from "./services/TicketServices/FindOrCreateTicketService";
 import CreateLogTicketService from "./services/TicketServices/CreateLogTicketService";
@@ -1942,10 +1942,8 @@ async function handleRandomUser() {
                 const tempoPassadoB = moment().subtract(tempoRoteador, "minutes").utc().toDate();
                 const updatedAtV = new Date(ticket.updatedAt);
 
-                let settings = await CompaniesSettings.findOne({
-                  where: {
-                    companyId: ticket.companyId
-                  }
+                const { settings } = await EnsureCompanySettingsService({
+                  companyId: ticket.companyId
                 });
                 const sendGreetingMessageOneQueues = settings.sendGreetingMessageOneQueues === "enabled" || false;
 

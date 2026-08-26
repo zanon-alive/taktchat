@@ -22,7 +22,7 @@ import ListSettingsService from "../SettingServices/ListSettingsService";
 import { isNil, isNull, head } from "lodash";
 import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
 import { handleMessageIntegration, handleRating, verifyRating } from "../WbotServices/wbotMessageListener";
-import CompaniesSettings from "../../models/CompaniesSettings";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 import sendFacebookMessage from "./sendFacebookMessage";
 import { Mutex } from "async-mutex";
 import TicketTag from "../../models/TicketTag";
@@ -538,10 +538,7 @@ export const handleMessage = async (
         ]
       });
 
-      const settings = await CompaniesSettings.findOne({
-        where: { companyId }
-      }
-      )
+      const { settings } = await EnsureCompanySettingsService({ companyId });
 
       const isFirstMsg = await Ticket.findOne({
         where: {

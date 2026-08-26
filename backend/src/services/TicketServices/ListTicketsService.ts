@@ -16,6 +16,7 @@ import ContactTag from "../../models/ContactTag";
 import removeAccents from "remove-accents";
 
 import FindCompanySettingOneService from "../CompaniesSettings/FindCompanySettingOneService";
+import EnsureCompanySettingsService from "../CompaniesSettings/EnsureCompanySettingsService";
 
 interface Request {
   searchParam?: string;
@@ -50,6 +51,7 @@ interface Response {
   tickets: Ticket[];
   count: number;
   hasMore: boolean;
+  settingsCreated: boolean;
 }
 
 const ListTicketsService = async ({
@@ -78,8 +80,16 @@ const ListTicketsService = async ({
   const showTicketAllQueues = user.allHistoric === "enabled";
   const showTicketWithoutQueue = user.allTicket === "enable";
   const showGroups = user.allowGroup === true;
-  const showPendingNotification = await FindCompanySettingOneService({ companyId, column: "showNotificationPending" });
-  const showNotificationPendingValue = showPendingNotification[0].showNotificationPending;
+  const { created: settingsCreated } = await EnsureCompanySettingsService({
+    companyId
+  });
+  const showPendingNotification = await FindCompanySettingOneService({
+    companyId,
+    column: "showNotificationPending"
+  });
+  const showNotificationPendingValue = Boolean(
+    showPendingNotification?.[0]?.showNotificationPending
+  );
     let whereCondition: Filterable["where"];
 
   whereCondition = {
@@ -588,7 +598,8 @@ const ListTicketsService = async ({
   return {
     tickets,
     count,
-    hasMore
+    hasMore,
+    settingsCreated
   };
 };
 

@@ -782,6 +782,8 @@ const messages = {
         },
         toasts: {
           deleted: "Görüşmede olduğunuz ticket silindi.",
+          settingsCreated: "Şirketin varsayılan ayarları uygulandı. Ayarlar'dan gözden geçirin.",
+          openSettings: "Ayarları aç",
         },
         notification: {
           message: "Mesaj",
