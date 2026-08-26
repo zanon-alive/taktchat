@@ -6,6 +6,7 @@
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "^2.16.0",
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.17.1",
@@ -90,6 +91,7 @@
     "recharts": "^2.0.2",
     "socket.io-client": "^4.7.4",
     "styled-components": "^5.3.6",
+    "stylis": "^4.2.0",
     "use-debounce": "^7.0.0",
     "use-sound": "^2.0.1",
     "uuid": "^8.3.2",
