@@ -828,6 +828,8 @@ const messages = {
         },
         toasts: {
           deleted: "O atendimento que você estava foi deletado.",
+          settingsCreated: "Configurações padrão da empresa foram aplicadas. Revise em Configurações.",
+          openSettings: "Abrir configurações",
         },
         outcome: {
           title: "Como encerrar?",

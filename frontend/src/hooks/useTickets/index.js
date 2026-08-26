@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
 import { format, sub } from 'date-fns'
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const useTickets = ({
   searchParam,
@@ -83,6 +85,23 @@ const useTickets = ({
             setHasMore(data.hasMore);
             setCount(data.count);
             setLoading(false);
+            if (data.settingsCreated) {
+              toast.warning(
+                <span>
+                  {i18n.t("tickets.toasts.settingsCreated")}{" "}
+                  <strong style={{ textDecoration: "underline" }}>
+                    {i18n.t("tickets.toasts.openSettings")}
+                  </strong>
+                </span>,
+                {
+                  toastId: "company-settings-created",
+                  autoClose: 8000,
+                  onClick: () => {
+                    window.location.assign("/settings");
+                  },
+                }
+              );
+            }
           } catch (err) {
             if (isMountedRef.current) {
               setLoading(false);

@@ -781,6 +781,8 @@ const messages = {
 		  },
 		  toasts: {
 			deleted: "The service you were in was deleted.",
+			settingsCreated: "Default company settings were applied. Review them in Settings.",
+			openSettings: "Open settings",
 		  },
 		  notification: {
 			message: "Message from",
