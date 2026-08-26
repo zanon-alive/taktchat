@@ -19,6 +19,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 const menuItems = [
   { label: "Funcionalidades", id: "features" },
+  { label: "Tour", to: "/tour" },
   { label: "Planos", id: "planos" },
   { label: "FAQ", id: "faq" },
 ];
@@ -159,15 +160,26 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
             </IconButton>
           ) : (
             <Box className={classes.navButtons}>
-              {menuItems.map((item) => (
-                <Button
-                  key={item.id}
-                  className={classes.navButton}
-                  onClick={() => handleNavClick(item.id)}
-                >
-                  {item.label}
-                </Button>
-              ))}
+              {menuItems.map((item) =>
+                item.to ? (
+                  <Button
+                    key={item.to}
+                    className={classes.navButton}
+                    component={RouterLink}
+                    to={item.to}
+                  >
+                    {item.label}
+                  </Button>
+                ) : (
+                  <Button
+                    key={item.id}
+                    className={classes.navButton}
+                    onClick={() => handleNavClick(item.id)}
+                  >
+                    {item.label}
+                  </Button>
+                )
+              )}
               <Button
                 variant="outlined"
                 className={classes.loginButton}
@@ -205,16 +217,29 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
           </IconButton>
         </Box>
         <List>
-          {menuItems.map((item) => (
-            <ListItem
-              key={item.id}
-              button
-              className={classes.drawerItem}
-              onClick={() => handleNavClick(item.id)}
-            >
-              <ListItemText primary={item.label} />
-            </ListItem>
-          ))}
+          {menuItems.map((item) =>
+            item.to ? (
+              <ListItem
+                key={item.to}
+                button
+                className={classes.drawerItem}
+                component={RouterLink}
+                to={item.to}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemText primary={item.label} />
+              </ListItem>
+            ) : (
+              <ListItem
+                key={item.id}
+                button
+                className={classes.drawerItem}
+                onClick={() => handleNavClick(item.id)}
+              >
+                <ListItemText primary={item.label} />
+              </ListItem>
+            )
+          )}
           <ListItem
             button
             className={classes.drawerItem}

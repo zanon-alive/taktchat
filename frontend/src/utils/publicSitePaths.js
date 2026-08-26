@@ -1,9 +1,19 @@
+export function normalizePublicPath(pathname) {
+  if (!pathname) return "";
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.replace(/\/+$/, "");
+  }
+  return pathname;
+}
+
 export function isPublicMarketingPath(pathname) {
-  if (!pathname) return false;
+  const path = normalizePublicPath(pathname);
   return (
-    pathname === "/landing" ||
-    pathname === "/landing/v1" ||
-    pathname === "/lgpd"
+    path === "/landing" ||
+    path === "/landing/v1" ||
+    path === "/lgpd" ||
+    path === "/tour" ||
+    path === "/p/tour"
   );
 }
 

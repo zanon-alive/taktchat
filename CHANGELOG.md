@@ -7,6 +7,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- Tour público em `/tour` (5 slides, ~1 min): pitch (problema + para quem), prints da landing, CTA **Falar com especialista**, links na vitrine v2. `/p/tour` redireciona para `/tour`.
 - Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, página `/lgpd` e redirect de visitante `/` → `/landing` (#30).
 - Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.

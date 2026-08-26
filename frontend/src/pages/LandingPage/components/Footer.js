@@ -73,6 +73,9 @@ const Footer = () => {
               <Link href="#features" className={classes.footerLink}>
                 Funcionalidades
               </Link>
+              <Link component={RouterLink} to="/tour" className={classes.footerLink}>
+                Tour do produto
+              </Link>
               <Link href="#planos" className={classes.footerLink}>
                 Planos
               </Link>

@@ -136,6 +136,25 @@ const LandingPage = () => {
     loadPlans();
   }, []);
 
+  useEffect(() => {
+    const id = window.location.hash.replace(/^#/, "");
+    if (!id) {
+      return undefined;
+    }
+    let tries = 0;
+    const timer = setInterval(() => {
+      const el = document.getElementById(id);
+      tries += 1;
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        clearInterval(timer);
+      } else if (tries > 30) {
+        clearInterval(timer);
+      }
+    }, 100);
+    return () => clearInterval(timer);
+  }, []);
+
   const softwareApplicationSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",

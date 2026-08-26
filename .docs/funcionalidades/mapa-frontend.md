@@ -6,8 +6,10 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 
 | Rota | Finalidade |
 |---|---|
-| `/landing` | Vitrine comercial (v2): funil de conversão, print do produto no hero, lead e cadastro direto se habilitado. CTAs só na nav, hero, lead, FAB e rodapé. Sem números inventados nem `react-ga4`. |
+| `/landing` | Vitrine comercial (v2): funil de conversão, print do produto no hero, lead e cadastro direto se habilitado. CTAs na nav, hero (inclui **Ver em 1 min**), lead, FAB e rodapé. Sem números inventados nem `react-ga4`. |
 | `/landing/v1` | Arquivo da landing anterior (`noindex`); copy antiga (prova social / uptime) pode permanecer |
+| `/tour` | Tour público de 5 slides (`noindex`): pitch do problema e para quem, prints de `/landing/*.png`, CTA final falar com especialista. Nginx injeta og:* para preview no WhatsApp. |
+| `/p/tour` | Redirect para `/tour` (query `s` preservada) |
 | `/lgpd` | Texto genérico de privacidade/cookies/LGPD (em revisão jurídica) |
 | `/login` | Autenticação |
 | `/signup` | Cadastro público |
@@ -15,7 +17,7 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 | `/docs` | Documentação de onboarding |
 | `/docs_admin` | Documentação administrativa |
 
-Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing` e `/lgpd` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine.
+Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing`, `/lgpd` e `/tour` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine e o tour. `/apresentacoes` continua privado.
 
 ## Rotas privadas por área
 
