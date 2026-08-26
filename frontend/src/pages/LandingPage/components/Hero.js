@@ -1,32 +1,33 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
-import { Container, Typography, Button, Box, Grid } from "@mui/material";
+import { Container, Button, Box, Grid } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   hero: {
-    minHeight: "88vh",
+    minHeight: "auto",
     display: "flex",
     alignItems: "center",
     background: "linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%)",
     color: "#ffffff",
     position: "relative",
     overflow: "hidden",
+    padding: theme.spacing(5, 0, 6),
     [theme.breakpoints.down("sm")]: {
-      minHeight: "auto",
-      paddingTop: theme.spacing(6),
-      paddingBottom: theme.spacing(6),
+      paddingTop: theme.spacing(4),
+      paddingBottom: theme.spacing(4),
     },
   },
   heroContent: {
     position: "relative",
     zIndex: 2,
-    padding: theme.spacing(4, 0),
+    padding: theme.spacing(2, 0),
   },
   title: {
+    margin: 0,
     fontWeight: 800,
     marginBottom: theme.spacing(3),
-    fontSize: "3.25rem",
+    fontSize: "2.75rem",
     lineHeight: 1.15,
     color: "#ffffff",
     [theme.breakpoints.down("md")]: {
@@ -38,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   subtitle: {
+    margin: 0,
     fontSize: "1.35rem",
     marginBottom: theme.spacing(4),
     opacity: 0.95,
@@ -73,17 +75,17 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "0 20px 50px rgba(0,0,0,0.35)",
     border: "1px solid rgba(255,255,255,0.2)",
     backgroundColor: "#0f172a",
-    maxHeight: "68vh",
+    lineHeight: 0,
   },
   screenshot: {
     display: "block",
     width: "100%",
     height: "auto",
-    maxHeight: "68vh",
-    objectFit: "cover",
-    objectPosition: "top left",
+    objectFit: "contain",
+    objectPosition: "top center",
   },
   caption: {
+    margin: 0,
     marginTop: theme.spacing(1.5),
     fontSize: "0.9rem",
     opacity: 0.85,
@@ -110,14 +112,14 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
   return (
     <Box className={classes.hero} id="inicio">
       <Container className={classes.heroContent}>
-        <Grid container spacing={6} alignItems="center">
+        <Grid container spacing={6} alignItems="flex-start">
           <Grid item xs={12} md={6}>
-            <Typography variant="h1" className={classes.title}>
+            <h1 className={classes.title}>
               Atendimento no WhatsApp, no mesmo lugar
-            </Typography>
-            <Typography variant="h2" className={classes.subtitle}>
+            </h1>
+            <p className={classes.subtitle}>
               Centralize conversas, organize a equipe e automatize o que se repetir — com a tela real do produto, não um mockup genérico.
-            </Typography>
+            </p>
             <Box className={classes.ctaContainer}>
               <Button
                 className={classes.ctaButton}
@@ -138,9 +140,9 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
                 className={classes.screenshot}
               />
             </Box>
-            <Typography className={classes.caption}>
+            <p className={classes.caption}>
               Print do produto: chat e tickets na mesma tela
-            </Typography>
+            </p>
           </Grid>
         </Grid>
       </Container>

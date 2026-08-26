@@ -13,7 +13,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Warnings CSS do Firefox de `-ms-input-placeholder` (seletores IE do Emotion/MUI).
 
 ### Alterado (refactor/chore)
-
+- Landing v2: print do hero cabe no viewport, CTAs extras do meio da página saíram, claim de uptime 99,9% só na v1, dependência `react-ga4` não usada removida.
 ### Quebra de compatibilidade (BREAKING)
 - Visitante sem sessão em `/` passa a ir para `/landing` em vez de `/login`.
 ---

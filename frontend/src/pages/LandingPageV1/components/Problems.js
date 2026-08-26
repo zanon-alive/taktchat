@@ -113,7 +113,7 @@ const problems = [
   },
 ];
 
-const Problems = () => {
+const Problems = ({ showCta = true }) => {
   const classes = useStyles();
 
   const scrollToForm = () => {
@@ -155,18 +155,20 @@ const Problems = () => {
           );
         })}
       </Grid>
-      <Box className={`${classes.ctaContainer} visible`}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          className={classes.ctaButton}
-          endIcon={<ArrowForwardIcon />}
-          onClick={scrollToForm}
-        >
-          Veja como resolver todos esses problemas
-        </Button>
-      </Box>
+      {showCta && (
+        <Box className={`${classes.ctaContainer} visible`}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            className={classes.ctaButton}
+            endIcon={<ArrowForwardIcon />}
+            onClick={scrollToForm}
+          >
+            Veja como resolver todos esses problemas
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

@@ -289,25 +289,25 @@ const LandingPage = () => {
 
           <Box id="proposta-valor" className={classes.section}>
             <Container>
-              <ValueProposition showSocialProof={false} />
+              <ValueProposition showSocialProof={false} showCta={false} />
             </Container>
           </Box>
 
           <Box id="problemas" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
-              <Problems />
+              <Problems showCta={false} />
             </Container>
           </Box>
 
           <Box id="features" className={classes.section}>
             <Container>
-              <Features ctaAnchorId={ctaTargetId} />
+              <Features ctaAnchorId={ctaTargetId} showCta={false} hideUptimeClaim />
             </Container>
           </Box>
 
           <Box id="planos" className={`${classes.section} ${classes.sectionDark}`}>
             <Container>
-              <Plans plans={plans} loading={loadingPlans} ctaAnchorId={ctaTargetId} />
+              <Plans plans={plans} loading={loadingPlans} ctaAnchorId={ctaTargetId} showPlanCta={false} />
             </Container>
           </Box>
 

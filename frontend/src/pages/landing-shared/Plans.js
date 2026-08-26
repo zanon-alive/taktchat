@@ -187,7 +187,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Plans = ({ plans, loading, ctaAnchorId = "lead-form" }) => {
+const Plans = ({ plans, loading, ctaAnchorId = "lead-form", showPlanCta = true }) => {
   const classes = useStyles();
   const [viewMode, setViewMode] = useState("cards");
 
@@ -381,6 +381,7 @@ const Plans = ({ plans, loading, ctaAnchorId = "lead-form" }) => {
                   })}
                 </TableRow>
               ))}
+              {showPlanCta && (
               <TableRow>
                 <TableCell className={classes.tableCell} component="th" scope="row">
                   Ação
@@ -405,6 +406,7 @@ const Plans = ({ plans, loading, ctaAnchorId = "lead-form" }) => {
                   );
                 })}
               </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -493,15 +495,17 @@ const Plans = ({ plans, loading, ctaAnchorId = "lead-form" }) => {
                         />
                       </Box>
                     )}
-                    <Button
-                      variant={isFeatured ? "contained" : "outlined"}
-                      color="primary"
-                      fullWidth
-                      className={classes.planButton}
-                      onClick={scrollToForm}
-                    >
-                      {isFeatured ? "Assinar Agora" : "Escolher este Plano"}
-                    </Button>
+                    {showPlanCta && (
+                      <Button
+                        variant={isFeatured ? "contained" : "outlined"}
+                        color="primary"
+                        fullWidth
+                        className={classes.planButton}
+                        onClick={scrollToForm}
+                      >
+                        {isFeatured ? "Assinar Agora" : "Escolher este Plano"}
+                      </Button>
+                    )}
                   </Box>
                 </CardContent>
               </Card>
