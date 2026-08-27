@@ -14,6 +14,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
 ### Corrigido (fix)
+- Ícone e splash do app Android usam o emblema Taktchat (mesmo da PWA), não o placeholder do Capacitor.
 - Visitante em `/` voltava para `/login`: o `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30. No app Android (Capacitor) a raiz sem sessão continua em `/login`.
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).
 - Warnings CSS do Firefox de `-ms-input-placeholder` (seletores IE do Emotion/MUI).
