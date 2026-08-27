@@ -1,9 +1,18 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `fix/landing-fab-pendencias`
+**Branch git:** `feat/landing-fab-melhorias`
+**Demanda anterior:** landing / tour / FAB — encerrada (#40, #41)
+**Demanda atual:** 5 melhorias pós-produção (em implementação)
 
 ## Estado
-- Branch `fix/landing-fab-pendencias`: FAB empilhado; hero sem WhatsApp no tablet/celular; FAB some no login com aviso de API.
+- Número da vitrine via setting `supportWhatsAppNumber`.
+- Migration liga `enableSiteChatWidget` na empresa 1.
+- `widget.js` com `data-api-url` e `prefers-reduced-motion`.
+- Teste frio do FAB com diálogo de API no mount.
 
 ## Não fazer
-- Deploy pelo agente. Merge só com OK do revisor.
+- Deploy pelo agente.
+- Não commitar `.kiro/`, `.telecontrol/`, rules Cursor soltas.
+
+## MCP
+- Telecontrol desconectado; sync queue local.

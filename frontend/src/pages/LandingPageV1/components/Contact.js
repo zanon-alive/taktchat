@@ -5,7 +5,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { getNumberSupport } from "../../../config";
+import useSupportWhatsApp from "../../landing-shared/useSupportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {
@@ -67,13 +67,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Contact = () => {
   const classes = useStyles();
-  const supportNumber = getNumberSupport() || "5514996870843";
-
-  const formatPhoneForWhatsApp = (phone) => {
-    // Remove caracteres não numéricos
-    const cleaned = phone.replace(/\D/g, "");
-    return cleaned;
-  };
+  const { number: supportNumber, url: supportWhatsAppUrl } = useSupportWhatsApp();
 
   const formatPhoneDisplay = (phone) => {
     // Formata para exibição: +55 (14) 99687-0843
@@ -89,7 +83,7 @@ const Contact = () => {
     return phone;
   };
 
-  const whatsappLink = `https://wa.me/${formatPhoneForWhatsApp(supportNumber)}`;
+  const whatsappLink = supportWhatsAppUrl;
 
   const contactInfo = [
     {
@@ -101,7 +95,7 @@ const Contact = () => {
     {
       icon: <PhoneIcon />,
       title: "WhatsApp",
-      info: formatPhoneDisplay(supportNumber),
+      info: supportNumber ? formatPhoneDisplay(supportNumber) : "Em configuração",
       link: whatsappLink,
     },
     {

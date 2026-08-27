@@ -74,6 +74,7 @@ const SiteChatWidget = () => {
     if (apiUrl) {
       window.TaktChatWidget = window.TaktChatWidget || {};
       window.TaktChatWidget.apiUrl = apiUrl;
+      script.setAttribute("data-api-url", apiUrl);
     }
 
     script.onload = () => {

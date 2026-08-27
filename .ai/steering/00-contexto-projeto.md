@@ -88,6 +88,7 @@ Lista completa: `.docs/configuracao/variaveis-ambiente.md`. **Nunca colar secret
 | `JWT_SECRET` / `JWT_REFRESH_SECRET` | Tokens | string local qualquer |
 | `REACT_APP_BACKEND_URL` | API no frontend | `http://localhost:8080` |
 | `REACT_APP_SOCKET_URL` | Socket no frontend | `http://localhost:8080` |
+| `REACT_APP_NUMBER_SUPPORT` | WhatsApp opcional no painel (Connections) | |
 
 ## Servidor de Producao
 

@@ -4,7 +4,7 @@ import { Container, Typography, Box, Button, Alert } from "@mui/material";
 import { Helmet } from "react-helmet";
 import { Link as RouterLink } from "react-router-dom";
 import CookieBanner from "../landing-shared/CookieBanner";
-import { getNumberSupport } from "../../config";
+import useSupportWhatsApp from "../landing-shared/useSupportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,10 +46,12 @@ const useStyles = makeStyles((theme) => ({
 
 const LgpdPage = () => {
   const classes = useStyles();
-  const supportNumber = getNumberSupport() || "5514996870843";
-  const waLink = `https://wa.me/${supportNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
-    "Olá! Gostaria de falar sobre privacidade e dados no TaktChat."
-  )}`;
+  const { number: supportNumber, url: supportWhatsAppUrl } = useSupportWhatsApp();
+  const waLink = supportWhatsAppUrl
+    ? `https://wa.me/${supportNumber}?text=${encodeURIComponent(
+        "Olá! Gostaria de falar sobre privacidade e dados no TaktChat."
+      )}`
+    : null;
 
   return (
     <>
@@ -133,9 +135,13 @@ const LgpdPage = () => {
             </Typography>
             <Typography className={classes.paragraph}>
               WhatsApp:{" "}
+              {waLink ? (
               <a href={waLink} target="_blank" rel="noopener noreferrer">
                 {supportNumber}
               </a>
+              ) : (
+                "canal em configuração"
+              )}
             </Typography>
             <Typography className={classes.paragraph}>
               Site:{" "}

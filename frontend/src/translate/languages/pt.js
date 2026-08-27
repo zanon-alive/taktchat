@@ -1773,6 +1773,8 @@ const messages = {
             chatBotType: "Tipo do Bot",
             enableSiteChatWidget: "Widget Chat do Site na Landing",
             enableSiteChatWidgetHelp: "Quando habilitado, exibe o widget de chat do site na página inicial (/landing)",
+            supportWhatsAppNumber: "WhatsApp da vitrine",
+            supportWhatsAppNumberHelp: "Somente dígitos, com DDI. Usado no FAB, hero e tour. Sem número, os CTAs somem.",
             userRandom: "Escolher atendente aleatório",
             buttons: "Botões",
             acceptCallWhatsapp: "Informar que não aceita ligação no whatsapp?",

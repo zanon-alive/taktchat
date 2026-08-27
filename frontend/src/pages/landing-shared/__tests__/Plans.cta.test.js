@@ -4,6 +4,15 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StylesProvider, createGenerateClassName } from "@mui/styles";
 import Plans from "../Plans";
 
+jest.mock("../useSupportWhatsApp", () => ({
+  __esModule: true,
+  default: () => ({
+    number: "5514999990000",
+    ready: true,
+    url: "https://wa.me/5514999990000?text=teste",
+  }),
+}));
+
 const theme = createTheme();
 const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "plans" });
 

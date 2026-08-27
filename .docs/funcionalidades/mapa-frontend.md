@@ -11,13 +11,15 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 | `/tour` | Tour público de 5 slides (`noindex`): pitch do problema e para quem, prints de `/landing/*.png`, FAB WhatsApp e CTA final (WhatsApp + falar com especialista). Nginx injeta og:* para preview no WhatsApp. |
 | `/p/tour` | Redirect para `/tour` (query `s` preservada) |
 | `/lgpd` | Texto genérico de privacidade/cookies/LGPD (em revisão jurídica) |
-| `/login` | Autenticação. Link **Baixar app Android** aponta para `/downloads/taktchat.apk` (escondido dentro do app Capacitor). |
+| `/login` | Autenticação. Link **Baixar app Android** aponta para `/downloads/taktchat.apk` (escondido dentro do app Capacitor). FAB WhatsApp no canto; some enquanto o diálogo **Servidor de API indisponível** está aberto. |
 | `/signup` | Cadastro público |
 | `/signup-partner` | Cadastro vinculado a parceiro |
 | `/docs` | Documentação de onboarding |
 | `/docs_admin` | Documentação administrativa |
 
-Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. No app Android (Capacitor), a raiz sem sessão continua em `/login`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing`, `/lgpd` e `/tour` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine e o tour. `/apresentacoes` continua privado.
+Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. No app Android (Capacitor), a raiz sem sessão continua em `/login`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing`, `/lgpd`, `/tour` e `/landing/v1` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine e o tour. O diálogo de API indisponível **não** cobre essas rotas de marketing (`shouldShowApiOfflineDialog`). `/apresentacoes` continua privado.
+
+O FAB WhatsApp da vitrine (`ChatWidget`) usa `position: fixed` no `document.body`. Empilha com o banner de cookies (sobe ~16px acima) e, se o chat do site estiver injetado (`#taktchat-widget-button`), fica abaixo dele via CSS vars `--taktchat-site-chat-bottom` / `--taktchat-site-chat-panel-bottom`. Número: setting pública `supportWhatsAppNumber` (só dígitos). Sem número, FAB e CTAs não renderizam. Mensagem de interesse sem formulário.
 
 ## Rotas privadas por área
 

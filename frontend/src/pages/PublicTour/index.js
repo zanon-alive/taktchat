@@ -7,7 +7,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import ChatWidget from "../landing-shared/ChatWidget";
-import { getSupportWhatsAppUrl } from "../landing-shared/supportWhatsApp";
+import useSupportWhatsApp from "../landing-shared/useSupportWhatsApp";
 import {
   LANDING_FAQ_PATH,
   LANDING_PATH,
@@ -268,6 +268,7 @@ const PublicTour = () => {
   const classes = useStyles();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { url: supportWhatsAppUrl } = useSupportWhatsApp();
   const history = useHistory();
   const location = useLocation();
   const total = tourSlides.length;
@@ -435,16 +436,18 @@ const PublicTour = () => {
                 ) : null}
                 {slide.ctaTo ? (
                   <Box className={classes.ctaRow}>
+                    {supportWhatsAppUrl ? (
                     <Button
                       className={classes.ctaButton}
                       component="a"
-                      href={getSupportWhatsAppUrl()}
+                      href={supportWhatsAppUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       startIcon={<WhatsAppIcon />}
                     >
                       Falar no WhatsApp
                     </Button>
+                    ) : null}
                     <Button
                       className={classes.secondaryCta}
                       variant="outlined"

@@ -3,8 +3,9 @@ import { createPortal } from "react-dom";
 import { makeStyles } from "@mui/styles";
 import { Fab, Tooltip } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { getSupportWhatsAppUrl } from "./supportWhatsApp";
+import { fabBottomCss } from "./cornerFabStack";
 import useCornerFabStack from "./useCornerFabStack";
+import useSupportWhatsApp from "./useSupportWhatsApp";
 
 const useStyles = makeStyles(() => ({
     icon: {
@@ -49,8 +50,9 @@ export const supportWhatsAppFabSx = {
 const ChatWidget = ({ className, sx, minBottom }) => {
     const classes = useStyles();
     const { whatsappBottom, apiDialogOpen } = useCornerFabStack({ minBottom });
+    const { url, ready } = useSupportWhatsApp();
 
-    if (typeof document === "undefined" || apiDialogOpen) {
+    if (typeof document === "undefined" || apiDialogOpen || !ready || !url) {
         return null;
     }
 
@@ -59,7 +61,7 @@ const ChatWidget = ({ className, sx, minBottom }) => {
             <Fab
                 className={`${classes.fab}${className ? ` ${className}` : ""}`}
                 component="a"
-                href={getSupportWhatsAppUrl()}
+                href={url}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Falar no WhatsApp"
@@ -67,7 +69,7 @@ const ChatWidget = ({ className, sx, minBottom }) => {
                 sx={{
                     "&&": {
                         ...supportWhatsAppFabSx,
-                        bottom: `max(${whatsappBottom}px, env(safe-area-inset-bottom, 0px))`,
+                        bottom: fabBottomCss(whatsappBottom),
                         ...sx,
                     },
                 }}

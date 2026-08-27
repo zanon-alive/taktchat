@@ -2,8 +2,20 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StylesProvider, createGenerateClassName } from "@mui/styles";
-import ChatWidget from "../ChatWidget";
 import { API_OFFLINE_DIALOG_TITLE_ID } from "../../../utils/publicSitePaths";
+
+jest.mock("../useSupportWhatsApp", () => ({
+  __esModule: true,
+  default: () => ({
+    number: "5514999990000",
+    ready: true,
+    url: `https://wa.me/5514999990000?text=${encodeURIComponent(
+      "Olá! Vi o TaktChat e quero conhecer. Podem me ajudar?"
+    )}`,
+  }),
+}));
+
+import ChatWidget from "../ChatWidget";
 
 const theme = createTheme();
 const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "wa" });
@@ -72,6 +84,17 @@ describe("ChatWidget", () => {
         "84px"
       );
     });
+  });
+
+  it("não mostra o FAB se o aviso de API já está aberto no carregamento", () => {
+    const title = document.createElement("h2");
+    title.id = API_OFFLINE_DIALOG_TITLE_ID;
+    title.textContent = "Servidor de API indisponível";
+    document.body.appendChild(title);
+
+    renderFab();
+
+    expect(screen.queryByRole("link", { name: "Falar no WhatsApp" })).not.toBeInTheDocument();
   });
 
   it("esconde o FAB enquanto o aviso de API indisponível está aberto", async () => {

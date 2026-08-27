@@ -68,8 +68,9 @@ A vitrine pública está em `/landing` (`https://taktchat.com.br/landing`):
 - **Entrada:** visitante sem login que abre `/` vai para `/landing`; quem já entrou segue no Dashboard. No app Android (Capacitor) a raiz sem sessão abre `/login`.
 - **Formulários:** cadastro direto (quando a API `direct-signup` está ligada) e lead; revendedor abre modal no rodapé
 - **Legal:** `/lgpd` (texto genérico, em revisão); cookie e rodapé apontam para essa rota
-- **Widgets:** FAB WhatsApp e, se habilitado nas configurações, Chat do Site
+- **Widgets:** FAB WhatsApp e, se habilitado nas settings (`enableSiteChatWidget`), Chat do Site. Número da vitrine: setting pública `supportWhatsAppNumber` (Configurações, super). Sem número, os CTAs somem.
 - **SEO:** canonical em `/landing`; sem prova social inventada (depoimentos/nota); sem Google Analytics até existir ID real (`react-ga4` não está no frontend)
+- **PRs:** #40 (menu, tour, CTA WhatsApp, FAB fixo) e #41 (empilhamento cookies/chat, hero compacto, FAB some no aviso de API). Em produção em 2026-08-27.
 
 > Detalhes: `.docs/funcionalidades/mapa-frontend.md` e `.docs/pendencias/termos-privacidade-lgpd.md`.
 

@@ -1,29 +1,42 @@
 # Landing, widget e canais de entrada
 
-## Landing `/landing`
+## Landing `/landing` (v2)
 
-Página pública (título: *Revolucione seu Atendimento no WhatsApp*). Seções vistas nesta versão:
+Página pública de conversão (título: *Atendimento no WhatsApp, no mesmo lugar*). Funil:
 
-- Prova social e pilares (estabilidade, omnichannel, campanhas, dados)
-- Problemas que resolve (desorganização, automação, risco de ban, métricas, campanhas, multi-atendente)
-- Funcionalidades (tickets, dual channel, IA, relatórios, APIs)
-- Planos **Básico R$ 99** / **Premium R$ 299** / **Enterprise R$ 799** (valores da landing, não necessariamente iguais ao banco)
-- Convite a revendedor
-- FAQ (celular conectado, número atual, fidelidade, limite de usuários, suporte)
+- Hero com print real do produto
+- Galeria (tickets, kanban, fluxos)
+- Proposta, funcionalidades, planos (valores vêm da API; não inventar)
+- Cadastro direto se habilitado + lead
+- FAQ
 
-Overlay *Servidor de API indisponível* aparece se o health do backend falhar no carregamento — nesta sessão o health em `localhost:8080/health` respondeu ok depois que o backend subiu.
+**CTAs:** nav **Começar**; no desktop o hero tem **Falar no WhatsApp** + **Ver em 1 min** + **Começar agora**. No celular/tablet o WhatsApp do hero some (fica o FAB). FAB WhatsApp no canto inferior direito, também em `/tour` e `/login`.
+
+O FAB abre `wa.me` com mensagem de interesse, sem formulário. Número: setting pública `supportWhatsAppNumber` (Configurações). Empilha acima do banner de cookies e abaixo do chat do site, se os dois existirem.
+
+O diálogo **Servidor de API indisponível** não cobre `/landing`, `/landing/v1`, `/tour` nem `/lgpd`.
+
+## Tour `/tour`
+
+Cinco slides, sem login. **Voltar** e logo levam a `/landing`. Último slide: WhatsApp, falar com especialista e ir para a landing. `/p/tour` redireciona para `/tour`.
+
+## Landing arquivada `/landing/v1`
+
+Copy antiga (prova social / uptime) pode permanecer. `noindex`. Usa o mesmo FAB compartilhado.
 
 ## Login `/login`
 
-Marca TaktChat, *Conectando pessoas, acelerando negócios*, e-mail, senha, lembrar, esqueci senha, atalho de documentação.
+Marca TaktChat, e-mail, senha, lembrar, esqueci senha. FAB WhatsApp visível; some enquanto o aviso de API está aberto.
 
 ## Widget e canais
 
 Configuração em **Settings** (admin): canais de entrada, `useSiteChat`, snippet do `widget.js` e token por empresa. Cadastro público `/signup` e `/signup-partner`.
 
+`widget.js` respeita `--taktchat-site-chat-bottom` para não cobrir o FAB da vitrine.
+
 ## Status
 
-Landing e login: **exercitados**. Widget/API: **implementados**, mas o embed em site externo não foi exercitado.
+Landing, tour e FAB: **exercitados em produção** (`taktchat.com.br`, 2026-08-27, PRs #40 e #41). Chat do site: migration liga `enableSiteChatWidget` na empresa 1; o script passa `data-api-url`. `widget.js` respeita `prefers-reduced-motion`.
 
 ## Limitação
 
