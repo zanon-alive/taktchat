@@ -2,7 +2,7 @@
 
 Índice funcional v1.8. Cada módulo informa capacidades implementadas, condicionais, stubs e órfãos. A revisão descreve código/ambiente local e não confirma deploy em produção.
 
-**Ambiente da validação:** local, atualizado em 2026-08-25. Filas dependem de Redis; RAG depende de `pgvector`.
+**Ambiente da validação:** local, atualizado em 2026-08-25. Filas dependem de Redis; RAG depende de `pgvector`. Módulo 8 (landing/tour/FAB) também exercitado em produção em 2026-08-27.
 
 ## Módulos
 

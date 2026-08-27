@@ -41,6 +41,7 @@ Mapa funcional da revisão documental v1.8. Os estados abaixo descrevem o códig
 - Widget e API de site chat com `useSiteChat` e token por empresa.
 - Canais de entrada configuram fila, tag, conexão e mensagem inicial.
 - Lead, revendedor, site chat e WhatsApp alimentam `entrySource`.
+- Vitrine `/landing` e tour `/tour`: CTA **Falar no WhatsApp** (hero só no desktop; FAB em todas as larguras) abre `wa.me` com mensagem de interesse, sem formulário. O FAB empilha com cookies e com o botão do chat do site.
 - Limitação: o fluxo público de Lead escolhe a primeira empresa quando não há seleção explícita; não prometer roteamento público multiempresa.
 
 ## Whitelabel, licenças e cobrança

@@ -13,18 +13,18 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, página `/lgpd` e redirect de visitante `/` → `/landing` (#30).
 - Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
-- CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário.
+- CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário (#40).
 ### Corrigido (fix)
-- Menu da landing visível no topo (links brancos no header azul; o tema `primary` escondia os itens até o scroll).
-- Tour público (`/tour`) volta para `/landing`: botão **Voltar**, logo e avançar no último slide.
+- Menu da landing visível no topo (links brancos no header azul; o tema `primary` escondia os itens até o scroll) (#40).
+- Tour público (`/tour`) volta para `/landing`: botão **Voltar**, logo e avançar no último slide (#40).
 - Modal de API indisponível não cobre mais landing, tour, LGPD nem `/landing/v1`.
 - Header do arquivo `/landing/v1` com o mesmo contraste branco; drawer mobile da landing com texto branco.
 - Atalhos no tour: **Planos**, **FAQ** e tecla Esc para a landing.
 - Tour no mobile: Planos/FAQ no rodapé; palco sem scroll extra da viewport.
 - Modal de API acompanha a rota SPA (landing → login).
 - Botões do hero (**Começar agora**, **Ver em 1 min**) com contraste correto.
-- FAB WhatsApp fixo no canto inferior direito (landing, tour e login), sem entrar no fluxo da página.
-- FAB WhatsApp sobe com o banner de cookies e empilha abaixo do chat do site; no celular e no tablet o hero não duplica o CTA; no login o FAB some enquanto o aviso de API está aberto.
+- FAB WhatsApp fixo no canto inferior direito (landing, tour e login), sem entrar no fluxo da página (#40).
+- FAB WhatsApp sobe com o banner de cookies e empilha abaixo do chat do site; no celular e no tablet o hero não duplica o CTA; no login o FAB some enquanto o aviso de API está aberto (#41).
 - Ícone e splash do app Android usam o emblema Taktchat (mesmo da PWA), não o placeholder do Capacitor.
 - Visitante em `/` voltava para `/login`: o `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30. No app Android (Capacitor) a raiz sem sessão continua em `/login`.
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).

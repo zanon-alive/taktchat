@@ -281,6 +281,17 @@ window.TaktChatWidgetAPI.sendMessage();
 
 ---
 
+## Empilhamento com o FAB da vitrine
+
+Na landing (`/landing`, `/landing/v1`), no tour e no login, o FAB **Falar no WhatsApp** e o botão `#taktchat-widget-button` compartilham o canto inferior direito.
+
+- O frontend define `--taktchat-site-chat-bottom` e `--taktchat-site-chat-panel-bottom` no `documentElement`.
+- `widget.js` posiciona o botão com `bottom: calc(var(--taktchat-site-chat-bottom, 20px) + env(safe-area-inset-bottom, 0px))`.
+- Ordem: banner de cookies (se visível) → FAB WhatsApp → chat do site acima do FAB.
+- Se o chat do site não estiver habilitado nas settings, só o FAB aparece.
+
+---
+
 ## Personalização Avançada
 
 O widget pode ser personalizado via CSS customizado (usando `!important` para sobrescrever estilos padrão):
