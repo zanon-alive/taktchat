@@ -6,7 +6,7 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 
 | Rota | Finalidade |
 |---|---|
-| `/landing` | Vitrine comercial (v2): funil de conversão, print do produto no hero, lead e cadastro direto se habilitado. CTAs na nav, hero (**Falar no WhatsApp**, **Ver em 1 min**, **Começar agora**), lead, FAB WhatsApp e rodapé. Sem números inventados nem `react-ga4`. |
+| `/landing` | Vitrine comercial (v2): funil de conversão, print do produto no hero, lead e cadastro direto se habilitado. CTAs na nav, hero (**Falar no WhatsApp** no desktop, **Ver em 1 min**, **Começar agora**), lead, FAB WhatsApp (empilhado com cookies/chat do site) e rodapé. Sem números inventados nem `react-ga4`. |
 | `/landing/v1` | Arquivo da landing anterior (`noindex`); copy antiga (prova social / uptime) pode permanecer |
 | `/tour` | Tour público de 5 slides (`noindex`): pitch do problema e para quem, prints de `/landing/*.png`, FAB WhatsApp e CTA final (WhatsApp + falar com especialista). Nginx injeta og:* para preview no WhatsApp. |
 | `/p/tour` | Redirect para `/tour` (query `s` preservada) |

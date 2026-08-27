@@ -1,11 +1,9 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `fix/landing-menu-e-tour`
-**PR:** https://github.com/zanon-alive/taktchat/pull/40
+**Branch git:** `fix/landing-fab-pendencias`
 
 ## Estado
-- FAB WhatsApp: portal no `body`, `position: fixed` inferior direito (landing, tour, login).
-- MCP Telecontrol desconectado nesta sessão.
+- Pendências pós-PR #40: empilhar FAB com cookies e chat do site; hero sem WhatsApp duplicado no mobile; `prefers-reduced-motion`.
 
 ## Não fazer
 - Deploy pelo agente. Merge só com OK do revisor.

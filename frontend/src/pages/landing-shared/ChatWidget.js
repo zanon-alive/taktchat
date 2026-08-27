@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import { Fab, Tooltip } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getSupportWhatsAppUrl } from "./supportWhatsApp";
+import useCornerFabStack from "./useCornerFabStack";
 
 const useStyles = makeStyles(() => ({
     icon: {
@@ -11,6 +12,9 @@ const useStyles = makeStyles(() => ({
     },
     fab: {
         animation: "$pulse 2s infinite",
+        "@media (prefers-reduced-motion: reduce)": {
+            animation: "none",
+        },
     },
     "@keyframes pulse": {
         "0%": {
@@ -42,8 +46,9 @@ export const supportWhatsAppFabSx = {
     },
 };
 
-const ChatWidget = ({ className, sx }) => {
+const ChatWidget = ({ className, sx, minBottom }) => {
     const classes = useStyles();
+    const { whatsappBottom } = useCornerFabStack({ minBottom });
 
     if (typeof document === "undefined") {
         return null;
@@ -62,6 +67,7 @@ const ChatWidget = ({ className, sx }) => {
                 sx={{
                     "&&": {
                         ...supportWhatsAppFabSx,
+                        bottom: `max(${whatsappBottom}px, env(safe-area-inset-bottom, 0px))`,
                         ...sx,
                     },
                 }}

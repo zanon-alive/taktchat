@@ -514,7 +514,7 @@ const PublicTour = () => {
             </Box>
           ) : null}
         </footer>
-        <ChatWidget sx={{ bottom: "max(88px, env(safe-area-inset-bottom, 0px))" }} />
+        <ChatWidget minBottom={88} />
       </Box>
     </>
   );

@@ -92,8 +92,8 @@
     style.textContent = `
       #taktchat-widget-button {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        bottom: calc(var(--taktchat-site-chat-bottom, 20px) + env(safe-area-inset-bottom, 0px));
+        right: max(20px, env(safe-area-inset-right, 0px));
         width: 60px;
         height: 60px;
         border-radius: 50%;
@@ -118,7 +118,7 @@
       }
       #taktchat-widget-container {
         position: fixed;
-        bottom: 90px;
+        bottom: calc(var(--taktchat-site-chat-panel-bottom, 90px) + env(safe-area-inset-bottom, 0px));
         right: 20px;
         width: 380px;
         height: 600px;
@@ -299,7 +299,7 @@
           width: calc(100vw - 40px);
           right: 20px;
           left: 20px;
-          bottom: 90px;
+          bottom: calc(var(--taktchat-site-chat-panel-bottom, 90px) + env(safe-area-inset-bottom, 0px));
         }
       }
     `;
