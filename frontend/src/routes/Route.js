@@ -3,6 +3,7 @@ import { Route as RouterRoute, Redirect } from "react-router-dom";
 
 import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
+import { isNativeCapacitor } from "../utils/nativeApp";
 import { getPrivateGuestPath } from "../utils/publicSitePaths";
 
 const Route = ({ component: Component, isPrivate = false, guestRedirect, ...rest }) => {
@@ -12,31 +13,33 @@ const Route = ({ component: Component, isPrivate = false, guestRedirect, ...rest
 		<RouterRoute
 			{...rest}
 			render={(props) => {
+				if (loading) {
+					return <BackdropLoading />;
+				}
+
 				if (!isAuth && isPrivate) {
 					return (
-						<>
-							{loading && <BackdropLoading />}
-							<Redirect to={{ pathname: getPrivateGuestPath(guestRedirect), state: { from: props.location } }} />
-						</>
+						<Redirect
+							to={{
+								pathname: getPrivateGuestPath(guestRedirect, {
+									isNative: isNativeCapacitor(),
+								}),
+								state: { from: props.location },
+							}}
+						/>
 					);
 				}
 
 				if (isAuth && !isPrivate) {
 					return (
-						<>
-							{loading && <BackdropLoading />}
-							<Redirect to={{ pathname: "/", state: { from: props.location } }} />
-						</>
+						<Redirect to={{ pathname: "/", state: { from: props.location } }} />
 					);
 				}
 
 				return (
-					<>
-						{loading && <BackdropLoading />}
-						<Suspense fallback={<BackdropLoading />}>
-							<Component {...props} />
-						</Suspense>
-					</>
+					<Suspense fallback={<BackdropLoading />}>
+						<Component {...props} />
+					</Suspense>
 				);
 			}}
 		/>

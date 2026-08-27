@@ -1,12 +1,13 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `feat/app-mobile-lojas`
+**Branch git:** `feat/landing-as-home`
 
 ## Estado
-- Fatia 1 commitada nesta branch: Capacitor Android, link **Baixar app Android** no login, CI do APK (`android-sideload`).
-- iOS/IPA e push: fora. PWA no iPhone continua válida.
-- Após merge: esperar workflows frontend GHCR + `build-taktchat-android-apk` e o Portainer; aí o link `/downloads/taktchat.apk` funciona.
+- Visitante web em `/` vai para `/landing` (não mais `/login`). Logado continua no Dashboard. Capacitor sem sessão continua em `/login`.
+- Causa: `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30.
+- Commit e PR desta branch. Deploy não é pelo agente.
+- `main` segue com PWA #35, QR/CORS #36 e app Android #37.
 
 ## Não fazer
-- Capacitor iOS, Play/App Store, FCM/OneSignal.
-- Reativar service worker. Deploy pelo agente.
+- Deploy pelo agente. Código de push/iOS sem plano + OK.
+- Reativar service worker.

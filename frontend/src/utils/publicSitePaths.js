@@ -1,3 +1,11 @@
+const PUBLIC_AUTH_PATHS = [
+  "/login",
+  "/signup",
+  "/signup-partner",
+  "/forgot-password",
+  "/reset-password",
+];
+
 export function normalizePublicPath(pathname) {
   if (!pathname) return "";
   if (pathname.length > 1 && pathname.endsWith("/")) {
@@ -17,6 +25,38 @@ export function isPublicMarketingPath(pathname) {
   );
 }
 
-export function getPrivateGuestPath(guestRedirect) {
+export function isPublicAuthPath(pathname) {
+  const path = normalizePublicPath(pathname);
+  return PUBLIC_AUTH_PATHS.some(
+    (authPath) => path === authPath || path.startsWith(`${authPath}/`)
+  );
+}
+
+export function getPrivateGuestPath(guestRedirect, options = {}) {
+  if (options.isNative) {
+    return "/login";
+  }
   return guestRedirect || "/login";
+}
+
+/**
+ * Destino do visitante sem sessão. null = permanecer na URL atual.
+ * Web na raiz → /landing. App nativo e rotas privadas → /login.
+ */
+export function getUnauthenticatedRedirect(pathname, options = {}) {
+  const path = normalizePublicPath(pathname);
+
+  if (isPublicAuthPath(path) || isPublicMarketingPath(path)) {
+    return null;
+  }
+
+  if (options.isNative) {
+    return "/login";
+  }
+
+  if (path === "/" || path === "") {
+    return "/landing";
+  }
+
+  return "/login";
 }
