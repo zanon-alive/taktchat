@@ -71,19 +71,21 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   ctaButton: {
-    padding: theme.spacing(1.5, 5),
-    fontSize: "1.1rem",
-    borderRadius: "12px",
-    textTransform: "none",
-    fontWeight: 700,
-    background: "linear-gradient(45deg, #25D366 30%, #128C7E 90%)",
-    color: "#ffffff",
-    boxShadow: "0 4px 14px 0 rgba(0,0,0,0.25)",
-    "&:hover": {
-      background: "linear-gradient(45deg, #20BA5A 30%, #0E7A6E 90%)",
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "100%",
+    "&&": {
+      padding: theme.spacing(1.5, 5),
+      fontSize: "1.1rem",
+      borderRadius: "12px",
+      textTransform: "none",
+      fontWeight: 700,
+      background: "linear-gradient(45deg, #25D366 30%, #128C7E 90%)",
+      color: "#ffffff",
+      boxShadow: "0 4px 14px 0 rgba(0,0,0,0.25)",
+      "&:hover": {
+        background: "linear-gradient(45deg, #20BA5A 30%, #0E7A6E 90%)",
+      },
+      [theme.breakpoints.down("sm")]: {
+        width: "100%",
+      },
     },
   },
   screenshotWrap: {
@@ -117,19 +119,21 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   secondaryCta: {
-    padding: theme.spacing(1.5, 4),
-    fontSize: "1.1rem",
-    borderRadius: "12px",
-    textTransform: "none",
-    fontWeight: 700,
-    color: "#ffffff",
-    borderColor: "rgba(255,255,255,0.85)",
-    "&:hover": {
-      borderColor: "#ffffff",
-      backgroundColor: "rgba(255,255,255,0.1)",
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "100%",
+    "&&": {
+      padding: theme.spacing(1.5, 4),
+      fontSize: "1.1rem",
+      borderRadius: "12px",
+      textTransform: "none",
+      fontWeight: 700,
+      color: "#ffffff",
+      borderColor: "rgba(255,255,255,0.85)",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255,255,255,0.1)",
+      },
+      [theme.breakpoints.down("sm")]: {
+        width: "100%",
+      },
     },
   },
 }));
@@ -165,15 +169,25 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
                 onClick={scrollToCta}
                 size="large"
                 aria-label="Começar agora"
+                sx={{
+                  background: "linear-gradient(45deg, #25D366 30%, #128C7E 90%)",
+                  color: "#ffffff",
+                  textTransform: "none",
+                  "&:hover": {
+                    background: "linear-gradient(45deg, #20BA5A 30%, #0E7A6E 90%)",
+                  },
+                }}
               >
                 Começar agora
               </Button>
               <Button
                 className={classes.secondaryCta}
                 variant="outlined"
+                color="inherit"
                 component={RouterLink}
                 to="/tour"
                 size="large"
+                sx={{ color: "#ffffff", textTransform: "none" }}
               >
                 Ver em 1 min
               </Button>

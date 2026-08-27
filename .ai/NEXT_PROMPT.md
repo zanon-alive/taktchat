@@ -1,11 +1,11 @@
 # Taktchat — continuidade de sessão
 
 **Branch git:** `fix/landing-menu-e-tour`
+**PR:** https://github.com/zanon-alive/taktchat/pull/40
 
 ## Estado
-- Menu visível na `/landing` e `/landing/v1`; drawer mobile branco.
-- Tour: Voltar, Planos, FAQ, Esc e avançar no último slide → `/landing`.
-- Modal de API offline não cobre páginas de marketing.
+- Commit `c8a6e74` enviado. PR #40 aberto.
+- Menu visível na landing; tour volta para `/landing`.
 
 ## Não fazer
-- Deploy pelo agente.
+- Deploy pelo agente. Merge só com OK do revisor.

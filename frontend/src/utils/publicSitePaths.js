@@ -29,6 +29,11 @@ export function shouldShowApiOfflineDialog(pathname, isOpen) {
   return Boolean(isOpen) && !isPublicMarketingPath(pathname);
 }
 
+export function isDocumentationPath(pathname) {
+  const path = normalizePublicPath(pathname);
+  return path === "/docs" || path === "/docs_admin";
+}
+
 export function isPublicAuthPath(pathname) {
   const path = normalizePublicPath(pathname);
   return PUBLIC_AUTH_PATHS.some(

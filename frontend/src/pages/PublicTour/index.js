@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link as RouterLink, useHistory, useLocation } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
@@ -22,13 +22,17 @@ const SWIPE_PX = 50;
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    height: "100vh",
     minHeight: "100vh",
+    maxHeight: "100vh",
+    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
     background: "linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #1e293b 100%)",
     color: "#ffffff",
   },
   header: {
+    flexShrink: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -78,6 +82,8 @@ const useStyles = makeStyles((theme) => ({
   },
   stage: {
     flex: 1,
+    minHeight: 0,
+    overflow: "hidden",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -90,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
   },
   slide: {
     width: "min(1100px, 100%)",
-    maxHeight: "calc(100vh - 140px)",
+    maxHeight: "100%",
     overflow: "auto",
   },
   kicker: {
@@ -194,14 +200,26 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   footer: {
+    flexShrink: 0,
     display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    alignItems: "stretch",
     gap: theme.spacing(1),
     padding: theme.spacing(1.5, 2, 2.5),
     [theme.breakpoints.up("md")]: {
       padding: theme.spacing(1.5, 4, 3),
     },
+  },
+  footerNav: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: theme.spacing(1),
+  },
+  footerShortcuts: {
+    display: "flex",
+    justifyContent: "center",
+    gap: theme.spacing(1),
   },
   meta: {
     fontVariantNumeric: "tabular-nums",
@@ -224,6 +242,8 @@ const useStyles = makeStyles((theme) => ({
 
 const PublicTour = () => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const history = useHistory();
   const location = useLocation();
   const total = tourSlides.length;
@@ -324,22 +344,26 @@ const PublicTour = () => {
             </Button>
           </Box>
           <Box className={classes.headerRight}>
-            <Button
-              color="inherit"
-              className={classes.backButton}
-              component={RouterLink}
-              to={LANDING_PLANS_PATH}
-            >
-              Planos
-            </Button>
-            <Button
-              color="inherit"
-              className={classes.backButton}
-              component={RouterLink}
-              to={LANDING_FAQ_PATH}
-            >
-              FAQ
-            </Button>
+            {!isMobile ? (
+              <>
+                <Button
+                  color="inherit"
+                  className={classes.backButton}
+                  component={RouterLink}
+                  to={LANDING_PLANS_PATH}
+                >
+                  Planos
+                </Button>
+                <Button
+                  color="inherit"
+                  className={classes.backButton}
+                  component={RouterLink}
+                  to={LANDING_FAQ_PATH}
+                >
+                  FAQ
+                </Button>
+              </>
+            ) : null}
             <Button
               variant="outlined"
               color="inherit"
@@ -405,35 +429,57 @@ const PublicTour = () => {
         </Box>
 
         <footer className={classes.footer}>
-          <IconButton
-            className={classes.navBtn}
-            onClick={() => goTo(index - 1)}
-            disabled={index === 0}
-            aria-label="Slide anterior"
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-          <span className={classes.meta}>
-            {index + 1} / {total} · ±1 min
-          </span>
-          {index >= total - 1 ? (
+          <Box className={classes.footerNav}>
             <IconButton
               className={classes.navBtn}
-              component={RouterLink}
-              to={LANDING_PATH}
-              aria-label="Ir para a landing"
+              onClick={() => goTo(index - 1)}
+              disabled={index === 0}
+              aria-label="Slide anterior"
             >
-              <ChevronRightIcon />
+              <ChevronLeftIcon />
             </IconButton>
-          ) : (
-            <IconButton
-              className={classes.navBtn}
-              onClick={goNext}
-              aria-label="Próximo slide"
-            >
-              <ChevronRightIcon />
-            </IconButton>
-          )}
+            <span className={classes.meta}>
+              {index + 1} / {total} · ±1 min
+            </span>
+            {index >= total - 1 ? (
+              <IconButton
+                className={classes.navBtn}
+                component={RouterLink}
+                to={LANDING_PATH}
+                aria-label="Ir para a landing"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            ) : (
+              <IconButton
+                className={classes.navBtn}
+                onClick={goNext}
+                aria-label="Próximo slide"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            )}
+          </Box>
+          {isMobile ? (
+            <Box className={classes.footerShortcuts}>
+              <Button
+                color="inherit"
+                className={classes.backButton}
+                component={RouterLink}
+                to={LANDING_PLANS_PATH}
+              >
+                Planos
+              </Button>
+              <Button
+                color="inherit"
+                className={classes.backButton}
+                component={RouterLink}
+                to={LANDING_FAQ_PATH}
+              >
+                FAQ
+              </Button>
+            </Box>
+          ) : null}
         </footer>
       </Box>
     </>

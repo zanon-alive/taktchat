@@ -3,6 +3,15 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StylesProvider, createGenerateClassName } from "@mui/styles";
+
+jest.mock("@mui/material", () => {
+  const actual = jest.requireActual("@mui/material");
+  return {
+    ...actual,
+    useMediaQuery: () => false,
+  };
+});
+
 import PublicTour from "../index";
 
 const theme = createTheme();

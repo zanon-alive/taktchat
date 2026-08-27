@@ -1,6 +1,7 @@
 import {
   getPrivateGuestPath,
   getUnauthenticatedRedirect,
+  isDocumentationPath,
   isPublicAuthPath,
   isPublicMarketingPath,
   shouldShowApiOfflineDialog,
@@ -37,6 +38,20 @@ describe("shouldShowApiOfflineDialog", () => {
     expect(shouldShowApiOfflineDialog("/login", true)).toBe(true);
     expect(shouldShowApiOfflineDialog("/tickets", true)).toBe(true);
     expect(shouldShowApiOfflineDialog("/landing", false)).toBe(false);
+  });
+});
+
+describe("isDocumentationPath", () => {
+  it("reconhece /docs e /docs_admin", () => {
+    expect(isDocumentationPath("/docs")).toBe(true);
+    expect(isDocumentationPath("/docs_admin")).toBe(true);
+    expect(isDocumentationPath("/docs/")).toBe(true);
+  });
+
+  it("nao trata landing nem login como documentacao", () => {
+    expect(isDocumentationPath("/landing")).toBe(false);
+    expect(isDocumentationPath("/login")).toBe(false);
+    expect(isDocumentationPath("/tickets")).toBe(false);
   });
 });
 
