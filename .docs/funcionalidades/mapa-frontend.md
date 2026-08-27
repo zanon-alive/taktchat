@@ -11,7 +11,7 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 | `/tour` | Tour público de 5 slides (`noindex`): pitch do problema e para quem, prints de `/landing/*.png`, CTA final falar com especialista. Nginx injeta og:* para preview no WhatsApp. |
 | `/p/tour` | Redirect para `/tour` (query `s` preservada) |
 | `/lgpd` | Texto genérico de privacidade/cookies/LGPD (em revisão jurídica) |
-| `/login` | Autenticação |
+| `/login` | Autenticação. Link **Baixar app Android** aponta para `/downloads/taktchat.apk` (escondido dentro do app Capacitor). |
 | `/signup` | Cadastro público |
 | `/signup-partner` | Cadastro vinculado a parceiro |
 | `/docs` | Documentação de onboarding |
@@ -24,7 +24,7 @@ Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autentic
 | Área | Rotas principais | Menu e gates |
 |---|---|---|
 | Gestão | `/`, `/moments` | `admin`/`super` ou flags legadas de dashboard/tempo real |
-| Atendimento | `/tickets/:ticketId?`, `/quick-messages` | Permissões `tickets.view` e `quick-messages.view`. Em viewport `< md` (e no PWA standalone) `/tickets` usa chrome compacto: sem drawer, AppBar com logo/notificações/avatar; avatar tem **Painel completo** (`/`). O PWA (`manifest.json`) abre em `/tickets`. |
+| Atendimento | `/tickets/:ticketId?`, `/quick-messages` | Permissões `tickets.view` e `quick-messages.view`. Em viewport `< md` (e no PWA standalone) `/tickets` usa chrome compacto: sem drawer, AppBar com logo/notificações/avatar; avatar tem **Painel completo** (`/`). O PWA (`manifest.json`) abre em `/tickets`. O app Android (Capacitor) abre o mesmo SPA em `https://taktchat.com.br`; IPA/iOS fica para quando houver Mac. |
 | Kanban | `/kanban`, `/Kanban`, `/kanban/stats` | Plano `useKanban` + `kanban.view` |
 | Contatos | `/contacts`, `/contacts/import`, `/tags` | Permissões de contatos/tags; importação não tem item próprio no menu |
 | Agenda e chat | `/schedules`, `/chats/:id?` | `useSchedules`/`useInternalChat` + permissão |

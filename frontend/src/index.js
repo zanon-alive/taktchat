@@ -7,6 +7,7 @@ import "./index.css";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ToastContainer } from "react-toastify";
 import * as serviceworker from './serviceWorker';
+import { initCapacitorShell } from "./native/capacitorShell";
 import App from "./App";
 import { createAppJss } from "./utils/createAppJss";
 import { createEmotionCache } from "./utils/createEmotionCache";
@@ -36,3 +37,4 @@ ReactDOM.render(
 
 // Desabilita o Service Worker para evitar cache agressivo e erro de MIME em dev/prod
 serviceworker.unregister();
+initCapacitorShell();

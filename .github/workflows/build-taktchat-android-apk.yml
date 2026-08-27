@@ -1,0 +1,73 @@
+name: build-taktchat-android-apk
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "frontend/android/**"
+      - "frontend/capacitor.config.json"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - ".github/workflows/build-taktchat-android-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps
+
+      - name: Placeholder webDir
+        working-directory: frontend
+        run: mkdir -p build && printf '%s\n' '<!doctype html><title>Taktchat</title>' > build/index.html
+
+      - name: Capacitor sync
+        working-directory: frontend
+        run: npx cap sync android
+
+      - name: Assemble debug APK
+        working-directory: frontend/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp frontend/android/app/build/outputs/apk/debug/app-debug.apk taktchat.apk
+
+      - name: Publish sideload release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-sideload
+          name: App Android (instalação direta)
+          body: |
+            APK para instalar sem a Play Store.
+            No Android: permitir fontes desconhecidas e abrir o arquivo.
+            O app abre https://taktchat.com.br (mesmo atendimento da PWA).
+            iOS / IPA fica para quando houver Mac.
+          files: taktchat.apk
+          make_latest: false

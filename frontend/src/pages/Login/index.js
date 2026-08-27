@@ -12,6 +12,10 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { getNumberSupport, getBackendUrl } from "../../config";
+import {
+  getAndroidApkUrl,
+  shouldShowAndroidDownloadLink,
+} from "../../utils/nativeApp";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -349,6 +353,13 @@ const Login = () => {
               Esqueceu a senha?
             </RouterLink>
           </div>
+          {shouldShowAndroidDownloadLink() && (
+            <div className={classes.forgotPassword}>
+              <a href={getAndroidApkUrl()} className={classes.forgotPasswordLink}>
+                Baixar app Android
+              </a>
+            </div>
+          )}
         </form>
         <Tooltip title="Fale conosco no WhatsApp" placement="left" arrow>
           <Fab 
