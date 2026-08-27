@@ -17,7 +17,7 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 | `/docs` | Documentação de onboarding |
 | `/docs_admin` | Documentação administrativa |
 
-Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing`, `/lgpd` e `/tour` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine e o tour. `/apresentacoes` continua privado.
+Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. No app Android (Capacitor), a raiz sem sessão continua em `/login`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing`, `/lgpd` e `/tour` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine e o tour. `/apresentacoes` continua privado.
 
 ## Rotas privadas por área
 

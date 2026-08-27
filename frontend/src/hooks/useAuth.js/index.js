@@ -9,24 +9,19 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { socketConnection } from "../../services/socket";
 import logger from "../../utils/logger";
+import { isNativeCapacitor } from "../../utils/nativeApp";
+import { getUnauthenticatedRedirect } from "../../utils/publicSitePaths";
 // import { useDate } from "../../hooks/useDate";
 import moment from "moment";
 
-const PUBLIC_AUTH_PATHS = [
-  "/login",
-  "/signup",
-  "/signup-partner",
-  "/forgot-password",
-  "/reset-password",
-];
-
-function isPublicAuthPath(pathname) {
-  const path =
-    pathname ||
-    (typeof window !== "undefined" ? window.location.pathname : "");
-  return PUBLIC_AUTH_PATHS.some(
-    (p) => path === p || path.startsWith(`${p}/`)
+function redirectUnauthenticatedGuest(history) {
+  const dest = getUnauthenticatedRedirect(
+    typeof window !== "undefined" ? window.location.pathname : "",
+    { isNative: isNativeCapacitor() }
   );
+  if (dest) {
+    history.push(dest);
+  }
 }
 
 const useAuth = () => {
@@ -94,7 +89,7 @@ const useAuth = () => {
             return api(originalRequest);
           }
         } catch (e) {
-          // Refresh falhou: limpar estado e redirecionar para login
+          // Refresh falhou: limpar estado e ir para landing (web na raiz) ou login
           isRefreshingRef.current = false;
           const refreshStatus = e?.response?.status;
           const refreshErrorCode = e?.response?.data?.message || e?.response?.data?.code || "";
@@ -115,10 +110,7 @@ const useAuth = () => {
           localStorage.removeItem("token");
           api.defaults.headers.Authorization = undefined;
           safeSetState(setIsAuth, false);
-          
-          if (!isPublicAuthPath(window.location.pathname)) {
-            history.push("/login");
-          }
+          redirectUnauthenticatedGuest(history);
         }
       }
       
@@ -126,10 +118,7 @@ const useAuth = () => {
         localStorage.removeItem("token");
         api.defaults.headers.Authorization = undefined;
         safeSetState(setIsAuth, false);
-        
-        if (!isPublicAuthPath(window.location.pathname)) {
-          history.push("/login");
-        }
+        redirectUnauthenticatedGuest(history);
       }
       
       if (status === 403) {
@@ -148,10 +137,7 @@ const useAuth = () => {
         localStorage.removeItem("token");
         api.defaults.headers.Authorization = undefined;
         safeSetState(setIsAuth, false);
-        
-        if (!isPublicAuthPath(window.location.pathname)) {
-          history.push("/login");
-        }
+        redirectUnauthenticatedGuest(history);
       }
       
       return Promise.reject(error);
@@ -185,10 +171,8 @@ const useAuth = () => {
           api.defaults.headers.Authorization = undefined;
           safeSetState(setIsAuth, false);
           
-          // Sem sessão: ficar nas rotas públicas (cadastro da filha, signup, etc.)
-          if (!isPublicAuthPath(window.location.pathname)) {
-            history.push("/login");
-          }
+          // Sem sessão: landing na raiz (web), login no nativo/painel, ficar em auth/marketing
+          redirectUnauthenticatedGuest(history);
         }
       } finally {
         isRefreshingRef.current = false;

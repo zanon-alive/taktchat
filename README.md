@@ -65,7 +65,7 @@ A vitrine pública está em `/landing` (`https://taktchat.com.br/landing`):
 - **CTAs (v2):** nav “Começar”, hero “Começar agora” + “Ver em 1 min”, formulário de lead, FAB WhatsApp e “Seja revendedor” no rodapé — sem botões extras no meio da página
 - **Copy (v2):** sem números inventados (“centenas de empresas”, “1 milhão de conversas”, “Uptime 99.9%”); a v1 arquivada pode manter o texto antigo
 - **Histórico:** a landing anterior permanece em `/landing/v1` com `noindex`
-- **Entrada:** visitante sem login que abre `/` vai para `/landing`; quem já entrou segue no Dashboard
+- **Entrada:** visitante sem login que abre `/` vai para `/landing`; quem já entrou segue no Dashboard. No app Android (Capacitor) a raiz sem sessão abre `/login`.
 - **Formulários:** cadastro direto (quando a API `direct-signup` está ligada) e lead; revendedor abre modal no rodapé
 - **Legal:** `/lgpd` (texto genérico, em revisão); cookie e rodapé apontam para essa rota
 - **Widgets:** FAB WhatsApp e, se habilitado nas configurações, Chat do Site
