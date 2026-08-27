@@ -8,17 +8,17 @@ jest.mock("@mui/material", () => {
   const actual = jest.requireActual("@mui/material");
   return {
     ...actual,
-    useMediaQuery: () => false,
+    useMediaQuery: () => true,
   };
 });
 
 import Hero from "../Hero";
 
 const theme = createTheme();
-const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "hero" });
+const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "herom" });
 
-describe("Hero da landing", () => {
-  it("expõe WhatsApp, o tour e Começar agora sem depender do tema primary", () => {
+describe("Hero da landing no tablet/mobile", () => {
+  it("deixa o WhatsApp só no FAB abaixo de md", () => {
     render(
       <StylesProvider generateClassName={generateClassName}>
         <ThemeProvider theme={theme}>
@@ -29,11 +29,8 @@ describe("Hero da landing", () => {
       </StylesProvider>
     );
 
-    expect(screen.getByRole("button", { name: "Começar agora" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Ver em 1 min" })).toHaveAttribute("href", "/tour");
-    expect(screen.getByRole("link", { name: "Falar no WhatsApp" })).toHaveAttribute(
-      "href",
-      expect.stringMatching(/^https:\/\/wa\.me\/\d+\?text=/)
-    );
+    expect(screen.queryByRole("link", { name: "Falar no WhatsApp" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver em 1 min" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Começar agora" })).toBeInTheDocument();
   });
 });

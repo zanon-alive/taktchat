@@ -62,7 +62,7 @@ Consulte `.docs/instalacao/` para requisitos e variações (Docker completo, pro
 A vitrine pública está em `/landing` (`https://taktchat.com.br/landing`):
 - **Funil:** hero com print real do produto visível no viewport, galeria (tickets, kanban, fluxos), proposta, funcionalidades, planos, cadastro (se habilitado) + lead, FAQ
 - **Tour:** `/tour` (5 slides, sem login, pitch de problema/para quem); `/p/tour` redireciona para `/tour`. Links na v2: hero **Ver em 1 min**, menu **Tour**, galeria e rodapé
-- **CTAs (v2):** nav “Começar”, hero **Falar no WhatsApp** + “Ver em 1 min” + “Começar agora”, formulário de lead, FAB WhatsApp (também no `/tour`) e “Seja revendedor” no rodapé — sem botões extras no meio da página. O WhatsApp abre o número de suporte (`REACT_APP_NUMBER_SUPPORT`) com mensagem de interesse, sem exigir o formulário.
+- **CTAs (v2):** nav “Começar”, hero **Falar no WhatsApp** (desktop) + “Ver em 1 min” + “Começar agora”, formulário de lead, FAB WhatsApp (também no `/tour`; no celular e no tablet o hero não duplica o CTA) e “Seja revendedor” no rodapé. O FAB sobe com o banner de cookies e fica abaixo do chat do site, se os dois existirem. No login, o FAB some enquanto o aviso de API indisponível está aberto.
 - **Copy (v2):** sem números inventados (“centenas de empresas”, “1 milhão de conversas”, “Uptime 99.9%”); a v1 arquivada pode manter o texto antigo
 - **Histórico:** a landing anterior permanece em `/landing/v1` com `noindex`
 - **Entrada:** visitante sem login que abre `/` vai para `/landing`; quem já entrou segue no Dashboard. No app Android (Capacitor) a raiz sem sessão abre `/login`.

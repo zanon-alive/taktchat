@@ -30,7 +30,7 @@ import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
 import logger from "./utils/logger";
 import { resolvePublicAssetUrl } from "./utils/publicAssetUrl";
-import { isPublicMarketingPath, shouldShowApiOfflineDialog, isDocumentationPath } from "./utils/publicSitePaths";
+import { isPublicMarketingPath, shouldShowApiOfflineDialog, isDocumentationPath, API_OFFLINE_DIALOG_TITLE_ID } from "./utils/publicSitePaths";
 
 const queryClient = new QueryClient();
 
@@ -489,7 +489,7 @@ const App = () => {
                     setShowApiStatusDialog(false);
                   }}
                 >
-                  <DialogTitle id="api-offline-dialog-title">
+                  <DialogTitle id={API_OFFLINE_DIALOG_TITLE_ID}>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                       <span>{apiStatus === "degraded" ? "Banco de Dados indisponível" : "Servidor de API indisponível"}</span>
                       <IconButton onClick={() => setShowApiStatusDialog(false)} size="small" aria-label="fechar">

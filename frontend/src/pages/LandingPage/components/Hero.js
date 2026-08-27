@@ -1,6 +1,6 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
-import { Container, Button, Box, Grid } from "@mui/material";
+import { Container, Button, Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getSupportWhatsAppUrl } from "../../landing-shared/supportWhatsApp";
@@ -141,6 +141,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Hero = ({ ctaTargetId = "lead-form" }) => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isCompact = useMediaQuery(theme.breakpoints.down("md"));
 
   const scrollToCta = () => {
     const formElement = document.getElementById(ctaTargetId);
@@ -164,26 +166,28 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
               O cliente continua no WhatsApp dele. A empresa ganha fila, dono e histórico.
             </p>
             <Box className={classes.ctaContainer}>
-              <Button
-                className={classes.ctaButton}
-                startIcon={<WhatsAppIcon />}
-                component="a"
-                href={getSupportWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                size="large"
-                aria-label="Falar no WhatsApp"
-                sx={{
-                  background: "linear-gradient(45deg, #25D366 30%, #128C7E 90%)",
-                  color: "#ffffff",
-                  textTransform: "none",
-                  "&:hover": {
-                    background: "linear-gradient(45deg, #20BA5A 30%, #0E7A6E 90%)",
-                  },
-                }}
-              >
-                Falar no WhatsApp
-              </Button>
+              {!isCompact ? (
+                <Button
+                  className={classes.ctaButton}
+                  startIcon={<WhatsAppIcon />}
+                  component="a"
+                  href={getSupportWhatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  size="large"
+                  aria-label="Falar no WhatsApp"
+                  sx={{
+                    background: "linear-gradient(45deg, #25D366 30%, #128C7E 90%)",
+                    color: "#ffffff",
+                    textTransform: "none",
+                    "&:hover": {
+                      background: "linear-gradient(45deg, #20BA5A 30%, #0E7A6E 90%)",
+                    },
+                  }}
+                >
+                  Falar no WhatsApp
+                </Button>
+              ) : null}
               <Button
                 className={classes.secondaryCta}
                 variant="outlined"
