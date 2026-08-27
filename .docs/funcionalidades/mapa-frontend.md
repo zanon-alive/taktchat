@@ -19,7 +19,7 @@ Referência da revisão documental v1.8, baseada em `frontend/src/routes/index.j
 
 Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autenticou permanece no Dashboard em `/`. No app Android (Capacitor), a raiz sem sessão continua em `/login`. `/forgot-password` e `/reset-password` também são públicas. As rotas de documentação passam pelo provider de autenticação, mas não exigem `isPrivate`. `/landing`, `/lgpd`, `/tour` e `/landing/v1` ficam fora do gate `isPrivate`, então usuário logado ainda consegue abrir a vitrine e o tour. O diálogo de API indisponível **não** cobre essas rotas de marketing (`shouldShowApiOfflineDialog`). `/apresentacoes` continua privado.
 
-O FAB WhatsApp da vitrine (`ChatWidget`) usa `position: fixed` no `document.body`. Empilha com o banner de cookies (sobe ~16px acima) e, se o chat do site estiver injetado (`#taktchat-widget-button`), fica abaixo dele via CSS vars `--taktchat-site-chat-bottom` / `--taktchat-site-chat-panel-bottom`. Número: `REACT_APP_NUMBER_SUPPORT` (só dígitos); fallback no código. Mensagem de interesse sem formulário.
+O FAB WhatsApp da vitrine (`ChatWidget`) usa `position: fixed` no `document.body`. Empilha com o banner de cookies (sobe ~16px acima) e, se o chat do site estiver injetado (`#taktchat-widget-button`), fica abaixo dele via CSS vars `--taktchat-site-chat-bottom` / `--taktchat-site-chat-panel-bottom`. Número: setting pública `supportWhatsAppNumber` (só dígitos). Sem número, FAB e CTAs não renderizam. Mensagem de interesse sem formulário.
 
 ## Rotas privadas por área
 

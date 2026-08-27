@@ -159,6 +159,8 @@ export default function Options(props) {
 
   const [enableSiteChatWidget, setEnableSiteChatWidget] = useState("disabled");
   const [loadingEnableSiteChatWidget, setLoadingEnableSiteChatWidget] = useState(false);
+  const [supportWhatsAppNumber, setSupportWhatsAppNumber] = useState("");
+  const [loadingSupportWhatsAppNumber, setLoadingSupportWhatsAppNumber] = useState(false);
 
   const { update: updateUserCreation, getAll } = useSettings();
 
@@ -177,6 +179,14 @@ export default function Options(props) {
 
       if (userPar) {
         setUserCreation(userPar.value);
+      }
+      const widgetPar = oldSettings.find((s) => s.key === "enableSiteChatWidget");
+      if (widgetPar) {
+        setEnableSiteChatWidget(widgetPar.value || "disabled");
+      }
+      const supportPar = oldSettings.find((s) => s.key === "supportWhatsAppNumber");
+      if (supportPar) {
+        setSupportWhatsAppNumber(supportPar.value || "");
       }
     }
   }, [oldSettings])
@@ -522,6 +532,16 @@ export default function Options(props) {
       value,
     });
     setLoadingEnableSiteChatWidget(false);
+  }
+
+  async function handleSupportWhatsAppNumber(value) {
+    setSupportWhatsAppNumber(value);
+    setLoadingSupportWhatsAppNumber(true);
+    await updateUserCreation({
+      key: "supportWhatsAppNumber",
+      value: String(value || "").replace(/\D/g, ""),
+    });
+    setLoadingSupportWhatsAppNumber(false);
   }
 
   return (
@@ -1006,6 +1026,26 @@ export default function Options(props) {
                   ? i18n.t("settings.settings.options.updating")
                   : i18n.t("settings.settings.options.enableSiteChatWidgetHelp")}
               </FormHelperText>
+            </FormControl>
+          </Grid>
+        )}
+
+        {isSuper() && (
+          <Grid xs={12} sm={6} md={4} item>
+            <FormControl className={classes.selectContainer}>
+              <TextField
+                label={i18n.t("settings.settings.options.supportWhatsAppNumber")}
+                value={supportWhatsAppNumber}
+                onChange={(e) => setSupportWhatsAppNumber(e.target.value)}
+                onBlur={async (e) => {
+                  handleSupportWhatsAppNumber(e.target.value);
+                }}
+                helperText={
+                  loadingSupportWhatsAppNumber
+                    ? i18n.t("settings.settings.options.updating")
+                    : i18n.t("settings.settings.options.supportWhatsAppNumberHelp")
+                }
+              />
             </FormControl>
           </Grid>
         )}

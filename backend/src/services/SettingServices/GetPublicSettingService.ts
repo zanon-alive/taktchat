@@ -14,7 +14,8 @@ const publicSettingsKeys = [
   "appName",
   "enableSiteChatWidget",
   "siteChatWidgetCompanyId",
-  "siteChatWidgetCompanyToken"
+  "siteChatWidgetCompanyToken",
+  "supportWhatsAppNumber"
 ]
 
 const GetPublicSettingService = async ({

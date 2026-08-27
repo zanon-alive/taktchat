@@ -9,4 +9,5 @@ export {
   getSupportWhatsAppUrl,
   openSupportWhatsApp,
 } from "./supportWhatsApp";
+export { default as useSupportWhatsApp } from "./useSupportWhatsApp";
 export { default as RevendedorDialog } from "./RevendedorDialog";

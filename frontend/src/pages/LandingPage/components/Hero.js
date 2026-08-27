@@ -3,7 +3,7 @@ import { makeStyles } from "@mui/styles";
 import { Container, Button, Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { getSupportWhatsAppUrl } from "../../landing-shared/supportWhatsApp";
+import useSupportWhatsApp from "../../landing-shared/useSupportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   hero: {
@@ -143,6 +143,7 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
   const classes = useStyles();
   const theme = useTheme();
   const isCompact = useMediaQuery(theme.breakpoints.down("md"));
+  const { url: supportWhatsAppUrl } = useSupportWhatsApp();
 
   const scrollToCta = () => {
     const formElement = document.getElementById(ctaTargetId);
@@ -166,12 +167,12 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
               O cliente continua no WhatsApp dele. A empresa ganha fila, dono e histórico.
             </p>
             <Box className={classes.ctaContainer}>
-              {!isCompact ? (
+              {!isCompact && supportWhatsAppUrl ? (
                 <Button
                   className={classes.ctaButton}
                   startIcon={<WhatsAppIcon />}
                   component="a"
-                  href={getSupportWhatsAppUrl()}
+                  href={supportWhatsAppUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   size="large"

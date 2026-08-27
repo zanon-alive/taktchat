@@ -12,6 +12,15 @@ jest.mock("@mui/material", () => {
   };
 });
 
+jest.mock("../../landing-shared/useSupportWhatsApp", () => ({
+  __esModule: true,
+  default: () => ({
+    number: "5514999990000",
+    ready: true,
+    url: "https://wa.me/5514999990000?text=teste",
+  }),
+}));
+
 import PublicTour from "../index";
 
 const theme = createTheme();

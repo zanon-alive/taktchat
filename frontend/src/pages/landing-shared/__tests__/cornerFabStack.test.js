@@ -5,6 +5,8 @@ import {
   SITE_CHAT_DEFAULT_BOTTOM,
   SITE_CHAT_PANEL_GAP,
   computeCornerStack,
+  fabBottomCss,
+  siteChatBottomCss,
 } from "../cornerFabStack";
 
 describe("computeCornerStack", () => {
@@ -30,5 +32,20 @@ describe("computeCornerStack", () => {
       siteChatBottom: FAB_EDGE + FAB_SIZE + FAB_GAP,
       siteChatPanelBottom: FAB_EDGE + FAB_SIZE + FAB_GAP + SITE_CHAT_PANEL_GAP,
     });
+  });
+
+  it("combina banner, chat do site e minBottom do tour", () => {
+    expect(
+      computeCornerStack({ cookieHeight: 120, siteChatPresent: true, minBottom: 88 })
+    ).toEqual({
+      whatsappBottom: 208,
+      siteChatBottom: 276,
+      siteChatPanelBottom: 346,
+    });
+  });
+
+  it("soma safe-area no CSS do FAB e do chat do site", () => {
+    expect(fabBottomCss(208)).toBe("max(208px, env(safe-area-inset-bottom, 0px))");
+    expect(siteChatBottomCss(276)).toBe("calc(276px + env(safe-area-inset-bottom, 0px))");
   });
 });

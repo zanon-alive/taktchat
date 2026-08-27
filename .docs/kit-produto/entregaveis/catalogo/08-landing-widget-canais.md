@@ -12,7 +12,7 @@ Página pública de conversão (título: *Atendimento no WhatsApp, no mesmo luga
 
 **CTAs:** nav **Começar**; no desktop o hero tem **Falar no WhatsApp** + **Ver em 1 min** + **Começar agora**. No celular/tablet o WhatsApp do hero some (fica o FAB). FAB WhatsApp no canto inferior direito, também em `/tour` e `/login`.
 
-O FAB abre `wa.me` com mensagem de interesse, sem formulário. Número: `REACT_APP_NUMBER_SUPPORT` (só dígitos). Empilha acima do banner de cookies e abaixo do chat do site, se os dois existirem.
+O FAB abre `wa.me` com mensagem de interesse, sem formulário. Número: setting pública `supportWhatsAppNumber` (Configurações). Empilha acima do banner de cookies e abaixo do chat do site, se os dois existirem.
 
 O diálogo **Servidor de API indisponível** não cobre `/landing`, `/landing/v1`, `/tour` nem `/lgpd`.
 
@@ -36,7 +36,7 @@ Configuração em **Settings** (admin): canais de entrada, `useSiteChat`, snippe
 
 ## Status
 
-Landing, tour e FAB: **exercitados em produção** (`taktchat.com.br`, 2026-08-27, PRs #40 e #41). Chat do site: **implementado**; o botão não estava injetado nessa validação (settings).
+Landing, tour e FAB: **exercitados em produção** (`taktchat.com.br`, 2026-08-27, PRs #40 e #41). Chat do site: migration liga `enableSiteChatWidget` na empresa 1; o script passa `data-api-url`. `widget.js` respeita `prefers-reduced-motion`.
 
 ## Limitação
 

@@ -11,12 +11,25 @@ for path in /landing /landing/v1 /tour /login /lgpd; do
   if [ "$code" = "200" ]; then echo "✅ ${path} ${code}"; else echo "❌ ${path} ${code}"; fi
 done
 
-echo "== widget.js (CSS var do empilhamento) =="
-if curl -s "${BASE_URL}/widget.js" | grep -q "taktchat-site-chat-bottom"; then
+echo "== widget.js (CSS var e reduced-motion) =="
+js=$(curl -s "${BASE_URL}/widget.js")
+if echo "$js" | grep -q "taktchat-site-chat-bottom"; then
   echo "✅ widget.js usa --taktchat-site-chat-bottom"
 else
   echo "❌ widget.js sem variável de empilhamento"
 fi
+if echo "$js" | grep -q "prefers-reduced-motion"; then
+  echo "✅ widget.js respeita prefers-reduced-motion"
+else
+  echo "❌ widget.js sem prefers-reduced-motion"
+fi
+
+echo "== settings públicas (token wtV) =="
+API="${API_URL:-https://api.taktchat.com.br}"
+for key in enableSiteChatWidget supportWhatsAppNumber; do
+  code=$(curl -s -o /tmp/taktchat-setting.json -w "%{http_code}" "${API}/public-settings/${key}?token=wtV")
+  echo "${key}: HTTP ${code} $(head -c 80 /tmp/taktchat-setting.json)"
+done
 
 echo "== API health =="
 code=$(curl -s -o /dev/null -w "%{http_code}" "https://api.taktchat.com.br/health")
@@ -47,10 +60,11 @@ Não precisa enviar mensagem real no WhatsApp: conferir `href` (`wa.me` + texto 
 - [ ] Último slide: Falar no WhatsApp + Falar com especialista + Ir para a landing
 - [ ] Esc volta para a landing
 
-### Login (`/login`)
+### Login (`/login`) — janela anônima
 
+- [ ] Sem sessão: formulário de login visível
 - [ ] API no ar: FAB visível, sem diálogo
-- [ ] Aviso de API aberto: FAB some; ao fechar, volta
+- [ ] Aviso de API aberto (backend parado no local): FAB some no carregamento; ao fechar, volta
 
 ### Landing v1 (`/landing/v1`)
 

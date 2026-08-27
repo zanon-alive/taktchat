@@ -302,6 +302,19 @@
           bottom: calc(var(--taktchat-site-chat-panel-bottom, 90px) + env(safe-area-inset-bottom, 0px));
         }
       }
+      @media (prefers-reduced-motion: reduce) {
+        #taktchat-widget-button,
+        #taktchat-widget-container,
+        #taktchat-widget-close,
+        #taktchat-widget-form button,
+        #taktchat-widget-input-area button {
+          transition: none;
+        }
+        #taktchat-widget-button:hover,
+        #taktchat-widget-button:active {
+          transform: none;
+        }
+      }
     `;
     document.head.appendChild(style);
   }

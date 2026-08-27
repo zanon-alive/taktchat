@@ -13,6 +13,7 @@ import {
   shouldShowTrialChip,
 } from "./planCta";
 import { openSupportWhatsApp } from "./supportWhatsApp";
+import useSupportWhatsApp from "./useSupportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {
@@ -202,6 +203,7 @@ const Plans = ({
 }) => {
   const classes = useStyles();
   const [viewMode, setViewMode] = useState("cards");
+  const { number: supportWhatsAppNumber } = useSupportWhatsApp();
 
   const formatPrice = (amount) => {
     if (!amount) return "R$ 0,00";
@@ -247,7 +249,7 @@ const Plans = ({
 
   const handlePlanCta = () => {
     if (!signupEnabled) {
-      openSupportWhatsApp();
+      openSupportWhatsApp(supportWhatsAppNumber);
       return;
     }
     scrollToForm();

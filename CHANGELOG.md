@@ -7,6 +7,8 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- Setting pública `supportWhatsAppNumber` para o WhatsApp da vitrine (FAB, hero, tour, lead). Sem número no banco, os CTAs somem.
+- Migration liga `enableSiteChatWidget` na empresa 1 e grava o número da vitrine se ainda não existir.
 - App Android (Capacitor) com WebView em `taktchat.com.br`; link **Baixar app Android** no login (`/downloads/taktchat.apk`). iOS/IPA e push ficam para depois.
 - Modo móvel de conversas em `/tickets`: no celular (e no PWA instalado) some o menu do painel; avatar oferece **Painel completo**. PWA abre em `/tickets` (atalho `/atendimento` corrigido). Sem app nativo nem push FCM nesta entrega.
 - Tour público em `/tour` (5 slides, ~1 min): pitch (problema + para quem), prints da landing, CTA **Falar com especialista**, links na vitrine v2. `/p/tour` redireciona para `/tour`.
@@ -25,6 +27,8 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Botões do hero (**Começar agora**, **Ver em 1 min**) com contraste correto.
 - FAB WhatsApp fixo no canto inferior direito (landing, tour e login), sem entrar no fluxo da página (#40).
 - FAB WhatsApp sobe com o banner de cookies e empilha abaixo do chat do site; no celular e no tablet o hero não duplica o CTA; no login o FAB some enquanto o aviso de API está aberto (#41).
+- FAB some também se o aviso de API já está no DOM no carregamento da tela.
+- `widget.js` não anima o botão do chat do site quando `prefers-reduced-motion: reduce`.
 - Ícone e splash do app Android usam o emblema Taktchat (mesmo da PWA), não o placeholder do Capacitor.
 - Visitante em `/` voltava para `/login`: o `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30. No app Android (Capacitor) a raiz sem sessão continua em `/login`.
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).

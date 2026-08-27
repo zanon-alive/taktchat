@@ -25,7 +25,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
-import { getNumberSupport } from "../../config";
+import useSupportWhatsApp from "./useSupportWhatsApp";
 
 // Lista de países com código e bandeira
 const countries = [
@@ -202,7 +202,7 @@ const LeadForm = () => {
   const classes = useStyles();
   const [submitting, setSubmitting] = useState(false);
   const recaptchaRef = useRef(null);
-  const supportNumber = getNumberSupport() || "5514996870843";
+  const { number: supportNumber, url: supportWhatsAppUrl } = useSupportWhatsApp();
 
   const formatPhoneForWhatsApp = (phone, countryCode = "BR") => {
     // Remove todos os caracteres não numéricos
@@ -214,10 +214,9 @@ const LeadForm = () => {
     
     // Se já tem código do país, retorna como está
     if (cleaned.startsWith(countryCodeDigits)) {
-      return cleaned; // Já tem código do país: 5514996870843
+      return cleaned;
     }
     
-    // Adiciona código do país: 55 + 14996870843 = 5514996870843
     return countryCodeDigits + cleaned;
   };
 
@@ -312,7 +311,7 @@ ${values.message ? `\nMensagem: ${values.message}` : ""}`;
         const response = await api.post("/leads", {
           name: values.name,
           email: values.email,
-          phone: fullPhoneNumber, // Número completo sem máscara: 5514996870843
+          phone: fullPhoneNumber,
           countryCode: values.countryCode,
           company: values.company || null,
           message: values.message || null,
@@ -333,6 +332,10 @@ ${values.message ? `\nMensagem: ${values.message}` : ""}`;
       }
 
       const whatsappMessage = createWhatsAppMessage(values);
+      if (!supportWhatsAppUrl) {
+        toast.error("WhatsApp de contato não configurado. Tente novamente mais tarde.");
+        return;
+      }
       const whatsappNumber = formatPhoneForWhatsApp(supportNumber);
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 

@@ -1,16 +1,18 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `main`
-**Demanda:** landing / tour / FAB WhatsApp — **encerrada** (2026-08-27)
-**PRs:** https://github.com/zanon-alive/taktchat/pull/40 e https://github.com/zanon-alive/taktchat/pull/41 (mergeados, em produção)
+**Branch git:** `feat/landing-fab-melhorias`
+**Demanda anterior:** landing / tour / FAB — encerrada (#40, #41)
+**Demanda atual:** 5 melhorias pós-produção (em implementação)
 
 ## Estado
-- Menu da `/landing` visível; tour volta para a landing; CTA WhatsApp sem formulário; FAB fixo empilhado com cookies (e com o chat do site, se injetado).
-- Validado em `https://taktchat.com.br` (landing, tour, tablet, cookies). Chat do site não estava injetado nas settings. Sessão Admin no browser impediu reteste frio do `/login`.
+- Número da vitrine via setting `supportWhatsAppNumber`.
+- Migration liga `enableSiteChatWidget` na empresa 1.
+- `widget.js` com `data-api-url` e `prefers-reduced-motion`.
+- Teste frio do FAB com diálogo de API no mount.
 
 ## Não fazer
 - Deploy pelo agente.
-- Reabrir esta demanda sem pedido novo.
+- Não commitar `.kiro/`, `.telecontrol/`, rules Cursor soltas.
 
 ## MCP
-- Telecontrol desconectado nesta sessão; `analyze_demand` / `log_activity` / `log_deploy` na sync queue local (`.telecontrol/sync-queue.json`).
+- Telecontrol desconectado; sync queue local.

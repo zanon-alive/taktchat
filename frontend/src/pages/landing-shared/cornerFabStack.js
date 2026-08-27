@@ -22,3 +22,13 @@ export function computeCornerStack({
     siteChatPanelBottom: siteChatBottom + SITE_CHAT_PANEL_GAP,
   };
 }
+
+export function fabBottomCss(whatsappBottom) {
+  const bottom = Math.max(0, Number(whatsappBottom) || 0);
+  return `max(${bottom}px, env(safe-area-inset-bottom, 0px))`;
+}
+
+export function siteChatBottomCss(siteChatBottom) {
+  const bottom = Math.max(0, Number(siteChatBottom) || 0);
+  return `calc(${bottom}px + env(safe-area-inset-bottom, 0px))`;
+}
