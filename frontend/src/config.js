@@ -1,3 +1,5 @@
+import { resolveLocalDevBackendUrl } from "./utils/localDevBackend";
+
 function getConfig(name, defaultValue = null) {
     // If inside a docker container, use window.ENV
     if (window.ENV !== undefined) {
@@ -24,9 +26,9 @@ export function getBackendUrl() {
         if (hostname === 'taktchat.alivesolucoes.com.br') {
             return 'https://taktchat-api.alivesolucoes.com.br';
         }
-        // Em desenvolvimento local
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            return 'http://localhost:8080';
+        const localDev = resolveLocalDevBackendUrl(hostname);
+        if (localDev) {
+            return localDev;
         }
     }
     

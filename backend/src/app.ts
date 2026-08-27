@@ -15,6 +15,7 @@ import "./database";
 import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
 import routes from "./routes";
+import { isAllowedCorsOrigin } from "./helpers/isAllowedCorsOrigin";
 import logger from "./utils/logger";
 import { messageQueue, sendScheduledMessages } from "./queues";
 import { importContactsQueue } from "./queues/ImportContactsQueue";
@@ -84,7 +85,13 @@ app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 app.use(
   cors({
     credentials: true,
-    origin: allowedOrigins
+    origin: (origin, callback) => {
+      if (isAllowedCorsOrigin(origin, allowedOrigins)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Origem CORS nao permitida"));
+    }
   })
 );
 app.use(cookieParser());

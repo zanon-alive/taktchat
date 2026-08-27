@@ -4,6 +4,7 @@ import AppError from "../errors/AppError";
 import logger from "../utils/logger";
 import { instrument } from "@socket.io/admin-ui";
 import jwt from "jsonwebtoken";
+import { isAllowedCorsOrigin } from "../helpers/isAllowedCorsOrigin";
 import Redis from "ioredis";
 
 // Define namespaces permitidos
@@ -84,7 +85,7 @@ export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
       origin: (origin, callback) => {
-        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        if (isAllowedCorsOrigin(origin, ALLOWED_ORIGINS)) {
           callback(null, true);
         } else {
           logger.warn(`Origem não autorizada: ${origin}`);
