@@ -76,3 +76,17 @@ describe("capacitor.config.json", () => {
     expect(config.server.androidScheme).toBe("https");
   });
 });
+
+describe("ícone Android", () => {
+  it("tem launcher PNG gerado (não vazio)", () => {
+    const icon = path.join(
+      __dirname,
+      "../../../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+    );
+    const buf = fs.readFileSync(icon);
+    expect(buf.slice(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(
+      true
+    );
+    expect(buf.length).toBeGreaterThan(10000);
+  });
+});

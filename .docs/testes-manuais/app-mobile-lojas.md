@@ -16,8 +16,15 @@ curl -sI "${BASE_URL}/downloads/taktchat.apk" | head -n 15
 3. Permita instalar de fontes desconhecidas (Chrome/arquivos), se o sistema pedir.
 4. Abra o APK e instale.
 5. Login → `/tickets` (mesmo chrome compacto da PWA).
+6. Ícone na tela inicial: emblema Taktchat (bolhas azuis + verde) em fundo preto — não o “C” do Capacitor.
 
 Dentro do app Capacitor o link de download **não** aparece.
+
+## Atualizar o APK já instalado
+
+O conteúdo do site (conversas, layout) atualiza sozinho. **Ícone, splash e código nativo só mudam com APK novo.**
+
+Depois do CI republicar `android-sideload`: baixe de novo em `/login` e instale **por cima** (mesmo app, `versionCode` maior). Não precisa desinstalar. Não há auto-update da loja nesta fatia.
 
 ## iOS
 

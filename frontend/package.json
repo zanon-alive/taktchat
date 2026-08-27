@@ -110,7 +110,8 @@
     "test": "craco test",
     "analyze": "npm run build && npx source-map-explorer 'build/static/js/*.js' --no-open --html build/bundle-report.html",
     "cap:sync": "cap sync android",
-    "cap:open:android": "cap open android"
+    "cap:open:android": "cap open android",
+    "cap:icons": "bash scripts/generate-android-logo.sh && npx @capacitor/assets generate --android --iconBackgroundColor '#000000' --splashBackgroundColor '#000000' --logoSplashScale 0.4"
   },
   "eslintConfig": {
     "extends": "react-app"
