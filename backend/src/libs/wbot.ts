@@ -1375,6 +1375,10 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               
               // Monitorar se QR code foi escaneado (verificar após 5 segundos se credenciais mudaram)
               const qrMonitorInterval = setInterval(() => {
+                if (!wsocket) {
+                  clearInterval(qrMonitorInterval);
+                  return;
+                }
                 const elapsed = (Date.now() - qrTimestamp) / 1000;
                 const currentHasMeId = !!state?.creds?.me?.id;
                 const currentRegistered = state?.creds?.registered || false;
@@ -1417,6 +1421,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   });
                 wsocket.ev.removeAllListeners("connection.update");
                 wsocket.ws.close();
+                clearInterval(qrMonitorInterval);
                 wsocket = null;
                 retriesQrCodeMap.delete(id);
               } else {
