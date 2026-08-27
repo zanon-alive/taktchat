@@ -1,27 +1,16 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { makeStyles } from "@mui/styles";
 import { Fab, Tooltip } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { getNumberSupport } from "../../config";
+import { getSupportWhatsAppUrl } from "./supportWhatsApp";
 
-const useStyles = makeStyles((theme) => ({
-    fab: {
-        position: "fixed",
-        bottom: theme.spacing(4),
-        right: theme.spacing(4),
-        zIndex: 1000,
-        backgroundColor: "#25D366",
-        color: "#ffffff",
-        width: "60px",
-        height: "60px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        "&:hover": {
-            backgroundColor: "#20BA5A",
-        },
-        animation: "$pulse 2s infinite",
-    },
+const useStyles = makeStyles(() => ({
     icon: {
         fontSize: "2rem",
+    },
+    fab: {
+        animation: "$pulse 2s infinite",
     },
     "@keyframes pulse": {
         "0%": {
@@ -36,21 +25,51 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ChatWidget = () => {
+export const supportWhatsAppFabSx = {
+    position: "fixed",
+    right: "max(16px, env(safe-area-inset-right, 0px))",
+    bottom: "max(16px, env(safe-area-inset-bottom, 0px))",
+    left: "auto",
+    top: "auto",
+    zIndex: 1400,
+    width: 56,
+    height: 56,
+    backgroundColor: "#25D366",
+    color: "#ffffff",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    "&:hover": {
+        backgroundColor: "#20BA5A",
+    },
+};
+
+const ChatWidget = ({ className, sx }) => {
     const classes = useStyles();
-    const supportNumber = getNumberSupport() || "5514996870843";
 
-    const handleClick = () => {
-        const link = `https://wa.me/${supportNumber.replace(/\D/g, "")}?text=Olá! Gostaria de saber mais sobre o TaktChat.`;
-        window.open(link, "_blank");
-    };
+    if (typeof document === "undefined") {
+        return null;
+    }
 
-    return (
+    return createPortal(
         <Tooltip title="Fale conosco no WhatsApp" placement="left" arrow>
-            <Fab className={classes.fab} onClick={handleClick} aria-label="whatsapp-contact">
+            <Fab
+                className={`${classes.fab}${className ? ` ${className}` : ""}`}
+                component="a"
+                href={getSupportWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Falar no WhatsApp"
+                color="inherit"
+                sx={{
+                    "&&": {
+                        ...supportWhatsAppFabSx,
+                        ...sx,
+                    },
+                }}
+            >
                 <WhatsAppIcon className={classes.icon} />
             </Fab>
-        </Tooltip>
+        </Tooltip>,
+        document.body
     );
 };
 

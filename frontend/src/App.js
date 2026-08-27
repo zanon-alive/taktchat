@@ -30,7 +30,7 @@ import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
 import logger from "./utils/logger";
 import { resolvePublicAssetUrl } from "./utils/publicAssetUrl";
-import { isPublicMarketingPath } from "./utils/publicSitePaths";
+import { isPublicMarketingPath, shouldShowApiOfflineDialog, isDocumentationPath } from "./utils/publicSitePaths";
 
 const queryClient = new QueryClient();
 
@@ -59,15 +59,13 @@ const App = () => {
   // Estado para controlar o prompt de instalação do PWA
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
-  
-  // Verifica se está na rota de documentação
-  const isDocumentationRoute = () => {
-    const pathname = window.location.pathname;
-    return pathname === '/docs' || pathname === '/docs_admin';
-  };
+  const [routePathname, setRoutePathname] = useState(() => window.location.pathname);
+  const handlePathnameChange = useCallback((pathname) => {
+    setRoutePathname(pathname);
+  }, []);
 
-  // Não exibir prompt de instalação PWA nas páginas públicas de vendas/legais
-  const isLandingRoute = () => isPublicMarketingPath(window.location.pathname);
+  const isDocumentationRoute = isDocumentationPath(routePathname);
+  const isLandingRoute = isPublicMarketingPath(routePathname);
 
   const SESSION_DISMISS_KEY = "taktchat:pwaPromptDismissedSession";
   const DAILY_SNOOZE_KEY = "taktchat:pwaPromptSnoozeUntil";
@@ -204,15 +202,15 @@ const App = () => {
 
   // Fecha o diálogo de instalação se o usuário navegar para as rotas de documentação
   useEffect(() => {
-    if (isDocumentationRoute() && showInstallDialog) {
+    if (isDocumentationRoute && showInstallDialog) {
       setShowInstallDialog(false);
     }
-  }, [showInstallDialog]);
+  }, [isDocumentationRoute, showInstallDialog]);
 
   // Detecta quando o navegador está pronto para mostrar o prompt de instalação do PWA
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      if (shouldSkipInstallPrompt() || isDocumentationRoute()) {
+      if (shouldSkipInstallPrompt() || isDocumentationRoute) {
         return;
       }
 
@@ -228,7 +226,7 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [shouldSkipInstallPrompt]);
+  }, [isDocumentationRoute, shouldSkipInstallPrompt]);
 
   // Função para mostrar o prompt de instalação
   const showInstallPrompt = useCallback(async () => {
@@ -481,10 +479,10 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <ActiveMenuProvider>
               <div style={{ position: "relative", overflow: "visible", zIndex: 0, minHeight: "100vh" }}>
-                <Routes />
+                <Routes onPathnameChange={handlePathnameChange} />
 
                 <Dialog
-                  open={showApiStatusDialog}
+                  open={shouldShowApiOfflineDialog(routePathname, showApiStatusDialog)}
                   aria-labelledby="api-offline-dialog-title"
                   onClose={(_, reason) => {
                     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
@@ -552,7 +550,7 @@ const App = () => {
                 </Dialog>
 
                 <Dialog
-                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute() && !isLandingRoute()}
+                  open={showInstallDialog && apiStatus === "online" && !isDocumentationRoute && !isLandingRoute}
                   onClose={(event, reason) => {
                     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
                     handleRemindLaterThisSession();

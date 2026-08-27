@@ -45,33 +45,40 @@ const useStyles = makeStyles((theme) => ({
     gap: theme.spacing(0.5),
   },
   navButton: {
-    color: "#ffffff",
-    textTransform: "none",
-    fontWeight: 600,
-    fontSize: "0.95rem",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      color: "#ffffff",
+      textTransform: "none",
+      fontWeight: 600,
+      fontSize: "0.95rem",
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
   ctaButton: {
-    marginLeft: theme.spacing(1),
-    textTransform: "none",
-    fontWeight: 700,
-    backgroundColor: "#25D366",
-    color: "#ffffff",
-    "&:hover": {
-      backgroundColor: "#20BA5A",
+    "&&": {
+      marginLeft: theme.spacing(1),
+      textTransform: "none",
+      fontWeight: 700,
+      backgroundColor: "#25D366",
+      color: "#ffffff",
+      boxShadow: "none",
+      "&:hover": {
+        backgroundColor: "#20BA5A",
+      },
     },
   },
   loginButton: {
-    marginLeft: theme.spacing(1),
-    textTransform: "none",
-    fontWeight: 600,
-    color: "#ffffff",
-    borderColor: "rgba(255, 255, 255, 0.7)",
-    "&:hover": {
-      borderColor: "#ffffff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      marginLeft: theme.spacing(1),
+      textTransform: "none",
+      fontWeight: 600,
+      color: "#ffffff",
+      borderColor: "rgba(255, 255, 255, 0.7)",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
   logo: {
@@ -100,9 +107,14 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
   },
   drawerItem: {
-    color: "#ffffff",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      color: "#ffffff",
+      "& .MuiListItemText-primary": {
+        color: "#ffffff",
+      },
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
 }));
@@ -137,8 +149,12 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
       <AppBar
         position="fixed"
         elevation={0}
+        color="transparent"
         className={classes.appBar}
-        sx={{ backgroundColor: scrolled ? "rgba(30, 58, 138, 0.98)" : undefined }}
+        sx={{
+          color: "#ffffff",
+          backgroundColor: scrolled ? "rgba(30, 58, 138, 0.98)" : "rgba(30, 58, 138, 0.95)",
+        }}
       >
         <Toolbar className={classes.toolbar}>
           <Box display="flex" alignItems="center">
@@ -152,6 +168,7 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
 
           {isMobile ? (
             <IconButton
+              color="inherit"
               className={classes.menuButton}
               onClick={() => setDrawerOpen(true)}
               aria-label="Abrir menu"
@@ -164,6 +181,7 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
                 item.to ? (
                   <Button
                     key={item.to}
+                    color="inherit"
                     className={classes.navButton}
                     component={RouterLink}
                     to={item.to}
@@ -173,6 +191,7 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
                 ) : (
                   <Button
                     key={item.id}
+                    color="inherit"
                     className={classes.navButton}
                     onClick={() => handleNavClick(item.id)}
                   >
@@ -182,6 +201,7 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
               )}
               <Button
                 variant="outlined"
+                color="inherit"
                 className={classes.loginButton}
                 component={RouterLink}
                 to="/login"
@@ -190,7 +210,13 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
               </Button>
               <Button
                 variant="contained"
+                disableElevation
                 className={classes.ctaButton}
+                sx={{
+                  backgroundColor: "#25D366",
+                  color: "#ffffff",
+                  "&:hover": { backgroundColor: "#20BA5A" },
+                }}
                 onClick={() => handleNavClick(ctaTargetId)}
               >
                 Começar
@@ -227,7 +253,10 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
                 to={item.to}
                 onClick={() => setDrawerOpen(false)}
               >
-                <ListItemText primary={item.label} />
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{ sx: { color: "#ffffff" } }}
+                />
               </ListItem>
             ) : (
               <ListItem
@@ -236,7 +265,10 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
                 className={classes.drawerItem}
                 onClick={() => handleNavClick(item.id)}
               >
-                <ListItemText primary={item.label} />
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{ sx: { color: "#ffffff" } }}
+                />
               </ListItem>
             )
           )}
@@ -247,14 +279,20 @@ const LandingNav = ({ ctaTargetId = "lead-form" }) => {
             to="/login"
             onClick={() => setDrawerOpen(false)}
           >
-            <ListItemText primary="Login" />
+            <ListItemText
+              primary="Login"
+              primaryTypographyProps={{ sx: { color: "#ffffff" } }}
+            />
           </ListItem>
           <ListItem
             button
             className={classes.drawerItem}
             onClick={() => handleNavClick(ctaTargetId)}
           >
-            <ListItemText primary="Começar" />
+            <ListItemText
+              primary="Começar"
+              primaryTypographyProps={{ sx: { color: "#ffffff" } }}
+            />
           </ListItem>
         </List>
       </Drawer>

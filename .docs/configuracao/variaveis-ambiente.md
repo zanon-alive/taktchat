@@ -51,6 +51,7 @@
 | `REACT_APP_PRIMARY_COLOR` | Cor principal exibida quando não houver personalização vinda do backend | `#2563EB` |
 | `REACT_APP_PRIMARY_DARK` | Variante escura da cor principal | `#1E3A8A` |
 | `REACT_APP_SENTRY_DSN` | Observabilidade opcional | |
+| `REACT_APP_NUMBER_SUPPORT` | WhatsApp de suporte da vitrine (landing/tour), só dígitos | `5514996870843` |
 | `PUBLIC_URL` | URL pública usada pelo build | |
 | `REACT_APP_ANDROID_APK_URL` | URL do APK no login (opcional) | `/downloads/taktchat.apk` |
 

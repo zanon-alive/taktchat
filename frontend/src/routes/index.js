@@ -1,5 +1,5 @@
 import React, { useEffect, useState, lazy } from "react";
-import { BrowserRouter, Switch, Route as RouterRoute, Redirect } from "react-router-dom";
+import { BrowserRouter, Switch, Route as RouterRoute, Redirect, useLocation } from "react-router-dom";
 
 import LoggedInLayout from "../layout";
 import { AuthProvider } from "../context/Auth/AuthContext";
@@ -65,7 +65,17 @@ const ApresentacoesHub = lazy(() => import("../pages/Apresentacoes"));
 const ApresentacaoDeck = lazy(() => import("../pages/Apresentacoes/Deck"));
 
 
-const Routes = () => {
+const PathnameReporter = ({ onPathnameChange }) => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (onPathnameChange) {
+      onPathnameChange(pathname);
+    }
+  }, [onPathnameChange, pathname]);
+  return null;
+};
+
+const Routes = ({ onPathnameChange }) => {
   const [showCampaigns, setShowCampaigns] = useState(false);
 
   useEffect(() => {
@@ -77,6 +87,7 @@ const Routes = () => {
 
   return (
     <BrowserRouter>
+      <PathnameReporter onPathnameChange={onPathnameChange} />
       <Switch>
         <RouterRoute exact path="/landing" component={LandingPage} />
         <RouterRoute exact path="/landing/v1" component={LandingPageV1} />

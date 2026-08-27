@@ -2,10 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link as RouterLink, useHistory, useLocation } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ChatWidget from "../landing-shared/ChatWidget";
+import { getSupportWhatsAppUrl } from "../landing-shared/supportWhatsApp";
 import {
+  LANDING_FAQ_PATH,
+  LANDING_PATH,
+  LANDING_PLANS_PATH,
   parseTourSlideParam,
   tourSearchForIndex,
   tourSlides,
@@ -19,13 +25,17 @@ const SWIPE_PX = 50;
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    height: "100vh",
     minHeight: "100vh",
+    maxHeight: "100vh",
+    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
     background: "linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #1e293b 100%)",
     color: "#ffffff",
   },
   header: {
+    flexShrink: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -34,22 +44,49 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(1.5, 4),
     },
   },
+  headerLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1.5),
+  },
   logo: {
     height: 36,
     cursor: "pointer",
+    display: "block",
+  },
+  headerRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
+  backButton: {
+    "&&": {
+      textTransform: "none",
+      fontWeight: 700,
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
+    },
   },
   loginButton: {
-    textTransform: "none",
-    fontWeight: 600,
-    color: "#ffffff",
-    borderColor: "rgba(255, 255, 255, 0.7)",
-    "&:hover": {
-      borderColor: "#ffffff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      textTransform: "none",
+      fontWeight: 600,
+      color: "#ffffff",
+      borderColor: "rgba(255, 255, 255, 0.7)",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
   stage: {
     flex: 1,
+    minHeight: 0,
+    overflow: "hidden",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -62,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
   },
   slide: {
     width: "min(1100px, 100%)",
-    maxHeight: "calc(100vh - 140px)",
+    maxHeight: "100%",
     overflow: "auto",
   },
   kicker: {
@@ -151,27 +188,62 @@ const useStyles = makeStyles((theme) => ({
       maxHeight: "38vh",
     },
   },
+  ctaRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(1.5),
+    marginTop: theme.spacing(1),
+  },
   ctaButton: {
-    textTransform: "none",
-    fontWeight: 700,
-    backgroundColor: "#25D366",
-    color: "#ffffff",
-    padding: theme.spacing(1.5, 4),
-    borderRadius: 12,
-    fontSize: "1.05rem",
-    "&:hover": {
-      backgroundColor: "#20BA5A",
+    "&&": {
+      textTransform: "none",
+      fontWeight: 700,
+      backgroundColor: "#25D366",
+      color: "#ffffff",
+      padding: theme.spacing(1.5, 4),
+      borderRadius: 12,
+      fontSize: "1.05rem",
+      "&:hover": {
+        backgroundColor: "#20BA5A",
+      },
+    },
+  },
+  secondaryCta: {
+    "&&": {
+      textTransform: "none",
+      fontWeight: 700,
+      color: "#ffffff",
+      borderColor: "rgba(255,255,255,0.85)",
+      padding: theme.spacing(1.5, 4),
+      borderRadius: 12,
+      fontSize: "1.05rem",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255,255,255,0.1)",
+      },
     },
   },
   footer: {
+    flexShrink: 0,
     display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    alignItems: "stretch",
     gap: theme.spacing(1),
     padding: theme.spacing(1.5, 2, 2.5),
     [theme.breakpoints.up("md")]: {
       padding: theme.spacing(1.5, 4, 3),
     },
+  },
+  footerNav: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: theme.spacing(1),
+  },
+  footerShortcuts: {
+    display: "flex",
+    justifyContent: "center",
+    gap: theme.spacing(1),
   },
   meta: {
     fontVariantNumeric: "tabular-nums",
@@ -194,6 +266,8 @@ const useStyles = makeStyles((theme) => ({
 
 const PublicTour = () => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const history = useHistory();
   const location = useLocation();
   const total = tourSlides.length;
@@ -209,6 +283,14 @@ const PublicTour = () => {
     [history, total]
   );
 
+  const goNext = useCallback(() => {
+    if (index >= total - 1) {
+      history.push(LANDING_PATH);
+      return;
+    }
+    goTo(index + 1);
+  }, [goTo, history, index, total]);
+
   useEffect(() => {
     const fromUrl = parseTourSlideParam(location.search, total);
     setIndex((current) => (current === fromUrl ? current : fromUrl));
@@ -216,15 +298,19 @@ const PublicTour = () => {
 
   useEffect(() => {
     const onKey = (event) => {
+      if (event.key === "Escape") {
+        history.push(LANDING_PATH);
+        return;
+      }
       if (event.key === "ArrowRight") {
-        goTo(index + 1);
+        goNext();
       } else if (event.key === "ArrowLeft") {
         goTo(index - 1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goTo, index]);
+  }, [goNext, goTo, history, index]);
 
   const onTouchStart = (event) => {
     touchStartX.current = event.changedTouches[0].clientX;
@@ -237,7 +323,7 @@ const PublicTour = () => {
     const delta = event.changedTouches[0].clientX - touchStartX.current;
     touchStartX.current = null;
     if (delta <= -SWIPE_PX) {
-      goTo(index + 1);
+      goNext();
     } else if (delta >= SWIPE_PX) {
       goTo(index - 1);
     }
@@ -268,17 +354,50 @@ const PublicTour = () => {
       </Helmet>
       <Box className={classes.root}>
         <header className={classes.header}>
-          <RouterLink to="/landing" aria-label="Voltar para a landing">
-            <img src="/logo_quadrado.png" alt="TaktChat" className={classes.logo} />
-          </RouterLink>
-          <Button
-            variant="outlined"
-            className={classes.loginButton}
-            component={RouterLink}
-            to="/login"
-          >
-            Login
-          </Button>
+          <Box className={classes.headerLeft}>
+            <RouterLink to={LANDING_PATH} aria-label="TaktChat — ir para a landing">
+              <img src="/logo_quadrado.png" alt="TaktChat" className={classes.logo} />
+            </RouterLink>
+            <Button
+              color="inherit"
+              className={classes.backButton}
+              component={RouterLink}
+              to={LANDING_PATH}
+            >
+              Voltar
+            </Button>
+          </Box>
+          <Box className={classes.headerRight}>
+            {!isMobile ? (
+              <>
+                <Button
+                  color="inherit"
+                  className={classes.backButton}
+                  component={RouterLink}
+                  to={LANDING_PLANS_PATH}
+                >
+                  Planos
+                </Button>
+                <Button
+                  color="inherit"
+                  className={classes.backButton}
+                  component={RouterLink}
+                  to={LANDING_FAQ_PATH}
+                >
+                  FAQ
+                </Button>
+              </>
+            ) : null}
+            <Button
+              variant="outlined"
+              color="inherit"
+              className={classes.loginButton}
+              component={RouterLink}
+              to="/login"
+            >
+              Login
+            </Button>
+          </Box>
         </header>
 
         <Box
@@ -315,13 +434,27 @@ const PublicTour = () => {
                   </div>
                 ) : null}
                 {slide.ctaTo ? (
-                  <Button
-                    className={classes.ctaButton}
-                    component={RouterLink}
-                    to={slide.ctaTo}
-                  >
-                    {slide.ctaLabel}
-                  </Button>
+                  <Box className={classes.ctaRow}>
+                    <Button
+                      className={classes.ctaButton}
+                      component="a"
+                      href={getSupportWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<WhatsAppIcon />}
+                    >
+                      Falar no WhatsApp
+                    </Button>
+                    <Button
+                      className={classes.secondaryCta}
+                      variant="outlined"
+                      color="inherit"
+                      component={RouterLink}
+                      to={slide.ctaTo}
+                    >
+                      {slide.ctaLabel}
+                    </Button>
+                  </Box>
                 ) : null}
               </>
             )}
@@ -329,26 +462,59 @@ const PublicTour = () => {
         </Box>
 
         <footer className={classes.footer}>
-          <IconButton
-            className={classes.navBtn}
-            onClick={() => goTo(index - 1)}
-            disabled={index === 0}
-            aria-label="Slide anterior"
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-          <span className={classes.meta}>
-            {index + 1} / {total} · ±1 min
-          </span>
-          <IconButton
-            className={classes.navBtn}
-            onClick={() => goTo(index + 1)}
-            disabled={index === total - 1}
-            aria-label="Próximo slide"
-          >
-            <ChevronRightIcon />
-          </IconButton>
+          <Box className={classes.footerNav}>
+            <IconButton
+              className={classes.navBtn}
+              onClick={() => goTo(index - 1)}
+              disabled={index === 0}
+              aria-label="Slide anterior"
+            >
+              <ChevronLeftIcon />
+            </IconButton>
+            <span className={classes.meta}>
+              {index + 1} / {total} · ±1 min
+            </span>
+            {index >= total - 1 ? (
+              <IconButton
+                className={classes.navBtn}
+                component={RouterLink}
+                to={LANDING_PATH}
+                aria-label="Ir para a landing"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            ) : (
+              <IconButton
+                className={classes.navBtn}
+                onClick={goNext}
+                aria-label="Próximo slide"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            )}
+          </Box>
+          {isMobile ? (
+            <Box className={classes.footerShortcuts}>
+              <Button
+                color="inherit"
+                className={classes.backButton}
+                component={RouterLink}
+                to={LANDING_PLANS_PATH}
+              >
+                Planos
+              </Button>
+              <Button
+                color="inherit"
+                className={classes.backButton}
+                component={RouterLink}
+                to={LANDING_FAQ_PATH}
+              >
+                FAQ
+              </Button>
+            </Box>
+          ) : null}
         </footer>
+        <ChatWidget sx={{ bottom: "max(88px, env(safe-area-inset-bottom, 0px))" }} />
       </Box>
     </>
   );

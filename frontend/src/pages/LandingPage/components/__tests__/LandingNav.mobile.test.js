@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StylesProvider, createGenerateClassName } from "@mui/styles";
@@ -8,17 +8,17 @@ jest.mock("@mui/material", () => {
   const actual = jest.requireActual("@mui/material");
   return {
     ...actual,
-    useMediaQuery: () => false,
+    useMediaQuery: () => true,
   };
 });
 
 import LandingNav from "../LandingNav";
 
 const theme = createTheme();
-const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "nav" });
+const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "navm" });
 
-describe("LandingNav", () => {
-  it("expõe o menu e o Login no topo, sem depender de scroll", () => {
+describe("LandingNav no mobile", () => {
+  it("abre o drawer com os itens do menu em texto visível", () => {
     render(
       <StylesProvider generateClassName={generateClassName}>
         <ThemeProvider theme={theme}>
@@ -29,13 +29,12 @@ describe("LandingNav", () => {
       </StylesProvider>
     );
 
-    expect(screen.getByRole("button", { name: "Funcionalidades" })).toBeVisible();
+    fireEvent.click(screen.getByLabelText("Abrir menu"));
+    expect(screen.getByText("Funcionalidades")).toBeVisible();
     expect(screen.getByRole("link", { name: "Tour" })).toHaveAttribute("href", "/tour");
-    expect(screen.getByRole("button", { name: "Planos" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "FAQ" })).toBeVisible();
-    const login = screen.getByRole("link", { name: "Login" });
-    expect(login).toHaveAttribute("href", "/login");
-    expect(login).toBeVisible();
-    expect(screen.getByRole("button", { name: "Começar" })).toBeVisible();
+    expect(screen.getByText("Planos")).toBeVisible();
+    expect(screen.getByText("FAQ")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Login" })).toHaveAttribute("href", "/login");
+    expect(screen.getByText("Começar")).toBeVisible();
   });
 });
