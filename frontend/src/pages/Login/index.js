@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Button, TextField, Typography, Fab, Tooltip } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { IconButton, InputAdornment, Switch } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
@@ -8,10 +8,10 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { getNumberSupport, getBackendUrl } from "../../config";
+import { getBackendUrl } from "../../config";
+import ChatWidget from "../landing-shared/ChatWidget";
 import {
   getAndroidApkUrl,
   shouldShowAndroidDownloadLink,
@@ -131,35 +131,6 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     marginTop: "10px",
-  },
-  fab: {
-    position: "fixed",
-    bottom: theme.spacing(4),
-    right: theme.spacing(4),
-    zIndex: 1000,
-    backgroundColor: "#25D366",
-    color: "#ffffff",
-    width: "60px",
-    height: "60px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    "&:hover": {
-      backgroundColor: "#20BA5A",
-    },
-    animation: "$pulse 2s infinite",
-  },
-  icon: {
-    fontSize: "2rem",
-  },
-  "@keyframes pulse": {
-    "0%": {
-      boxShadow: "0 0 0 0 rgba(37, 211, 102, 0.7)",
-    },
-    "70%": {
-      boxShadow: "0 0 0 15px rgba(37, 211, 102, 0)",
-    },
-    "100%": {
-      boxShadow: "0 0 0 0 rgba(37, 211, 102, 0)",
-    },
   },
   docsLink: {
     position: "absolute",
@@ -361,19 +332,7 @@ const Login = () => {
             </div>
           )}
         </form>
-        <Tooltip title="Fale conosco no WhatsApp" placement="left" arrow>
-          <Fab 
-            className={classes.fab} 
-            onClick={() => {
-              const supportNumber = getNumberSupport() || "5514996870843";
-              const link = `https://wa.me/${supportNumber.replace(/\D/g, "")}?text=Olá! Gostaria de saber mais sobre o TaktChat.`;
-              window.open(link, "_blank");
-            }} 
-            aria-label="whatsapp-contact"
-          >
-            <WhatsAppIcon className={classes.icon} />
-          </Fab>
-        </Tooltip>
+        <ChatWidget />
       </div>
     </>
   );

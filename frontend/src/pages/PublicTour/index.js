@@ -223,12 +223,6 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  whatsappFab: {
-    bottom: theme.spacing(11),
-    [theme.breakpoints.down("md")]: {
-      bottom: theme.spacing(16),
-    },
-  },
   footer: {
     flexShrink: 0,
     display: "flex",
@@ -520,7 +514,7 @@ const PublicTour = () => {
             </Box>
           ) : null}
         </footer>
-        <ChatWidget className={classes.whatsappFab} />
+        <ChatWidget sx={{ bottom: "max(88px, env(safe-area-inset-bottom, 0px))" }} />
       </Box>
     </>
   );

@@ -9,7 +9,7 @@ const generateClassName = createGenerateClassName({ disableGlobal: true, product
 
 describe("ChatWidget", () => {
   it("abre o WhatsApp de suporte sem passar pelo formulário", () => {
-    render(
+    const { container } = render(
       <StylesProvider generateClassName={generateClassName}>
         <ThemeProvider theme={theme}>
           <ChatWidget />
@@ -17,9 +17,9 @@ describe("ChatWidget", () => {
       </StylesProvider>
     );
 
-    expect(screen.getByRole("link", { name: "Falar no WhatsApp" })).toHaveAttribute(
-      "href",
-      expect.stringMatching(/^https:\/\/wa\.me\/\d+\?text=/)
-    );
+    const link = screen.getByRole("link", { name: "Falar no WhatsApp" });
+    expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/\d+\?text=/));
+    expect(container.contains(link)).toBe(false);
+    expect(document.body.contains(link)).toBe(true);
   });
 });
