@@ -3,7 +3,7 @@
 **Branch git:** `fix/landing-fab-pendencias`
 
 ## Estado
-- Pendências pós-PR #40: empilhar FAB com cookies e chat do site; hero sem WhatsApp duplicado no mobile; `prefers-reduced-motion`.
+- Branch `fix/landing-fab-pendencias`: FAB empilhado; hero sem WhatsApp no tablet/celular; FAB some no login com aviso de API.
 
 ## Não fazer
 - Deploy pelo agente. Merge só com OK do revisor.

@@ -24,7 +24,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Modal de API acompanha a rota SPA (landing → login).
 - Botões do hero (**Começar agora**, **Ver em 1 min**) com contraste correto.
 - FAB WhatsApp fixo no canto inferior direito (landing, tour e login), sem entrar no fluxo da página.
-- FAB WhatsApp sobe com o banner de cookies e empilha abaixo do chat do site; no mobile o hero não duplica o CTA.
+- FAB WhatsApp sobe com o banner de cookies e empilha abaixo do chat do site; no celular e no tablet o hero não duplica o CTA; no login o FAB some enquanto o aviso de API está aberto.
 - Ícone e splash do app Android usam o emblema Taktchat (mesmo da PWA), não o placeholder do Capacitor.
 - Visitante em `/` voltava para `/login`: o `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30. No app Android (Capacitor) a raiz sem sessão continua em `/login`.
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).

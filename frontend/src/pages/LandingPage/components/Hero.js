@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme) => ({
 const Hero = ({ ctaTargetId = "lead-form" }) => {
   const classes = useStyles();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isCompact = useMediaQuery(theme.breakpoints.down("md"));
 
   const scrollToCta = () => {
     const formElement = document.getElementById(ctaTargetId);
@@ -166,7 +166,7 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
               O cliente continua no WhatsApp dele. A empresa ganha fila, dono e histórico.
             </p>
             <Box className={classes.ctaContainer}>
-              {!isMobile ? (
+              {!isCompact ? (
                 <Button
                   className={classes.ctaButton}
                   startIcon={<WhatsAppIcon />}

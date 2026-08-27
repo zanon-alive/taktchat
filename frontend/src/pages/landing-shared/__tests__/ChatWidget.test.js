@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StylesProvider, createGenerateClassName } from "@mui/styles";
 import ChatWidget from "../ChatWidget";
+import { API_OFFLINE_DIALOG_TITLE_ID } from "../../../utils/publicSitePaths";
 
 const theme = createTheme();
 const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "wa" });
@@ -20,6 +21,7 @@ describe("ChatWidget", () => {
   afterEach(() => {
     document.querySelector(".taktchat-cookie-banner")?.remove();
     document.getElementById("taktchat-widget-button")?.remove();
+    document.getElementById(API_OFFLINE_DIALOG_TITLE_ID)?.remove();
     document.documentElement.style.removeProperty("--taktchat-site-chat-bottom");
     document.documentElement.style.removeProperty("--taktchat-site-chat-panel-bottom");
   });
@@ -69,6 +71,20 @@ describe("ChatWidget", () => {
       expect(document.documentElement.style.getPropertyValue("--taktchat-site-chat-bottom")).toBe(
         "84px"
       );
+    });
+  });
+
+  it("esconde o FAB enquanto o aviso de API indisponível está aberto", async () => {
+    renderFab();
+    expect(screen.getByRole("link", { name: "Falar no WhatsApp" })).toBeInTheDocument();
+
+    const title = document.createElement("h2");
+    title.id = API_OFFLINE_DIALOG_TITLE_ID;
+    title.textContent = "Servidor de API indisponível";
+    document.body.appendChild(title);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("link", { name: "Falar no WhatsApp" })).not.toBeInTheDocument();
     });
   });
 });

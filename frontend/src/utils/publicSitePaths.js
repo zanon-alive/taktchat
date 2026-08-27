@@ -25,6 +25,8 @@ export function isPublicMarketingPath(pathname) {
   );
 }
 
+export const API_OFFLINE_DIALOG_TITLE_ID = "api-offline-dialog-title";
+
 export function shouldShowApiOfflineDialog(pathname, isOpen) {
   return Boolean(isOpen) && !isPublicMarketingPath(pathname);
 }

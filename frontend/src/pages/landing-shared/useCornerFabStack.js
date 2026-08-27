@@ -4,18 +4,23 @@ import {
   SITE_CHAT_BUTTON_ID,
   computeCornerStack,
 } from "./cornerFabStack";
+import { API_OFFLINE_DIALOG_TITLE_ID } from "../../utils/publicSitePaths";
 
 function measureCornerState() {
   const banner = document.querySelector(COOKIE_BANNER_SELECTOR);
   return {
     cookieHeight: banner ? Math.ceil(banner.getBoundingClientRect().height) : 0,
     siteChatPresent: Boolean(document.getElementById(SITE_CHAT_BUTTON_ID)),
+    apiDialogOpen: Boolean(document.getElementById(API_OFFLINE_DIALOG_TITLE_ID)),
   };
 }
 
 export default function useCornerFabStack({ minBottom } = {}) {
   const [cookieHeight, setCookieHeight] = useState(0);
   const [siteChatPresent, setSiteChatPresent] = useState(false);
+  const [apiDialogOpen, setApiDialogOpen] = useState(() =>
+    typeof document !== "undefined" && Boolean(document.getElementById(API_OFFLINE_DIALOG_TITLE_ID))
+  );
 
   useEffect(() => {
     let observedBanner = null;
@@ -25,6 +30,7 @@ export default function useCornerFabStack({ minBottom } = {}) {
       const next = measureCornerState();
       setCookieHeight(next.cookieHeight);
       setSiteChatPresent(next.siteChatPresent);
+      setApiDialogOpen(next.apiDialogOpen);
 
       const banner = document.querySelector(COOKIE_BANNER_SELECTOR);
       if (typeof ResizeObserver === "function" && banner && banner !== observedBanner) {
@@ -63,5 +69,5 @@ export default function useCornerFabStack({ minBottom } = {}) {
     };
   }, [stack.siteChatBottom, stack.siteChatPanelBottom]);
 
-  return stack;
+  return { ...stack, apiDialogOpen };
 }

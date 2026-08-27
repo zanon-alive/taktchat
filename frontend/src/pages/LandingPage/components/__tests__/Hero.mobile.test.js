@@ -17,8 +17,8 @@ import Hero from "../Hero";
 const theme = createTheme();
 const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "herom" });
 
-describe("Hero da landing no mobile", () => {
-  it("deixa o WhatsApp só no FAB", () => {
+describe("Hero da landing no tablet/mobile", () => {
+  it("deixa o WhatsApp só no FAB abaixo de md", () => {
     render(
       <StylesProvider generateClassName={generateClassName}>
         <ThemeProvider theme={theme}>

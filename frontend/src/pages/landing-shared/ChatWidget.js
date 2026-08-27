@@ -48,9 +48,9 @@ export const supportWhatsAppFabSx = {
 
 const ChatWidget = ({ className, sx, minBottom }) => {
     const classes = useStyles();
-    const { whatsappBottom } = useCornerFabStack({ minBottom });
+    const { whatsappBottom, apiDialogOpen } = useCornerFabStack({ minBottom });
 
-    if (typeof document === "undefined") {
+    if (typeof document === "undefined" || apiDialogOpen) {
         return null;
     }
 
