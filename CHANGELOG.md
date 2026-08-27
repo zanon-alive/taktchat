@@ -7,6 +7,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- App Android (Capacitor) com WebView em `taktchat.com.br`; link **Baixar app Android** no login (`/downloads/taktchat.apk`). iOS/IPA e push ficam para depois.
 - Modo móvel de conversas em `/tickets`: no celular (e no PWA instalado) some o menu do painel; avatar oferece **Painel completo**. PWA abre em `/tickets` (atalho `/atendimento` corrigido). Sem app nativo nem push FCM nesta entrega.
 - Tour público em `/tour` (5 slides, ~1 min): pitch (problema + para quem), prints da landing, CTA **Falar com especialista**, links na vitrine v2. `/p/tour` redireciona para `/tour`.
 - Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, página `/lgpd` e redirect de visitante `/` → `/landing` (#30).

@@ -1,0 +1,15 @@
+{
+  "appId": "br.com.taktchat.app",
+  "appName": "Taktchat",
+  "webDir": "build",
+  "server": {
+    "url": "https://taktchat.com.br",
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#2563EB"
+    }
+  }
+}

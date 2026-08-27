@@ -5,6 +5,11 @@
   "versionSystem": "2.0.0",
   "private": true,
   "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/app": "^6.0.3",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/status-bar": "^6.0.3",
     "@date-io/date-fns": "^2.16.0",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.10.5",
@@ -103,7 +108,9 @@
     "start": "node ./scripts/check_and_kill_port.js && node ./scripts/start-dev.js",
     "build": "NODE_OPTIONS=--max-old-space-size=8192 craco build",
     "test": "craco test",
-    "analyze": "npm run build && npx source-map-explorer 'build/static/js/*.js' --no-open --html build/bundle-report.html"
+    "analyze": "npm run build && npx source-map-explorer 'build/static/js/*.js' --no-open --html build/bundle-report.html",
+    "cap:sync": "cap sync android",
+    "cap:open:android": "cap open android"
   },
   "eslintConfig": {
     "extends": "react-app"

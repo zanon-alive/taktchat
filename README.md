@@ -19,7 +19,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 - Multi-empresa nativa, perfis e permissões granulares, painel financeiro e billing.
 - Webhooks, APIs externas, monitoramento (audit logs, announcements) e recursos de AI/RAG.
 - **WhatsApp Dual Channel**: Suporte simultâneo a Baileys (gratuito) e WhatsApp Business API Oficial (Meta, pago).
-- **Atendimento no celular**: em `/tickets` no viewport estreito (e no PWA na tela inicial) o atendente vê só conversas, sem o menu administrativo. O painel completo continua no desktop e pelo item **Painel completo** no avatar. Não é app nativo das lojas nesta versão.
+- **Atendimento no celular**: em `/tickets` no viewport estreito (e no PWA na tela inicial) o atendente vê só conversas, sem o menu administrativo. No login há o link **Baixar app Android** (`/downloads/taktchat.apk`). iOS nativo fica para quando houver Mac.
 - **Landing Page de Vendas**: Página pública de apresentação do produto com coleta de leads, formulário de revendedor e integração WhatsApp.
 - **EntrySource e Chat do Site**: Rastreamento de origem nos tickets (lead, revendedor, site_chat, whatsapp); canais configuráveis; widget de chat embarcável para sites externos; API pública e token por empresa.
 - **Governança Multi-Empresa e Whitelabel**: Hierarquia plataforma → whitelabels → clientes; visibilidade e CRUD por nível (empresas, planos, licenças); dashboards e menus por perfil; relatório de cobrança por parceiro (`/partner-billing-report`) e registro de snapshots; cadastro direto na landing e cadastro por link do parceiro (`/signup-partner`); bloqueio por cobrança (plataforma suspende parceiro; parceiro bloqueia/libera empresas-filhas). Fase 1 e Fase 2 concluídas.

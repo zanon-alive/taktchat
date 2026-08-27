@@ -1,12 +1,12 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `feat/app-mobile-conversas`
+**Branch git:** `feat/app-mobile-lojas`
 
 ## Estado
-- Decisão: **PWA é a primeira entrega**. Lojas/push = demanda seguinte.
-- Código da inbox móvel commitado (ou a commitar nesta sessão). Sem PR automático.
+- Fatia 1 commitada nesta branch: Capacitor Android, link **Baixar app Android** no login, CI do APK (`android-sideload`).
+- iOS/IPA e push: fora. PWA no iPhone continua válida.
+- Após merge: esperar workflows frontend GHCR + `build-taktchat-android-apk` e o Portainer; aí o link `/downloads/taktchat.apk` funciona.
 
 ## Não fazer
-- Capacitor, lojas, push FCM nesta branch.
-- Reescrever o chat em React Native.
-- Merge/deploy sem pedido.
+- Capacitor iOS, Play/App Store, FCM/OneSignal.
+- Reativar service worker. Deploy pelo agente.
