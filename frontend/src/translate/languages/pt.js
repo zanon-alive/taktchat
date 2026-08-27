@@ -990,6 +990,8 @@ const messages = {
           user: {
             profile: "Perfil",
             logout: "Sair",
+            fullPanel: "Painel completo",
+            toggleTheme: "Alternar tema",
             message: "Olá",
             messageEnd: "seja bem-vindo a",
             active: "Ativo até",

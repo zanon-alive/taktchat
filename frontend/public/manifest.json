@@ -1,6 +1,6 @@
 {
-	"short_name": "Taktchat_Flow",
-	"name": "Taktchat_Flow",
+	"short_name": "Taktchat",
+	"name": "Taktchat",
 	"icons": [
 		{
 			"src": "favicon.ico",
@@ -19,21 +19,21 @@
 			"purpose": "any maskable"
 		}
 	],
-	"start_url": ".",
+	"start_url": "/tickets",
 	"display": "standalone",
 	"theme_color": "#2563EB",
 	"background_color": "#FFFFFF",
 	"prefer_related_applications": false,
 	"categories": ["business", "productivity"],
-	"description": "Sistema de Multi-Atendimento para WhatsApp",
+	"description": "Atendimento WhatsApp no celular — conversas do Taktchat",
 	"orientation": "any",
 	"scope": "/",
 	"shortcuts": [
 		{
-			"name": "Iniciar atendimento",
-			"short_name": "Atendimento",
-			"description": "Iniciar novo atendimento",
-			"url": "/atendimento"
+			"name": "Atendimentos",
+			"short_name": "Atendimentos",
+			"description": "Abrir a lista de conversas",
+			"url": "/tickets"
 		}
 	]
 }

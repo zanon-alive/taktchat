@@ -24,7 +24,7 @@ Visitante sem sessão em `/` é redirecionado para `/landing`. Quem já autentic
 | Área | Rotas principais | Menu e gates |
 |---|---|---|
 | Gestão | `/`, `/moments` | `admin`/`super` ou flags legadas de dashboard/tempo real |
-| Atendimento | `/tickets/:ticketId?`, `/quick-messages` | Permissões `tickets.view` e `quick-messages.view` |
+| Atendimento | `/tickets/:ticketId?`, `/quick-messages` | Permissões `tickets.view` e `quick-messages.view`. Em viewport `< md` (e no PWA standalone) `/tickets` usa chrome compacto: sem drawer, AppBar com logo/notificações/avatar; avatar tem **Painel completo** (`/`). O PWA (`manifest.json`) abre em `/tickets`. |
 | Kanban | `/kanban`, `/Kanban`, `/kanban/stats` | Plano `useKanban` + `kanban.view` |
 | Contatos | `/contacts`, `/contacts/import`, `/tags` | Permissões de contatos/tags; importação não tem item próprio no menu |
 | Agenda e chat | `/schedules`, `/chats/:id?` | `useSchedules`/`useInternalChat` + permissão |

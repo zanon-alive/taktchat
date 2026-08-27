@@ -1,10 +1,12 @@
 # Taktchat — continuidade de sessão
 
-**Branch:** `feat/landing-tour-publico`
+**Branch git:** `feat/app-mobile-conversas`
 
 ## Estado
-- Tour público `/tour` implementado (5 slides + pitch). Commit e PR desta sessão.
+- Decisão: **PWA é a primeira entrega**. Lojas/push = demanda seguinte.
+- Código da inbox móvel commitado (ou a commitar nesta sessão). Sem PR automático.
 
 ## Não fazer
-- Expor `/apresentacoes` sem login.
-- Criar pasta `public/tour/`.
+- Capacitor, lojas, push FCM nesta branch.
+- Reescrever o chat em React Native.
+- Merge/deploy sem pedido.
