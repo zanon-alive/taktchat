@@ -1,9 +1,13 @@
-import { parseTourSlideParam, tourSearchForIndex, tourSlides } from "../slides";
+import { LANDING_FAQ_PATH, LANDING_PATH, LANDING_PLANS_PATH, parseTourSlideParam, tourSearchForIndex, tourSlides, TOUR_LEAD_PATH } from "../slides";
 
 describe("slides do tour público", () => {
   it("tem 5 slides e CTA só no último", () => {
     expect(tourSlides).toHaveLength(5);
     expect(tourSlides.filter((slide) => slide.ctaTo).map((slide) => slide.id)).toEqual(["ao-vivo"]);
+    expect(tourSlides.find((slide) => slide.ctaTo).ctaTo).toBe(TOUR_LEAD_PATH);
+    expect(TOUR_LEAD_PATH).toBe(`${LANDING_PATH}#lead-form`);
+    expect(LANDING_PLANS_PATH).toBe(`${LANDING_PATH}#planos`);
+    expect(LANDING_FAQ_PATH).toBe(`${LANDING_PATH}#faq`);
     expect(tourSlides[0].audience).toMatch(/mais de uma pessoa no mesmo número/);
     expect(tourSlides[0].oneLiner).toMatch(/não muda de app/);
     expect(tourSlides.some((slide) => slide.image && slide.image.includes("kanban"))).toBe(false);

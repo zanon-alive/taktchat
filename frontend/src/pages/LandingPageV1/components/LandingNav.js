@@ -51,12 +51,14 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
   },
   navButton: {
-    color: "#ffffff",
-    textTransform: "none",
-    fontWeight: 600,
-    fontSize: "0.9rem",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      color: "#ffffff",
+      textTransform: "none",
+      fontWeight: 600,
+      fontSize: "0.9rem",
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
   logo: {
@@ -84,20 +86,27 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
   },
   drawerItem: {
-    color: "#ffffff",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      color: "#ffffff",
+      "& .MuiListItemText-primary": {
+        color: "#ffffff",
+      },
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
   loginButton: {
-    marginLeft: theme.spacing(1),
-    textTransform: "none",
-    fontWeight: 600,
-    color: "#ffffff",
-    borderColor: "rgba(255, 255, 255, 0.7)",
-    "&:hover": {
-      borderColor: "#ffffff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      marginLeft: theme.spacing(1),
+      textTransform: "none",
+      fontWeight: 600,
+      color: "#ffffff",
+      borderColor: "rgba(255, 255, 255, 0.7)",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
 }));
@@ -132,8 +141,12 @@ const LandingNav = () => {
       <AppBar
         position="fixed"
         elevation={0}
+        color="transparent"
         className={classes.appBar}
-        sx={{ backgroundColor: scrolled ? "rgba(30, 58, 138, 0.98)" : undefined }}
+        sx={{
+          color: "#ffffff",
+          backgroundColor: scrolled ? "rgba(30, 58, 138, 0.98)" : "rgba(30, 58, 138, 0.95)",
+        }}
       >
         <Toolbar className={classes.toolbar}>
           <Box display="flex" alignItems="center">
@@ -148,6 +161,7 @@ const LandingNav = () => {
 
           {isMobile ? (
             <IconButton
+              color="inherit"
               className={classes.menuButton}
               onClick={() => setDrawerOpen(true)}
               aria-label="Abrir menu"
@@ -159,6 +173,7 @@ const LandingNav = () => {
               {menuItems.map((item) => (
                 <Button
                   key={item.id}
+                  color="inherit"
                   className={classes.navButton}
                   onClick={() => handleNavClick(item.id)}
                 >
@@ -167,6 +182,7 @@ const LandingNav = () => {
               ))}
               <Button
                 variant="outlined"
+                color="inherit"
                 className={classes.loginButton}
                 component={RouterLink}
                 to="/login"
@@ -202,7 +218,10 @@ const LandingNav = () => {
               className={classes.drawerItem}
               onClick={() => handleNavClick(item.id)}
             >
-              <ListItemText primary={item.label} />
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{ sx: { color: "#ffffff" } }}
+              />
             </ListItem>
           ))}
           <ListItem
@@ -212,7 +231,10 @@ const LandingNav = () => {
             to="/login"
             onClick={() => setDrawerOpen(false)}
           >
-            <ListItemText primary="Login" />
+            <ListItemText
+              primary="Login"
+              primaryTypographyProps={{ sx: { color: "#ffffff" } }}
+            />
           </ListItem>
         </List>
       </Drawer>

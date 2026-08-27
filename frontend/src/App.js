@@ -30,7 +30,7 @@ import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
 import logger from "./utils/logger";
 import { resolvePublicAssetUrl } from "./utils/publicAssetUrl";
-import { isPublicMarketingPath } from "./utils/publicSitePaths";
+import { isPublicMarketingPath, shouldShowApiOfflineDialog } from "./utils/publicSitePaths";
 
 const queryClient = new QueryClient();
 
@@ -484,7 +484,7 @@ const App = () => {
                 <Routes />
 
                 <Dialog
-                  open={showApiStatusDialog}
+                  open={shouldShowApiOfflineDialog(window.location.pathname, showApiStatusDialog)}
                   aria-labelledby="api-offline-dialog-title"
                   onClose={(_, reason) => {
                     if (reason === "backdropClick" || reason === "escapeKeyDown") return;

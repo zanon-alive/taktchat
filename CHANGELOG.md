@@ -14,6 +14,11 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
 ### Corrigido (fix)
+- Menu da landing visível no topo (links brancos no header azul; o tema `primary` escondia os itens até o scroll).
+- Tour público (`/tour`) volta para `/landing`: botão **Voltar**, logo e avançar no último slide.
+- Modal de API indisponível não cobre mais landing, tour, LGPD nem `/landing/v1`.
+- Header do arquivo `/landing/v1` com o mesmo contraste branco; drawer mobile da landing com texto branco.
+- Atalhos no tour: **Planos**, **FAQ** e tecla Esc para a landing.
 - Ícone e splash do app Android usam o emblema Taktchat (mesmo da PWA), não o placeholder do Capacitor.
 - Visitante em `/` voltava para `/login`: o `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30. No app Android (Capacitor) a raiz sem sessão continua em `/login`.
 - Warnings CSS do Firefox na landing: JSS sem vendor prefixer inválido (`-moz-`).

@@ -3,6 +3,7 @@ import {
   getUnauthenticatedRedirect,
   isPublicAuthPath,
   isPublicMarketingPath,
+  shouldShowApiOfflineDialog,
 } from "../publicSitePaths";
 
 describe("isPublicMarketingPath", () => {
@@ -21,6 +22,21 @@ describe("isPublicMarketingPath", () => {
     expect(isPublicMarketingPath("/tickets")).toBe(false);
     expect(isPublicMarketingPath("")).toBe(false);
     expect(isPublicMarketingPath(undefined)).toBe(false);
+  });
+});
+
+describe("shouldShowApiOfflineDialog", () => {
+  it("esconde o aviso nas paginas publicas de marketing", () => {
+    expect(shouldShowApiOfflineDialog("/landing", true)).toBe(false);
+    expect(shouldShowApiOfflineDialog("/landing/v1", true)).toBe(false);
+    expect(shouldShowApiOfflineDialog("/tour", true)).toBe(false);
+    expect(shouldShowApiOfflineDialog("/lgpd", true)).toBe(false);
+  });
+
+  it("mostra o aviso no login e no painel quando a API cai", () => {
+    expect(shouldShowApiOfflineDialog("/login", true)).toBe(true);
+    expect(shouldShowApiOfflineDialog("/tickets", true)).toBe(true);
+    expect(shouldShowApiOfflineDialog("/landing", false)).toBe(false);
   });
 });
 

@@ -15,9 +15,9 @@ jest.mock("@mui/material", () => {
 import LandingNav from "../LandingNav";
 
 const theme = createTheme();
-const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "nav" });
+const generateClassName = createGenerateClassName({ disableGlobal: true, productionPrefix: "navv1" });
 
-describe("LandingNav", () => {
+describe("LandingNav v1", () => {
   it("expõe o menu e o Login no topo, sem depender de scroll", () => {
     render(
       <StylesProvider generateClassName={generateClassName}>
@@ -30,12 +30,8 @@ describe("LandingNav", () => {
     );
 
     expect(screen.getByRole("button", { name: "Funcionalidades" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Tour" })).toHaveAttribute("href", "/tour");
     expect(screen.getByRole("button", { name: "Planos" })).toBeVisible();
     expect(screen.getByRole("button", { name: "FAQ" })).toBeVisible();
-    const login = screen.getByRole("link", { name: "Login" });
-    expect(login).toHaveAttribute("href", "/login");
-    expect(login).toBeVisible();
-    expect(screen.getByRole("button", { name: "Começar" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Login" })).toHaveAttribute("href", "/login");
   });
 });

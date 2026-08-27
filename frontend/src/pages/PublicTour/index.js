@@ -6,6 +6,9 @@ import { Box, Button, IconButton } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
+  LANDING_FAQ_PATH,
+  LANDING_PATH,
+  LANDING_PLANS_PATH,
   parseTourSlideParam,
   tourSearchForIndex,
   tourSlides,
@@ -34,18 +37,43 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(1.5, 4),
     },
   },
+  headerLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1.5),
+  },
   logo: {
     height: 36,
     cursor: "pointer",
+    display: "block",
+  },
+  headerRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
+  backButton: {
+    "&&": {
+      textTransform: "none",
+      fontWeight: 700,
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
+    },
   },
   loginButton: {
-    textTransform: "none",
-    fontWeight: 600,
-    color: "#ffffff",
-    borderColor: "rgba(255, 255, 255, 0.7)",
-    "&:hover": {
-      borderColor: "#ffffff",
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    "&&": {
+      textTransform: "none",
+      fontWeight: 600,
+      color: "#ffffff",
+      borderColor: "rgba(255, 255, 255, 0.7)",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+      },
     },
   },
   stage: {
@@ -152,15 +180,17 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   ctaButton: {
-    textTransform: "none",
-    fontWeight: 700,
-    backgroundColor: "#25D366",
-    color: "#ffffff",
-    padding: theme.spacing(1.5, 4),
-    borderRadius: 12,
-    fontSize: "1.05rem",
-    "&:hover": {
-      backgroundColor: "#20BA5A",
+    "&&": {
+      textTransform: "none",
+      fontWeight: 700,
+      backgroundColor: "#25D366",
+      color: "#ffffff",
+      padding: theme.spacing(1.5, 4),
+      borderRadius: 12,
+      fontSize: "1.05rem",
+      "&:hover": {
+        backgroundColor: "#20BA5A",
+      },
     },
   },
   footer: {
@@ -209,6 +239,14 @@ const PublicTour = () => {
     [history, total]
   );
 
+  const goNext = useCallback(() => {
+    if (index >= total - 1) {
+      history.push(LANDING_PATH);
+      return;
+    }
+    goTo(index + 1);
+  }, [goTo, history, index, total]);
+
   useEffect(() => {
     const fromUrl = parseTourSlideParam(location.search, total);
     setIndex((current) => (current === fromUrl ? current : fromUrl));
@@ -216,15 +254,19 @@ const PublicTour = () => {
 
   useEffect(() => {
     const onKey = (event) => {
+      if (event.key === "Escape") {
+        history.push(LANDING_PATH);
+        return;
+      }
       if (event.key === "ArrowRight") {
-        goTo(index + 1);
+        goNext();
       } else if (event.key === "ArrowLeft") {
         goTo(index - 1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goTo, index]);
+  }, [goNext, goTo, history, index]);
 
   const onTouchStart = (event) => {
     touchStartX.current = event.changedTouches[0].clientX;
@@ -237,7 +279,7 @@ const PublicTour = () => {
     const delta = event.changedTouches[0].clientX - touchStartX.current;
     touchStartX.current = null;
     if (delta <= -SWIPE_PX) {
-      goTo(index + 1);
+      goNext();
     } else if (delta >= SWIPE_PX) {
       goTo(index - 1);
     }
@@ -268,17 +310,46 @@ const PublicTour = () => {
       </Helmet>
       <Box className={classes.root}>
         <header className={classes.header}>
-          <RouterLink to="/landing" aria-label="Voltar para a landing">
-            <img src="/logo_quadrado.png" alt="TaktChat" className={classes.logo} />
-          </RouterLink>
-          <Button
-            variant="outlined"
-            className={classes.loginButton}
-            component={RouterLink}
-            to="/login"
-          >
-            Login
-          </Button>
+          <Box className={classes.headerLeft}>
+            <RouterLink to={LANDING_PATH} aria-label="TaktChat — ir para a landing">
+              <img src="/logo_quadrado.png" alt="TaktChat" className={classes.logo} />
+            </RouterLink>
+            <Button
+              color="inherit"
+              className={classes.backButton}
+              component={RouterLink}
+              to={LANDING_PATH}
+            >
+              Voltar
+            </Button>
+          </Box>
+          <Box className={classes.headerRight}>
+            <Button
+              color="inherit"
+              className={classes.backButton}
+              component={RouterLink}
+              to={LANDING_PLANS_PATH}
+            >
+              Planos
+            </Button>
+            <Button
+              color="inherit"
+              className={classes.backButton}
+              component={RouterLink}
+              to={LANDING_FAQ_PATH}
+            >
+              FAQ
+            </Button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              className={classes.loginButton}
+              component={RouterLink}
+              to="/login"
+            >
+              Login
+            </Button>
+          </Box>
         </header>
 
         <Box
@@ -319,6 +390,11 @@ const PublicTour = () => {
                     className={classes.ctaButton}
                     component={RouterLink}
                     to={slide.ctaTo}
+                    sx={{
+                      backgroundColor: "#25D366",
+                      color: "#ffffff",
+                      "&:hover": { backgroundColor: "#20BA5A" },
+                    }}
                   >
                     {slide.ctaLabel}
                   </Button>
@@ -340,14 +416,24 @@ const PublicTour = () => {
           <span className={classes.meta}>
             {index + 1} / {total} · ±1 min
           </span>
-          <IconButton
-            className={classes.navBtn}
-            onClick={() => goTo(index + 1)}
-            disabled={index === total - 1}
-            aria-label="Próximo slide"
-          >
-            <ChevronRightIcon />
-          </IconButton>
+          {index >= total - 1 ? (
+            <IconButton
+              className={classes.navBtn}
+              component={RouterLink}
+              to={LANDING_PATH}
+              aria-label="Ir para a landing"
+            >
+              <ChevronRightIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              className={classes.navBtn}
+              onClick={goNext}
+              aria-label="Próximo slide"
+            >
+              <ChevronRightIcon />
+            </IconButton>
+          )}
         </footer>
       </Box>
     </>

@@ -1,6 +1,9 @@
 export const TOUR_PATH = "/tour";
 export const TOUR_LEGACY_PATH = "/p/tour";
-export const TOUR_LEAD_PATH = "/landing#lead-form";
+export const LANDING_PATH = "/landing";
+export const LANDING_PLANS_PATH = `${LANDING_PATH}#planos`;
+export const LANDING_FAQ_PATH = `${LANDING_PATH}#faq`;
+export const TOUR_LEAD_PATH = `${LANDING_PATH}#lead-form`;
 export const TOUR_OG_IMAGE = "https://taktchat.com.br/landing/f3-atendente-chat-maria.png";
 export const TOUR_OG_TITLE = "TaktChat em 1 minuto";
 export const TOUR_OG_DESCRIPTION =
