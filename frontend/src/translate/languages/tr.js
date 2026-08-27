@@ -912,6 +912,8 @@ const messages = {
           user: {
             profile: "Profil",
             logout: "Çıkış",
+            fullPanel: "Tam panel",
+            toggleTheme: "Temayı değiştir",
             message: "Merhaba",
             messageEnd: "hoş geldiniz",
             active: "Şu Tarihe Kadar Aktif",
