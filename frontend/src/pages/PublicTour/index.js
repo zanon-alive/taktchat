@@ -5,6 +5,9 @@ import { makeStyles } from "@mui/styles";
 import { Box, Button, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ChatWidget from "../landing-shared/ChatWidget";
+import { getSupportWhatsAppUrl } from "../landing-shared/supportWhatsApp";
 import {
   LANDING_FAQ_PATH,
   LANDING_PATH,
@@ -185,6 +188,12 @@ const useStyles = makeStyles((theme) => ({
       maxHeight: "38vh",
     },
   },
+  ctaRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(1.5),
+    marginTop: theme.spacing(1),
+  },
   ctaButton: {
     "&&": {
       textTransform: "none",
@@ -197,6 +206,27 @@ const useStyles = makeStyles((theme) => ({
       "&:hover": {
         backgroundColor: "#20BA5A",
       },
+    },
+  },
+  secondaryCta: {
+    "&&": {
+      textTransform: "none",
+      fontWeight: 700,
+      color: "#ffffff",
+      borderColor: "rgba(255,255,255,0.85)",
+      padding: theme.spacing(1.5, 4),
+      borderRadius: 12,
+      fontSize: "1.05rem",
+      "&:hover": {
+        borderColor: "#ffffff",
+        backgroundColor: "rgba(255,255,255,0.1)",
+      },
+    },
+  },
+  whatsappFab: {
+    bottom: theme.spacing(11),
+    [theme.breakpoints.down("md")]: {
+      bottom: theme.spacing(16),
     },
   },
   footer: {
@@ -410,18 +440,27 @@ const PublicTour = () => {
                   </div>
                 ) : null}
                 {slide.ctaTo ? (
-                  <Button
-                    className={classes.ctaButton}
-                    component={RouterLink}
-                    to={slide.ctaTo}
-                    sx={{
-                      backgroundColor: "#25D366",
-                      color: "#ffffff",
-                      "&:hover": { backgroundColor: "#20BA5A" },
-                    }}
-                  >
-                    {slide.ctaLabel}
-                  </Button>
+                  <Box className={classes.ctaRow}>
+                    <Button
+                      className={classes.ctaButton}
+                      component="a"
+                      href={getSupportWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<WhatsAppIcon />}
+                    >
+                      Falar no WhatsApp
+                    </Button>
+                    <Button
+                      className={classes.secondaryCta}
+                      variant="outlined"
+                      color="inherit"
+                      component={RouterLink}
+                      to={slide.ctaTo}
+                    >
+                      {slide.ctaLabel}
+                    </Button>
+                  </Box>
                 ) : null}
               </>
             )}
@@ -481,6 +520,7 @@ const PublicTour = () => {
             </Box>
           ) : null}
         </footer>
+        <ChatWidget className={classes.whatsappFab} />
       </Box>
     </>
   );

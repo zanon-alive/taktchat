@@ -3,6 +3,7 @@ import { makeStyles } from "@mui/styles";
 import { Container, Button, Box, Grid } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import { getSupportWhatsAppUrl } from "../../landing-shared/supportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   hero: {
@@ -166,9 +167,12 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
               <Button
                 className={classes.ctaButton}
                 startIcon={<WhatsAppIcon />}
-                onClick={scrollToCta}
+                component="a"
+                href={getSupportWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
                 size="large"
-                aria-label="Começar agora"
+                aria-label="Falar no WhatsApp"
                 sx={{
                   background: "linear-gradient(45deg, #25D366 30%, #128C7E 90%)",
                   color: "#ffffff",
@@ -178,7 +182,7 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
                   },
                 }}
               >
-                Começar agora
+                Falar no WhatsApp
               </Button>
               <Button
                 className={classes.secondaryCta}
@@ -190,6 +194,17 @@ const Hero = ({ ctaTargetId = "lead-form" }) => {
                 sx={{ color: "#ffffff", textTransform: "none" }}
               >
                 Ver em 1 min
+              </Button>
+              <Button
+                className={classes.secondaryCta}
+                variant="outlined"
+                color="inherit"
+                onClick={scrollToCta}
+                size="large"
+                aria-label="Começar agora"
+                sx={{ color: "#ffffff", textTransform: "none" }}
+              >
+                Começar agora
               </Button>
             </Box>
           </Grid>

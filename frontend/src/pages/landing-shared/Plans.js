@@ -12,6 +12,7 @@ import {
   getPlanTableCtaLabel,
   shouldShowTrialChip,
 } from "./planCta";
+import { openSupportWhatsApp } from "./supportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
   sectionTitle: {
@@ -244,6 +245,14 @@ const Plans = ({
     }
   };
 
+  const handlePlanCta = () => {
+    if (!signupEnabled) {
+      openSupportWhatsApp();
+      return;
+    }
+    scrollToForm();
+  };
+
   if (loading) {
     return (
       <Box className={classes.loadingContainer}>
@@ -409,7 +418,7 @@ const Plans = ({
                         variant={isFeatured ? "contained" : "outlined"}
                         color="primary"
                         size="small"
-                        onClick={scrollToForm}
+                        onClick={handlePlanCta}
                       >
                         {getPlanTableCtaLabel(signupEnabled, isFeatured)}
                       </Button>
@@ -512,7 +521,7 @@ const Plans = ({
                         color="primary"
                         fullWidth
                         className={classes.planButton}
-                        onClick={scrollToForm}
+                        onClick={handlePlanCta}
                       >
                         {getPlanCardCtaLabel(signupEnabled, isFeatured)}
                       </Button>

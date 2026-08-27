@@ -4,8 +4,8 @@
 **PR:** https://github.com/zanon-alive/taktchat/pull/40
 
 ## Estado
-- Commit `c8a6e74` enviado. PR #40 aberto.
-- Menu visível na landing; tour volta para `/landing`.
+- Landing/tour: CTA **Falar no WhatsApp** (helper `supportWhatsApp.js`, FAB, hero, planos sem signup, último slide do tour).
+- MCP Telecontrol desconectado nesta sessão; análise local em `.docs/branchs/fix/landing-menu-e-tour/04-whatsapp-cta-direto.md`.
 
 ## Não fazer
 - Deploy pelo agente. Merge só com OK do revisor.

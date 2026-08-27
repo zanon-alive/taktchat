@@ -41,6 +41,10 @@ describe("PublicTour", () => {
     expect(screen.getByRole("link", { name: "Login" })).toHaveAttribute("href", "/login");
     expect(screen.getByText("1 / 5 · ±1 min")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Falar com especialista" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Falar no WhatsApp" })).toHaveAttribute(
+      "href",
+      expect.stringMatching(/^https:\/\/wa\.me\/\d+\?text=/)
+    );
   });
 
   it("abre o slide da fila via ?s=3", () => {
@@ -48,10 +52,17 @@ describe("PublicTour", () => {
     expect(screen.getByRole("heading", { name: "A mesa do time" })).toBeInTheDocument();
   });
 
-  it("no último slide mostra o CTA de especialista e avança para a landing", () => {
+  it("no último slide mostra WhatsApp, o CTA de especialista e avança para a landing", () => {
     renderTour("/tour?s=5");
-    const cta = screen.getByRole("link", { name: "Falar com especialista" });
-    expect(cta).toHaveAttribute("href", "/landing#lead-form");
+    expect(screen.getByRole("link", { name: "Falar com especialista" })).toHaveAttribute(
+      "href",
+      "/landing#lead-form"
+    );
+    const whatsappLinks = screen.getAllByRole("link", { name: "Falar no WhatsApp" });
+    expect(whatsappLinks.length).toBeGreaterThanOrEqual(2);
+    whatsappLinks.forEach((link) => {
+      expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/\d+\?text=/));
+    });
     expect(screen.getByLabelText("Ir para a landing")).toHaveAttribute("href", "/landing");
     fireEvent.click(screen.getByLabelText("Slide anterior"));
     expect(screen.queryByRole("link", { name: "Falar com especialista" })).not.toBeInTheDocument();

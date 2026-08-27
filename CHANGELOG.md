@@ -13,6 +13,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Landing de conversão em `/landing` (v2), arquivo em `/landing/v1`, página `/lgpd` e redirect de visitante `/` → `/landing` (#30).
 - Toast para revisar Configurações quando a empresa ainda não tinha `CompaniesSettings` e a linha padrão foi criada.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
+- CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário.
 ### Corrigido (fix)
 - Menu da landing visível no topo (links brancos no header azul; o tema `primary` escondia os itens até o scroll).
 - Tour público (`/tour`) volta para `/landing`: botão **Voltar**, logo e avançar no último slide.

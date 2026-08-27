@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Fab, Tooltip } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { getNumberSupport } from "../../config";
+import { getSupportWhatsAppUrl } from "./supportWhatsApp";
 
 const useStyles = makeStyles((theme) => ({
     fab: {
@@ -36,18 +36,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ChatWidget = () => {
+const ChatWidget = ({ className }) => {
     const classes = useStyles();
-    const supportNumber = getNumberSupport() || "5514996870843";
-
-    const handleClick = () => {
-        const link = `https://wa.me/${supportNumber.replace(/\D/g, "")}?text=Olá! Gostaria de saber mais sobre o TaktChat.`;
-        window.open(link, "_blank");
-    };
 
     return (
         <Tooltip title="Fale conosco no WhatsApp" placement="left" arrow>
-            <Fab className={classes.fab} onClick={handleClick} aria-label="whatsapp-contact">
+            <Fab
+                className={`${classes.fab}${className ? ` ${className}` : ""}`}
+                component="a"
+                href={getSupportWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Falar no WhatsApp"
+            >
                 <WhatsAppIcon className={classes.icon} />
             </Fab>
         </Tooltip>
