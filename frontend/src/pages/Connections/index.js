@@ -590,6 +590,13 @@ const Connections = () => {
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
         onConfirm={handleSubmitConfirmationModal}
+        confirmLabel={
+          confirmModalInfo.action === "disconnect"
+            ? i18n.t("connections.confirmationModal.disconnectTitle")
+            : confirmModalInfo.action === "delete"
+            ? i18n.t("connections.confirmationModal.deleteTitle")
+            : undefined
+        }
       >
         {confirmModalInfo.message}
       </ConfirmationModal>

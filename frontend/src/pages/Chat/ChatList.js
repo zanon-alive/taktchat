@@ -17,6 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 import ConfirmationModal from "../../components/ConfirmationModal";
+import EmptyState from "../../components/EmptyState";
 import api from "../../services/api";
 
 const useStyles = makeStyles((theme) => ({
@@ -126,6 +127,12 @@ export default function ChatList({
       <div className={classes.mainContainer}>
         <div className={classes.chatList}>
           <List>
+            {Array.isArray(chats) && chats.length === 0 && (
+              <EmptyState
+                title="Nenhuma conversa"
+                description="Clique em Nova para começar uma conversa interna."
+              />
+            )}
             {Array.isArray(chats) &&
               chats.length > 0 &&
               chats.map((chat, key) => (

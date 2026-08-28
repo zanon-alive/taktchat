@@ -569,6 +569,26 @@ const MainListItems = ({ collapsed, onItemClick }) => {
         )}
       
       {/* SEÇÃO ADMINISTRAÇÃO */}
+      {(
+        (showCampaigns && hasPermission("campaigns.view")) ||
+        hasPermission("flowbuilder.view") ||
+        (showExternalApi && hasPermission("external-api.view")) ||
+        hasPermission("users.view") ||
+        hasPermission("queues.view") ||
+        (showOpenAi && hasPermission("prompts.view")) ||
+        (showIntegrations && hasPermission("integrations.view")) ||
+        user.profile === "admin" ||
+        user.profile === "super" ||
+        (user.profile === "user" && user.allowConnections === "enabled") ||
+        user.super ||
+        hasPermission("files.view") ||
+        hasPermission("financeiro.view") ||
+        hasPermission("settings.view") ||
+        hasPermission("ai-settings.view") ||
+        user.super ||
+        user.company?.type === "whitelabel"
+      ) && (
+      <>
       <Divider />
       <ListSubheader inset>{i18n.t("mainDrawer.listItems.administration")}</ListSubheader>
       
@@ -860,6 +880,9 @@ const MainListItems = ({ collapsed, onItemClick }) => {
           tooltip={collapsed}
           onClick={onItemClick}
         />
+      )}
+
+      </>
       )}
 
       {!collapsed && (
