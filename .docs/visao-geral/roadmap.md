@@ -1,6 +1,6 @@
 # 🗺️ Roadmap e Melhorias Futuras - TaktChat
 
-**Última atualização:** 2026-08-26
+**Última atualização:** 2026-08-27
 **Status:** Documento centralizado de melhorias futuras do projeto
 
 ---
@@ -10,6 +10,15 @@
 Este documento centraliza todas as melhorias futuras, funcionalidades pendentes e itens de roadmap do projeto TaktChat. As melhorias estão organizadas por área/módulo e prioridade.
 
 > **Nota:** Análises por branch ficam em `.docs/branchs/<nome-da-branch>/` **nesta máquina** (pasta no gitignore; não vai no clone). O roadmap versionado é este arquivo.
+
+### UX e Design do painel (pré-produção)
+
+Inventário e ondas de correção: `.docs/ux-design/levantamento-pre-producao.md` (branch `docs/ux-design-pre-producao`). Ainda **não implementado** — aguarda escolha das ondas.
+
+- [ ] Onda A — uma fonte de tema (MUI + Tailwind); cards claros no tema claro; títulos do card legíveis (P0-10)
+- [ ] Onda B — tabelas no dark + legado (`tableHead`, fluxos, tags)
+- [ ] Onda C — empty states + overlays de tarefa (confirmação Ok, overlay `/`, 403 da atendente, status vs lane)
+- [ ] Onda D — grids e chrome (AppBar, i18n, Relatórios/Kanban neste zoom)
 
 ---
 

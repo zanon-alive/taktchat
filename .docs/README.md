@@ -14,6 +14,8 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
   - **Release/deploy/rollback:** `operacao/release-deploy-rollback-swarm.md` — GHCR por digest e atualização da stack no Portainer.
   - **Drift Sequelize / Postgres:** `operacao/recuperacao-migrations-banco.md` — quando `SequelizeMeta` não reflete o schema real.
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
+- `ux-design/`: levantamento de estética e UX do painel (tema, cards, grids, empty states, fluxos e persona atendente).
+  - **Pré-produção:** `ux-design/levantamento-pre-producao.md`
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
   - **Mapa real de rotas, menu, personas e gates:** `funcionalidades/mapa-frontend.md`
   - **Landing / tour / FAB:** checklist em `testes-manuais/landing-tour-fab-whatsapp.md`
