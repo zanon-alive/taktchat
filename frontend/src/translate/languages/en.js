@@ -947,6 +947,11 @@ const messages = {
 		  en: "English",
 		  tr: "Turkish",
 		},
+		mainHeader: {
+		  buttons: {
+			language: "Language",
+		  },
+		},
 		messagesAPI: {
 		  title: "API",
 		  textMessage: {

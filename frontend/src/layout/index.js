@@ -140,8 +140,13 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
+    minWidth: 0,
     fontSize: 14,
     color: "white",
+    overflow: "hidden",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
   },
   drawerPaper: {
     position: "fixed",
@@ -635,7 +640,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             component="h2"
             variant="h6"
             color="inherit"
-            noWrap
             className={classes.title}
           >
             {greaterThenSm &&

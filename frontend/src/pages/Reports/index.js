@@ -58,8 +58,8 @@ const useStyles = makeStyles((theme) => ({
   },
   mainPaperFilter: {
     flex: 1,
-    overflow: 'auto',
-    height: '20vh',
+    overflow: "visible",
+    height: "auto",
     ...theme.scrollbarStylesSoftBig,
   },
   table: {

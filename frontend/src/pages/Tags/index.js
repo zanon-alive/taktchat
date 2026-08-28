@@ -123,13 +123,17 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 4,
   },
   helpBox: {
-    backgroundColor: theme.palette.info.light,
+    backgroundColor: theme.palette.mode === "dark"
+      ? theme.palette.action.hover
+      : theme.palette.grey[50],
+    color: theme.palette.text.primary,
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
     borderRadius: 4,
     display: "flex",
     alignItems: "flex-start",
     gap: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
   },
   categoryDivider: {
     margin: theme.spacing(2, 0),

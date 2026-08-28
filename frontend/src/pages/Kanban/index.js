@@ -617,7 +617,8 @@ const Kanban = () => {
               onCardMoveAcrossLanes={handleCardMove}
               components={{ LaneHeader: KanbanLaneHeader, Card: KanbanBoardCard }}
               hideCardDeleteIcon
-              style={{ backgroundColor: 'rgba(252, 252, 252, 0.03)' }}
+              style={{ backgroundColor: 'rgba(252, 252, 252, 0.03)', overflowX: 'auto' }}
+              laneStyle={{ minWidth: 220 }}
             />
           )
         )}

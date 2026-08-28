@@ -20,6 +20,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Cards e paginação Tailwind no painel seguem o tema do app (`darkMode: 'class'`), não o tema do sistema operacional; o fundo da página acompanha o toggle claro/escuro.
 - Headers de tabela no tema escuro usam papel/hover e texto primary; listagens legadas (fluxos e campanhas de fluxo) deixam o fundo navy.
 - Empty states em chat interno e campanhas de fluxo; confirmação com rótulo da ação; overlay `/` sem texto duplicado; atendente sem Transferir e sem 403 na home.
+- Chrome: tooltip de idioma, saudação sem corte cego, login em português, Kanban com largura mínima de coluna.
 - Menu da landing visível no topo (links brancos no header azul; o tema `primary` escondia os itens até o scroll) (#40).
 - Tour público (`/tour`) volta para `/landing`: botão **Voltar**, logo e avançar no último slide (#40).
 - Modal de API indisponível não cobre mais landing, tour, LGPD nem `/landing/v1`.
