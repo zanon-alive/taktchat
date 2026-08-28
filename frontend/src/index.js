@@ -4,7 +4,6 @@ import ReactDOM from "react-dom";
 import { CacheProvider } from "@emotion/react";
 import { StylesProvider } from "@mui/styles";
 import "./index.css";
-import CssBaseline from "@mui/material/CssBaseline";
 import { ToastContainer } from "react-toastify";
 import * as serviceworker from './serviceWorker';
 import { initCapacitorShell } from "./native/capacitorShell";
@@ -20,7 +19,6 @@ const emotionCache = createEmotionCache();
 ReactDOM.render(
 	<CacheProvider value={emotionCache}>
 		<StylesProvider jss={jss}>
-			<CssBaseline />
 			<App />
 			<ToastContainer
 				position="top-center"

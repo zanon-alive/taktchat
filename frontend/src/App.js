@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useCallback } from "react";
 import api from "./services/api";
 import "react-toastify/dist/ReactToastify.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ptBR } from "@mui/material/locale";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import {
   useMediaQuery,
   Dialog,
@@ -31,6 +32,7 @@ import useSettings from "./hooks/useSettings";
 import logger from "./utils/logger";
 import { resolvePublicAssetUrl } from "./utils/publicAssetUrl";
 import { isPublicMarketingPath, shouldShowApiOfflineDialog, isDocumentationPath, API_OFFLINE_DIALOG_TITLE_ID } from "./utils/publicSitePaths";
+import { applyColorScheme } from "./utils/applyColorScheme";
 
 const queryClient = new QueryClient();
 
@@ -278,6 +280,10 @@ const App = () => {
     }
   }, []);
 
+  useLayoutEffect(() => {
+    applyColorScheme(mode);
+  }, [mode]);
+
   useEffect(() => {
     window.localStorage.setItem("preferredTheme", mode);
   }, [mode]);
@@ -476,6 +482,7 @@ const App = () => {
       <Favicon url={resolvePublicAssetUrl(backendUrl, appLogoFavicon) || defaultLogoFavicon} />
       <ColorModeContext.Provider value={{ colorMode }}>
         <ThemeProvider theme={theme}>
+          <CssBaseline />
           <QueryClientProvider client={queryClient}>
             <ActiveMenuProvider>
               <div style={{ position: "relative", overflow: "visible", zIndex: 0, minHeight: "100vh" }}>
