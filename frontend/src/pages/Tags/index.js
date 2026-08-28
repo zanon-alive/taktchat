@@ -78,14 +78,14 @@ const useStyles = makeStyles((theme) => ({
     borderCollapse: "collapse",
   },
   tableHead: {
-    backgroundColor: theme.palette.grey[100],
+    backgroundColor: theme.palette.mode === "dark" ? theme.palette.action.hover : theme.palette.background.paper,
     "& th": {
       padding: theme.spacing(1.5),
       textAlign: "left",
       fontSize: "0.75rem",
       fontWeight: 600,
       textTransform: "uppercase",
-      color: theme.palette.text.secondary,
+      color: theme.palette.text.primary,
       borderBottom: `2px solid ${theme.palette.divider}`,
     },
   },
@@ -112,7 +112,11 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
   },
   categoryHeader: {
-    backgroundColor: theme.palette.grey[100],
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? theme.palette.action.hover
+        : theme.palette.background.paper,
+    color: theme.palette.text.primary,
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(1),
@@ -367,7 +371,7 @@ const Tags = () => {
             return (
               <>
                 <Box className={classes.categoryHeader}>
-                  <Typography variant="h6" style={{ fontWeight: 'bold' }}>
+                  <Typography variant="h6" style={{ fontWeight: "bold", color: "inherit" }}>
                     {title} ({categoryTags.length})
                   </Typography>
                 </Box>

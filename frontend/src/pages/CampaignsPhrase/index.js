@@ -44,7 +44,7 @@ import { CircularProgress, Grid, Stack } from "@mui/material";
 import { Can } from "../../components/Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import CampaignModalPhrase from "../../components/CampaignModalPhrase";
-import { colorBackgroundTable, colorLineTable, colorLineTableHover, colorTopTable } from "../../styles/styles";
+import { legacyListRowSx } from "../../styles/listTableHead";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -95,7 +95,7 @@ const reducer = (state, action) => {
 const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
-    backgroundColor: colorBackgroundTable(),
+    backgroundColor: theme.palette.background.paper,
     borderRadius: 12,
     padding: theme.spacing(1),
     overflowY: "scroll",
@@ -237,13 +237,13 @@ const CampaignsPhrase = () => {
       >
         <Stack>
           <Grid container style={{ padding: "8px" }}>
-            <Grid item xs={4} style={{ color: colorTopTable() }}>
+            <Grid item xs={4} style={{ color: theme.palette.text.secondary }}>
               Nome
             </Grid>
-            <Grid item xs={4} style={{ color: colorTopTable() }} align="center">
+            <Grid item xs={4} style={{ color: theme.palette.text.secondary }} align="center">
               Status
             </Grid>
-            <Grid item xs={4} align="end" style={{ color: colorTopTable() }}>
+            <Grid item xs={4} align="end" style={{ color: theme.palette.text.secondary }}>
               {i18n.t("contacts.table.actions")}
             </Grid>
           </Grid>
@@ -253,23 +253,12 @@ const CampaignsPhrase = () => {
                 <Grid
                   container
                   key={flow.id}
-                  sx={{
-                  padding: "8px",
-                  backgroundColor: theme.palette.primary.main,
-                  color: "#fff",
-                 borderRadius: 4,
-                 marginTop: 0.5,
-                "&:hover": {
-                 backgroundColor: theme.palette.primary.dark,
-               },
-                }}
-
+                  sx={legacyListRowSx(theme)}
                 >
                   <Grid item xs={4}>
                     <Stack
                       justifyContent={"center"}
                       height={"100%"}
-                      style={{ color: "#F8FAFC" }}
                     >
                       <Stack direction={"row"}>
                         <TextFields />
@@ -279,7 +268,7 @@ const CampaignsPhrase = () => {
                       </Stack>
                     </Stack>
                   </Grid>
-                  <Grid item xs={4} align="center" style={{ color: "#F8FAFC" }}>
+                  <Grid item xs={4} align="center">
                     <Stack justifyContent={"center"} height={"100%"}>
                       {flow.status ? "Ativo" : "Desativado"}
                     </Stack>
@@ -292,7 +281,7 @@ const CampaignsPhrase = () => {
                         setModalOpenPhrase(true);
                       }}
                     >
-                      <EditIcon style={{ color: "#F8FAFC" }} />
+                      <EditIcon />
                     </IconButton>
                     <Can
                       role={user.profile}
@@ -305,7 +294,7 @@ const CampaignsPhrase = () => {
                             setDeletingContact(flow);
                           }}
                         >
-                          <DeleteOutlineIcon style={{ color: "#F8FAFC" }} />
+                          <DeleteOutlineIcon />
                         </IconButton>
                       )}
                     />

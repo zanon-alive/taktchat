@@ -53,14 +53,7 @@ import {
 
 import FlowBuilderModal from "../../components/FlowBuilderModal";
 
-import {
-  colorBackgroundTable,
-  colorLineTable,
-  colorLineTableHover,
-  colorPrimary,
-  colorTitleTable,
-  colorTopTable
-} from "../../styles/styles";
+import { legacyListRowSx } from "../../styles/listTableHead";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -109,7 +102,7 @@ const reducer = (state, action) => {
 const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
-    backgroundColor: colorBackgroundTable(),
+    backgroundColor: theme.palette.background.paper,
     borderRadius: 12,
     padding: theme.spacing(1),
     overflowY: "scroll",
@@ -319,9 +312,6 @@ const FlowBuilder = () => {
             value={searchParam}
             onChange={handleSearch}
             InputProps={{
-              style: {
-                color: colorTitleTable()
-              },
               startAdornment: (
                 <InputAdornment position="start">
                   <SearchIcon style={{ color: "gray" }} />
@@ -352,13 +342,13 @@ const FlowBuilder = () => {
       >
         <Stack>
           <Grid container style={{ padding: "8px" }}>
-            <Grid item xs={4} style={{ color: colorTopTable() }}>
+            <Grid item xs={4} style={{ color: theme.palette.text.secondary }}>
               {i18n.t("contacts.table.name")}
             </Grid>
-            <Grid item xs={4} style={{ color: colorTopTable() }} align="center">
+            <Grid item xs={4} style={{ color: theme.palette.text.secondary }} align="center">
               Status
             </Grid>
-            <Grid item xs={4} align="end" style={{ color: colorTopTable() }}>
+            <Grid item xs={4} align="end" style={{ color: theme.palette.text.secondary }}>
               {i18n.t("contacts.table.actions")}
             </Grid>
           </Grid>
@@ -367,21 +357,12 @@ const FlowBuilder = () => {
               <Grid               
                 container
                 key={contact.id}
-                sx={{
-                  padding: "8px",
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: 2,
-                  marginTop: 0.5,
-                  "&:hover": {
-                    backgroundColor: theme.palette.primary.dark,
-                  }
-                }}
+                sx={legacyListRowSx(theme)}
               >
                 <Grid item xs={4}  onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
                   <Stack
                     justifyContent={"center"}
                     height={"100%"}
-                    style={{ color: "#F8FAFC" }}
                   >
                     <Stack direction={"row"}>
                       <DevicesFold />
@@ -391,7 +372,7 @@ const FlowBuilder = () => {
                     </Stack>
                   </Stack>
                 </Grid>
-                <Grid item xs={4} align="center" style={{ color: "#F8FAFC" }}  onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
+                <Grid item xs={4} align="center" onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
                   <Stack justifyContent={"center"} height={"100%"}>
                     {contact.active ? "Ativo" : "Desativado"}
                   </Stack>
@@ -409,7 +390,7 @@ const FlowBuilder = () => {
                     sx={{ borderRadius: "36px", minWidth: "24px" }}
                   >
                     <MoreVert
-                      sx={{ color: "#F8FAFC", width: "21px", height: "21px" }}
+                      sx={{ width: "21px", height: "21px" }}
                     />
                   </Button>
                   {/* <IconButton
