@@ -43,7 +43,6 @@ import { CircularProgress, Grid, Stack } from "@mui/material";
 import { Can } from "../Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import CampaignModalPhrase from "../CampaignModalPhrase";
-import { colorBackgroundTable, colorLineTable, colorLineTableHover, colorTopTable } from "../../styles/styles";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -94,12 +93,24 @@ const reducer = (state, action) => {
 const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
-    backgroundColor: colorBackgroundTable(),
+    backgroundColor: theme.palette.background.paper,
     borderRadius: 12,
     padding: theme.spacing(1),
     overflowY: "scroll",
     ...theme.scrollbarStyles
-  }
+  },
+  listRow: {
+    padding: 8,
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    borderRadius: 8,
+    marginTop: 4,
+    border: `1px solid ${theme.palette.divider}`,
+    borderLeft: `4px solid ${theme.palette.primary.main}`,
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
 }));
 
 const CampaignsPhrase = () => {
@@ -234,13 +245,13 @@ const CampaignsPhrase = () => {
       >
         <Stack>
           <Grid container style={{ padding: "8px" }}>
-            <Grid item xs={4} style={{ color: colorTopTable() }}>
+            <Grid item xs={4}>
               Nome
             </Grid>
-            <Grid item xs={4} style={{ color: colorTopTable() }} align="center">
+            <Grid item xs={4} align="center">
               Status
             </Grid>
-            <Grid item xs={4} align="end" style={{ color: colorTopTable() }}>
+            <Grid item xs={4} align="end">
               {i18n.t("contacts.table.actions")}
             </Grid>
           </Grid>
@@ -250,21 +261,12 @@ const CampaignsPhrase = () => {
                 <Grid
                   container
                   key={flow.id}
-                  sx={{
-                    padding: "8px",
-                    backgroundColor: colorLineTable(),
-                    borderRadius: 4,
-                    marginTop: 0.5,
-                    "&:hover": {
-                      backgroundColor: colorLineTableHover()
-                    }
-                  }}
+                  className={classes.listRow}
                 >
                   <Grid item xs={4}>
                     <Stack
                       justifyContent={"center"}
                       height={"100%"}
-                      style={{ color: "#F8FAFC" }}
                     >
                       <Stack direction={"row"}>
                         <TextFields />
@@ -274,7 +276,7 @@ const CampaignsPhrase = () => {
                       </Stack>
                     </Stack>
                   </Grid>
-                  <Grid item xs={4} align="center" style={{ color: "#F8FAFC" }}>
+                  <Grid item xs={4} align="center">
                     <Stack justifyContent={"center"} height={"100%"}>
                       {flow.status ? "Ativo" : "Desativado"}
                     </Stack>
@@ -287,7 +289,7 @@ const CampaignsPhrase = () => {
                         setModalOpenPhrase(true);
                       }}
                     >
-                      <EditIcon style={{ color: "#F8FAFC" }} />
+                      <EditIcon />
                     </IconButton>
                     <Can
                       role={user.profile}
@@ -300,7 +302,7 @@ const CampaignsPhrase = () => {
                             setDeletingContact(flow);
                           }}
                         >
-                          <DeleteOutlineIcon style={{ color: "#F8FAFC" }} />
+                          <DeleteOutlineIcon />
                         </IconButton>
                       )}
                     />

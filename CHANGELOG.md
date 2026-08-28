@@ -18,6 +18,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário (#40).
 ### Corrigido (fix)
 - Cards e paginação Tailwind no painel seguem o tema do app (`darkMode: 'class'`), não o tema do sistema operacional; o fundo da página acompanha o toggle claro/escuro.
+- Headers de tabela no tema escuro usam papel/hover e texto primary; listagens legadas (fluxos e campanhas de fluxo) deixam o fundo navy.
 - Menu da landing visível no topo (links brancos no header azul; o tema `primary` escondia os itens até o scroll) (#40).
 - Tour público (`/tour`) volta para `/landing`: botão **Voltar**, logo e avançar no último slide (#40).
 - Modal de API indisponível não cobre mais landing, tour, LGPD nem `/landing/v1`.

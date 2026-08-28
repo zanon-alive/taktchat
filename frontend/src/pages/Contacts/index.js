@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme) => ({
             fontSize: "0.75rem",
             fontWeight: 600,
             textTransform: "uppercase",
-            color: theme.palette.text.secondary,
+            color: theme.palette.text.primary,
             borderBottom: `2px solid ${theme.palette.divider}`,
             backgroundColor: "inherit",
         },
