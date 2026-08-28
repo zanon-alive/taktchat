@@ -23,11 +23,9 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import {
   Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack
+  FormControlLabel,
+  Stack,
+  Switch
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { AddCircle, Delete } from "@mui/icons-material";
@@ -99,6 +97,7 @@ const FlowBuilderMenuModal = ({ open, onSave, onUpdate, data, close }) => {
   const [textDig, setTextDig] = useState();
 
   const [arrayOption, setArrayOption] = useState([]);
+  const [sendAsButtons, setSendAsButtons] = useState(true);
 
   const [labels, setLabels] = useState({
     title: "Adicionar menu ao fluxo",
@@ -113,6 +112,7 @@ const FlowBuilderMenuModal = ({ open, onSave, onUpdate, data, close }) => {
       });
       setTextDig(data.data.message);
       setArrayOption(data.data.arrayOption);
+      setSendAsButtons(data.data.interactive !== false);
       setActiveModal(true);
     } else if (open === "create") {
       setLabels({
@@ -121,6 +121,7 @@ const FlowBuilderMenuModal = ({ open, onSave, onUpdate, data, close }) => {
       });
       setTextDig();
       setArrayOption([]);
+      setSendAsButtons(true);
       setActiveModal(true);
     } else {
       setActiveModal(false);
@@ -143,14 +144,19 @@ const FlowBuilderMenuModal = ({ open, onSave, onUpdate, data, close }) => {
       handleClose();
       onUpdate({
         ...data,
-        data: { message: textDig, arrayOption: arrayOption }
+        data: {
+          message: textDig,
+          arrayOption: arrayOption,
+          interactive: sendAsButtons
+        }
       });
       return;
     } else if (open === "create") {
       handleClose();
       onSave({
         message: textDig,
-        arrayOption: arrayOption
+        arrayOption: arrayOption,
+        interactive: sendAsButtons
       });
     }
   };
@@ -189,6 +195,23 @@ const FlowBuilderMenuModal = ({ open, onSave, onUpdate, data, close }) => {
               className={classes.textField}
               style={{ width: "100%" }}
             />
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  checked={sendAsButtons}
+                  onChange={e => setSendAsButtons(e.target.checked)}
+                />
+              }
+              label="Enviar como botões no WhatsApp"
+            />
+            <Typography variant="caption" color="textSecondary">
+              Na API Oficial: até 3 opções viram botões; de 4 a 10, uma lista.
+              Na conexão não oficial (QR Code), o cliente recebe o menu
+              numerado (digite 1, 2, 3…). Texto do botão: no máximo 20
+              caracteres. O conector cinza “Outra resposta” trata opção
+              inválida; se não estiver ligado, o menu é reenviado.
+            </Typography>
             <Stack direction={"row"} justifyContent={"space-between"}>
               <Typography>Adicionar Opção</Typography>
               <Button

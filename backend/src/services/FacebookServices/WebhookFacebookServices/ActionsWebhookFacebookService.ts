@@ -14,6 +14,10 @@ import mime from "mime";
 import path from "path";
 import { getIO } from "../../../libs/socket";
 import { randomizarCaminho } from "../../../utils/randomizador";
+import {
+  resolveFlowBuilderMediaPath,
+  toFlowBuilderPublicUrl
+} from "../../../helpers/flowBuilderMediaPath";
 import CreateLogTicketService from "../../TicketServices/CreateLogTicketService";
 import UpdateTicketService from "../../TicketServices/UpdateTicketService";
 import FindOrCreateATicketTrakingService from "../../TicketServices/FindOrCreateATicketTrakingService";
@@ -235,32 +239,23 @@ export const ActionsWebhookFacebookService = async (
 
 
                 if (elementNowSelected.includes("img")) {
-                    const mediaPath = process.env.BACKEND_URL === "http://localhost:8090"
-                        ? `${__dirname.split("src")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.elements.filter(
-                            item => item.number === elementNowSelected
-                        )[0].value
-                        }`
-                        : `${__dirname.split("dist")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.elements.filter(
-                            item => item.number === elementNowSelected
-                        )[0].value
-                        }`
+                    const storedName = nodeSelected.data.elements.filter(
+                        item => item.number === elementNowSelected
+                    )[0]?.value;
+                    const mediaPath = resolveFlowBuilderMediaPath(storedName, companyId) || String(storedName || "");
+                    const domain = toFlowBuilderPublicUrl(storedName, companyId);
 
                     const contact = await Contact.findOne({
                         where: { number: numberPhrase.number, companyId }
                     });
 
-
-                    // Obtendo o tipo do arquivo
                     const fileExtension = path.extname(mediaPath);
-
-                    //Obtendo o nome do arquivo sem a extensão
                     const fileNameWithoutExtension = path.basename(mediaPath, fileExtension);
-
-                    //Obtendo o tipo do arquivo
                     const mimeType = mime.lookup(mediaPath);
 
-                    const domain = `${process.env.BACKEND_URL}/public/company${companyId}/${fileNameWithoutExtension}${fileExtension}`
-
+                    if (!domain) {
+                        continue;
+                    }
 
                     await showTypingIndicator(
                         contact.number,
@@ -293,16 +288,12 @@ export const ActionsWebhookFacebookService = async (
 
 
                 if (elementNowSelected.includes("audio")) {
+                    const storedName = nodeSelected.data.elements.filter(
+                        item => item.number === elementNowSelected
+                    )[0]?.value;
                     const mediaDirectory =
-                        process.env.BACKEND_URL === "http://localhost:8090"
-                            ? `${__dirname.split("src")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.elements.filter(
-                                item => item.number === elementNowSelected
-                            )[0].value
-                            }`
-                            : `${__dirname.split("dist")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.elements.filter(
-                                item => item.number === elementNowSelected
-                            )[0].value
-                            }`;
+                        resolveFlowBuilderMediaPath(storedName, companyId) ||
+                        String(storedName || "");
 
                     const contact = await Contact.findOne({
                         where: { number: numberPhrase.number, companyId }
@@ -324,7 +315,7 @@ export const ActionsWebhookFacebookService = async (
                         await convertAudio(folder)
                     }
 
-                    const domain = `${process.env.BACKEND_URL}/public/company${companyId}/${fileNameWithoutExtension}.mp4`
+                    const domain = toFlowBuilderPublicUrl(storedName, companyId);
 
 
                     await showTypingIndicator(
@@ -359,16 +350,12 @@ export const ActionsWebhookFacebookService = async (
 
 
                 if (elementNowSelected.includes("video")) {
+                    const storedName = nodeSelected.data.elements.filter(
+                        item => item.number === elementNowSelected
+                    )[0]?.value;
                     const mediaDirectory =
-                        process.env.BACKEND_URL === "http://localhost:8090"
-                            ? `${__dirname.split("src")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.elements.filter(
-                                item => item.number === elementNowSelected
-                            )[0].value
-                            }`
-                            : `${__dirname.split("dist")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.elements.filter(
-                                item => item.number === elementNowSelected
-                            )[0].value
-                            }`;
+                        resolveFlowBuilderMediaPath(storedName, companyId) ||
+                        String(storedName || "");
 
 
                     const contact = await Contact.findOne({
@@ -384,7 +371,7 @@ export const ActionsWebhookFacebookService = async (
                     //Obtendo o tipo do arquivo
                     const mimeType = mime.lookup(mediaDirectory);
 
-                    const domain = `${process.env.BACKEND_URL}/public/company${companyId}/${fileNameWithoutExtension}${fileExtension}`
+                    const domain = toFlowBuilderPublicUrl(storedName, companyId);
 
 
                     await showTypingIndicator(
@@ -417,12 +404,10 @@ export const ActionsWebhookFacebookService = async (
         }
 
         if (nodeSelected.type === "img") {
-            const mediaPath = process.env.BACKEND_URL === "http://localhost:8090"
-                ? `${__dirname.split("src")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.url
-                }`
-                : `${__dirname.split("dist")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.url
-                }`
-
+            const storedName = nodeSelected.data.url;
+            const mediaPath =
+                resolveFlowBuilderMediaPath(storedName, companyId) ||
+                String(storedName || "");
 
             // Obtendo o tipo do arquivo
             const fileExtension = path.extname(mediaPath);
@@ -433,7 +418,7 @@ export const ActionsWebhookFacebookService = async (
             //Obtendo o tipo do arquivo
             const mimeType = mime.lookup(mediaPath);
 
-            const domain = `${process.env.BACKEND_URL}/public/company${companyId}/${fileNameWithoutExtension}${fileExtension}`
+            const domain = toFlowBuilderPublicUrl(storedName, companyId);
 
             const contact = await Contact.findOne({
                 where: { number: numberPhrase.number, companyId }
@@ -468,12 +453,10 @@ export const ActionsWebhookFacebookService = async (
         }
 
         if (nodeSelected.type === "audio") {
+            const storedName = nodeSelected.data.url;
             const mediaDirectory =
-                process.env.BACKEND_URL === "http://localhost:8090"
-                    ? `${__dirname.split("src")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.url
-                    }`
-                    : `${__dirname.split("dist")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.url
-                    }`;
+                resolveFlowBuilderMediaPath(storedName, companyId) ||
+                String(storedName || "");
 
             const contact = await Contact.findOne({
                 where: { number: numberPhrase.number, companyId }
@@ -488,7 +471,7 @@ export const ActionsWebhookFacebookService = async (
             //Obtendo o tipo do arquivo
             const mimeType = mime.lookup(mediaDirectory);
 
-            const domain = `${process.env.BACKEND_URL}/public/company${companyId}/${fileNameWithoutExtension}${fileExtension}`
+            const domain = toFlowBuilderPublicUrl(storedName, companyId);
 
 
             const sendMessage = await sendAttachmentFromUrl(
@@ -510,12 +493,10 @@ export const ActionsWebhookFacebookService = async (
             await intervalWhats(nodeSelected.data.sec);
         }
         if (nodeSelected.type === "video") {
+            const storedName = nodeSelected.data.url;
             const mediaDirectory =
-                process.env.BACKEND_URL === "http://localhost:8090"
-                    ? `${__dirname.split("src")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.url
-                    }`
-                    : `${__dirname.split("dist")[0].split("\\").join("/")}public/company${companyId}/${nodeSelected.data.url
-                    }`;
+                resolveFlowBuilderMediaPath(storedName, companyId) ||
+                String(storedName || "");
 
 
             const contact = await Contact.findOne({
@@ -531,7 +512,7 @@ export const ActionsWebhookFacebookService = async (
             //Obtendo o tipo do arquivo
             const mimeType = mime.lookup(mediaDirectory);
 
-            const domain = `${process.env.BACKEND_URL}/public/company${companyId}/${fileNameWithoutExtension}${fileExtension}`
+            const domain = toFlowBuilderPublicUrl(storedName, companyId);
 
 
             await showTypingIndicator(

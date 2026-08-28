@@ -7,6 +7,11 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- Menu do Flow Builder: na API Oficial vai como botões (até 3) ou lista (4 a 10); no Baileys vai como texto numerado, porque o WhatsApp corta o interativo na sessão não oficial.
+- Conector **Outra resposta** nos nós Menu e Pergunta do Flow Builder (opção inválida ou mensagem sem texto).
+- Nó de fila no Flow Builder com rótulo **Abrir Ticket (Fila)** (o atendimento entra na fila escolhida).
+- No nó Conteúdo do Flow Builder, cada atividade (texto, intervalo, imagem, áudio, vídeo) tem cor própria; o cabeçalho do bloco continua vermelho.
+- Modal **Criar Ticket** com botão **Cadastrar contato** para abrir o cadastro sem sair do fluxo.
 - Setting pública `supportWhatsAppNumber` para o WhatsApp da vitrine (FAB, hero, tour, lead). Sem número no banco, os CTAs somem.
 - Migration liga `enableSiteChatWidget` na empresa 1 e grava o número da vitrine se ainda não existir.
 - App Android (Capacitor) com WebView em `taktchat.com.br`; link **Baixar app Android** no login (`/downloads/taktchat.apk`). iOS/IPA e push ficam para depois.
@@ -32,6 +37,19 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - FAB WhatsApp fixo no canto inferior direito (landing, tour e login), sem entrar no fluxo da página (#40).
 - FAB WhatsApp sobe com o banner de cookies e empilha abaixo do chat do site; no celular e no tablet o hero não duplica o CTA; no login o FAB some enquanto o aviso de API está aberto (#41).
 - FAB some também se o aviso de API já está no DOM no carregamento da tela.
+- Mensagem WhatsApp `@lid` sem JID válido não derruba mais o `handleMessage` (`jidDecode`); o fluxo de boas-vindas da conexão inicia em ticket existente sem fila, e o menu de filas não substitui o Flow Builder ativo.
+- Motor do Flow Builder carrega o ticket antes do nó Inicio; o `ticket.update` nulo não aborta mais o envio da saudação e do menu.
+- `ActionsWebhookService` compila no `dev:fast`: `formatBody` recebe o ticket (não o contato) e `dataWebhook` declara `variables`.
+- Continuação do Flow Builder sem `hash_id`: fluxo de boas-vindas não quebra mais com `WHERE parameter "hash_id" has invalid "undefined" value`.
+- Resposta do menu do fluxo: usa o nó real (não um stub sem `data`); opção inválida reenvia as opções em vez de derrubar o processo.
+- Imagem/áudio/vídeo do nó Conteúdo: o envio e o preview usam `public/flowbuilder/` (o split de `dist`/`src` apontava para um path inexistente).
+- Imagem do Flow Builder no WhatsApp: envio em JPEG pelo ticket; PNG via Baileys no iOS virava “Aguardando mensagem”.
+- Resposta Baileys no mesmo `@lid` da última mensagem recebida (iOS “Aguardando mensagem” após o segundo envio).
+- Console do Flow Builder: removidos `console.log` de debug (dump do fluxo, UPDATE2, números de linha).
+- Palete do Flow Builder: hover no nome do bloco não fecha mais a lista; clicar em **Inicio** não apaga o fluxo.
+- Modal Criar Ticket: opção **Adicionar undefined** (Autocomplete MUI v5) passa a mostrar o texto digitado.
+- Mensagens e cabeçalho usam o nome do perfil WhatsApp quando o contato ainda não tem nome cadastrado (`{nome}` / `contactName`).
+- Menu de filas da conexão não envia mais a palavra `null` quando a saudação está vazia.
 - `widget.js` não anima o botão do chat do site quando `prefers-reduced-motion: reduce`.
 - Ícone e splash do app Android usam o emblema Taktchat (mesmo da PWA), não o placeholder do Capacitor.
 - Visitante em `/` voltava para `/login`: o `useAuth` sobrescrevia o `guestRedirect="/landing"` da #30. No app Android (Capacitor) a raiz sem sessão continua em `/login`.

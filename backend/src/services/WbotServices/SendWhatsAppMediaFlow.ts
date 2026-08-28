@@ -10,6 +10,7 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
 import mime from "mime-types";
 import Contact from "../../models/Contact";
+import { getContactChatJid, resolveOutboundChatJid, safeSendPresenceUpdate } from "../../helpers/whatsappJid";
 
 interface Request {
   media: Express.Multer.File;
@@ -63,7 +64,11 @@ const nameFileDiscovery = (pathMedia: string) => {
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-export const typeSimulation = async (ticket: Ticket, presence: WAPresence) => {
+export const typeSimulation = async (
+  ticket: Ticket,
+  presence: WAPresence,
+  durationMs = 800
+) => {
 
   const wbot = await GetTicketWbot(ticket);
 
@@ -73,10 +78,10 @@ export const typeSimulation = async (ticket: Ticket, presence: WAPresence) => {
     }
   });
 
-  await wbot.sendPresenceUpdate(presence, `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`);
+  await safeSendPresenceUpdate(wbot, presence, getContactChatJid(contact, ticket.isGroup));
   const baileys = await getBaileys();
-  await baileys.delay(5000);
-  await wbot.sendPresenceUpdate('paused', `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`);
+  await baileys.delay(durationMs);
+  await safeSendPresenceUpdate(wbot, "paused", getContactChatJid(contact, ticket.isGroup));
 
 }
 
@@ -149,12 +154,13 @@ const SendWhatsAppMediaFlow = async ({
       }
     });
 
-    const sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        ...options
-      }
-    );
+    const sentJid =
+      (await resolveOutboundChatJid(ticket, contact)) ||
+      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
+
+    const sentMessage = await wbot.sendMessage(sentJid, {
+      ...options
+    });
 
     await ticket.update({ lastMessage: mediaName });
 

@@ -4,6 +4,7 @@ import { CardHeader } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import Tooltip from "@mui/material/Tooltip";
 import ContactAvatar from "../ContactAvatar";
+import { resolveContactDisplayName } from "../../helpers/contactDisplayName";
 import api from "../../services/api";
 import ConnectionIcon from "../ConnectionIcon";
 
@@ -138,7 +139,7 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
                         )}
                     </div>
                 )}
-				title={`${contact?.name || '(sem contato)'} #${ticket.id}`}
+				title={`${resolveContactDisplayName(contact) || '(sem contato)'} #${ticket.id}`}
 				subheader={(
 					<div className={classes.subheaderRoot}>
 						<span className={classes.subheaderText}>

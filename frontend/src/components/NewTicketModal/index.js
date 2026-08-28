@@ -20,7 +20,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { Box, Grid, IconButton, ListItemText, MenuItem, Select } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { toast } from "react-toastify";
-import { Facebook, Instagram, WhatsApp } from "@mui/icons-material";
+import { Facebook, Instagram, WhatsApp, PersonAdd } from "@mui/icons-material";
 import ShowTicketOpen from "../ShowTicketOpenModal";
 import useQueues from "../../hooks/useQueues";
 
@@ -251,6 +251,18 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
   };
 
   const handleSelectOption = (e, newValue) => {
+    if (!newValue) {
+      setSelectedContact(null);
+      return;
+    }
+    if (typeof newValue === "string") {
+      const typed = newValue.trim();
+      if (typed) {
+        setNewContact({ name: typed });
+        setContactModalOpen(true);
+      }
+      return;
+    }
     if (newValue?.number) {
       setSelectedContact(newValue);
     } else if (newValue?.name) {
@@ -259,12 +271,26 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
     }
   };
 
+  const handleOpenRegisterContact = () => {
+    const typed = (searchParam || "").trim();
+    const digits = typed.replace(/\D/g, "");
+    const looksLikeNumber = digits.length >= 8 && !/[A-Za-zÀ-ÿ]/.test(typed);
+    setNewContact(looksLikeNumber ? { number: digits } : { name: typed });
+    setContactModalOpen(true);
+  };
+
   const handleCloseContactModal = () => {
     setContactModalOpen(false);
   };
 
   const handleAddNewContactTicket = contact => {
     setSelectedContact(contact);
+    if (contact?.id) {
+      setOptions((prev) => {
+        const exists = prev.some((item) => item.id === contact.id);
+        return exists ? prev : [contact, ...prev];
+      });
+    }
   };
 
   const createAddContactOption = (filterOptions, params) => {
@@ -277,25 +303,39 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
     return filtered;
   };
 
-  const renderOption = option => {
-    if (option.number) {
-      return <>
-        {IconChannel(option.channel)}
-        <Typography component="span" style={{ fontSize: 14, marginLeft: "10px", display: "inline-flex", alignItems: "center", lineHeight: "2" }}>
-          {option.name} - {option.number}
-        </Typography>
-      </>
-    } else {
-      return `${i18n.t("newTicketModal.add")} ${option.name}`;
+  const renderOption = (props, option) => {
+    if (typeof option === "string") {
+      return (
+        <li {...props}>
+          {`${i18n.t("newTicketModal.add")} ${option}`}
+        </li>
+      );
     }
+    if (option.number) {
+      return (
+        <li {...props}>
+          {IconChannel(option.channel)}
+          <Typography component="span" style={{ fontSize: 14, marginLeft: "10px", display: "inline-flex", alignItems: "center", lineHeight: "2" }}>
+            {option.name} - {option.number}
+          </Typography>
+        </li>
+      );
+    }
+    return (
+      <li {...props}>
+        {`${i18n.t("newTicketModal.add")} ${option.name || ""}`}
+      </li>
+    );
   };
 
   const renderOptionLabel = option => {
-    if (option.number) {
-      return `${option.name} - ${option.number}`;
-    } else {
-      return `${option.name}`;
+    if (typeof option === "string") {
+      return option;
     }
+    if (option?.number) {
+      return `${option.name} - ${option.number}`;
+    }
+    return `${option?.name || ""}`;
   };
 
   const renderContactAutocomplete = () => {
@@ -314,7 +354,7 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
             renderOption={renderOption}
             filterOptions={createAddContactOption}
             onChange={(e, newValue) => {                     
-              setChannelFilter(newValue ? newValue.channel : "whatsapp");
+              setChannelFilter(newValue && typeof newValue !== "string" ? newValue.channel : "whatsapp");
               handleSelectOption(e, newValue)
             }}
             renderInput={params => (
@@ -366,6 +406,20 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
           <Grid style={{ width: 300 }} container spacing={2}>
             {/* CONTATO */}
             {renderContactAutocomplete()}
+            {(!initialContact || initialContact.id === undefined) && (
+              <Grid xs={12} item>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<PersonAdd />}
+                  onClick={handleOpenRegisterContact}
+                  sx={{ textTransform: "none" }}
+                >
+                  {i18n.t("newTicketModal.buttons.addContact")}
+                </Button>
+              </Grid>
+            )}
             {/* FILA */}
             <Grid xs={12} item>
               <Select
@@ -472,23 +526,23 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
             {i18n.t("newTicketModal.buttons.ok")}
           </ButtonWithSpinner>
         </DialogActions>
-        {contactModalOpen && (
-          <ContactModal
-            open={contactModalOpen}
-            initialValues={newContact}
-            onClose={handleCloseContactModal}
-            onSave={handleAddNewContactTicket}
-          ></ContactModal>
-        )}
-        {openAlert && (
-          <ShowTicketOpen
-            isOpen={openAlert}
-            handleClose={handleCloseAlert}
-            user={userTicketOpen}
-            queue={queueTicketOpen}
-          />
-        )}
-      </Dialog >
+      </Dialog>
+      {contactModalOpen && (
+        <ContactModal
+          open={contactModalOpen}
+          initialValues={newContact}
+          onClose={handleCloseContactModal}
+          onSave={handleAddNewContactTicket}
+        />
+      )}
+      {openAlert && (
+        <ShowTicketOpen
+          isOpen={openAlert}
+          handleClose={handleCloseAlert}
+          user={userTicketOpen}
+          queue={queueTicketOpen}
+        />
+      )}
     </>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, memo } from "react";
 import { Avatar } from "@mui/material";
+import { resolveContactDisplayName } from "../../helpers/contactDisplayName";
 
 // Componente de avatar com otimização de desempenho (memoizado)
 const ContactAvatar = memo(({ contact, ...props }) => {
@@ -25,13 +26,13 @@ const ContactAvatar = memo(({ contact, ...props }) => {
 
   // Determina a URL da imagem baseado na estrutura de dados
   let imageUrl = null;
-  let contactName = contact.name;
+  let contactName = resolveContactDisplayName(contact);
 
   // Se tem contact.contact (estrutura de ContactListItems)
   if (contact.contact) {
     // Prefira sempre urlPicture (servida pelo backend), depois profilePicUrl (externa)
     imageUrl = contact.contact.urlPicture || contact.contact.profilePicUrl;
-    contactName = contact.contact.name || contact.name;
+    contactName = resolveContactDisplayName(contact.contact) || contactName;
   } else {
     // Estrutura normal de contatos: prefira urlPicture
     imageUrl = contact.urlPicture || contact.profilePicUrl;

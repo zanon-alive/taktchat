@@ -33,6 +33,7 @@ import { TicketsContext } from "../../context/Tickets/TicketsContext";
 
 import ContactTag from "../ContactTag";
 import ContactAvatar from "../ContactAvatar";
+import { resolveContactDisplayName } from "../../helpers/contactDisplayName";
 import { v4 as uuidv4 } from "uuid";
 
 import GroupIcon from '@mui/icons-material/Group';
@@ -612,7 +613,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     />
                     <div>
                         <Typography variant="subtitle1">
-                            {ticket.contact?.name}
+                            {resolveContactDisplayName(ticket.contact)}
                         </Typography>
                         <Typography variant="caption" color="textSecondary">
                             {ticket.whatsapp?.name || ticket.channel}
@@ -711,7 +712,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                 variant="body2"
                                 className={classes.contactNameText}
                             >
-                                {ticket.contact?.name}
+                                {resolveContactDisplayName(ticket.contact)}
                             </Typography>
                         </div>
                     }

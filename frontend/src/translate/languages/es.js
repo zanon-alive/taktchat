@@ -847,7 +847,8 @@ const messages = {
         add: "Agregar",
         buttons: {
           ok: "Guardar",
-          cancel: "Cancelar"
+          cancel: "Cancelar",
+          addContact: "Registrar contacto"
         }
       },
       SendContactModal: {

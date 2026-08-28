@@ -1,5 +1,6 @@
 import Mustache from "mustache";
 import Ticket from "../models/Ticket";
+import { resolveContactDisplayName } from "./contactDisplayName";
 
 function makeid(length) {
   var result = '';
@@ -80,17 +81,18 @@ export const hour = (): string => {
 };
 
 export const firstName = (ticket?: Ticket): string => {
-  if (ticket && ticket?.contact?.name) {
-    const nameArr = ticket?.contact?.name.split(' ');
-    return nameArr[0];
+  const display = resolveContactDisplayName(ticket as any);
+  if (display) {
+    return display.split(" ")[0];
   }
-  return '';
+  return "";
 };
 
 export default (body: string, ticket?: Ticket): string => {
+  const displayName = resolveContactDisplayName(ticket as any);
   const view = {
     firstName: firstName(ticket),
-    name: ticket ? ticket?.contact?.name : "",
+    name: displayName,
     email: ticket ? ticket?.contact?.email : "",
     cpfCnpj: ticket ? ticket?.contact?.cpfCnpj : "",
     representativeCode: ticket ? ticket?.contact?.representativeCode : "",

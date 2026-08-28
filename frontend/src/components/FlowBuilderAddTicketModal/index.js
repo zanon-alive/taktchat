@@ -147,6 +147,9 @@ const FlowBuilderTicketModal = ({
                 </DialogTitle>
                 <Stack>
                     <DialogContent dividers>
+                        <Typography variant="caption" color="textSecondary" display="block" style={{ marginBottom: 12 }}>
+                            Este nó coloca o atendimento na fila escolhida. O fluxo para de atender sozinho e um humano assume.
+                        </Typography>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
@@ -166,7 +169,7 @@ const FlowBuilderTicketModal = ({
                             }}
                             renderValue={() => {
                                 if (selectedQueue === "") {
-                                    return "Selecione uma Conexão"
+                                    return "Selecione uma fila"
                                 }
                                 const queue = queues.find(w => w.id === selectedQueue)
                                 return queue.name

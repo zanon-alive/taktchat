@@ -8,6 +8,11 @@ import Contact from "../../models/Contact";
 import formatBody from "../../helpers/Mustache";
 import logger from "../../utils/logger";
 import { IWhatsAppMessage } from "../../libs/whatsapp";
+import {
+  getContactChatJid,
+  resolveOutboundChatJid,
+  toWhatsAppAdapterAddress
+} from "../../helpers/whatsappJid";
 
 interface Request {
   media: Express.Multer.File;
@@ -52,15 +57,16 @@ const SendWhatsAppMediaUnified = async ({
 
     // Determinar número de destino
     let number: string;
-    if (
-      contact.remoteJid &&
-      contact.remoteJid !== "" &&
-      contact.remoteJid.includes("@")
-    ) {
-      number = contact.remoteJid;
+    if (channelType === "official") {
+      number =
+        getContactChatJid(contact, ticket.isGroup) ||
+        `${contact.number}@s.whatsapp.net`;
     } else {
-      number = `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
+      number =
+        (await resolveOutboundChatJid(ticket, contact)) ||
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
     }
+    const to = toWhatsAppAdapterAddress(number, channelType);
 
     // Determinar tipo de mídia baseado no mimetype
     let mediaType: "image" | "audio" | "video" | "document" = "document";
@@ -98,7 +104,7 @@ const SendWhatsAppMediaUnified = async ({
       const dataUri = `data:${media.mimetype};base64,${base64File}`;
 
       sentMessage = await adapter.sendMessage({
-        to: number.split("@")[0],
+        to,
         mediaUrl: dataUri,
         mediaType,
         caption: formattedBody,
@@ -114,7 +120,7 @@ const SendWhatsAppMediaUnified = async ({
       logger.info(`[SendMediaUnified] URL pública da mídia: ${mediaUrl}`);
 
       sentMessage = await adapter.sendMessage({
-        to: number.split("@")[0],
+        to,
         mediaUrl,
         mediaType,
         caption: formattedBody,

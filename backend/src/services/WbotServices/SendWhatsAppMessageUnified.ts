@@ -2,6 +2,11 @@ import * as Sentry from "@sentry/node";
 import type { proto } from "@whiskeysockets/baileys";
 import AppError from "../../errors/AppError";
 import { GetTicketAdapter } from "../../helpers/GetWhatsAppAdapter";
+import {
+  getContactChatJid,
+  resolveOutboundChatJid,
+  toWhatsAppAdapterAddress
+} from "../../helpers/whatsappJid";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
@@ -36,6 +41,15 @@ interface Request {
   templateButtons?: TemplateButton[];
   messageTitle?: string;
   imageUrl?: string;
+  listSections?: Array<{
+    title: string;
+    rows: Array<{
+      id: string;
+      title: string;
+      description?: string;
+    }>;
+  }>;
+  listButtonText?: string;
 }
 
 /**
@@ -60,6 +74,8 @@ const SendWhatsAppMessageUnified = async ({
   templateButtons,
   messageTitle,
   imageUrl,
+  listSections,
+  listButtonText
 }: Request): Promise<IWhatsAppMessage | proto.WebMessageInfo> => {
   
   try {
@@ -79,15 +95,18 @@ const SendWhatsAppMessageUnified = async ({
 
     // Determinar número de destino
     let number: string;
-    if (
-      contactNumber.remoteJid &&
-      contactNumber.remoteJid !== "" &&
-      contactNumber.remoteJid.includes("@")
-    ) {
-      number = contactNumber.remoteJid;
+    if (channelType === "official") {
+      number =
+        getContactChatJid(contactNumber, ticket.isGroup) ||
+        `${contactNumber.number}@s.whatsapp.net`;
     } else {
-      number = `${contactNumber.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
+      number =
+        (await resolveOutboundChatJid(ticket, contactNumber)) ||
+        `${contactNumber.number}@${
+          ticket.isGroup ? "g.us" : "s.whatsapp.net"
+        }`;
     }
+    const to = toWhatsAppAdapterAddress(number, channelType);
 
     // Atualizar nome/avatar proativamente se necessário
     if (!ticket.isGroup && channelType === "baileys") {
@@ -128,7 +147,7 @@ const SendWhatsAppMessageUnified = async ({
         `END:VCARD`;
 
       sentMessage = await adapter.sendMessage({
-        to: number.split("@")[0], // Apenas o número
+        to,
         vcard: vcardContent
       });
 
@@ -180,6 +199,52 @@ const SendWhatsAppMessageUnified = async ({
       return sentMessage;
     }
 
+    // ===== ENVIO DE LISTA INTERATIVA =====
+    if (listSections && listSections.length > 0) {
+      const formattedBody = formatBody(body || "", ticket);
+
+      sentMessage = await adapter.sendMessage({
+        to,
+        body: formattedBody,
+        listSections,
+        listButtonText: listButtonText || "Escolher",
+        listTitle: messageTitle
+      });
+
+      await ticket.update({
+        lastMessage: formattedBody,
+        imported: null
+      });
+
+      try {
+        const CreateMessageService = (await import("../MessageServices/CreateMessageService")).default;
+        const messageId = sentMessage?.id || (sentMessage as any)?.key?.id || `SENT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const ackValue = sentMessage?.ack ?? 1;
+
+        const messageData = {
+          wid: messageId,
+          ticketId: ticket.id,
+          contactId: ticket.contactId,
+          body: formattedBody,
+          fromMe: true,
+          mediaType: "interactiveMessage",
+          read: true,
+          ack: ackValue,
+          remoteJid: contactNumber.remoteJid || number,
+          participant: ticket.isGroup ? (sentMessage as any)?.key?.participant : null,
+          dataJson: JSON.stringify(sentMessage),
+          isPrivate: false
+        };
+
+        await CreateMessageService({ messageData, companyId: ticket.companyId });
+      } catch (createError: any) {
+        logger.warn(`[SendUnified] Erro ao criar mensagem de lista no banco: ${createError.message}`);
+        Sentry.captureException(createError);
+      }
+
+      return sentMessage;
+    }
+
     // ===== ENVIO DE MENSAGEM COM BOTÕES =====
     if (templateButtons && templateButtons.length > 0) {
       const formattedBody = formatBody(body || "", ticket);
@@ -195,7 +260,7 @@ const SendWhatsAppMessageUnified = async ({
       // Se tem imagem
       if (imageUrl) {
         sentMessage = await adapter.sendMessage({
-          to: number.split("@")[0],
+          to,
           body: formattedBody,
           mediaUrl: imageUrl,
           mediaType: "image",
@@ -205,7 +270,7 @@ const SendWhatsAppMessageUnified = async ({
       } else {
         // Apenas texto com botões
         sentMessage = await adapter.sendMessage({
-          to: number.split("@")[0],
+          to,
           body: formattedBody,
           buttons: buttons.length > 0 ? buttons : undefined
         });
@@ -270,7 +335,7 @@ const SendWhatsAppMessageUnified = async ({
       }
 
       sentMessage = await adapter.sendMessage({
-        to: number.split("@")[0],
+        to,
         body: formattedBody,
         quotedMsgId
       });

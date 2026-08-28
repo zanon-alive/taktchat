@@ -15,8 +15,100 @@ import { Handle } from "react-flow-renderer";
 import { useNodeStorage } from "../../../stores/useNodeStorage";
 import { Typography } from "@mui/material";
 
+const CONTENT_STYLES = {
+  message: {
+    Icon: Message,
+    icon: "#64748B",
+    background: "#F1F5F9",
+    text: "#334155"
+  },
+  interval: {
+    Icon: AccessTime,
+    icon: "#F7953B",
+    background: "#FFF7ED",
+    text: "#9A3412"
+  },
+  img: {
+    Icon: Image,
+    icon: "#2563EB",
+    background: "#EFF6FF",
+    text: "#1E40AF"
+  },
+  audio: {
+    Icon: MicNone,
+    icon: "#0D9488",
+    background: "#F0FDFA",
+    text: "#115E59"
+  },
+  video: {
+    Icon: Videocam,
+    icon: "#7C3AED",
+    background: "#F5F3FF",
+    text: "#5B21B6"
+  }
+};
+
+const getContentKind = item => {
+  if (String(item).includes("message")) return "message";
+  if (String(item).includes("interval")) return "interval";
+  if (String(item).includes("img")) return "img";
+  if (String(item).includes("audio")) return "audio";
+  if (String(item).includes("video")) return "video";
+  return null;
+};
+
+const ContentChip = ({ kind, label }) => {
+  const style = CONTENT_STYLES[kind];
+  if (!style) {
+    return null;
+  }
+  const Icon = style.Icon;
+  return (
+    <div style={{ gap: "5px", padding: "6px" }}>
+      <div
+        style={{
+          display: "flex",
+          position: "relative",
+          flexDirection: "row",
+          justifyContent: "center"
+        }}
+      >
+        <Icon sx={{ color: style.icon }} />
+      </div>
+      <Typography
+        textAlign={"center"}
+        sx={{
+          textOverflow: "ellipsis",
+          fontSize: "10px",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          color: style.text
+        }}
+      >
+        {label}
+      </Typography>
+    </div>
+  );
+};
+
+const chipLabel = (kind, element) => {
+  if (!element) {
+    return "";
+  }
+  if (kind === "interval") {
+    return `${element.value} segundos`;
+  }
+  if (kind === "message") {
+    return element.value;
+  }
+  return element.original || element.value || "";
+};
+
 export default memo(({ data, isConnectable, id }) => {
   const storageItems = useNodeStorage();
+  const sequence = data.seq || [];
+  const elements = data.elements || [];
+
   return (
     <div
       style={{
@@ -36,7 +128,7 @@ export default memo(({ data, isConnectable, id }) => {
           height: "18px",
           top: "20px",
           left: "-12px",
-          cursor: 'pointer'
+          cursor: "pointer"
         }}
         onConnect={params => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
@@ -98,158 +190,25 @@ export default memo(({ data, isConnectable, id }) => {
         <div style={{ color: "#232323", fontSize: "16px" }}>Conteúdo</div>
       </div>
       <div style={{ color: "#232323", fontSize: "12px", width: 180 }}>
-        {data.seq.map(item => (
-          <div
-            key={item}
-            style={{
-              backgroundColor: "#F6EEEE",
-              marginBottom: "3px",
-              borderRadius: "5px"
-            }}
-          >
-            {item.includes("message") && (
-              <div style={{ gap: "5px", padding: "6px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    position: "relative",
-                    flexDirection: "row",
-                    justifyContent: "center"
-                  }}
-                >
-                  <Message sx={{ color: "#EC5858" }} />
-                </div>
-                <Typography
-                  textAlign={"center"}
-                  sx={{
-                    textOverflow: "ellipsis",
-                    fontSize: "10px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden"
-                  }}
-                >
-                  {
-                    data.elements.filter(itemLoc => itemLoc.number === item)[0]
-                      .value
-                  }
-                </Typography>
-              </div>
-            )}
-            {item.includes("interval") && (
-              <div style={{ gap: "5px", padding: "6px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    position: "relative",
-                    flexDirection: "row",
-                    justifyContent: "center"
-                  }}
-                >
-                  <AccessTime sx={{ color: "#EC5858" }} />
-                </div>
-                <Typography
-                  textAlign={"center"}
-                  sx={{
-                    textOverflow: "ellipsis",
-                    fontSize: "10px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden"
-                  }}
-                >
-                  {
-                    data.elements.filter(itemLoc => itemLoc.number === item)[0]
-                      .value
-                  }{" "}
-                  segundos
-                </Typography>
-              </div>
-            )}
-            {item.includes("img") && (
-              <div style={{ gap: "5px", padding: "6px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    position: "relative",
-                    flexDirection: "row",
-                    justifyContent: "center"
-                  }}
-                >
-                  <Image sx={{ color: "#EC5858" }} />
-                </div>
-                <Typography
-                  textAlign={"center"}
-                  sx={{
-                    textOverflow: "ellipsis",
-                    fontSize: "10px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden"
-                  }}
-                >
-                  {
-                    data.elements.filter(itemLoc => itemLoc.number === item)[0]
-                      .original
-                  }
-                </Typography>
-              </div>
-            )}
-            {item.includes("audio") && (
-              <div style={{ gap: "5px", padding: "6px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    position: "relative",
-                    flexDirection: "row",
-                    justifyContent: "center"
-                  }}
-                >
-                  <MicNone sx={{ color: "#EC5858" }} />
-                </div>
-                <Typography
-                  textAlign={"center"}
-                  sx={{
-                    textOverflow: "ellipsis",
-                    fontSize: "10px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden"
-                  }}
-                >
-                  {
-                    data.elements.filter(itemLoc => itemLoc.number === item)[0]
-                      .original
-                  }
-                </Typography>
-              </div>
-            )}
-            {item.includes("video") && (
-              <div style={{ gap: "5px", padding: "6px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    position: "relative",
-                    flexDirection: "row",
-                    justifyContent: "center"
-                  }}
-                >
-                  <Videocam sx={{ color: "#EC5858" }} />
-                </div>
-                <Typography
-                  textAlign={"center"}
-                  sx={{
-                    textOverflow: "ellipsis",
-                    fontSize: "10px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden"
-                  }}
-                >
-                  {
-                    data.elements.filter(itemLoc => itemLoc.number === item)[0]
-                      .original
-                  }
-                </Typography>
-              </div>
-            )}
-          </div>
-        ))}
+        {sequence.map(item => {
+          const kind = getContentKind(item);
+          const element = elements.find(itemLoc => itemLoc.number === item);
+          const style = CONTENT_STYLES[kind] || {
+            background: "#F6EEEE"
+          };
+          return (
+            <div
+              key={item}
+              style={{
+                backgroundColor: style.background,
+                marginBottom: "3px",
+                borderRadius: "5px"
+              }}
+            >
+              <ContentChip kind={kind} label={chipLabel(kind, element)} />
+            </div>
+          );
+        })}
       </div>
       <Handle
         type="source"
@@ -261,7 +220,7 @@ export default memo(({ data, isConnectable, id }) => {
           height: "18px",
           top: "90%",
           right: "-11px",
-          cursor: 'pointer'
+          cursor: "pointer"
         }}
         isConnectable={isConnectable}
       >

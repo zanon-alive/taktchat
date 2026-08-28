@@ -192,32 +192,51 @@ export class BaileysAdapter implements IWhatsAppAdapter {
       let content: any;
       let sentMsg: any;
 
-      // Mensagem de texto simples
-      if (mediaType === "text" || !mediaType) {
-        content = { text: body || "" };
-        
-        // Adicionar quoted se existir
-        if (quotedMsgId) {
-          content.quoted = { key: { id: quotedMsgId } };
-        }
-        
-        sentMsg = await this.socket.sendMessage(to, content);
-      }
-      // Mensagem com botões
-      else if (buttons && buttons.length > 0) {
+      if (vcard) {
         content = {
-          text: body || "",
-          buttons: buttons.map(btn => ({
-            buttonId: btn.id,
-            buttonText: { displayText: btn.title },
-            type: 1
-          })),
-          headerType: 1
+          contacts: {
+            displayName: "Contato",
+            contacts: [{ vcard }]
+          }
         };
         sentMsg = await this.socket.sendMessage(to, content);
-      }
-      // Mensagem com lista
-      else if (listSections && listSections.length > 0) {
+      } else if (buttons && buttons.length > 0) {
+        const baileys = await getBaileys();
+        const interactiveMsg = {
+          viewOnceMessage: {
+            message: {
+              interactiveMessage: {
+                body: {
+                  text: body || ""
+                },
+                nativeFlowMessage: {
+                  buttons: buttons.map(btn => ({
+                    name: "quick_reply",
+                    buttonParamsJson: JSON.stringify({
+                      display_text: (btn.title || "").slice(0, 20),
+                      id: btn.id
+                    })
+                  })),
+                  messageParamsJson: JSON.stringify({ from: "taktchat" })
+                }
+              }
+            }
+          }
+        };
+        const botNumber = this.socket.user?.id;
+        const generated = await baileys.generateWAMessageFromContent(
+          to,
+          interactiveMsg,
+          { userJid: botNumber }
+        );
+        await this.socket.relayMessage(to, generated.message!, {
+          messageId: generated.key.id
+        });
+        if (generated && typeof (this.socket as any).upsertMessage === "function") {
+          await (this.socket as any).upsertMessage(generated, "notify");
+        }
+        sentMsg = generated;
+      } else if (listSections && listSections.length > 0) {
         content = {
           text: body || "",
           sections: listSections.map(section => ({
@@ -233,19 +252,7 @@ export class BaileysAdapter implements IWhatsAppAdapter {
           footer: ""
         };
         sentMsg = await this.socket.sendMessage(to, content as any);
-      }
-      // vCard (contato)
-      else if (vcard) {
-        content = {
-          contacts: {
-            displayName: "Contato",
-            contacts: [{ vcard }]
-          }
-        };
-        sentMsg = await this.socket.sendMessage(to, content);
-      }
-      // Mensagem com mídia
-      else if (mediaPath || mediaUrl) {
+      } else if (mediaPath || mediaUrl) {
         const mediaData = mediaPath
           ? { url: mediaPath }
           : { url: mediaUrl };
@@ -285,6 +292,12 @@ export class BaileysAdapter implements IWhatsAppAdapter {
             );
         }
 
+        sentMsg = await this.socket.sendMessage(to, content);
+      } else {
+        content = { text: body || "" };
+        if (quotedMsgId) {
+          content.quoted = { key: { id: quotedMsgId } };
+        }
         sentMsg = await this.socket.sendMessage(to, content);
       }
 

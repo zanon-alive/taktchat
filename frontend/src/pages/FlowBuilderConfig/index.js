@@ -182,14 +182,22 @@ export const FlowBuilderConfig = () => {
 
   const connectionLineStyle = { stroke: "#2b2b2b", strokeWidth: "6px" };
 
+  const [speedDialOpen, setSpeedDialOpen] = useState(false);
+
   const addNode = (type, data) => {
-    const posY = nodes[nodes.length - 1].position.y;
-    const posX =
-      nodes[nodes.length - 1].position.x + nodes[nodes.length - 1].width + 40;
+    const last = nodes[nodes.length - 1];
+    const posY = last?.position?.y ?? 80;
+    const posX = last
+      ? last.position.x + (last.width || 180) + 40
+      : 80;
     if (type === "start") {
+      if (nodes.some((item) => item.type === "start" || item.id === "1")) {
+        toast.info("O fluxo já possui um nó de Início.");
+        return;
+      }
       return setNodes((old) => {
         return [
-        //  ...old.filter((item) => item.id !== "1"),
+          ...old,
           {
             id: "1",
             position: { x: posX, y: posY },
@@ -697,7 +705,7 @@ export const FlowBuilderConfig = () => {
           }}
         />
       ),
-      name: "Ticket",
+      name: "Abrir Ticket (Fila)",
       type: "ticket",
     },
     {
@@ -902,16 +910,28 @@ export const FlowBuilderConfig = () => {
         >
           <Stack>
             <SpeedDial
-              ariaLabel="SpeedDial basic example"
+              ariaLabel="Adicionar bloco ao fluxo"
+              open={speedDialOpen}
+              onOpen={() => setSpeedDialOpen(true)}
+              onClose={(_event, reason) => {
+                if (reason === "mouseLeave") {
+                  return;
+                }
+                setSpeedDialOpen(false);
+              }}
               sx={{
                 position: "absolute",
                 top: 16,
                 left: 16,
+                zIndex: 10,
                 ".MuiSpeedDial-fab": {
                   backgroundColor: colorPrimary(),
                   "&:hover": {
                     backgroundColor: colorPrimary(),
                   },
+                },
+                "& .MuiSpeedDialAction-staticTooltipLabel": {
+                  whiteSpace: "nowrap",
                 },
               }}
               icon={<SpeedDialIcon />}
@@ -925,8 +945,8 @@ export const FlowBuilderConfig = () => {
                   tooltipOpen
                   tooltipPlacement={"right"}
                   onClick={() => {
-                    console.log(action.type);
                     clickActions(action.type);
+                    setSpeedDialOpen(false);
                   }}
                 />
               ))}

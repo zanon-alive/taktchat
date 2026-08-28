@@ -33,6 +33,7 @@ import insatagramIcon from "../../assets/instagram.png";
 import whatsappIcon from "../../assets/whatsapp.png";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import ContactAvatar from "../ContactAvatar";
+import { resolveContactDisplayName } from "../../helpers/contactDisplayName";
 
 const useStyles = makeStyles((theme) => ({
     ticket: {
@@ -426,7 +427,7 @@ const TicketListItem = ({ ticket }) => {
                                 variant="body2"
                                 color="textPrimary"
                             >
-                                {ticket.contact.name}
+                                {resolveContactDisplayName(ticket.contact)}
                             </Typography>
 
                             {ticket.lastMessage && (
