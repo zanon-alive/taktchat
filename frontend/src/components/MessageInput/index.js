@@ -56,6 +56,7 @@ import api from "../../services/api";
 import RecordingTimer from "./RecordingTimer";
 
 import useQuickMessages from "../../hooks/useQuickMessages";
+import { formatQuickReplyLabel } from "../../utils/formatQuickReplyLabel";
 import { isString, isEmpty } from "lodash";
 import ContactSendModal from "../ContactSendModal";
 import CameraModal from "../CameraModal";
@@ -1085,13 +1086,9 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
       const companyId = user?.companyId;
       const messages = await listQuickMessages({ companyId, userId: user.id });
       const options = messages.map((m) => {
-        let truncatedMessage = m.message;
-        if (isString(truncatedMessage) && truncatedMessage.length > 90) {
-          truncatedMessage = m.message.substring(0, 90) + "...";
-        }
         return {
           value: m.message,
-          label: `/${m.shortcode} - ${truncatedMessage}`,
+          label: formatQuickReplyLabel(m.shortcode),
           mediaPath: m.mediaPath,
         };
       });
@@ -1607,7 +1604,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                             >
                               {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                               <a onClick={() => handleQuickAnswersClick(value)}>
-                                {`${value.label} - ${value.value}`}
+                                {value.label}
                               </a>
                             </li>
                           );
@@ -1656,7 +1653,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                             >
                               {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                               <a onClick={() => handleQuickAnswersClick(value)}>
-                                {`${value.label} - ${value.value}`}
+                                {value.label}
                               </a>
                             </li>
                           );

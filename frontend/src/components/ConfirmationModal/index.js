@@ -13,7 +13,8 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { i18n } from "../../translate/i18n";
 
-const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
+const ConfirmationModal = ({ title, children, open, onClose, onConfirm, confirmLabel }) => {
+	const confirmText = confirmLabel || i18n.t("confirmationModal.buttons.confirm");
 	return (
 		<Dialog
 			open={open}
@@ -47,7 +48,7 @@ const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 					}}
 					color="secondary"
 				>
-					{i18n.t("confirmationModal.buttons.confirm")}
+					{confirmText}
 				</Button>
 			</DialogActions>
 		</Dialog>

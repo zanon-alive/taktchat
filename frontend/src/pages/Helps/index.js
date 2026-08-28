@@ -405,7 +405,7 @@ const Helps = () => {
   return (
     <div className={classes.root}>
       <MainHeader>
-        <Title>{i18n.t("helps.title")} ({records.length})</Title>
+        <Title>{i18n.t("helps.title")}</Title>
         <MainHeaderButtonsWrapper></MainHeaderButtonsWrapper>
       </MainHeader>
       {renderHelps()}

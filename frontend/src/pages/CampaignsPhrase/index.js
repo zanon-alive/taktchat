@@ -45,6 +45,7 @@ import { Can } from "../../components/Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import CampaignModalPhrase from "../../components/CampaignModalPhrase";
 import { legacyListRowSx } from "../../styles/listTableHead";
+import EmptyState from "../../components/EmptyState";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -248,6 +249,17 @@ const CampaignsPhrase = () => {
             </Grid>
           </Grid>
           <>
+            {!loading && campaignflows.length === 0 && (
+              <EmptyState
+                title="Nenhuma campanha de fluxo"
+                description="Crie a primeira para disparar um fluxo automaticamente."
+                actionLabel="Campanha"
+                onAction={() => {
+                  setCampaignFlowSelected();
+                  setModalOpenPhrase(true);
+                }}
+              />
+            )}
             {!loading &&
               campaignflows.map(flow => (
                 <Grid

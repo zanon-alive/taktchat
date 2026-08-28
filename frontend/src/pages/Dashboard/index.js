@@ -41,8 +41,8 @@ import { ChatsUser } from "./ChartsUser";
 import ChartDonut from "./ChartDonut";
 import Filters from "./Filters";
 import { ChartsDate } from "./ChartsDate";
-import ForbiddenPage from "../../components/ForbiddenPage";
 import { i18n } from "../../translate/i18n";
+import { Redirect } from "react-router-dom";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -143,7 +143,7 @@ const Dashboard = () => {
   };
 
   if (user.profile === "user" && user.showDashboard === "disabled") {
-    return <ForbiddenPage />;
+    return <Redirect to="/tickets" />;
   }
 
   const statCards = [

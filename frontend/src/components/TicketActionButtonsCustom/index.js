@@ -14,6 +14,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import usePermissions from "../../hooks/usePermissions";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import Tooltip from '@mui/material/Tooltip';
 import ConfirmationModal from "../ConfirmationModal";
@@ -94,6 +95,7 @@ const TicketActionButtonsCustom = ({ ticket
     const [isMounted, setIsMounted] = useState(true);
     const [loading, setLoading] = useState(false);
     const { user } = useContext(AuthContext);
+    const { hasPermission } = usePermissions();
     const { setCurrentTicket, setTabOpen } = useContext(TicketsContext);
     const [open, setOpen] = React.useState(false);
     const [outcomeOpen, setOutcomeOpen] = useState(false);
@@ -454,11 +456,13 @@ const TicketActionButtonsCustom = ({ ticket
                                     <UndoIcon onClick={(e) => handleUpdateTicketStatus(e, "pending", null)} />
                                 </Tooltip>
                             </IconButton>
+                            {hasPermission("tickets.transfer") && (
                             <IconButton className={classes.bottomButtonVisibilityIcon}>
                                 <Tooltip title="Transferir Ticket">
                                     <SwapHorizOutlined onClick={handleOpenTransferModal} />
                                 </Tooltip>
                             </IconButton>
+                            )}
                             <MenuItem className={classes.bottomButtonVisibilityIcon}>
                                 <Tooltip title={i18n.t("contactModal.form.chatBotContact")}>
                                     <Switch size="small" checked={disableBot} onChange={() => handleContactToggleDisableBot()} />
@@ -542,10 +546,12 @@ const TicketActionButtonsCustom = ({ ticket
                             <UndoIcon style={{ color: '#fb8c00', marginRight: 10 }} />
                             {i18n.t("tickets.buttons.returnQueue")}
                         </MenuItem>,
+                        hasPermission("tickets.transfer") && (
                         <MenuItem key="transfer" onClick={() => { handleCloseMenu(); handleOpenTransferModal(); }}>
                             <SwapHorizOutlined style={{ color: '#1e88e5', marginRight: 10 }} />
                             {i18n.t("ticketsList.buttons.transfer") || "Transferir ticket"}
-                        </MenuItem>,
+                        </MenuItem>
+                        ),
                         <MenuItem key="bot" onClick={() => { handleCloseMenu(); handleContactToggleDisableBot(); }}>
                             <DeviceHubOutlined style={{ color: '#8e24aa', marginRight: 10 }} />
                             {i18n.t("contactModal.form.chatBotContact")} {disableBot ? "(desligado)" : "(ligado)"}

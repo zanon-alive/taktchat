@@ -680,6 +680,7 @@ const Campaigns = () => {
                     </table>
                   </Box>
                   {/* Paginação Desktop */}
+                  {totalCampaigns > 0 && (
                   <Box className={classes.pagination} component="nav" aria-label="Table navigation">
                     <span className={classes.paginationInfo}>
                       Página <strong>{pageNumber}</strong> de <strong>{totalPages}</strong> • 
@@ -750,6 +751,7 @@ const Campaigns = () => {
                       </li>
                     </Box>
                   </Box>
+                  )}
                 </Paper>
               ) : (
                 /* Mobile View */

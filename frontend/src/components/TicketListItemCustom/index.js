@@ -27,6 +27,7 @@ import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import usePermissions from "../../hooks/usePermissions";
 import toastError from "../../errors/toastError";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 
@@ -339,6 +340,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
     const isMounted = useRef(true);
     const { setCurrentTicket } = useContext(TicketsContext);
     const { user } = useContext(AuthContext);
+    const { hasPermission } = usePermissions();
 
     const { get: getSetting } = useCompanySettings();
 
@@ -825,7 +827,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                         )}
                     </span>
                     <span className={classes.secondaryContentSecond1} >
-                        {(ticket.status === "pending" || ticket.status === "open" || ticket.status === "group") && (
+                        {hasPermission("tickets.transfer") && (ticket.status === "pending" || ticket.status === "open" || ticket.status === "group") && (
                             <ButtonWithSpinner
                                 style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '50px', position: 'absolute', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
