@@ -1,15 +1,19 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `feat/ux-onda-a` (Onda A em implementação; base `docs/ux-design-pre-producao`)
-**Demanda:** UX pré-produção. Inventário em `.docs/ux-design/levantamento-pre-producao.md`.
+**Branch git:** `feat/ux-onda-d` (cadeia A–D, PRs #43–#46).  
+**Demanda UX pré-produção:** encerrada neste recorte. Aguardando merge humano na ordem A→B→C→D.
 
-## Antes do código
-- Sem TeleCX. Cores Taktchat. 1º PR = Onda A.
+## Referências
 
-## Estado
-- Onda A: Tailwind `darkMode: 'class'` + `applyColorScheme` + CssBaseline dentro do ThemeProvider.
-- Próximo: PR da Onda A, depois B, C, D. No fim, percurso comparativo.
+- Inventário: `.docs/ux-design/levantamento-pre-producao.md`
+- Comparativo: `.docs/ux-design/comparativo-ondas-abcd.md`
+- Final local: `.docs/branchs/feat/ux-onda-d/99-FINAL.md`
+
+## Ainda aberto (fora desta série)
+
+P0-11, mix dos cards de Ajuda, Settings, drawer só ícone, polimento 1100px.
 
 ## Não fazer
-- Deploy pelo agente.
+
+- Merge/deploy pelo agente sem pedido explícito.
 - Não commitar `.kiro/`, `.telecontrol/`, rules Cursor soltas.

@@ -88,6 +88,7 @@ Toda a documentação foi reorganizada em `.docs/`. Principais pontos de entrada
 - Variáveis de ambiente e segurança: `.docs/configuracao/`
 - Infraestrutura e stack de produção: `.docs/infraestrutura/` (inclui stack Docker Swarm em produção)
 - Operação, monitoramento e suporte: `.docs/operacao/`
+- UX do painel (pré-produção): `.docs/ux-design/` — levantamento e comparativo das ondas A–D (PRs #43–#46)
 - Funcionalidades por módulo: `.docs/funcionalidades/`
   - **Mapa de rotas e acesso do frontend:** `.docs/funcionalidades/mapa-frontend.md`
   - **Assets estáticos (public vs src, evitar 404 em produção):** `.docs/funcionalidades/frontend-assets-estaticos.md`

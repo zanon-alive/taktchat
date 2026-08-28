@@ -53,7 +53,7 @@ const messages = {
       login: {
         title: "Login",
         form: {
-          email: "Email",
+          email: "E-mail",
           password: "Senha",
           button: "Acessar",
         },
@@ -993,7 +993,7 @@ const messages = {
             fullPanel: "Painel completo",
             toggleTheme: "Alternar tema",
             message: "Olá",
-            messageEnd: "seja bem-vindo a",
+            messageEnd: "seja bem-vindo(a) a",
             active: "Ativo até",
             goodMorning: "Oi,",
             myName: "meu nome é",
@@ -1016,6 +1016,11 @@ const messages = {
         es: "Espanhol",
         en: "Inglês",
         tr: "Turco",
+      },
+      mainHeader: {
+        buttons: {
+          language: "Idioma",
+        },
       },
       messagesAPI: {
         title: "API",

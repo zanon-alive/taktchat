@@ -858,6 +858,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                     </Tooltip>
                                 </ButtonWithSpinner>
                                 {/* Ícone de espiar imediatamente ao lado do fechar */}
+                                {ticket.userId !== user?.id && (
                                 <Tooltip title="Espiar Conversa">
                                     <IconButton
                                         size="small"
@@ -872,6 +873,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                         <VisibilityIcon fontSize="small" style={{ color: blue[700] }} />
                                     </IconButton>
                                 </Tooltip>
+                                )}
                             </>
                         )}
                     </span>

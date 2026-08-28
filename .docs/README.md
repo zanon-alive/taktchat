@@ -16,6 +16,7 @@ Bem-vindo ao hub oficial de documentação do projeto **Taktchat**. Esta pasta c
 - `infraestrutura/`: detalhes de banco de dados, cache/filas, stack de produção (Docker Swarm) e integrações externas.
 - `ux-design/`: levantamento de estética e UX do painel (tema, cards, grids, empty states, fluxos e persona atendente).
   - **Pré-produção:** `ux-design/levantamento-pre-producao.md`
+  - **Comparativo ondas A–D:** `ux-design/comparativo-ondas-abcd.md`
 - `funcionalidades/`: guias funcionais por módulo (campanhas, permissões, tags, anti-ban, etc.).
   - **Mapa real de rotas, menu, personas e gates:** `funcionalidades/mapa-frontend.md`
   - **Landing / tour / FAB:** checklist em `testes-manuais/landing-tour-fab-whatsapp.md`

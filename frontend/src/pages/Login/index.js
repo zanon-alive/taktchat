@@ -10,6 +10,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { i18n } from "../../translate/i18n";
 import { getBackendUrl } from "../../config";
 import ChatWidget from "../landing-shared/ChatWidget";
 import {
@@ -236,7 +237,7 @@ const Login = () => {
           </Typography>
           {error && <Typography color="error">{error}</Typography>}
           <TextField
-            label="Email"
+            label={i18n.t("login.form.email")}
             variant="outlined"
             fullWidth
             margin="normal"
@@ -252,7 +253,7 @@ const Login = () => {
             }}
           />
           <TextField
-            label="Password"
+            label={i18n.t("login.form.password")}
             variant="outlined"
             fullWidth
             margin="normal"

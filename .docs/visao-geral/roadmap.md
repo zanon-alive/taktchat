@@ -13,12 +13,14 @@ Este documento centraliza todas as melhorias futuras, funcionalidades pendentes 
 
 ### UX e Design do painel (pré-produção)
 
-Inventário e ondas de correção: `.docs/ux-design/levantamento-pre-producao.md` (branch `docs/ux-design-pre-producao`). Ainda **não implementado** — aguarda escolha das ondas.
+Inventário: `.docs/ux-design/levantamento-pre-producao.md`. Comparativo após implementação: `.docs/ux-design/comparativo-ondas-abcd.md`. PRs empilhados #43–#46 (ainda sem merge em `main`).
 
-- [ ] Onda A — uma fonte de tema (MUI + Tailwind); cards claros no tema claro; títulos do card legíveis (P0-10)
-- [ ] Onda B — tabelas no dark + legado (`tableHead`, fluxos, tags)
-- [ ] Onda C — empty states + overlays de tarefa (confirmação Ok, overlay `/`, 403 da atendente, status vs lane)
-- [ ] Onda D — grids e chrome (AppBar, i18n, Relatórios/Kanban neste zoom)
+- [x] Onda A — uma fonte de tema (MUI + Tailwind); cards claros no tema claro; títulos do card legíveis (P0-10) — PR #43
+- [x] Onda B — tabelas no dark + legado (`tableHead`, fluxos, tags) — PR #44
+- [x] Onda C — empty states + overlays de tarefa (confirmação Ok, overlay `/`, 403 da atendente, status vs lane) — PR #45
+- [x] Onda D — grids e chrome (AppBar, i18n, Relatórios/Kanban neste zoom) — PR #46
+
+Comparativo: `.docs/ux-design/comparativo-ondas-abcd.md`.
 
 ---
 

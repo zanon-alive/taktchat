@@ -622,7 +622,7 @@ const Connections = () => {
             <Title>{i18n.t("connections.title")} ({whatsApps.length})</Title>
                   </Grid>
                   <Grid xs={12} sm={7} item>
-                    <Grid container alignItems="center" spacing={2} justifyContent="flex-end">
+                    <Grid container alignItems="center" spacing={1} justifyContent="flex-end" wrap="wrap">
                       <Grid item>
               <Button
                 variant="contained"

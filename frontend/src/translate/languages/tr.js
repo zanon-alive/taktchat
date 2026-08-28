@@ -939,6 +939,11 @@ const messages = {
         en: "İngilizce",
         tr: "Türkçe",
       },
+      mainHeader: {
+        buttons: {
+          language: "Dil",
+        },
+      },
       messagesAPI: {
         title: "Mesaj Gönderme için API",
         textMessage: {
