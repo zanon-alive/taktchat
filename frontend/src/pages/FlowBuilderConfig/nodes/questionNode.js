@@ -124,6 +124,18 @@ export default memo(({ data, isConnectable, id }) => {
                 </Typography>
               </div>
       </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          fontSize: "10px",
+          color: "#232323",
+          marginTop: "6px",
+          marginRight: "4px"
+        }}
+      >
+        Resposta
+      </div>
       <Handle
         type="source"
         position="right"
@@ -132,7 +144,44 @@ export default memo(({ data, isConnectable, id }) => {
           background: "#2563EB",
           width: "18px",
           height: "18px",
-          top: "90%",
+          top: "72%",
+          right: "-11px",
+          cursor: "pointer",
+        }}
+        isConnectable={isConnectable}
+      >
+        <ArrowForwardIos
+          sx={{
+            color: "#ffff",
+            width: "10px",
+            height: "10px",
+            marginLeft: "2.9px",
+            marginBottom: "1px",
+            pointerEvents: "none",
+          }}
+        />
+      </Handle>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          fontSize: "10px",
+          color: "#64748B",
+          marginTop: "10px",
+          marginRight: "4px"
+        }}
+      >
+        Outra resposta
+      </div>
+      <Handle
+        type="source"
+        position="right"
+        id="aelse"
+        style={{
+          background: "#64748B",
+          width: "18px",
+          height: "18px",
+          top: "92%",
           right: "-11px",
           cursor: "pointer",
         }}

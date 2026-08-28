@@ -13,6 +13,7 @@ import { useNodeStorage } from "../../../stores/useNodeStorage";
 
 export default memo(({ data, isConnectable, id }) => {
   const storageItems = useNodeStorage();
+  const options = data.arrayOption || [];
 
   return (
     <div
@@ -95,6 +96,23 @@ export default memo(({ data, isConnectable, id }) => {
           }}
         />
         <div style={{ color: "#232323", fontSize: "16px" }}>Menu</div>
+        {data.interactive !== false && (
+          <div
+            style={{
+              marginLeft: "auto",
+              marginRight: 18,
+              fontSize: "9px",
+              color: "#683AC8",
+              border: "1px solid rgba(104, 58, 200, 0.35)",
+              borderRadius: 4,
+              padding: "1px 4px",
+              height: 16,
+              lineHeight: "14px"
+            }}
+          >
+            Botões
+          </div>
+        )}
       </div>
       <div>
         <div
@@ -109,7 +127,7 @@ export default memo(({ data, isConnectable, id }) => {
           {data.message}
         </div>
       </div>
-      {data.arrayOption.map(option => (
+      {options.map(option => (
         <div
           key={option.number}
           style={{
@@ -161,6 +179,51 @@ export default memo(({ data, isConnectable, id }) => {
           </Handle>
         </div>
       ))}
+      <div
+        style={{
+          marginBottom: "4px",
+          justifyContent: "end",
+          display: "flex"
+        }}
+      >
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            fontSize: "10px",
+            color: "#64748B",
+            alignSelf: "end"
+          }}
+        >
+          Outra resposta
+        </div>
+        <Handle
+          type="source"
+          position="right"
+          id="aelse"
+          style={{
+            top: 74 + 23 * (options.length + 1),
+            background: "#64748B",
+            width: "18px",
+            height: "18px",
+            right: "-11px",
+            cursor: "pointer"
+          }}
+          isConnectable={isConnectable}
+        >
+          <ArrowForwardIos
+            sx={{
+              color: "#ffff",
+              width: "10px",
+              height: "10px",
+              marginLeft: "2.9px",
+              marginBottom: "1px",
+              pointerEvents: "none"
+            }}
+          />
+        </Handle>
+      </div>
     </div>
   );
 });

@@ -24,6 +24,7 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { flowBuilderPublicUrl } from "../../helpers/flowBuilderPublicUrl";
 import { Stack } from "@mui/material";
 
 const useStyles = makeStyles(theme => ({
@@ -71,9 +72,7 @@ const FlowBuilderAddImgModal = ({ open, onSave, onUpdate, data, close }) => {
     if (open === "edit") {
       setLabels({ title: "Editar imagem", btn: "Salvar" });
       setOldImage(data.data.url);
-      setPreview(
-        process.env.REACT_APP_BACKEND_URL + "/public/" + data.data.url
-      );
+      setPreview(flowBuilderPublicUrl(data.data.url));
       setActiveModal(true);
     } else if (open === "create") {
       setLabels({ title: "Adicionar imagem ao fluxo", btn: "Adicionar" });

@@ -11,6 +11,7 @@ import Whatsapp from "../../models/Whatsapp";
 import * as Sentry from "@sentry/node";
 import { safeNormalizePhoneNumber } from "../../utils/phone";
 import { Op } from "sequelize";
+import { pickWhatsAppProfileName } from "../../helpers/contactDisplayName";
 
 const axios = require('axios');
 
@@ -165,7 +166,9 @@ const CreateOrUpdateContactService = async ({
       return undefined;
     })();
 
-    const contactData = {
+    const whatsappProfileName = pickWhatsAppProfileName(name, number);
+
+    const contactData: Record<string, unknown> = {
       name,
       number,
       email: normalizedEmail,
@@ -183,6 +186,10 @@ const CreateOrUpdateContactService = async ({
       creditLimit: sanitizedCreditLimit,
       segment: normalizedSegment
     };
+
+    if (whatsappProfileName) {
+      contactData.contactName = whatsappProfileName;
+    }
 
     const io = getIO();
     let contact: Contact | null;
@@ -269,25 +276,22 @@ const CreateOrUpdateContactService = async ({
 
       // Proteção: nunca sobrescrever nome personalizado já válido
       // Somente definir/atualizar nome quando o atual estiver vazio ou igual ao número
-      const incomingName = (name || "").trim();
       const currentName = (contact.name || "").trim();
       const currentIsNumber = currentName.replace(/\D/g, "") === String(number);
       const hasValidExistingName = currentName !== "" && !currentIsNumber;
 
       if (hasValidExistingName) {
         // Não atualizar o campo name em hipótese alguma
-        delete (contactData as any).name;
+        delete contactData.name;
       } else {
-        // Nome salvo é vazio ou igual ao número: podemos definir um melhor, senão manter número
-        const incomingIsNumber = incomingName.replace(/\D/g, "") === String(number);
-        contactData.name = incomingName && !incomingIsNumber ? incomingName : String(number);
+        contactData.name = whatsappProfileName || String(number);
       }
 
       // Garantir que email não fique null ao salvar
       if ((contactData as any).email === undefined) {
         (contactData as any).email = contact.email ?? "";
       }
-      await contact.update(contactData);
+      await contact.update(contactData as any);
       await contact.reload();
 
       // Marca para emitir update se nome ou avatar mudaram
@@ -313,12 +317,12 @@ const CreateOrUpdateContactService = async ({
 
       // Definir nome efetivo na criação: se não vier nome válido, usa o número como fallback
       {
-        const incomingName = (name || "").trim();
-        const effectiveName = incomingName && incomingName !== number ? incomingName : number;
+        const effectiveName = whatsappProfileName || number;
         try {
           contact = await Contact.create({
             ...contactData,
             name: effectiveName,
+            contactName: whatsappProfileName || null,
             channel,
             acceptAudioMessage: acceptAudioMessageContact === 'enabled' ? true : false,
             remoteJid: newRemoteJid,
@@ -363,7 +367,7 @@ const CreateOrUpdateContactService = async ({
             
             if (contact) {
               // Contato encontrado, atualizar com novos dados
-              await contact.update(contactData);
+              await contact.update(contactData as any);
               await contact.reload();
               shouldEmitUpdate = true;
             } else {

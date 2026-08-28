@@ -128,62 +128,51 @@ export class OfficialAPIAdapter implements IWhatsAppAdapter {
         to: recipient
       };
 
-      // Mensagem de texto simples
-      if (mediaType === "text" || !mediaType) {
-        payload.type = "text";
-        payload.text = { body: body || "" };
-      }
-      // Mensagem com botões interativos
-      else if (buttons && buttons.length > 0) {
+      // Interativo precisa vir antes do texto: sendMessage({ body, buttons })
+      // chega sem mediaType e, no ramo de texto, os botões eram ignorados.
+      if (vcard) {
+        payload.type = "contacts";
+        payload.contacts = [{ vcard }];
+      } else if (buttons && buttons.length > 0) {
         payload.type = "interactive";
         payload.interactive = {
           type: "button",
           body: { text: body || "" },
           action: {
-            buttons: buttons.slice(0, 3).map(btn => ({  // Max 3 botões
+            buttons: buttons.slice(0, 3).map(btn => ({
               type: "reply",
               reply: {
                 id: btn.id,
-                title: btn.title.substring(0, 20)  // Max 20 chars
+                title: btn.title.substring(0, 20)
               }
             }))
           }
         };
-      }
-      // Mensagem com lista interativa
-      else if (listSections && listSections.length > 0) {
+      } else if (listSections && listSections.length > 0) {
         payload.type = "interactive";
         payload.interactive = {
           type: "list",
           body: { text: body || "" },
           action: {
             button: listButtonText || "Ver opções",
-            sections: listSections.slice(0, 10).map(section => ({  // Max 10 seções
-              title: section.title.substring(0, 24),  // Max 24 chars
-              rows: section.rows.slice(0, 10).map(row => ({  // Max 10 linhas por seção
+            sections: listSections.slice(0, 10).map(section => ({
+              title: section.title.substring(0, 24),
+              rows: section.rows.slice(0, 10).map(row => ({
                 id: row.id,
                 title: row.title.substring(0, 24),
-                description: row.description?.substring(0, 72)  // Max 72 chars
+                description: row.description?.substring(0, 72)
               }))
             }))
           }
         };
-        
-        // Header opcional
+
         if (listTitle) {
           payload.interactive.header = {
             type: "text",
-            text: listTitle.substring(0, 60)  // Max 60 chars
+            text: listTitle.substring(0, 60)
           };
         }
-      }
-      // vCard (contato)
-      else if (vcard) {
-        payload.type = "contacts";
-        payload.contacts = [{ vcard }];
-      }
-      // Mensagem com mídia (imagem, vídeo, documento, áudio)
-      else if (mediaUrl) {
+      } else if (mediaUrl) {
         switch (mediaType) {
           case "image":
             payload.type = "image";
@@ -223,6 +212,9 @@ export class OfficialAPIAdapter implements IWhatsAppAdapter {
               "UNSUPPORTED_MEDIA_TYPE"
             );
         }
+      } else {
+        payload.type = "text";
+        payload.text = { body: body || "" };
       }
 
       // Enviar mensagem

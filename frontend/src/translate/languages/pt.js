@@ -924,6 +924,7 @@ const messages = {
         buttons: {
           ok: "Salvar",
           cancel: "Cancelar",
+          addContact: "Cadastrar contato",
         },
       },
       SendContactModal: {

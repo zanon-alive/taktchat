@@ -4,6 +4,7 @@ import ContactAvatar from "../ContactAvatar";
 import { useParams } from "react-router-dom";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
+import { resolveContactDisplayName } from "../../helpers/contactDisplayName";
 
 const HeaderTicketInfo = () => {
   const { ticketId } = useParams();
@@ -59,7 +60,7 @@ const HeaderTicketInfo = () => {
       titleTypographyProps={{ noWrap: true }}
       subheaderTypographyProps={{ noWrap: true }}
       avatar={<ContactAvatar contact={contact} alt="contact_image" />}
-      title={`${contact?.name || "(sem contato)"} #${ticket.id}`}
+      title={`${resolveContactDisplayName(contact) || "(sem contato)"} #${ticket.id}`}
       subheader={
         ticket?.user && `${i18n.t("messagesList.header.assignedTo")} ${ticket.user.name}`
       }

@@ -15,6 +15,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { i18n } from "../../translate/i18n";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = makeStyles((theme) => ({
@@ -202,6 +203,10 @@ const FlowBuilderAddQuestionModal = ({
                   fullWidth
                   required
                 />
+                <Typography variant="caption" color="textSecondary" display="block" style={{ marginTop: 8 }}>
+                  O conector azul segue com a resposta. O cinza “Outra resposta”
+                  é usado quando a mensagem vem vazia (sem texto).
+                </Typography>
               </DialogContent>
               <DialogActions>
                 <Button

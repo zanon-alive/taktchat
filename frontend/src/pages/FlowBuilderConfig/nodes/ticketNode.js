@@ -89,8 +89,8 @@ export default memo(({ data, isConnectable, id }) => {
             color: "#3aba38"
           }}
         />
-        <div style={{ color: "#232323", fontSize: "16px" }}>
-          Ticket
+        <div style={{ color: "#232323", fontSize: "13px", lineHeight: "16px" }}>
+          Abrir Ticket (Fila)
         </div>
       </div>
       <div style={{ color: "#232323", fontSize: "12px", width: 180 }}>
@@ -102,13 +102,23 @@ export default memo(({ data, isConnectable, id }) => {
           }}
         >
           <div style={{ gap: "5px", padding: "6px" }}>
-            <div style={{ textAlign: "center" }}>
+            <div style={{ textAlign: "center", fontWeight: 600 }}>
               {Object.keys(data)[0] === "data" ? (
                 data.data.name
               ) : (
                 data.name
               )
               }
+            </div>
+            <div
+              style={{
+                textAlign: "center",
+                fontSize: "10px",
+                color: "#64748B",
+                marginTop: "2px"
+              }}
+            >
+              Envia o atendimento para esta fila
             </div>
           </div>
         </div>

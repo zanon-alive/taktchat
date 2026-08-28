@@ -1,19 +1,25 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `feat/ux-onda-d` (cadeia A–D, PRs #43–#46).  
-**Demanda UX pré-produção:** encerrada neste recorte. Aguardando merge humano na ordem A→B→C→D.
+**Branch git atual:** `feat/ux-onda-d`
+**Data:** 2026-08-28
 
-## Referências
+## Demanda desta sessão — FINALIZADA (código)
 
-- Inventário: `.docs/ux-design/levantamento-pre-producao.md`
-- Comparativo: `.docs/ux-design/comparativo-ondas-abcd.md`
-- Final local: `.docs/branchs/feat/ux-onda-d/99-FINAL.md`
+Flow Builder + WhatsApp da demo. Fechamento: `.docs/branchs/feat/ux-onda-d/09-FINAL-flow-whatsapp.md`
 
-## Ainda aberto (fora desta série)
+Ainda **não commitado**. Sem deploy.
 
-P0-11, mix dos cards de Ajuda, Settings, drawer só ícone, polimento 1100px.
+## Demanda nova (ainda sem branch Git)
 
-## Não fazer
+Soft delete + auditoria de exclusão de tickets.
 
-- Merge/deploy pelo agente sem pedido explícito.
-- Não commitar `.kiro/`, `.telecontrol/`, rules Cursor soltas.
+- Pasta: `.docs/branchs/feat/auditoria-exclusao-tickets/`
+- Análise: `01-analise.md`
+- **Não implementar** até o usuário aprovar requisitos e sugestões (S1–S10).
+- Branch Git `feat/auditoria-exclusao-tickets` **ainda não criada**.
+
+## Nao fazer
+
+- Deploy pelo agente.
+- Commit sem pedido explícito.
+- Implementar soft delete sem OK da análise.

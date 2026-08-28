@@ -121,24 +121,38 @@ const ContactSendModal = ({ modalOpen, onClose }) => {
     return filtered;
   };
 
-  const renderOption = option => {
-    if (option.number) {
-      return <>
-        <Typography component="span" style={{ fontSize: 14, marginLeft: "10px", display: "inline-flex", alignItems: "center", lineHeight: "2" }}>
-          {option.name} - {option.number}
-        </Typography>
-      </>
-    } else {
-      return `${i18n.t("SendContactModal.add")} ${option.name}`;
+  const renderOption = (props, option) => {
+    if (typeof option === "string") {
+      return (
+        <li {...props}>
+          {`${i18n.t("SendContactModal.add")} ${option}`}
+        </li>
+      );
     }
+    if (option.number) {
+      return (
+        <li {...props}>
+          <Typography component="span" style={{ fontSize: 14, marginLeft: "10px", display: "inline-flex", alignItems: "center", lineHeight: "2" }}>
+            {option.name} - {option.number}
+          </Typography>
+        </li>
+      );
+    }
+    return (
+      <li {...props}>
+        {`${i18n.t("SendContactModal.add")} ${option.name || ""}`}
+      </li>
+    );
   };
 
   const renderOptionLabel = option => {
-    if (option.number) {
-      return `${option.name} - ${option.number}`;
-    } else {
-      return `${option.name}`;
+    if (typeof option === "string") {
+      return option;
     }
+    if (option?.number) {
+      return `${option.name} - ${option.number}`;
+    }
+    return `${option?.name || ""}`;
   };
 
   const renderContactAutocomplete = () => {

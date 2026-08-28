@@ -291,14 +291,18 @@ async function processIncomingMessage(
       break;
 
     case "button":
-      body = message.button?.text || "";
+      body = message.button?.payload || message.button?.text || "";
       break;
 
     case "interactive":
       if (message.interactive?.button_reply) {
-        body = message.interactive.button_reply.title;
+        body =
+          message.interactive.button_reply.id ||
+          message.interactive.button_reply.title;
       } else if (message.interactive?.list_reply) {
-        body = message.interactive.list_reply.title;
+        body =
+          message.interactive.list_reply.id ||
+          message.interactive.list_reply.title;
       }
       break;
 

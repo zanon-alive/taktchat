@@ -865,6 +865,7 @@ const messages = {
         buttons: {
           ok: "Kaydet",
           cancel: "İptal",
+          addContact: "Kişi kaydet",
         },
       },
       SendContactModal: {

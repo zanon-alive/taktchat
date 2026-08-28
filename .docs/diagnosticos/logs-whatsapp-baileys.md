@@ -14,14 +14,14 @@ Este documento descreve mensagens de log geradas pela integração com WhatsApp 
 - **Quando aparecem:** durante a troca/atualização de sessões de criptografia.
 - **Origem:** protocolo Signal (libsignal).
 - **Significado:** uma sessão anterior foi fechada para abrir uma nova (prekey bundle). Comportamento normal.
-- **Ação:** nenhuma; não requer correção.
+- **Ação:** nenhuma; o backend oculta esses dumps no console (incluem material de sessão).
 
 ---
 
 ## Como proceder com esses erros
 
 1. **Se a tela está funcionando** (mensagens chegando, atendimentos normais): tratar como esperado e **não é necessário corrigir nada**. Essas mensagens podem ser ignoradas.
-2. **Reduzir ruído no console (opcional):** defina a variável de ambiente `SUPPRESS_BAILEYS_DECRYPT_LOGS=1` no backend. O bootstrap da aplicação filtrará do `console.error` as linhas que contêm "Failed to decrypt", "Bad MAC" e "Session error" do libsignal. Ver variáveis em [configuracao/variaveis-ambiente.md](../configuracao/variaveis-ambiente.md).
+2. **Reduzir ruído de decrypt no console (opcional):** defina `SUPPRESS_BAILEYS_DECRYPT_LOGS=1` no backend para filtrar `console.error` de "Failed to decrypt" / "Bad MAC". Dumps de `Closing session` já são omitidos automaticamente.
 3. **Monitorar:** se **mensagens ao vivo** passarem a não aparecer na tela, aí sim investigar (limpar auth/sessão e reconectar, evitar múltiplos dispositivos no mesmo número).
 
 ## Quando se preocupar
@@ -34,5 +34,5 @@ Este documento descreve mensagens de log geradas pela integração com WhatsApp 
 ## Referência
 
 - Logger do Baileys é configurado em `backend/src/libs/wbot.ts` (wrapper que rebaixa erros de decrypt/sessão para debug).
-- Filtro opcional de ruído (libsignal): `backend/src/utils/suppressBaileysDecryptLogs.ts`, ativado por `SUPPRESS_BAILEYS_DECRYPT_LOGS=1`.
+- Filtro de dump de sessão (libsignal): `backend/src/utils/suppressBaileysDecryptLogs.ts`. Erros de decrypt no `console.error` continuam opcionais com `SUPPRESS_BAILEYS_DECRYPT_LOGS=1`.
 - Tratamento de JID `@lid` em `backend/src/services/WbotServices/wbotMessageListener.ts` (função `verifyContact`).

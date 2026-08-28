@@ -24,6 +24,7 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { flowBuilderPublicUrl } from "../../helpers/flowBuilderPublicUrl";
 import { Checkbox, Stack } from "@mui/material";
 
 const useStyles = makeStyles(theme => ({
@@ -70,9 +71,7 @@ const FlowBuilderAddVideoModal = ({ open, onSave, onUpdate, data, close }) => {
   useEffect(() => {
     if (open === "edit") {
       setLabels({ title: "Editar video", btn: "Salvar" });
-      setPreview(
-        process.env.REACT_APP_BACKEND_URL + "/public/" + data.data.url
-      );
+      setPreview(flowBuilderPublicUrl(data.data.url));
       setRecord(data.data.record);
       setActiveModal(true);
     } else if (open === "create") {

@@ -44,6 +44,7 @@ import {
 import { capitalize } from "../../utils/capitalize";
 import { Box, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { flowBuilderPublicUrl } from "../../helpers/flowBuilderPublicUrl";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -579,7 +580,7 @@ const FlowBuilderSingleBlockModal = ({
           <img
             src={
               valueDefault.length > 0
-                ? process.env.REACT_APP_BACKEND_URL + "/public/" + valueDefault
+                ? flowBuilderPublicUrl(valueDefault)
                 : ""
             }
             className={`img${number}`}
@@ -636,9 +637,7 @@ const FlowBuilderSingleBlockModal = ({
           {valueDefault.length > 0 && (
             <audio controls>
               <source
-                src={
-                  process.env.REACT_APP_BACKEND_URL + "/public/" + valueDefault
-                }
+                src={flowBuilderPublicUrl(valueDefault)}
                 type="audio/mp3"
               />
               seu navegador não suporta HTML5
@@ -697,9 +696,7 @@ const FlowBuilderSingleBlockModal = ({
           {valueDefault.length > 0 && (
             <video controls style={{ width: "200px" }}>
               <source
-                src={
-                  process.env.REACT_APP_BACKEND_URL + "/public/" + valueDefault
-                }
+                src={flowBuilderPublicUrl(valueDefault)}
                 type="video/mp4"
               />
               seu navegador não suporta HTML5

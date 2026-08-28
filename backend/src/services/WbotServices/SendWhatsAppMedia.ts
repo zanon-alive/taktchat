@@ -15,6 +15,7 @@ import Contact from "../../models/Contact";
 import { getWbot } from "../../libs/wbot";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import formatBody from "../../helpers/Mustache";
+import { resolveOutboundChatJid } from "../../helpers/whatsappJid";
 interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
@@ -62,19 +63,13 @@ const processImage = async (
       img.scaleToFit(maxDim, maxDim, (Jimp as any).RESIZE_BILINEAR);
     }
 
-    // Por padrão, enviaremos JPEG de alta qualidade; mantém PNG se a origem é PNG
-    const outMimeIsPng = mimeType?.includes("png") === true;
+    // WhatsApp (iOS em especial) frequentemente não decifra PNG via Baileys
+    // e mostra "Aguardando mensagem". Sempre enviar JPEG.
     const ts = new Date().getTime();
-    const output = path.join(companyFolder, outMimeIsPng ? `${ts}.png` : `${ts}.jpg`);
-
-    if (outMimeIsPng) {
-      await img.writeAsync(output);
-      return { output, mime: "image/png" };
-    } else {
-      img.quality(90); // JPEG qualidade alta
-      await img.writeAsync(output);
-      return { output, mime: "image/jpeg" };
-    }
+    const output = path.join(companyFolder, `${ts}.jpg`);
+    img.quality(90);
+    await img.writeAsync(output);
+    return { output, mime: "image/jpeg" };
   } catch (e) {
     // Em caso de falha, retorna a própria imagem original
     return { output: imagePath, mime: mimeType || "image/jpeg" };
@@ -175,7 +170,7 @@ export const getMessageOptions = async (
       if (mimeType.includes("gif")) {
         options = {
           image: fs.readFileSync(pathMedia),
-          caption: body ? body : null,
+          caption: body || undefined,
           mimetype: "image/gif",
           gifPlayback: true
         };
@@ -183,7 +178,7 @@ export const getMessageOptions = async (
         const { output, mime: outMime } = await processImage(pathMedia, companyId, String(mimeType));
         options = {
           image: fs.readFileSync(output),
-          caption: body ? body : null,
+          caption: body || undefined,
           mimetype: outMime
         };
         if (output !== pathMedia) {
@@ -192,7 +187,7 @@ export const getMessageOptions = async (
       } else {
         options = {
           image: fs.readFileSync(pathMedia),
-          caption: body ? body : null,
+          caption: body || undefined,
         };
       }
     }
@@ -331,14 +326,9 @@ const SendWhatsAppMedia = async ({
 
     const contactNumber = await Contact.findByPk(ticket.contactId)
 
-    let number: string;
-
-    if (contactNumber.remoteJid && contactNumber.remoteJid !== "" && contactNumber.remoteJid.includes("@")) {
-      number = contactNumber.remoteJid;
-    } else {
-      number = `${contactNumber.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
-        }`;
-    }
+    const number =
+      (await resolveOutboundChatJid(ticket, contactNumber)) ||
+      `${contactNumber.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
 
     const sentMessage = await wbot.sendMessage(
       number,
