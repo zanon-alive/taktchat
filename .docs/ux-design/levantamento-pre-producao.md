@@ -1,8 +1,8 @@
 # Levantamento UX e Design — pré-produção
 
-**Branch:** `docs/ux-design-pre-producao`  
-**Data:** 2026-08-27 (atualizado após percurso de tarefa + persona atendente)  
-**Escopo desta fase:** identificar e priorizar. **Nenhuma correção de código nesta entrega.**  
+**Branch do inventário:** `docs/ux-design-pre-producao`  
+**Data:** 2026-08-27 (inventário). Implementação: ondas A–D nos PRs #43–#46.  
+**Escopo deste arquivo:** identificar e priorizar. **Não é o registro da correção** — o antes/depois no browser está em [comparativo-ondas-abcd.md](./comparativo-ondas-abcd.md).  
 **Ambiente:** `http://localhost:3000`. Admin: Carlos Admin. Atendente: Beatriz (`atendente@taktchat.local`).  
 **Viewport desta passada:** `innerWidth = 1100`, `min-width: 1200px` = false (layout de cards).
 
