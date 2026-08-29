@@ -586,13 +586,17 @@ const MainListItems = ({ collapsed, onItemClick }) => {
         hasPermission("financeiro.view") ||
         hasPermission("settings.view") ||
         hasPermission("ai-settings.view") ||
+        hasPermission("tickets.viewDeleted") ||
         user.super ||
         user.company?.type === "whitelabel"
       ) && (
       <>
       <Divider />
       <ListSubheader inset>{i18n.t("mainDrawer.listItems.administration")}</ListSubheader>
-      {(user.profile === "admin" || user.profile === "super") && (
+      {(user.profile === "admin" ||
+        user.profile === "super" ||
+        user.super ||
+        hasPermission("tickets.viewDeleted")) && (
         <ListItemLink
           to="/tickets-excluidos"
           primary={i18n.t("mainDrawer.listItems.deletedTickets")}

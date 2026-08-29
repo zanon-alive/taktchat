@@ -1,5 +1,6 @@
 import { QueryTypes } from "sequelize";
 import sequelize from "../../database";
+import { sqlNotDeleted } from "../../helpers/ticketDeletion";
 
 interface Request {
   startDate: string;
@@ -18,6 +19,7 @@ const query = `
   left join "Queues" q on (t."queueId" = q.id)
   where t."companyId" = :companyId AND t."userId" = :userId
   and date_trunc('day', t."createdAt") between :startDate and :endDate
+  ${sqlNotDeleted("t")}
   group by t."queueId", q.queue
   ) a
   order by 2 Desc
@@ -32,6 +34,7 @@ const queryAdmin = `
   left join "Queues" q on (t."queueId" = q.id)
   where t."companyId" = :companyId
   and date_trunc('day', t."createdAt") between :startDate and :endDate
+  ${sqlNotDeleted("t")}
   group by t."queueId", q.queue
   ) a
   order by 2 Desc

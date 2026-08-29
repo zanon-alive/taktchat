@@ -1,15 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Alert, Box, Button, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Link, Paper, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { format, parseISO } from "date-fns";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
+import ModalImageCors from "../../components/ModalImageCors";
+import AudioModal from "../../components/AudioModal";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import usePermissions from "../../hooks/usePermissions";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -32,27 +35,61 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const renderMedia = (msg) => {
+  if (!msg.mediaUrl) return null;
+  if (msg.mediaType === "image" || msg.mediaType === "sticker") {
+    return <ModalImageCors imageUrl={msg.mediaUrl} />;
+  }
+  if (msg.mediaType === "audio" || msg.mediaType === "ptt") {
+    return <AudioModal url={msg.mediaUrl} fromMe={msg.fromMe} />;
+  }
+  return (
+    <Link href={msg.mediaUrl} target="_blank" rel="noopener noreferrer">
+      {i18n.t("deletedTickets.downloadMedia")}
+    </Link>
+  );
+};
+
 const DeletedTicketDetail = () => {
   const classes = useStyles();
   const history = useHistory();
   const { ticketId } = useParams();
   const { user } = useContext(AuthContext);
-  const [data, setData] = useState(null);
+  const { hasPermission } = usePermissions();
+  const [ticket, setTicket] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [notes, setNotes] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
-  const isAdmin = user?.profile === "admin" || user?.profile === "super" || user?.super;
+  const canView =
+    user?.profile === "admin" ||
+    user?.profile === "super" ||
+    user?.super ||
+    hasPermission("tickets.viewDeleted");
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (!canView) {
       history.push("/tickets");
     }
-  }, [isAdmin, history]);
+  }, [canView, history]);
 
   useEffect(() => {
     let ignore = false;
     const load = async () => {
       try {
-        const { data: payload } = await api.get(`/tickets/deleted/${ticketId}`);
-        if (!ignore) setData(payload);
+        const { data: payload } = await api.get(`/tickets/deleted/${ticketId}`, {
+          params: { pageNumber, limit: 50 },
+        });
+        if (ignore) return;
+        setTicket(payload.ticket);
+        setNotes(payload.notes || []);
+        setLogs(payload.logs || []);
+        setHasMore(Boolean(payload.hasMore));
+        setMessages((prev) =>
+          pageNumber === 1 ? payload.messages || [] : [...prev, ...(payload.messages || [])]
+        );
       } catch (err) {
         toastError(err);
         history.push("/tickets-excluidos");
@@ -62,11 +99,9 @@ const DeletedTicketDetail = () => {
     return () => {
       ignore = true;
     };
-  }, [ticketId, history]);
+  }, [ticketId, history, pageNumber]);
 
-  if (!isAdmin || !data) return null;
-
-  const { ticket, messages = [], notes = [], logs = [] } = data;
+  if (!canView || !ticket) return null;
 
   return (
     <MainContainer>
@@ -81,9 +116,15 @@ const DeletedTicketDetail = () => {
       <Alert severity="warning" style={{ marginBottom: 16 }}>
         {i18n.t("deletedTickets.banner")}
       </Alert>
+      {ticket.anonymizedAt && (
+        <Alert severity="error" style={{ marginBottom: 16 }}>
+          {i18n.t("deletedTickets.lgpdBanner")}
+        </Alert>
+      )}
       <Paper className={classes.paper} variant="outlined">
         <Typography>
-          <strong>{i18n.t("deletedTickets.contact")}:</strong> {ticket.contact?.name} ({ticket.contact?.number})
+          <strong>{i18n.t("deletedTickets.contact")}:</strong> {ticket.contact?.name} (
+          {ticket.contact?.number})
         </Typography>
         <Typography>
           <strong>{i18n.t("deletedTickets.deletedBy")}:</strong>{" "}
@@ -120,13 +161,25 @@ const DeletedTicketDetail = () => {
                 {msg.createdAt ? format(parseISO(msg.createdAt), "dd/MM HH:mm") : ""}
                 {msg.isPrivate ? ` · ${i18n.t("deletedTickets.private")}` : ""}
               </Typography>
-              <Typography variant="body2">{msg.body}</Typography>
+              {renderMedia(msg)}
+              {msg.body && (
+                <Typography variant="body2" style={{ marginTop: 4 }}>
+                  {msg.body}
+                </Typography>
+              )}
             </Box>
           ))}
           {messages.length === 0 && (
             <Typography color="textSecondary">{i18n.t("deletedTickets.noMessages")}</Typography>
           )}
         </Box>
+        {hasMore && (
+          <Box mt={2}>
+            <Button onClick={() => setPageNumber((p) => p + 1)}>
+              {i18n.t("deletedTickets.loadMore")}
+            </Button>
+          </Box>
+        )}
       </Paper>
       <Paper className={classes.paper} variant="outlined">
         <Typography variant="subtitle1" gutterBottom>
@@ -151,8 +204,8 @@ const DeletedTicketDetail = () => {
         ) : (
           logs.map((log) => (
             <Typography key={log.id} variant="body2">
-              {log.createdAt ? format(parseISO(log.createdAt), "dd/MM/yyyy HH:mm") : ""} — {log.type}{" "}
-              ({log.user?.name || "—"})
+              {log.createdAt ? format(parseISO(log.createdAt), "dd/MM/yyyy HH:mm") : ""} —{" "}
+              {log.type} ({log.user?.name || "—"})
             </Typography>
           ))
         )}

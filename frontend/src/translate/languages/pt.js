@@ -122,6 +122,7 @@ const messages = {
           activeTickets: "Tickets Ativos",
           passiveTickets: "Tickets Passivos",
           groups: "Grupos",
+          ticketsHidden: "Tickets ocultados",
         },
         users: {
           name: "Nome",
@@ -828,6 +829,8 @@ const messages = {
         },
         toasts: {
           deleted: "O atendimento que você estava foi ocultado.",
+          hidden: "Ticket #{{id}} do contato {{contact}} foi ocultado por {{by}}.",
+          hiddenBurst: "{{name}} ocultou {{count}} tickets nas últimas {{hours}}h.",
           settingsCreated: "Configurações padrão da empresa foram aplicadas. Revise em Configurações.",
           openSettings: "Abrir configurações",
         },
@@ -1797,7 +1800,9 @@ const messages = {
             requiredTag: "Tag obrigatoria para fechar ticket",
             closeTicketOnTransfer: "Fechar ticket ao transferir para outra fila",
             DirectTicketsToWallets: "Mover automaticamente cliente para carteira",
-            showNotificationPending: "Mostrar notificação para tickets pendentes"
+            showNotificationPending: "Mostrar notificação para tickets pendentes",
+            hiddenTicketRetentionDays: "Retenção de tickets ocultos (dias)",
+            hiddenTicketRetentionDaysHint: "0 = nunca purgar. Job diário; não executa em produção pelo agente."
           },
           customMessages: {
             sendQueuePositionMessage: "Mensagem de posição na fila",
@@ -1920,6 +1925,11 @@ const messages = {
         reasonHint: "mínimo 15 caracteres",
         cancel: "Cancelar",
         confirm: "Ocultar ticket",
+        back: "Voltar",
+        lgpdTitle: "Confirmação LGPD",
+        lgpdWarning:
+          "O conteúdo da conversa será anonimizado. Não dá para desfazer.",
+        lgpdConfirm: "Confirmar irreversível",
         categories: {
           duplicado: "Duplicado",
           teste: "Teste",
@@ -1957,6 +1967,11 @@ const messages = {
         noNotes: "Sem anotações.",
         noLogs: "Sem histórico.",
         private: "interna",
+        allUsers: "Todos",
+        exportCsv: "Exportar CSV",
+        loadMore: "Carregar mais",
+        downloadMedia: "Baixar arquivo",
+        lgpdBanner: "Conteúdo anonimizado por LGPD.",
       },
       messageInput: {
         tooltip: {
@@ -2024,6 +2039,8 @@ const messages = {
         ERR_TICKET_DELETED: "Ticket ocultado. Não pode ser reaberto nem alterado.",
         ERR_TICKET_ALREADY_DELETED: "Este ticket já está ocultado.",
         ERR_TICKET_DELETE_REASON: "Informe uma categoria válida e um motivo com 15 a 500 caracteres.",
+        ERR_TICKET_HIDE_RATE_LIMIT: "Muitas ocultações em pouco tempo. Tente novamente em alguns minutos.",
+        ERR_DELETED_TICKETS_CSV_LIMIT: "Há mais de 5000 tickets no filtro. Refine as datas ou a busca para exportar.",
         ERR_NO_USER_FOUND: "Nenhum usuário encontrado com este ID.",
         ERR_NO_WAPP_FOUND: "Nenhum WhatsApp encontrado com este ID.",
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",

@@ -88,6 +88,7 @@ const messages = {
 			activeTickets: "Active Tickets",
 			passiveTickets: "Passive Tickets",
 			groups: "Groups",
+			ticketsHidden: "Hidden tickets",
 		  },
 		  users: {
 			name: "Name",
@@ -781,6 +782,8 @@ const messages = {
 		  },
 		  toasts: {
 			deleted: "The ticket you were viewing was hidden.",
+			hidden: "Ticket #{{id}} of contact {{contact}} was hidden by {{by}}.",
+			hiddenBurst: "{{name}} hid {{count}} tickets in the last {{hours}}h.",
 			settingsCreated: "Default company settings were applied. Review them in Settings.",
 			openSettings: "Open settings",
 		  },
@@ -1631,7 +1634,9 @@ const messages = {
 			  requiredTag: "Mandatory tag to close ticket",
 			  closeTicketOnTransfer: "Close ticket when transferring to another queue",
 			  DirectTicketsToWallets: "Automatically move client to wallet",
-			  showNotificationPending: "Show notification for pending tickets"
+			  showNotificationPending: "Show notification for pending tickets",
+			  hiddenTicketRetentionDays: "Hidden tickets retention (days)",
+			  hiddenTicketRetentionDaysHint: "0 = never purge. Daily job; the agent will not run it in production.",
 			},
 			customMessages: {
 			  sendQueuePositionMessage: "Queue position message",
@@ -1785,6 +1790,10 @@ const messages = {
 		  reasonHint: "15 characters minimum",
 		  cancel: "Cancel",
 		  confirm: "Hide ticket",
+		  back: "Back",
+		  lgpdTitle: "LGPD confirmation",
+		  lgpdWarning: "The conversation content will be anonymized. This cannot be undone.",
+		  lgpdConfirm: "Confirm irreversible action",
 		  categories: {
 			duplicado: "Duplicate",
 			teste: "Test",
@@ -1822,6 +1831,11 @@ const messages = {
 		  noNotes: "No notes.",
 		  noLogs: "No history.",
 		  private: "internal",
+		  allUsers: "All",
+		  exportCsv: "Export CSV",
+		  loadMore: "Load more",
+		  downloadMedia: "Download file",
+		  lgpdBanner: "Content anonymized for LGPD.",
 		},
 		backendErrors: {
 		  ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
@@ -1851,6 +1865,8 @@ const messages = {
 		  ERR_TICKET_DELETED: "Ticket is hidden and cannot be reopened or changed.",
 		  ERR_TICKET_ALREADY_DELETED: "This ticket is already hidden.",
 		  ERR_TICKET_DELETE_REASON: "Provide a valid category and a reason between 15 and 500 characters.",
+		  ERR_TICKET_HIDE_RATE_LIMIT: "Too many hide requests. Try again in a few minutes.",
+		  ERR_DELETED_TICKETS_CSV_LIMIT: "More than 5000 tickets match the filter. Narrow dates or search to export.",
 		  ERR_NO_USER_FOUND: "No user found with this ID.",
 		  ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
 		  ERR_CREATING_MESSAGE: "Error creating message in the database.",

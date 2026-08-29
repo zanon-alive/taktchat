@@ -88,7 +88,8 @@ const messages = {
           status: "Estado (Actual)",
           activeTickets: "Tickets Activos",
           passiveTickets: "Tickets Pasivos",
-          groups: "Grupos"
+          groups: "Grupos",
+          ticketsHidden: "Tickets ocultos"
         },
         users: {
           name: "Nombre",
@@ -760,6 +761,8 @@ const messages = {
         },
         toasts: {
           deleted: "El atendimiento que estabas fue eliminado.",
+          hidden: "El ticket #{{id}} del contacto {{contact}} fue ocultado por {{by}}.",
+          hiddenBurst: "{{name}} ocultó {{count}} tickets en las últimas {{hours}}h.",
           settingsCreated: "Se aplicaron las configuraciones predeterminadas de la empresa. Revíselas en Configuración.",
           openSettings: "Abrir configuración"
         },
@@ -1592,7 +1595,9 @@ const messages = {
             requiredTag: "Tag obligatoria para cerrar ticket",
             closeTicketOnTransfer: "Cerrar ticket al transferir para otra cola",
             DirectTicketsToWallets: "Mover automáticamente cliente para cartera",
-            showNotificationPending: "Mostrar notificación para tickets pendientes"
+            showNotificationPending: "Mostrar notificación para tickets pendientes",
+            hiddenTicketRetentionDays: "Retención de tickets ocultos (días)",
+            hiddenTicketRetentionDaysHint: "0 = nunca purgar. Job diario; el agente no lo ejecuta en producción."
           },
           customMessages: {
             sendQueuePositionMessage: "Mensaje de posición en la cola",
@@ -1729,6 +1734,10 @@ const messages = {
         reasonHint: "mínimo 15 caracteres",
         cancel: "Cancelar",
         confirm: "Ocultar ticket",
+        back: "Volver",
+        lgpdTitle: "Confirmación LGPD",
+        lgpdWarning: "El contenido de la conversación será anonimizado. No se puede deshacer.",
+        lgpdConfirm: "Confirmar irreversible",
         categories: {
           duplicado: "Duplicado",
           teste: "Prueba",
@@ -1765,7 +1774,12 @@ const messages = {
         noMessages: "Sin mensajes.",
         noNotes: "Sin notas.",
         noLogs: "Sin historial.",
-        private: "interna"
+        private: "interna",
+        allUsers: "Todos",
+        exportCsv: "Exportar CSV",
+        loadMore: "Cargar más",
+        downloadMedia: "Descargar archivo",
+        lgpdBanner: "Contenido anonimizado por LGPD."
       },
       invoices: {
         table: {
@@ -1800,6 +1814,8 @@ const messages = {
         ERR_TICKET_DELETED: "El ticket está oculto y no puede reabrirse ni alterarse.",
         ERR_TICKET_ALREADY_DELETED: "Este ticket ya está oculto.",
         ERR_TICKET_DELETE_REASON: "Informe una categoría válida y un motivo de 15 a 500 caracteres.",
+        ERR_TICKET_HIDE_RATE_LIMIT: "Demasiadas ocultaciones. Intente de nuevo en unos minutos.",
+        ERR_DELETED_TICKETS_CSV_LIMIT: "Hay más de 5000 tickets en el filtro. Refine fechas o búsqueda para exportar.",
         ERR_NO_USER_FOUND: "Ningún usuario encontrado con este ID.",
         ERR_NO_WAPP_FOUND: "Ningún WhatsApp encontrado con este ID.",
         ERR_CREATING_MESSAGE: "Error al crear mensaje en la base de datos.",

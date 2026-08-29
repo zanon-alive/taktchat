@@ -138,6 +138,10 @@ import {
     @Default(false)
     @Column
     enableLandingSignup: boolean;
+
+    @Default(0)
+    @Column
+    hiddenTicketRetentionDays: number;
   }
   
   export default CompaniesSettings;

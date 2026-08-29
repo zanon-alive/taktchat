@@ -100,6 +100,8 @@ export const AuditActions = {
   // Tickets
   TICKET_TRANSFER: "Ticket Transferido",
   TICKET_CLOSE: "Ticket Fechado",
+  TICKET_HIDE: "Atendimento ocultado",
+  TICKET_HIDE_BURST: "Volume alto de ocultações de atendimento",
   
   // Conexões
   CONNECTION_CONNECT: "Conexão Conectada",

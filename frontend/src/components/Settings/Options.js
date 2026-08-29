@@ -154,6 +154,9 @@ export default function Options(props) {
   const [licenseWarningDays, setLicenseWarningDays] = useState(null);
   const [loadingLicenseWarningDays, setLoadingLicenseWarningDays] = useState(false);
 
+  const [hiddenTicketRetentionDays, setHiddenTicketRetentionDays] = useState(0);
+  const [loadingHiddenTicketRetentionDays, setLoadingHiddenTicketRetentionDays] = useState(false);
+
   const [enableLandingSignup, setEnableLandingSignup] = useState(false);
   const [loadingEnableLandingSignup, setLoadingEnableLandingSignup] = useState(false);
 
@@ -221,6 +224,7 @@ export default function Options(props) {
       if (key === "sendQueuePositionMessage") setSendQueuePositionMessage(value);
       if (key === "showNotificationPending") setShowNotificationPending(value);
       if (key === "licenseWarningDays") setLicenseWarningDays(value);
+      if (key === "hiddenTicketRetentionDays") setHiddenTicketRetentionDays(value || 0);
       if (key === "enableLandingSignup") setEnableLandingSignup(value);
       if (key === "enableSiteChatWidget") setEnableSiteChatWidget(value || "disabled");
 
@@ -510,6 +514,17 @@ export default function Options(props) {
       data: value ? parseInt(value, 10) : null,
     });
     setLoadingLicenseWarningDays(false);
+  }
+
+  async function handleHiddenTicketRetentionDays(value) {
+    const n = value === "" ? 0 : parseInt(value, 10);
+    setHiddenTicketRetentionDays(Number.isNaN(n) ? 0 : n);
+    setLoadingHiddenTicketRetentionDays(true);
+    await update({
+      column: "hiddenTicketRetentionDays",
+      data: Number.isNaN(n) ? 0 : n,
+    });
+    setLoadingHiddenTicketRetentionDays(false);
   }
 
   async function handleEnableLandingSignup(value) {
@@ -973,6 +988,29 @@ export default function Options(props) {
                 loadingLicenseWarningDays
                   ? i18n.t("settings.settings.options.updating")
                   : "Número de dias antes do vencimento para enviar avisos (deixe vazio para usar padrão do sistema)"
+              }
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="hiddenTicketRetentionDays"
+              name="hiddenTicketRetentionDays"
+              margin="dense"
+              label={i18n.t("settings.settings.options.hiddenTicketRetentionDays")}
+              type="number"
+              variant="outlined"
+              value={hiddenTicketRetentionDays ?? 0}
+              onChange={async (e) => {
+                handleHiddenTicketRetentionDays(e.target.value);
+              }}
+              inputProps={{ min: 0 }}
+              helperText={
+                loadingHiddenTicketRetentionDays
+                  ? i18n.t("settings.settings.options.updating")
+                  : i18n.t("settings.settings.options.hiddenTicketRetentionDaysHint")
               }
             />
           </FormControl>

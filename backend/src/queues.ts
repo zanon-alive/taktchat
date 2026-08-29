@@ -103,6 +103,7 @@ export const sendScheduledMessages = new BullQueue("SendSacheduledMessages", con
 export const campaignQueue = new BullQueue("CampaignQueue", connection);
 export const queueMonitor = new BullQueue("QueueMonitor", connection);
 export const validateWhatsappContactsQueue = new BullQueue("ValidateWhatsappContacts", connection);
+export const purgeHiddenTicketsQueue = new BullQueue("PurgeHiddenTickets", connection);
 
 export const messageQueue = new BullQueue("MessageQueue", connection, {
   limiter: {
@@ -2258,6 +2259,11 @@ export async function startQueueProcess() {
     return validateJob.default.handle(job);
   });
 
+  purgeHiddenTicketsQueue.process("PurgeHiddenTickets", async () => {
+    const purgeJob = await import("./jobs/PurgeHiddenTicketsJob");
+    return purgeJob.default.handle();
+  });
+
   scheduleMonitor.add(
     "Verify",
     {},
@@ -2290,6 +2296,19 @@ export async function startQueueProcess() {
     {},
     {
       repeat: { cron: "0 * * * * *", key: "verify-queue" },
+      removeOnComplete: true
+    }
+  );
+
+  purgeHiddenTicketsQueue.add(
+    "PurgeHiddenTickets",
+    {},
+    {
+      repeat: {
+        cron: "0 4 * * *",
+        tz: "America/Sao_Paulo",
+        key: "purge-hidden-tickets"
+      },
       removeOnComplete: true
     }
   );

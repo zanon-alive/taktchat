@@ -1,5 +1,6 @@
 import { QueryTypes } from "sequelize";
 import sequelize from "../../database";
+import { sqlNotDeleted } from "../../helpers/ticketDeletion";
 
 interface Request {
   startDate: string;
@@ -25,6 +26,7 @@ const query = `
         c."tenantId" = :tenantId
         and ltc."userId" = :userId
         and date_trunc('day', c."createdAt") between :startDate and :endDate
+        ${sqlNotDeleted("tc")}
     ) new_contacts
     --ROUND(AVG(tma)::decimal,0) TMA,
     --ROUND(AVG(tme)::decimal,0) TME
@@ -47,6 +49,7 @@ const query = `
       and date_trunc('day', t."createdAt") between :startDate and :endDate
       and lt."userId" = :userId
       and (lt."type" LIKE 'open' OR lt."type" LIKE 'receivedTransfer')
+      ${sqlNotDeleted("t")}
   ) a
     --group by dt_referencia
       order by 1 Desc
@@ -86,6 +89,7 @@ const queryAdmin = `
       t."tenantId" = :tenantId
       and date_trunc('day', t."createdAt") between :startDate and :endDate
       and (lt."type" LIKE 'open' OR lt."type" LIKE 'receivedTransfer')
+      ${sqlNotDeleted("t")}
   ) a
     --group by dt_referencia
       order by 1 Desc

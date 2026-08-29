@@ -27,7 +27,8 @@ export const getCompanySettingsDefaults = (companyId: number) => ({
   closeTicketOnTransfer: false,
   DirectTicketsToWallets: false,
   showNotificationPending: false,
-  enableLandingSignup: false
+  enableLandingSignup: false,
+  hiddenTicketRetentionDays: 0
 });
 
 type Params = {

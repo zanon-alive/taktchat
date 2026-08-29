@@ -13,6 +13,7 @@ Plataforma de mensageria omnichannel voltada para operações de atendimento e c
 ### Funcionalidades em alto nível
 
 - Atendimento omnichannel com múltiplas filas, Kanban (lane de entrada, lane ao encerrar e cards `closed` visíveis na coluna), tags e automações anti-ban.
+- Administração de tickets ocultos (`/tickets-excluidos`): motivo, auditoria, CSV e permissão `tickets.viewDeleted`. Categoria LGPD anonimiza o conteúdo (irreversível). Ticket oculto não reabre.
 - Campanhas segmentadas, Flow Builder visual (menu numerado no Baileys; botões/lista na API Oficial), integrações com bots/IA e controle de cadência. Contato sem nome cadastrado usa o nome do perfil WhatsApp nas mensagens.
 - Contatos, listas, arquivos inteligentes, dashboards e relatórios operacionais.
 - **Validação i18n**: mensagens de validação de formulários em pt-BR, en, es e tr (campo obrigatório, muito curto, etc.).

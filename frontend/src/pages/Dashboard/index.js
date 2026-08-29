@@ -27,6 +27,7 @@ import {
   CheckCircle as CheckCircleIcon,
   RecordVoiceOver as RecordVoiceOverIcon,
   GroupAdd as GroupAddIcon,
+  VisibilityOff as VisibilityOffIcon,
 } from "@mui/icons-material";
 import * as XLSX from 'xlsx';
 import { toast } from "react-toastify";
@@ -42,10 +43,13 @@ import ChartDonut from "./ChartDonut";
 import Filters from "./Filters";
 import { ChartsDate } from "./ChartsDate";
 import { i18n } from "../../translate/i18n";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
+import usePermissions from "../../hooks/usePermissions";
 
 const Dashboard = () => {
   const theme = useTheme();
+  const history = useHistory();
+  const { hasPermission } = usePermissions();
   const [counters, setCounters] = useState({});
   const [attendants, setAttendants] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
@@ -185,6 +189,22 @@ const Dashboard = () => {
     }
   ];
 
+  const canViewDeleted =
+    user?.profile === "admin" ||
+    user?.profile === "super" ||
+    user?.super ||
+    hasPermission("tickets.viewDeleted");
+
+  if (canViewDeleted) {
+    statCards.push({
+      title: i18n.t("dashboard.cards.ticketsHidden"),
+      value: counters.ticketsHidden || 0,
+      icon: <VisibilityOffIcon />,
+      color: "#607d8b",
+      to: "/tickets-excluidos"
+    });
+  }
+
   return (
     <Box sx={{ backgroundColor: "#f5f7fa", minHeight: "100vh", py: 2 }}>
       <Container maxWidth="xl">
@@ -223,10 +243,12 @@ const Dashboard = () => {
           {statCards.map((card, index) => (
             <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
               <Card 
+                onClick={card.to ? () => history.push(card.to) : undefined}
                 sx={{ 
                   height: "100%",
                   borderRadius: 2,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  cursor: card.to ? "pointer" : "default",
                   transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
                   "&:hover": {
                     transform: "translateY(-3px)",
