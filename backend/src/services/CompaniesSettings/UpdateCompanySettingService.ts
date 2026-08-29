@@ -19,10 +19,15 @@ function normalizeValue(column: string, data: any): any {
     if (data === true || data === "true" || data === 1 || data === "1") return true;
     if (data === false || data === "false" || data === 0 || data === "0") return false;
   }
-  if (column === "licenseWarningDays") {
-    if (data === null || data === undefined || data === "") return null;
+  if (column === "licenseWarningDays" || column === "hiddenTicketRetentionDays") {
+    if (data === null || data === undefined || data === "") {
+      return column === "hiddenTicketRetentionDays" ? 0 : null;
+    }
     const n = Number(data);
-    return Number.isNaN(n) ? null : n;
+    if (Number.isNaN(n) || n < 0) {
+      return column === "hiddenTicketRetentionDays" ? 0 : null;
+    }
+    return Math.floor(n);
   }
   return data;
 }

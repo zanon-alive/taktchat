@@ -1,5 +1,10 @@
 import express from "express";
 import isAuth from "../middleware/isAuth";
+import { rateLimitByUser } from "../middleware/rateLimit";
+import {
+  TICKET_HIDE_RATE_LIMIT,
+  TICKET_HIDE_RATE_WINDOW_MS
+} from "../helpers/ticketDeletion";
 
 import * as TicketController from "../controllers/TicketController";
 
@@ -7,6 +12,8 @@ const ticketRoutes = express.Router();
 
 ticketRoutes.get("/tickets", isAuth, TicketController.index);
 
+ticketRoutes.get("/tickets/deletion-meta", isAuth, TicketController.deletionMeta);
+ticketRoutes.get("/tickets/deleted/export", isAuth, TicketController.exportDeleted);
 ticketRoutes.get("/tickets/deleted", isAuth, TicketController.indexDeleted);
 ticketRoutes.get("/tickets/deleted/:ticketId", isAuth, TicketController.showDeleted);
 
@@ -25,7 +32,12 @@ ticketRoutes.post("/tickets", isAuth, TicketController.store);
 
 ticketRoutes.put("/tickets/:ticketId", isAuth, TicketController.update);
 
-ticketRoutes.delete("/tickets/:ticketId", isAuth, TicketController.remove);
+ticketRoutes.delete(
+  "/tickets/:ticketId",
+  isAuth,
+  rateLimitByUser(TICKET_HIDE_RATE_LIMIT, TICKET_HIDE_RATE_WINDOW_MS),
+  TicketController.remove
+);
 
 ticketRoutes.post("/tickets/closeAll", isAuth, TicketController.closeAll);
 

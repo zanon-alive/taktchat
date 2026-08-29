@@ -7,6 +7,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- Auditoria da ocultação de tickets: métricas SQL sem contar oculto, lista usável (filtro, debounce, CSV, Table MUI), mídia/paginação no detalhe, LogTicket/AuditLog, permissão `tickets.viewDeleted`, KPI no dashboard, redação LGPD, alerta de volume, retenção configurável (job) e rate limit no DELETE.
 - Ocultação de tickets (soft delete): motivo obrigatório, lista admin em `/tickets-excluidos`, conversa somente leitura. Ticket oculto não reabre e some das métricas.
 - SHA curto do GitHub e número do PR (ex.: `#47 · ecaed27`) no canto do login e no rodapé da sidebar, para identificar a versão em produção. Clique copia.
 - Menu do Flow Builder: na API Oficial vai como botões (até 3) ou lista (4 a 10); no Baileys vai como texto numerado, porque o WhatsApp corta o interativo na sessão não oficial.

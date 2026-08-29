@@ -33,6 +33,7 @@ const ALLOWED_COLUMNS = new Set([
   "openaiModel",
   "licenseWarningDays",
   "enableLandingSignup",
+  "hiddenTicketRetentionDays",
   "ragEnabled",
   "ragTopK",
   "ragEmbeddingModel"

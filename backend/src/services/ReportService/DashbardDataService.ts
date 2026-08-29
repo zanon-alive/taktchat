@@ -4,6 +4,7 @@ import { QueryTypes } from "sequelize";
 import * as _ from "lodash";
 import sequelize from "../../database";
 import path from "path";
+import { sqlNotDeleted } from "../../helpers/ticketDeletion";
 const fs = require('fs');
 
 
@@ -53,7 +54,7 @@ export default async function DashboardDataService(
       left join "Companies" c on c.id = tt."companyId"
       left join "Users" u on u.id = tt."userId"
       left join "Whatsapps" w on w.id = tt."whatsappId"
-      inner join "Tickets" t on t.id = tt."ticketId" and t."deletedAt" IS NULL
+      inner join "Tickets" t on t.id = tt."ticketId" ${sqlNotDeleted("t")}
       left join "Contacts" ct on ct.id = t."contactId"
       -- filterPeriod
     ),
@@ -65,14 +66,21 @@ export default async function DashboardDataService(
         (
           select count(distinct "id")
           from "Tickets" t
-          where status like 'open' and t."companyId" = ? and t."deletedAt" IS NULL
+          where status like 'open' and t."companyId" = ? ${sqlNotDeleted("t")}
         ) "supportHappening",
         (
           select count(distinct "id")
           from "Tickets" t
-          where status like 'pending' and t."companyId" = ? and t."deletedAt" IS NULL
+          where status like 'pending' and t."companyId" = ? ${sqlNotDeleted("t")}
         ) "supportPending",
         (select count(id) from traking where groups) "supportGroups",
+        (
+          select count(*)
+          from "Tickets" th
+          where th."companyId" = ?
+          and th."deletedAt" IS NOT NULL
+          -- hiddenPeriod
+        ) "ticketsHidden",
         (
           select count(leads.id) from (
             select
@@ -154,7 +162,7 @@ export default async function DashboardDataService(
           (select coalesce(json_agg(a.*), '[]')::jsonb from attedants a) attendants;
   `;
 
-  let where = 'where tt."companyId" = ? and t."deletedAt" IS NULL';
+  let where = `where tt."companyId" = ? ${sqlNotDeleted("t")}`;
   const replacements: any[] = [companyId];
 
   if (_.has(params, "days")) {
@@ -178,7 +186,24 @@ export default async function DashboardDataService(
   replacements.push(companyId);
   replacements.push(companyId);
 
-  const finalQuery = query.replace("-- filterPeriod", where);
+  const ymd = (s?: string) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+  let hiddenPeriod = "";
+  if (_.has(params, "days")) {
+    const n = parseInt(`${params.days}`.replace(/\D/g, ""), 10);
+    if (Number.isFinite(n)) {
+      hiddenPeriod += ` and th."deletedAt" >= (now() - '${n} days'::interval)`;
+    }
+  }
+  if (ymd(params.date_from)) {
+    hiddenPeriod += ` and th."deletedAt" >= '${params.date_from} 00:00:00'`;
+  }
+  if (ymd(params.date_to)) {
+    hiddenPeriod += ` and th."deletedAt" <= '${params.date_to} 23:59:59'`;
+  }
+
+  const finalQuery = query
+    .replace("-- filterPeriod", where)
+    .replace("-- hiddenPeriod", hiddenPeriod);
 
   const responseData: DashboardData = await sequelize.query(finalQuery, {
     replacements,

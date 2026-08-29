@@ -3,6 +3,7 @@
 import { QueryTypes } from "sequelize";
 import * as _ from "lodash";
 import sequelize from "../../database";
+import { sqlNotDeleted } from "../../helpers/ticketDeletion";
 
 export interface DashboardData {
   tickets: any[];
@@ -126,7 +127,7 @@ export default async function ListTicketsServiceReport(
       t."queueId" = q.id 
   -- filterPeriod`;
   }
-  let where = `where t."companyId" = ${companyId} and t."deletedAt" IS NULL`;
+  let where = `where t."companyId" = ${companyId} ${sqlNotDeleted("t")}`;
 
   if (_.has(params, "dateFrom")) {
     where += ` and t."createdAt" >= '${params.dateFrom} 00:00:00'`;

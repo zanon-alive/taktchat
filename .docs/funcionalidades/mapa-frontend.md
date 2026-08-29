@@ -32,7 +32,7 @@ O FAB WhatsApp da vitrine (`ChatWidget`) usa `position: fixed` no `document.body
 | Agenda e chat | `/schedules`, `/chats/:id?` | `useSchedules`/`useInternalChat` + permissão |
 | Campanhas | `/campaigns`, `/contact-lists`, `/contact-lists/:id/contacts`, `/campaigns-config`, `/campaign/:id/detailed-report` | `cshow`, `useCampaigns` e `campaigns.view` |
 | Fluxos | `/flowbuilders`, `/flowbuilder/:id?`, `/phrase-lists` | `flowbuilder.view` |
-| Administração | `/users`, `/queues`, `/connections`, `/files`, `/settings` | Permissões específicas; conexões também usam flags legadas |
+| Administração | `/users`, `/queues`, `/connections`, `/files`, `/settings`, `/tickets-excluidos`, `/tickets-excluidos/:ticketId` | Permissões específicas; conexões também usam flags legadas. Tickets ocultos: `admin`/`super` ou `tickets.viewDeleted`. Ocultar (`DELETE`) continua só admin/super. |
 | IA e integrações | `/prompts`, `/ai-settings`, `/queue-integration`, `/messages-api` | Gates de plano e permissões |
 | Plataforma/parceiro | `/companies`, `/licenses`, `/partner-billing-report`, `/allConnections`, `/announcements` | `super` e/ou empresa `whitelabel`, conforme o recurso |
 | Financeiro | `/financeiro` | `financeiro.view` |

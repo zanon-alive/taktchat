@@ -12,7 +12,8 @@ export const AVAILABLE_PERMISSIONS = {
     "tickets.update",
     "tickets.transfer",
     "tickets.close",
-    "tickets.delete"
+    "tickets.delete",
+    "tickets.viewDeleted"
   ],
   quickMessages: [
     "quick-messages.view",
@@ -384,6 +385,7 @@ const formatPermissionLabel = (key: string): string => {
     "tickets.transfer": "Transferir Atendimentos",
     "tickets.close": "Fechar Atendimentos",
     "tickets.delete": "Deletar Atendimentos",
+    "tickets.viewDeleted": "Ver tickets ocultos",
     "quick-messages.view": "Ver Respostas Rápidas",
     "quick-messages.create": "Criar Respostas Rápidas",
     "quick-messages.edit": "Editar Respostas Rápidas",
@@ -419,6 +421,7 @@ const formatPermissionLabel = (key: string): string => {
 const getPermissionDescription = (key: string): string => {
   const descriptions: Record<string, string> = {
     "tickets.view": "Visualizar atendimentos e tickets",
+    "tickets.viewDeleted": "Listar e auditar tickets ocultados (não permite ocultar)",
     "campaigns.create": "Criar e configurar novas campanhas",
     "users.edit": "Editar informações e permissões de usuários",
     "connections.edit": "Adicionar, editar e remover conexões WhatsApp",

@@ -28,6 +28,8 @@ import { getBackendUrl } from "../../config";
 import defaultLogoFavicon from "../../assets/favicon.ico";
 import ContactAvatar from "../ContactAvatar";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
+import { toast } from "react-toastify";
+import usePermissions from "../../hooks/usePermissions";
 
 const useStyles = makeStyles(theme => ({
 	tabContainer: {
@@ -56,6 +58,7 @@ const NotificationsPopOver = (volume) => {
 	const history = useHistory();
 	// const socketManager = useContext(SocketContext);
 	const { user, socket } = useContext(AuthContext);
+	const { hasPermission } = usePermissions();
 	const { profile, queues } = user;
 
 	const ticketIdUrl = +history.location.pathname.split("/")[2];
@@ -177,6 +180,38 @@ const NotificationsPopOver = (volume) => {
 						}
 						return prevState;
 					});
+				}
+
+				if (data.action === "hidden") {
+					const isHider = Number(data.hiddenById) === Number(user.id);
+					const isOwner = Number(data.userId) === Number(user.id);
+					if (isOwner && !isHider) {
+						toast.info(
+							i18n.t("tickets.toasts.hidden", {
+								id: data.ticketId,
+								contact: data.contactName || "—",
+								by: data.hiddenByName || "—"
+							})
+						);
+					}
+				}
+
+				if (data.action === "hiddenBurst") {
+					const isHider = Number(data.userId) === Number(user.id);
+					const canSeeBurst =
+						user.profile === "admin" ||
+						user.profile === "super" ||
+						user.super ||
+						hasPermission("tickets.viewDeleted");
+					if (canSeeBurst && !isHider) {
+						toast.warn(
+							i18n.t("tickets.toasts.hiddenBurst", {
+								name: data.userName || "—",
+								count: data.count,
+								hours: data.windowHours || 24
+							})
+						);
+					}
 				}
 			};
 

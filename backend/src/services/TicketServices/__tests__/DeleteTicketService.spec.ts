@@ -6,6 +6,10 @@ jest.mock("../../../models/User", () => ({
   __esModule: true,
   default: { findByPk: jest.fn() }
 }));
+jest.mock("../../../models/Contact", () => ({
+  __esModule: true,
+  default: {}
+}));
 jest.mock("../../../models/KnowledgeDocument", () => ({
   __esModule: true,
   default: { findAll: jest.fn().mockResolvedValue([]), destroy: jest.fn() }
@@ -18,20 +22,36 @@ jest.mock("../../../utils/logger", () => ({
   __esModule: true,
   default: { error: jest.fn() }
 }));
+jest.mock("../CreateLogTicketService", () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue(undefined)
+}));
+jest.mock("../AnonymizeTicketMessagesService", () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue(undefined)
+}));
 
 import Ticket from "../../../models/Ticket";
 import User from "../../../models/User";
 import DeleteTicketService from "../DeleteTicketService";
+import CreateLogTicketService from "../CreateLogTicketService";
+import AnonymizeTicketMessagesService from "../AnonymizeTicketMessagesService";
 import AppError from "../../../errors/AppError";
+import { TICKET_HIDE_BURST_LIMIT } from "../../../helpers/ticketDeletion";
 
 describe("DeleteTicketService", () => {
   const unscopedFind = jest.fn();
+  const unscopedCount = jest.fn();
   const update = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (Ticket.unscoped as jest.Mock).mockReturnValue({ findOne: unscopedFind });
+    (Ticket.unscoped as jest.Mock).mockReturnValue({
+      findOne: unscopedFind,
+      count: unscopedCount
+    });
     (User.findByPk as jest.Mock).mockResolvedValue({ id: 1, name: "Admin" });
+    unscopedCount.mockResolvedValue(1);
   });
 
   const base = {
@@ -56,10 +76,13 @@ describe("DeleteTicketService", () => {
     ).rejects.toBeInstanceOf(AppError);
   });
 
-  it("atualiza em vez de destroy", async () => {
+  it("atualiza em vez de destroy e grava LogTicket", async () => {
     unscopedFind.mockResolvedValue({
       id: 19,
       deletedAt: null,
+      queueId: 3,
+      contactId: 9,
+      contact: { name: "Maria" },
       update
     });
 
@@ -73,6 +96,38 @@ describe("DeleteTicketService", () => {
       })
     );
     expect(update.mock.calls[0][0].deletedAt).toBeInstanceOf(Date);
+    expect(CreateLogTicketService).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "delete", ticketId: 19, userId: 1 })
+    );
+  });
+
+  it("LGPD anonimiza mensagens", async () => {
+    unscopedFind.mockResolvedValue({
+      id: 19,
+      deletedAt: null,
+      queueId: null,
+      update
+    });
+
+    await DeleteTicketService({ ...base, category: "lgpd" });
+
+    expect(AnonymizeTicketMessagesService).toHaveBeenCalledWith(19, 1);
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ anonymizedAt: expect.any(Date) })
+    );
+  });
+
+  it("burst não bloqueia o hide", async () => {
+    unscopedFind.mockResolvedValue({
+      id: 19,
+      deletedAt: null,
+      update
+    });
+    unscopedCount.mockResolvedValue(TICKET_HIDE_BURST_LIMIT);
+
+    const result = await DeleteTicketService(base);
+    expect(result.burst).toBe(true);
+    expect(update).toHaveBeenCalled();
   });
 
   it("recusa ticket já oculto", async () => {

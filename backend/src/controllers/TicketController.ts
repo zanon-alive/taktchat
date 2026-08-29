@@ -22,7 +22,18 @@ import FindOrCreateATicketTrakingService from "../services/TicketServices/FindOr
 import ListTicketsServiceReport from "../services/TicketServices/ListTicketsServiceReport";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import { Mutex } from "async-mutex";
-import { isCompanyAdmin } from "../helpers/ticketDeletion";
+import {
+  isCompanyAdmin,
+  canViewDeletedTickets,
+  getTicketDeletionMeta,
+  TICKET_HIDE_BURST_WINDOW_HOURS
+} from "../helpers/ticketDeletion";
+import {
+  createAuditLogFromRequest,
+  AuditActions,
+  AuditEntities
+} from "../helpers/AuditLogger";
+import { listDeletedTicketsForExport } from "../services/TicketServices/ListDeletedTicketsService";
 
 type IndexQuery = {
   searchParam: string;
@@ -464,15 +475,31 @@ export const update = async (
   return res.status(200).json(ticket);
 };
 
+const assertCanViewDeleted = async (req: Request) => {
+  const { id: userId, profile, super: isSuper } = req.user;
+  if (isCompanyAdmin({ profile, super: isSuper })) {
+    return;
+  }
+  const user = await User.findByPk(userId);
+  if (!canViewDeletedTickets(user)) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+};
+
+export const deletionMeta = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  return res.status(200).json(getTicketDeletionMeta());
+};
+
 export const indexDeleted = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { companyId, profile, super: isSuper } = req.user;
-  if (!isCompanyAdmin({ profile, super: isSuper })) {
-    throw new AppError("ERR_NO_PERMISSION", 403);
-  }
+  await assertCanViewDeleted(req);
 
+  const { companyId } = req.user;
   const {
     pageNumber,
     dateStart,
@@ -495,17 +522,75 @@ export const indexDeleted = async (
   return res.status(200).json(data);
 };
 
+export const exportDeleted = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  await assertCanViewDeleted(req);
+
+  const { companyId } = req.user;
+  const { dateStart, dateEnd, deletedBy, category, searchParam } =
+    req.query as any;
+
+  const tickets = await listDeletedTicketsForExport({
+    companyId,
+    dateStart,
+    dateEnd,
+    deletedBy,
+    category,
+    searchParam
+  });
+
+  const csvLines = [
+    "id,contato,numero,fila,conexao,status,quem_ocultou,quando,categoria,motivo"
+  ];
+
+  tickets.forEach(ticket => {
+    const contact = (ticket as any).contact;
+    const queue = (ticket as any).queue;
+    const whatsapp = (ticket as any).whatsapp;
+    const when = ticket.deletedAt
+      ? new Date(ticket.deletedAt).toLocaleString("pt-BR")
+      : "";
+    const cells = [
+      ticket.id,
+      contact?.name || "",
+      contact?.number || "",
+      queue?.name || "",
+      whatsapp?.name || "",
+      ticket.status || "",
+      ticket.deletedByName || "",
+      when,
+      ticket.deletionReasonCategory || "",
+      ticket.deletionReason || ""
+    ].map(value => `"${String(value).replace(/"/g, '""')}"`);
+    csvLines.push(cells.join(","));
+  });
+
+  const csv = csvLines.join("\n");
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader(
+    "Content-Disposition",
+    "attachment; filename=tickets-ocultos.csv"
+  );
+  res.send("\uFEFF" + csv);
+};
+
 export const showDeleted = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { companyId, profile, super: isSuper } = req.user;
-  if (!isCompanyAdmin({ profile, super: isSuper })) {
-    throw new AppError("ERR_NO_PERMISSION", 403);
-  }
+  await assertCanViewDeleted(req);
 
+  const { companyId } = req.user;
   const { ticketId } = req.params;
-  const data = await ShowDeletedTicketService(ticketId, companyId);
+  const { pageNumber, limit } = req.query as any;
+  const data = await ShowDeletedTicketService(
+    ticketId,
+    companyId,
+    pageNumber,
+    limit
+  );
   return res.status(200).json(data);
 };
 
@@ -517,7 +602,7 @@ export const remove = async (
   const { id: userId, companyId, profile, super: isSuper } = req.user;
   const { category, reason } = req.body || {};
 
-  const ticket = await DeleteTicketService({
+  const { ticket, hideCount24h, burst } = await DeleteTicketService({
     id: ticketId,
     userId,
     companyId,
@@ -527,13 +612,52 @@ export const remove = async (
     reason
   });
 
-  const io = getIO();
+  await createAuditLogFromRequest(
+    req,
+    AuditActions.TICKET_HIDE,
+    AuditEntities.TICKET,
+    ticket.id,
+    {
+      category: ticket.deletionReasonCategory,
+      reason: ticket.deletionReason,
+      deletedByName: ticket.deletedByName,
+      contactId: ticket.contactId
+    }
+  );
 
-  io.of(`/workspace-${companyId}`)
-    .emit(`company-${companyId}-ticket`, {
-      action: "delete",
-      ticketId: +ticketId
+  const io = getIO();
+  const namespace = io.of(`/workspace-${companyId}`);
+
+  namespace.emit(`company-${companyId}-ticket`, {
+    action: "delete",
+    ticketId: +ticketId
+  });
+
+  namespace.emit(`company-${companyId}-ticket`, {
+    action: "hidden",
+    ticketId: +ticketId,
+    contactName: (ticket as any).contact?.name,
+    hiddenByName: ticket.deletedByName,
+    userId: ticket.userId,
+    hiddenById: Number(userId)
+  });
+
+  if (burst) {
+    await createAuditLogFromRequest(
+      req,
+      AuditActions.TICKET_HIDE_BURST,
+      AuditEntities.TICKET,
+      ticket.id,
+      { burst: true, count: hideCount24h, windowHours: TICKET_HIDE_BURST_WINDOW_HOURS }
+    );
+    namespace.emit(`company-${companyId}-ticket`, {
+      action: "hiddenBurst",
+      userId: Number(userId),
+      userName: ticket.deletedByName,
+      count: hideCount24h,
+      windowHours: TICKET_HIDE_BURST_WINDOW_HOURS
     });
+  }
 
   return res.status(200).json({ message: "ticket deleted", ticketId: ticket.id });
 };

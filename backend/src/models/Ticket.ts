@@ -214,6 +214,9 @@ class Ticket extends Model<Ticket> {
 
   @Column(DataType.TEXT)
   deletionReason: string;
+
+  @Column
+  anonymizedAt: Date;
 }
 
 export default Ticket;
