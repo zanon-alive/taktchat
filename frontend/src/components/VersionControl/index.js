@@ -1,64 +1,74 @@
 import React, { useEffect, useState } from "react";
-import { Chip, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import api from "../../services/api";
+import { formatBuildLabel, frontendBuildLabel } from "../../helpers/gitSha";
 
-// Componente responsável por exibir informações de versão do backend:
-// - Commit atual
-// - Data/Hora do build
-// - Versão de backend (db/env)
-// Também mostra a versão do frontend no tooltip.
-const VersionControl = () => {
-  const [info, setInfo] = useState(null);
+const VersionControl = ({ variant = "default" }) => {
+  const frontendLabel = frontendBuildLabel();
+  const [backendLabel, setBackendLabel] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetch = async () => {
+    let mounted = true;
+    const fetchBackend = async () => {
       try {
         const { data } = await api.get("/version");
-        if (!isMounted) return;
-
-        const backendVersion = data?.backend?.version || "N/A";
-        const commit = data?.backend?.commit || "N/A";
-        const buildDateRaw = data?.backend?.buildDate || "N/A";
-        const frontendVersion = data?.version || "N/A";
-
-        // Formata a data localmente, quando possível
-        let buildDateLabel = buildDateRaw;
-        try {
-          const d = new Date(buildDateRaw);
-          if (!isNaN(d.getTime())) {
-            buildDateLabel = d.toLocaleString();
-          }
-        } catch {
-          // mantém string original
-        }
-
-        setInfo({
-          backendVersion,
-          commit,
-          buildDate: buildDateLabel,
-          frontendVersion
-        });
-      } catch (e) {
-        // Em caso de erro, não trava a UI; exibe nada
-        setInfo(null);
+        if (!mounted) return;
+        const raw = data?.backend?.commit || data?.backend?.commitShort || "";
+        const pr = data?.backend?.pr || "";
+        setBackendLabel(formatBuildLabel(raw, pr));
+      } catch {
+        if (mounted) setBackendLabel("");
       }
     };
-
-    fetch();
+    fetchBackend();
     return () => {
-      isMounted = false;
+      mounted = false;
     };
   }, []);
 
-  if (!info) return null;
+  if (!frontendLabel) return null;
 
-  const label = `BACKEND BUILD: ${info.buildDate} | Commit: ${info.commit} | Version: ${info.backendVersion}`;
+  const tooltip = backendLabel && backendLabel !== frontendLabel
+    ? `frontend ${frontendLabel} · backend ${backendLabel}`
+    : frontendLabel;
+  const copyValue = frontendLabel;
+
+  const handleClick = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(copyValue);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // silencioso
+    }
+  };
+
+  const color = variant === "onDark" ? "rgba(255,255,255,0.55)" : "inherit";
 
   return (
-    <Tooltip title={`Frontend: ${info.frontendVersion}`}>
-      <Chip size="small" label={label} />
+    <Tooltip title={copied ? "Copiado" : tooltip} placement="top">
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label={`Versão ${frontendLabel}`}
+        style={{
+          all: "unset",
+          cursor: "pointer",
+          fontSize: 11,
+          letterSpacing: "0.04em",
+          opacity: 0.55,
+          color,
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+          userSelect: "none",
+        }}
+      >
+        {frontendLabel}
+      </button>
     </Tooltip>
   );
 };

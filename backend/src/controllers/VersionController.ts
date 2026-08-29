@@ -61,6 +61,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const rawCommit = process.env.GIT_COMMIT || fileCommit || safeExec("git rev-parse --short HEAD") || readCommitFromGitDir() || "N/A";
     const commit = rawCommit || "N/A";
     const commitShort = commit && commit.length >= 6 ? commit.substring(0, 6) : commit;
+    const filePr = safeRead(path.join(process.cwd(), ".github-pr"));
+    const prRaw = String(process.env.GITHUB_PR || filePr || "").trim();
+    const pr = prRaw && prRaw !== "null" ? prRaw.replace(/^#/, "") : "";
 
     const fileBuildDate = safeRead(path.join(process.cwd(), ".build-date"));
     const buildDate = process.env.BUILD_DATE || fileBuildDate || new Date().toISOString();
@@ -75,6 +78,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
         versionLabel,
         commit,
         commitShort,
+        pr: pr || undefined,
         buildDate
       }
     });

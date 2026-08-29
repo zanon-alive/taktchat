@@ -7,6 +7,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- SHA curto do GitHub e número do PR (ex.: `#47 · ecaed27`) no canto do login e no rodapé da sidebar, para identificar a versão em produção. Clique copia.
 - Menu do Flow Builder: na API Oficial vai como botões (até 3) ou lista (4 a 10); no Baileys vai como texto numerado, porque o WhatsApp corta o interativo na sessão não oficial.
 - Conector **Outra resposta** nos nós Menu e Pergunta do Flow Builder (opção inválida ou mensagem sem texto).
 - Nó de fila no Flow Builder com rótulo **Abrir Ticket (Fila)** (o atendimento entra na fila escolhida).
