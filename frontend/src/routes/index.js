@@ -47,6 +47,8 @@ const Chat = lazy(() => import("../pages/Chat"));
 const Prompts = lazy(() => import("../pages/Prompts"));
 const AllConnections = lazy(() => import("../pages/AllConnections"));
 const Reports = lazy(() => import("../pages/Reports"));
+const DeletedTickets = lazy(() => import("../pages/DeletedTickets"));
+const DeletedTicketDetail = lazy(() => import("../pages/DeletedTickets/Detail"));
 const FlowBuilderConfig = lazy(() => import("../pages/FlowBuilderConfig").then(module => ({ default: module.FlowBuilderConfig })));
 const FlowBuilder = lazy(() => import("../pages/FlowBuilder"));
 const CampaignsPhrase = lazy(() => import("../pages/CampaignsPhrase"));
@@ -135,6 +137,8 @@ const Routes = ({ onPathnameChange }) => {
                 <Route exact path="/settings" component={SettingsCustom} isPrivate />
                 <Route exact path="/queues" component={Queues} isPrivate />
                 <Route exact path="/reports" component={Reports} isPrivate />
+                <Route exact path="/tickets-excluidos" component={DeletedTickets} isPrivate />
+                <Route exact path="/tickets-excluidos/:ticketId" component={DeletedTicketDetail} isPrivate />
                 <Route exact path="/queue-integration" component={QueueIntegration} isPrivate />
                 <RouterRoute exact path="/annoucements" render={() => <Redirect to="/announcements" />} />
                 <Route exact path="/announcements" component={Annoucements} isPrivate />

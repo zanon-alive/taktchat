@@ -46,6 +46,7 @@ import {
   Business as BusinessIcon,
   Description as DescriptionIcon,
   Slideshow as SlideshowIcon,
+  DeleteForever as DeleteForeverIcon,
 } from "@mui/icons-material";
 
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -591,6 +592,15 @@ const MainListItems = ({ collapsed, onItemClick }) => {
       <>
       <Divider />
       <ListSubheader inset>{i18n.t("mainDrawer.listItems.administration")}</ListSubheader>
+      {(user.profile === "admin" || user.profile === "super") && (
+        <ListItemLink
+          to="/tickets-excluidos"
+          primary={i18n.t("mainDrawer.listItems.deletedTickets")}
+          icon={<DeleteForeverIcon />}
+          tooltip={collapsed}
+          onClick={onItemClick}
+        />
+      )}
       
       {/* CAMPANHAS */}
       {showCampaigns && hasPermission("campaigns.view") && (

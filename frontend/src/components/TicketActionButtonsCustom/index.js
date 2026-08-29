@@ -17,7 +17,8 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import usePermissions from "../../hooks/usePermissions";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import Tooltip from '@mui/material/Tooltip';
-import ConfirmationModal from "../ConfirmationModal";
+import TransferTicketModalCustom from "../TransferTicketModalCustom";
+import HideTicketModal from "../HideTicketModal";
 import * as Yup from "yup";
 import { Formik, Form } from "formik";
 import Dialog from '@mui/material/Dialog';
@@ -271,13 +272,8 @@ const TicketActionButtonsCustom = ({ ticket
         setTransferTicketModalOpen(false);
     };
 
-    const handleDeleteTicket = async () => {
-        try {
-            await api.delete(`/tickets/${ticket.id}`);
-            history.push("/tickets")
-        } catch (err) {
-            toastError(err);
-        }
+    const handleTicketHidden = () => {
+        history.push("/tickets");
     };
 
     const handleSendMessage = async (id) => {
@@ -474,14 +470,12 @@ const TicketActionButtonsCustom = ({ ticket
                     )}
 
                 {confirmationOpen && (
-                    <ConfirmationModal
-                        title={`${i18n.t("ticketOptionsMenu.confirmationModal.title")} #${ticket.id}?`}
+                    <HideTicketModal
                         open={confirmationOpen}
-                        onClose={setConfirmationOpen}
-                        onConfirm={handleDeleteTicket}
-                    >
-                        {i18n.t("ticketOptionsMenu.confirmationModal.message")}
-                    </ConfirmationModal>
+                        onClose={() => setConfirmationOpen(false)}
+                        ticket={ticket}
+                        onSuccess={handleTicketHidden}
+                    />
                 )}
                 {transferTicketModalOpen && (
                     <TransferTicketModalCustom

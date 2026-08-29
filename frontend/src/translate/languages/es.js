@@ -890,6 +890,7 @@ const messages = {
           prompts: "Talk.Ai",
           allConnections: "Administrar conexiones",
           reports: "Informes",
+          deletedTickets: "Tickets ocultos",
           management: "Gerencia"
         },
         appBar: {
@@ -1720,6 +1721,52 @@ const messages = {
           message: "Esta acción no se puede revertir."
         }
       },
+      hideTicketModal: {
+        title: "Ocultar ticket",
+        message: "El ticket sale de la operación. El administrador puede auditar la conversación. Los mensajes no se borran.",
+        category: "Categoría",
+        reason: "Motivo",
+        reasonHint: "mínimo 15 caracteres",
+        cancel: "Cancelar",
+        confirm: "Ocultar ticket",
+        categories: {
+          duplicado: "Duplicado",
+          teste: "Prueba",
+          erro_abertura: "Error de apertura",
+          contato_pediu: "El contacto pidió exclusión",
+          lgpd: "LGPD",
+          outro: "Otro"
+        }
+      },
+      deletedTickets: {
+        title: "Tickets ocultos",
+        detailTitle: "Ticket oculto",
+        empty: "Ningún ticket oculto.",
+        dateStart: "Desde",
+        dateEnd: "Hasta",
+        category: "Categoría",
+        allCategories: "Todas",
+        search: "Contacto o número",
+        contact: "Contacto",
+        queue: "Cola / conexión",
+        status: "Estado",
+        deletedBy: "Ocultado por",
+        when: "Cuándo",
+        reason: "Motivo",
+        view: "Ver",
+        prev: "Anterior",
+        next: "Siguiente",
+        back: "Volver",
+        banner: "Oculto — no se puede reabrir",
+        removedUser: "Usuario eliminado",
+        conversation: "Conversación",
+        notes: "Notas",
+        logs: "Historial",
+        noMessages: "Sin mensajes.",
+        noNotes: "Sin notas.",
+        noLogs: "Sin historial.",
+        private: "interna"
+      },
       invoices: {
         table: {
           invoices: "Facturas",
@@ -1750,6 +1797,9 @@ const messages = {
         ERR_NO_SETTING_FOUND: "Ninguna configuración encontrada con este ID.",
         ERR_NO_CONTACT_FOUND: "Ningún contacto encontrado con este ID.",
         ERR_NO_TICKET_FOUND: "Ningún tíquete encontrado con este ID.",
+        ERR_TICKET_DELETED: "El ticket está oculto y no puede reabrirse ni alterarse.",
+        ERR_TICKET_ALREADY_DELETED: "Este ticket ya está oculto.",
+        ERR_TICKET_DELETE_REASON: "Informe una categoría válida y un motivo de 15 a 500 caracteres.",
         ERR_NO_USER_FOUND: "Ningún usuario encontrado con este ID.",
         ERR_NO_WAPP_FOUND: "Ningún WhatsApp encontrado con este ID.",
         ERR_CREATING_MESSAGE: "Error al crear mensaje en la base de datos.",

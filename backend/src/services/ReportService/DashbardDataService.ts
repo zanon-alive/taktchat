@@ -53,7 +53,7 @@ export default async function DashboardDataService(
       left join "Companies" c on c.id = tt."companyId"
       left join "Users" u on u.id = tt."userId"
       left join "Whatsapps" w on w.id = tt."whatsappId"
-      inner join "Tickets" t on t.id = tt."ticketId"
+      inner join "Tickets" t on t.id = tt."ticketId" and t."deletedAt" IS NULL
       left join "Contacts" ct on ct.id = t."contactId"
       -- filterPeriod
     ),
@@ -65,12 +65,12 @@ export default async function DashboardDataService(
         (
           select count(distinct "id")
           from "Tickets" t
-          where status like 'open' and t."companyId" = ?
+          where status like 'open' and t."companyId" = ? and t."deletedAt" IS NULL
         ) "supportHappening",
         (
           select count(distinct "id")
           from "Tickets" t
-          where status like 'pending' and t."companyId" = ?
+          where status like 'pending' and t."companyId" = ? and t."deletedAt" IS NULL
         ) "supportPending",
         (select count(id) from traking where groups) "supportGroups",
         (
@@ -154,7 +154,7 @@ export default async function DashboardDataService(
           (select coalesce(json_agg(a.*), '[]')::jsonb from attedants a) attendants;
   `;
 
-  let where = 'where tt."companyId" = ?';
+  let where = 'where tt."companyId" = ? and t."deletedAt" IS NULL';
   const replacements: any[] = [companyId];
 
   if (_.has(params, "days")) {

@@ -7,6 +7,8 @@ import User from "../models/User";
 
 import CreateTicketService from "../services/TicketServices/CreateTicketService";
 import DeleteTicketService from "../services/TicketServices/DeleteTicketService";
+import ListDeletedTicketsService from "../services/TicketServices/ListDeletedTicketsService";
+import ShowDeletedTicketService from "../services/TicketServices/ShowDeletedTicketService";
 import ListTicketsService from "../services/TicketServices/ListTicketsService";
 import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUIDService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
@@ -20,6 +22,7 @@ import FindOrCreateATicketTrakingService from "../services/TicketServices/FindOr
 import ListTicketsServiceReport from "../services/TicketServices/ListTicketsServiceReport";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import { Mutex } from "async-mutex";
+import { isCompanyAdmin } from "../helpers/ticketDeletion";
 
 type IndexQuery = {
   searchParam: string;
@@ -461,29 +464,78 @@ export const update = async (
   return res.status(200).json(ticket);
 };
 
+export const indexDeleted = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId, profile, super: isSuper } = req.user;
+  if (!isCompanyAdmin({ profile, super: isSuper })) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  const {
+    pageNumber,
+    dateStart,
+    dateEnd,
+    deletedBy,
+    category,
+    searchParam
+  } = req.query as any;
+
+  const data = await ListDeletedTicketsService({
+    companyId,
+    pageNumber,
+    dateStart,
+    dateEnd,
+    deletedBy,
+    category,
+    searchParam
+  });
+
+  return res.status(200).json(data);
+};
+
+export const showDeleted = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId, profile, super: isSuper } = req.user;
+  if (!isCompanyAdmin({ profile, super: isSuper })) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  const { ticketId } = req.params;
+  const data = await ShowDeletedTicketService(ticketId, companyId);
+  return res.status(200).json(data);
+};
+
 export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   const { ticketId } = req.params;
-  const { id: userId, companyId } = req.user;
+  const { id: userId, companyId, profile, super: isSuper } = req.user;
+  const { category, reason } = req.body || {};
 
-  // await ShowTicketService(ticketId, companyId);
-
-  const ticket = await DeleteTicketService(ticketId, userId, companyId);
+  const ticket = await DeleteTicketService({
+    id: ticketId,
+    userId,
+    companyId,
+    profile,
+    super: isSuper,
+    category,
+    reason
+  });
 
   const io = getIO();
 
   io.of(`/workspace-${companyId}`)
-    // .to(ticket.status)
-    // .to(ticketId)
-    // .to("notification")
     .emit(`company-${companyId}-ticket`, {
       action: "delete",
       ticketId: +ticketId
     });
 
-  return res.status(200).json({ message: "ticket deleted" });
+  return res.status(200).json({ message: "ticket deleted", ticketId: ticket.id });
 };
 
 export const closeAll = async (req: Request, res: Response): Promise<Response> => {
