@@ -9,11 +9,13 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/build-taktchat-backend-ghcr.yml"
+      - ".github/scripts/resolve-github-pr.sh"
   workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
+  pull-requests: read
 
 jobs:
   build:
@@ -21,6 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve PR number
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: bash .github/scripts/resolve-github-pr.sh
 
       - name: Verify backend build outputs (label-sync server)
         working-directory: backend
@@ -55,6 +64,7 @@ jobs:
             GIT_COMMIT=${{ github.sha }}
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             BACKEND_VERSION=${{ github.sha }}
+            GITHUB_PR=${{ steps.meta.outputs.pr }}
 
       - name: Backend (browser) — build & push
         uses: docker/build-push-action@v6
@@ -72,4 +82,5 @@ jobs:
             GIT_COMMIT=${{ github.sha }}
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             BACKEND_VERSION=${{ github.sha }}
+            GITHUB_PR=${{ steps.meta.outputs.pr }}
 

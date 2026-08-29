@@ -9,11 +9,13 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/build-taktchat-frontend-ghcr.yml"
+      - ".github/scripts/resolve-github-pr.sh"
   workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
+  pull-requests: read
 
 jobs:
   build:
@@ -21,6 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve PR number
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: bash .github/scripts/resolve-github-pr.sh
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -48,4 +57,5 @@ jobs:
             REACT_APP_SOCKET_URL=https://api.taktchat.com.br
             PUBLIC_URL=https://taktchat.com.br
             REACT_APP_FRONTEND_VERSION=${{ github.sha }}
+            REACT_APP_GITHUB_PR=${{ steps.meta.outputs.pr }}
 

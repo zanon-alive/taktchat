@@ -17,6 +17,7 @@ import {
   getAndroidApkUrl,
   shouldShowAndroidDownloadLink,
 } from "../../utils/nativeApp";
+import VersionControl from "../../components/VersionControl";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -160,6 +161,12 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("sm")]: {
       fontSize: "16px",
     },
+  },
+  buildSha: {
+    position: "fixed",
+    right: 12,
+    bottom: 8,
+    zIndex: 2,
   },
 }));
 
@@ -334,6 +341,9 @@ const Login = () => {
           )}
         </form>
         <ChatWidget />
+      </div>
+      <div className={classes.buildSha}>
+        <VersionControl variant="onDark" />
       </div>
     </>
   );

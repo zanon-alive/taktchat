@@ -34,7 +34,7 @@ docker build \
   frontend
 ```
 
-> **Observação**: os argumentos possuem default (ambiente local), mas em produção precisam ser definidos para refletir o domínio correto. Outros argumentos opcionais: `REACT_APP_PRIMARY_COLOR`, `REACT_APP_PRIMARY_DARK`, `REACT_APP_FRONTEND_VERSION`.
+> **Observação**: os argumentos possuem default (ambiente local), mas em produção precisam ser definidos para refletir o domínio correto. Outros argumentos opcionais: `REACT_APP_PRIMARY_COLOR`, `REACT_APP_PRIMARY_DARK`, `REACT_APP_FRONTEND_VERSION`, `REACT_APP_GITHUB_PR` (número do PR do merge).
 
 ### Backend
 ```bash

@@ -46,13 +46,15 @@ RUN mkdir -p public
 # Build info (gera arquivos .git-commit e .build-date no estágio de build)
 ARG GIT_COMMIT
 ARG BUILD_DATE
+ARG GITHUB_PR
 RUN set -eux; \
   COMMIT="${GIT_COMMIT:-}"; \
   if [ -z "$COMMIT" ] && [ -d .git ]; then COMMIT="$(git rev-parse --short HEAD)"; fi; \
   DATE="${BUILD_DATE:-}"; \
   if [ -z "$DATE" ]; then DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"; fi; \
   printf "%s" "$COMMIT" > .git-commit; \
-  printf "%s" "$DATE" > .build-date
+  printf "%s" "$DATE" > .build-date; \
+  printf "%s" "${GITHUB_PR:-}" > .github-pr
 
 # Build Typescript -> dist
 RUN npm run build
@@ -81,9 +83,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ARG BUILD_DATE
 ARG GIT_COMMIT
 ARG BACKEND_VERSION
+ARG GITHUB_PR
 ENV BUILD_DATE=$BUILD_DATE
 ENV GIT_COMMIT=$GIT_COMMIT
 ENV BACKEND_VERSION=$BACKEND_VERSION
+ENV GITHUB_PR=$GITHUB_PR
 
 # Copia manifestos, dependências já instaladas e artefatos compilados
 # Consolidado em grupos lógicos para otimizar layers
@@ -98,6 +102,7 @@ COPY --from=build /app/.sequelizerc ./.sequelizerc
 # Build info files (presentes em runtime para fallback)
 COPY --from=build /app/.git-commit ./.git-commit
 COPY --from=build /app/.build-date ./.build-date
+COPY --from=build /app/.github-pr ./.github-pr
 
 # Cria diretório privado para sessões e arquivos temporários
 RUN mkdir -p ./private

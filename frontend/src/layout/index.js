@@ -47,6 +47,7 @@ import LicenseExpiryWarning from "../components/LicenseExpiryWarning";
 
 import { useDate } from "../hooks/useDate";
 import UserLanguageSelector from "../components/UserLanguageSelector";
+import VersionControl from "../components/VersionControl";
 
 import ColorModeContext from "./themeContext";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
@@ -154,7 +155,8 @@ const useStyles = makeStyles((theme) => ({
     left: 0,
     height: "100vh",
     whiteSpace: "nowrap",
-    // overflowX: "hidden",
+    display: "flex",
+    flexDirection: "column",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
@@ -169,6 +171,8 @@ const useStyles = makeStyles((theme) => ({
     top: 0,
     left: 0,
     height: "100vh",
+    display: "flex",
+    flexDirection: "column",
     overflowX: "hidden",
     overflowY: "hidden",
     transition: theme.transitions.create("width", {
@@ -228,6 +232,11 @@ const useStyles = makeStyles((theme) => ({
     },
     "-ms-overflow-style": "none",
     "scrollbar-width": "none",
+  },
+  versionSlot: {
+    flexShrink: 0,
+    padding: "6px 14px 10px",
+    lineHeight: 1,
   },
   NotificationsPopOver: {
     // color: theme.barraSuperior.secondary.main,
@@ -603,6 +612,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         <List className={classes.containerWithScroll}>
           <MainListItems collapsed={!drawerOpen} onItemClick={handleMenuClose} />
         </List>
+        {drawerOpen && (
+          <div className={classes.versionSlot}>
+            <VersionControl />
+          </div>
+        )}
         <Divider />
       </Drawer>
       )}
