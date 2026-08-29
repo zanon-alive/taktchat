@@ -7,7 +7,7 @@ import Switch from "@mui/material/Switch";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
-import ConfirmationModal from "../ConfirmationModal";
+import HideTicketModal from "../HideTicketModal";
 import TransferTicketModalCustom from "../TransferTicketModalCustom";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -30,12 +30,8 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 		};
 	}, []);
 
-	const handleDeleteTicket = async () => {
-		try {
-			await api.delete(`/tickets/${ticket.id}`);
-		} catch (err) {
-			toastError(err);
-		}
+	const handleTicketHidden = () => {
+		history.push("/tickets");
 	};
 
 	const handleOpenConfirmationModal = e => {
@@ -136,15 +132,12 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 					</MenuItem>
 				) : null}
 			</Menu>
-			<ConfirmationModal
-				title={`${i18n.t("ticketOptionsMenu.confirmationModal.title")} ${ticket.contact.name
-					}?`}
+			<HideTicketModal
 				open={confirmationOpen}
-				onClose={setConfirmationOpen}
-				onConfirm={handleDeleteTicket}
-			>
-				{i18n.t("ticketOptionsMenu.confirmationModal.message")}
-			</ConfirmationModal>
+				onClose={() => setConfirmationOpen(false)}
+				ticket={ticket}
+				onSuccess={handleTicketHidden}
+			/>
 			<TransferTicketModalCustom
 				modalOpen={transferTicketModalOpen}
 				onClose={handleCloseTransferTicketModal}

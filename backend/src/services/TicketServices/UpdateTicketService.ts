@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
+import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import ShowTicketService from "./ShowTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
@@ -88,6 +89,17 @@ const UpdateTicketService = async ({
             : undefined,
         leaveBoard: Boolean(leaveKanbanBoard)
       });
+
+    const hiddenTicket = await Ticket.unscoped().findOne({
+      where: { id: ticketId, companyId },
+      attributes: ["id", "deletedAt"]
+    });
+    if (!hiddenTicket) {
+      throw new AppError("ERR_NO_TICKET_FOUND", 404);
+    }
+    if (hiddenTicket.deletedAt) {
+      throw new AppError("ERR_TICKET_DELETED", 409);
+    }
 
     const io = getIO();
 

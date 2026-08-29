@@ -126,7 +126,7 @@ export default async function ListTicketsServiceReport(
       t."queueId" = q.id 
   -- filterPeriod`;
   }
-  let where = `where t."companyId" = ${companyId}`;
+  let where = `where t."companyId" = ${companyId} and t."deletedAt" IS NULL`;
 
   if (_.has(params, "dateFrom")) {
     where += ` and t."createdAt" >= '${params.dateFrom} 00:00:00'`;

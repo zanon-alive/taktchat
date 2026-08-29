@@ -7,6 +7,9 @@ const ticketRoutes = express.Router();
 
 ticketRoutes.get("/tickets", isAuth, TicketController.index);
 
+ticketRoutes.get("/tickets/deleted", isAuth, TicketController.indexDeleted);
+ticketRoutes.get("/tickets/deleted/:ticketId", isAuth, TicketController.showDeleted);
+
 ticketRoutes.get("/tickets/:ticketId", isAuth, TicketController.show);
 
 ticketRoutes.get("/tickets-log/:ticketId", isAuth, TicketController.showLog);

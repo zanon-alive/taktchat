@@ -24,6 +24,8 @@ import { TagsContainer } from "../TagsContainer";
 import { isNil } from 'lodash';
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
+import { toast } from "react-toastify";
+import { i18n } from "../../translate/i18n";
 
 const drawerWidth = 320;
 
@@ -258,6 +260,7 @@ const Ticket = () => {
         }
 
         if (data.action === "delete" && data.ticketId === ticket?.id) {
+          toast.info(i18n.t("tickets.toasts.deleted"));
           history.push("/tickets");
         }
       };

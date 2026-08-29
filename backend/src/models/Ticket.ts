@@ -29,7 +29,11 @@ import QueueIntegrations from "./QueueIntegrations";
 import { format } from "date-fns";
 
 
-@Table
+@Table({
+  defaultScope: {
+    where: { deletedAt: null }
+  }
+})
 class Ticket extends Model<Ticket> {
   @PrimaryKey
   @AutoIncrement
@@ -191,6 +195,25 @@ class Ticket extends Model<Ticket> {
 
   @Column
   typebotSessionTime: Date
+
+  @Column
+  deletedAt: Date;
+
+  @ForeignKey(() => User)
+  @Column
+  deletedBy: number;
+
+  @BelongsTo(() => User, "deletedBy")
+  deletedByUser: User;
+
+  @Column
+  deletedByName: string;
+
+  @Column
+  deletionReasonCategory: string;
+
+  @Column(DataType.TEXT)
+  deletionReason: string;
 }
 
 export default Ticket;
