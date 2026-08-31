@@ -25,6 +25,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
 - CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário (#40).
 ### Corrigido (fix)
+- HTML da SPA (`index.html`, `/landing`, `/tour`) passa a ir com `Cache-Control: no-cache`, para o browser não prender uma página antiga (ex.: "Welcome to nginx!") após o deploy.
 - Build do frontend GHCR voltava a publicar o nginx default ("Welcome to nginx!") quando o CRA falhava em silêncio; import duplicado em `TicketActionButtonsCustom` e guarda no Dockerfile para recusar SPA incompleta.
 - Cards e paginação Tailwind no painel seguem o tema do app (`darkMode: 'class'`), não o tema do sistema operacional; o fundo da página acompanha o toggle claro/escuro.
 - Headers de tabela no tema escuro usam papel/hover e texto primary; listagens legadas (fluxos e campanhas de fluxo) deixam o fundo navy.
