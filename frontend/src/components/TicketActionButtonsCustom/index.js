@@ -27,7 +27,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CloseIcon from "@mui/icons-material/Close";
 
 import Button from '@mui/material/Button';
-import TransferTicketModalCustom from "../TransferTicketModalCustom";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 
 //icones
