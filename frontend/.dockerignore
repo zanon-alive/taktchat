@@ -14,7 +14,6 @@ dist
 tsconfig.json
 tsconfig.*.json
 yarn.lock
-package-lock.json
 
 *.log
 npm-debug.log*

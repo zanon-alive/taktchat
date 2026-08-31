@@ -31,6 +31,38 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: bash .github/scripts/resolve-github-pr.sh
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build SPA
+        working-directory: frontend
+        env:
+          CI: "false"
+          GENERATE_SOURCEMAP: "false"
+          SKIP_PREFLIGHT_CHECK: "true"
+          DISABLE_ESLINT_PLUGIN: "true"
+          TSC_COMPILE_ON_ERROR: "true"
+          REACT_APP_BACKEND_URL: https://api.taktchat.com.br
+          REACT_APP_SOCKET_URL: https://api.taktchat.com.br
+          PUBLIC_URL: https://taktchat.com.br
+          REACT_APP_FRONTEND_VERSION: ${{ github.sha }}
+          REACT_APP_GITHUB_PR: ${{ steps.meta.outputs.pr }}
+        run: |
+          set -euo pipefail
+          npm ci --legacy-peer-deps
+          NODE_OPTIONS=--max-old-space-size=8192 npm run build
+          if [ ! -f build/index.html ] \
+            || grep -q 'Welcome to nginx' build/index.html \
+            || ! grep -q 'id="root"' build/index.html \
+            || [ ! -d build/static ]; then
+            echo "SPA incompleta: index.html ausente/nginx default ou falta build/static" >&2
+            exit 1
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -41,21 +73,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push
+      - name: Pack nginx image & push
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: ./frontend/Dockerfile.runtime
           push: true
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/${{ github.repository_owner }}/taktchat-frontend:${{ github.sha }}
             ghcr.io/${{ github.repository_owner }}/taktchat-frontend:latest
           cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            REACT_APP_BACKEND_URL=https://api.taktchat.com.br
-            REACT_APP_SOCKET_URL=https://api.taktchat.com.br
-            PUBLIC_URL=https://taktchat.com.br
-            REACT_APP_FRONTEND_VERSION=${{ github.sha }}
-            REACT_APP_GITHUB_PR=${{ steps.meta.outputs.pr }}
-
+          cache-to: type=gha,mode=min

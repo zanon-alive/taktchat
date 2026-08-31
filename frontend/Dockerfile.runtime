@@ -1,0 +1,10 @@
+# Imagem de runtime da SPA (nginx). O GHCR Action compila o React no runner
+# e só empacota o resultado — ver .github/workflows/build-taktchat-frontend-ghcr.yml
+FROM nginx:alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY build /usr/share/nginx/html
+
+RUN if [ ! -f /usr/share/nginx/html/index.html ] || grep -q 'Welcome to nginx' /usr/share/nginx/html/index.html || ! grep -q 'id="root"' /usr/share/nginx/html/index.html || [ ! -d /usr/share/nginx/html/static ]; then echo 'SPA incompleta: index.html ausente/nginx default ou falta /usr/share/nginx/html/static' >&2; exit 1; fi
+
+EXPOSE 80
