@@ -5,9 +5,9 @@ WORKDIR /app
 
 # Copia o package.json e instala as dependências
 # Usando cache do BuildKit para acelerar builds subsequentes
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm install --legacy-peer-deps
+    npm ci --legacy-peer-deps
 
 # Copia o restante dos arquivos
 COPY . .

@@ -65,6 +65,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Rota `/landing` não devolve mais 403 do Nginx (conflito com a pasta de prints `public/landing/`).
 
 ### Alterado (refactor/chore)
+- Action do frontend GHCR compila o CRA no runner (`npm ci` + cache do Node) e o Docker só empacota nginx; `provenance` desligado. Build local `docker build -f frontend/Dockerfile` continua compilando no container.
 - Landing v2: print do hero cabe no viewport, CTAs extras do meio da página saíram, claim de uptime 99,9% só na v1, dependência `react-ga4` não usada removida (#30).
 - Frontend em produção: gzip nos estáticos do Nginx (`vendor.js` e demais JS/CSS), inclusive `application/x-javascript`.
 ### Quebra de compatibilidade (BREAKING)
