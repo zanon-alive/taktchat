@@ -1,27 +1,24 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `fix/frontend-spa-index-nginx`  
+**Branch git:** `fix/cadastro-empresa-id-sequence`  
 **Data:** 2026-08-31
 
 ## Feito
 
-Commit local: `fix(frontend): impede SPA vazia no GHCR por import duplicado`
+Correção do 500 ao cadastrar empresa em produção:
 
-- Import duplicado `TransferTicketModalCustom` removido
-- Guarda no `frontend/Dockerfile` após `npm run build`
-- Testes estáticos: PASS
+- Sequence `Companies_id_seq` tentava reusar `id=1`
+- `AppError` recebia o UniqueConstraintError como status HTTP
 
-PR ainda não criado. MCP Telecontrol desconectado.
+MCP Telecontrol desconectado.
 
-## Produção (ainda quebrada até aplicar)
+## Produção
 
-Rollback Portainer para frontend PR #48:
+Após merge: rodar `taktchat_taktchat-migrate` e validar POST `/companies`.
 
-`ghcr.io/zanon-alive/taktchat-frontend@sha256:ecb677270cebaf0323d2f369384715d353aa08f02c8a3276f6bb88e13a37cec3`
-
-Ou merge desta branch + Action + GitOps.
+Tentativa imediata (sequence já avançou para o próximo id=2) pode funcionar **antes** do deploy; unique de e-mail/nome ainda viraria 500 até este PR.
 
 ## Não fazer
 
-- Deploy/SSH pelo agente
 - Push direto na `main`
+- Deploy pelo agente
