@@ -42,6 +42,7 @@ ENV SKIP_PREFLIGHT_CHECK=true
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV TSC_COMPILE_ON_ERROR=true
 RUN NODE_OPTIONS=--max-old-space-size=8192 npm run build
+RUN if [ ! -f /app/build/index.html ] || grep -q 'Welcome to nginx' /app/build/index.html || ! grep -q 'id="root"' /app/build/index.html || [ ! -d /app/build/static ]; then echo 'SPA incompleta: index.html ausente/nginx default ou falta /app/build/static' >&2; exit 1; fi
 
 # Etapa de deploy
 FROM nginx:alpine
