@@ -131,6 +131,13 @@ O Dono da Plataforma cobra whitelabels baseado na **quantidade de planos ativos*
 2. **Parceiro bloqueia empresa cliente**: Admin whitelabel na página Empresas pode bloquear/liberar acesso de cada empresa-filha (coluna ACESSO). Persiste em `Company.accessBlockedByParent`; endpoint PATCH `/companies/:id/block-access`.
 3. **Mensagens ao usuário**: Login e refresh retornam 403 com códigos específicos (ex.: `ERR_ACCESS_BLOCKED_PLATFORM`, `ERR_ACCESS_BLOCKED_PARTNER`, `ERR_LICENSE_OVERDUE`); frontend exibe mensagem adequada e redireciona para login.
 
+### Cadastro de empresa no painel (`/companies`)
+
+1. Super ou admin autorizado preenche o modal e envia `POST /companies` (`CreateCompanyService`).
+2. Nome da empresa e e-mail do admin são únicos; conflito retorna **400** (não 500). Unique de `id` (sequence SERIAL atrasada após seed/dump) também vira 400; o serviço alinha as sequences e pede nova tentativa.
+3. Com sucesso, a página recarrega `GET /companiesPlan/` — a linha nova aparece sem F5.
+4. Migration `20260831000001-sync-serial-sequences` alinha `Companies`, `Users`, `CompaniesSettings`, `Plans`, `Queues` e `Licenses` ao `MAX(id)`. Em produção, rodar `taktchat_taktchat-migrate` após o deploy que a inclui.
+
 ## Validações e Regras de Negócio
 
 - Não permitir loops em `parentCompanyId`
@@ -139,6 +146,8 @@ O Dono da Plataforma cobra whitelabels baseado na **quantidade de planos ativos*
 - Whitelabel só pode gerenciar empresas-filhas
 - Cliente direto só pode gerenciar própria empresa
 - Apenas `super` pode criar empresas `type = 'whitelabel'`
+- Nome de empresa e e-mail de usuário são únicos no banco; o create mapeia UniqueConstraintError para 400
+- `AppError` só aceita status HTTP 100–599 (não passar objeto Sequelize como status)
 
 ## Status de Implementação
 
