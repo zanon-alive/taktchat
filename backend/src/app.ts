@@ -13,7 +13,7 @@ import type { BaseError as SequelizeBaseError } from "sequelize";
 
 import "./database";
 import uploadConfig from "./config/upload";
-import AppError from "./errors/AppError";
+import AppError, { toHttpStatusCode } from "./errors/AppError";
 import routes from "./routes";
 import { isAllowedCorsOrigin } from "./helpers/isAllowedCorsOrigin";
 import logger from "./utils/logger";
@@ -173,8 +173,9 @@ const mapDatabaseConnectionError = (
 // Middleware de tratamento de erros
 app.use(async (err: Error, req: Request, res: Response, _: NextFunction) => {
   if (err instanceof AppError) {
-    logger.warn(err);
-    return res.status(err.statusCode).json({ error: err.message });
+    const statusCode = toHttpStatusCode(err.statusCode);
+    logger.warn({ message: err.message, statusCode });
+    return res.status(statusCode).json({ error: err.message });
   }
 
   const dbError = mapDatabaseConnectionError(err);

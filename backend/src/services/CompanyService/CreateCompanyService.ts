@@ -11,6 +11,9 @@ import Plan from "../../models/Plan";
 import { getPlatformCompanyId, isPlatformCompany } from "../../config/platform";
 import CreateLicenseService from "../LicenseService/CreateLicenseService";
 import { generateSignupToken } from "../../helpers/PartnerSignupToken";
+import { mapCompanyCreateError, isIdUniqueConstraintError } from "../../helpers/mapCompanyCreateError";
+import { syncCompanyCreateSequences } from "../../helpers/syncSerialSequence";
+import logger from "../../utils/logger";
 
 interface CompanyData {
   name: string;
@@ -106,6 +109,18 @@ const CreateCompanyService = async (
     }
   }
 
+  const existingName = await Company.findOne({ where: { name } });
+  if (existingName) {
+    throw new AppError("Já existe uma empresa com este nome.", 400);
+  }
+
+  if (email) {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new AppError("E-mail já cadastrado.", 400);
+    }
+  }
+
   const t = await sequelize.transaction();
 
   try {
@@ -188,7 +203,14 @@ const CreateCompanyService = async (
     return company;
   } catch (error) {
     await t.rollback();
-    throw new AppError("Não foi possível criar a empresa!", error);
+    if (isIdUniqueConstraintError(error)) {
+      try {
+        await syncCompanyCreateSequences();
+      } catch (syncError) {
+        logger.error({ err: syncError }, "Falha ao alinhar sequences após unique de id");
+      }
+    }
+    throw mapCompanyCreateError(error);
   }
 };
 
