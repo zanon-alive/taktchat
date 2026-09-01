@@ -26,6 +26,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário (#40).
 ### Corrigido (fix)
 - Cadastro de empresa retornava 500: sequence de IDs tentava reusar `id = 1` e o `AppError` recebia o erro Sequelize no lugar do status HTTP.
+- Lista de Empresas não atualizava após cadastrar/editar: o modal fechava sem recarregar `/companiesPlan`; agora recarrega após sucesso (sem precisar de F5).
 - HTML da SPA (`index.html`, `/landing`, `/tour`) passa a ir com `Cache-Control: no-cache`, para o browser não prender uma página antiga (ex.: "Welcome to nginx!") após o deploy.
 - Build do frontend GHCR voltava a publicar o nginx default ("Welcome to nginx!") quando o CRA falhava em silêncio; import duplicado em `TicketActionButtonsCustom` e guarda no Dockerfile para recusar SPA incompleta.
 - Cards e paginação Tailwind no painel seguem o tema do app (`darkMode: 'class'`), não o tema do sistema operacional; o fundo da página acompanha o toggle claro/escuro.
