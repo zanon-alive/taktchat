@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useContext, useMemo } from "react";
+import React, { useState, useEffect, useReducer, useContext, useMemo, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
@@ -282,32 +282,33 @@ const Companies = () => {
         setPageNumber(1); //
     }, [searchParam]); //
 
+    const loadCompanies = useCallback(async () => {
+        const { data } = await api.get("/companiesPlan/", {
+            params: {
+                searchParam,
+                pageNumber,
+                limit: itemsPerPage,
+                orderBy: sortField || "name",
+                order: sortDirection,
+            },
+        });
+        dispatch({ type: "SET_COMPANIES", payload: data.companies || [] });
+        setTotalItems(
+            typeof data.count === "number"
+                ? data.count
+                : data.total || data.companies?.length || 0
+        );
+    }, [searchParam, pageNumber, itemsPerPage, sortField, sortDirection]);
+
     useEffect(() => {
         setLoading(true);
         const delayDebounceFn = setTimeout(() => {
-            const fetchCompanies = async () => {
-                try {
-                    const { data } = await api.get("/companiesPlan/", {
-                        params: { 
-                            searchParam, 
-                            pageNumber,
-                            limit: itemsPerPage,
-                            orderBy: sortField || 'name',
-                            order: sortDirection
-                        },
-                    });
-                    dispatch({ type: "SET_COMPANIES", payload: data.companies || [] });
-                    setTotalItems(typeof data.count === "number" ? data.count : (data.total || data.companies?.length || 0));
-                    setLoading(false);
-                } catch (err) {
-                    toastError(err);
-                    setLoading(false);
-                }
-            };
-            fetchCompanies();
+            loadCompanies()
+                .catch((err) => toastError(err))
+                .finally(() => setLoading(false));
         }, 500);
         return () => clearTimeout(delayDebounceFn);
-    }, [searchParam, pageNumber, itemsPerPage, sortField, sortDirection]);
+    }, [loadCompanies]);
 
     // // Evento de socket para atualização de empresas
     // useEffect(() => {
@@ -338,6 +339,17 @@ const Companies = () => {
         setCompanyModalOpen(false); //
     };
 
+    const handleCompanySaved = async () => {
+        setLoading(true);
+        try {
+            await loadCompanies();
+        } catch (err) {
+            toastError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSearch = (event) => {
         setSearchParam(event.target.value.toLowerCase()); //
     };
@@ -363,17 +375,7 @@ const Companies = () => {
         try {
             await blockAccess(company.id, blocked);
             toast.success(blocked ? "Acesso bloqueado com sucesso." : "Acesso liberado com sucesso.");
-            // Recarregar empresas
-            const { data } = await api.get("/companiesPlan/", {
-                params: { 
-                    searchParam, 
-                    pageNumber,
-                    limit: itemsPerPage,
-                    orderBy: sortField || 'name',
-                    order: sortDirection
-                },
-            });
-            dispatch({ type: "SET_COMPANIES", payload: data.companies || [] });
+            await loadCompanies();
         } catch (err) {
             toast.error(err?.response?.data?.message || (blocked ? "Não foi possível bloquear o acesso." : "Não foi possível liberar o acesso."));
             toastError(err);
@@ -451,6 +453,7 @@ const Companies = () => {
             <CompanyModal
                         open={companyModalOpen}
                         onClose={handleCloseCompanyModal}
+                        onSave={handleCompanySaved}
                         aria-labelledby="form-dialog-title"
                         companyId={selectedCompany && selectedCompany.id}
             />

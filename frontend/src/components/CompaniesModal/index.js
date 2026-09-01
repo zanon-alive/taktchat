@@ -78,7 +78,7 @@ const CompanySchema = Yup.object().shape({
 	numberConections: Yup.number(),
 });
 
-const CompanyModal = ({ open, onClose, companyId }) => {
+const CompanyModal = ({ open, onClose, companyId, onSave }) => {
 	const classes = useStyles();
 
 	const initialState = {
@@ -199,6 +199,9 @@ const CompanyModal = ({ open, onClose, companyId }) => {
 				await api.post("/companies", companyData);
 			}
 			toast.success(i18n.t("companyModal.success"));
+			if (typeof onSave === "function") {
+				await onSave();
+			}
 		} catch (err) {
 			toastError(err);
 		}
