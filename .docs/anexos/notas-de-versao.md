@@ -4,6 +4,7 @@ Use este arquivo para registrar mudanças relevantes em cada release.
 
 | Data | Versão | Descrição | Autor |
 | --- | --- | --- | --- |
+| 2026-08-31 | 2.2.2v-26 | Cadastro de empresa no painel: 500 por sequence de `id` (#54) e lista `/companies` que não recarregava após sucesso (#55). Mergeados na `main`. | Equipe Dev |
 | 2026-08-27 | 2.2.2v-26 | Landing/tour: menu visível, volta para `/landing`, CTA WhatsApp sem formulário, FAB fixo empilhado com cookies e chat do site (#40, #41). Validado em `taktchat.com.br`. | Equipe Dev |
 | 2026-08-25 | Documentação v1.8 | Inventário funcional backend/frontend, mapa de rotas e acesso, catálogo e manuais alinhados ao código. Registra dependências, stubs, órfãos e pendências de segurança; não confirma deploy em produção. | Equipe Docs |
 | 2026-08-25 | 2.2.2v-26 | Kit v1.7: overlay do Painel, atalho do funil, login sem tag `#`, heap do frontend. | Equipe Dev |
