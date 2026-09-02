@@ -6,6 +6,10 @@ import authConfig from "../config/auth";
 
 import { updateUser } from "../helpers/updateUser";
 import logger from "../utils/logger";
+import CompanyAccessService, {
+  canUseBillingOnly
+} from "../services/CompanyService/CompanyAccessService";
+import { isBillingAllowedPath } from "../helpers/isBillingAllowedPath";
 
 // Interface para Request estendido
 interface ExtendedRequest extends Request {
@@ -52,8 +56,24 @@ const isAuth = async (req: ExtendedRequest, res: Response, next: NextFunction): 
       super: isSuper
     };
 
-    return next();
+    const access = await CompanyAccessService(companyId);
+    if (access.allowed) {
+      return next();
+    }
+
+    const path = (req.originalUrl || req.path || "").split("?")[0];
+    if (canUseBillingOnly(access, profile) && isBillingAllowedPath(req.method, path)) {
+      return next();
+    }
+    if (canUseBillingOnly(access, profile)) {
+      throw new AppError("ERR_BILLING_ONLY", 403);
+    }
+
+    throw new AppError(access.code ?? "ERR_ACCESS_BLOCKED", 403);
   } catch (err: any) {
+    if (err instanceof AppError) {
+      throw err;
+    }
     // Log apenas erros de autenticação que não sejam esperados
     if (err.name !== 'TokenExpiredError' && err.name !== 'JsonWebTokenError') {
       logger.error({ err, scope: "isAuth" }, "Erro inesperado na autenticação");

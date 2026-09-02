@@ -6,6 +6,7 @@ import Plan from "../../models/Plan";
 import CompaniesSettings from "../../models/CompaniesSettings";
 import CreateCompanyService from "./CreateCompanyService";
 import CreateLicenseService from "../LicenseService/CreateLicenseService";
+import EnsureOpenInvoiceForCompanyService from "../InvoicesService/EnsureOpenInvoiceForCompanyService";
 import { getPlatformCompanyId } from "../../config/platform";
 import { sendWelcomePartnerSignupMail } from "../MailServices/SendWelcomePartnerSignupMailService";
 
@@ -72,6 +73,12 @@ const DirectSignupService = async (
   }
 
   // Criar empresa direta (sem parentCompanyId)
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const endDate = new Date(today);
+  endDate.setUTCDate(endDate.getUTCDate() + DEFAULT_TRIAL_DAYS);
+  const dueDate = endDate.toISOString().slice(0, 10);
+
   const company = await CreateCompanyService({
     name: companyName,
     phone: phone || "",
@@ -80,19 +87,13 @@ const DirectSignupService = async (
     companyUserName: adminName,
     status: true,
     planId,
-    dueDate: "",
-    recurrence: "",
+    dueDate,
+    recurrence: plan.recurrence || "MENSAL",
     type: "direct",
     parentCompanyId: null,
     requestUserCompanyId: platformCompanyId,
     requestUserSuper: true
   });
-
-  // Criar licença com trial
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const endDate = new Date(today);
-  endDate.setUTCDate(endDate.getUTCDate() + DEFAULT_TRIAL_DAYS);
 
   await CreateLicenseService({
     companyId: company.id,
@@ -103,6 +104,8 @@ const DirectSignupService = async (
     requestUserCompanyId: platformCompanyId,
     requestUserSuper: true
   });
+
+  await EnsureOpenInvoiceForCompanyService(company.id, endDate);
 
   // E-mail de boas-vindas (não bloqueia o cadastro se falhar)
   sendWelcomePartnerSignupMail({

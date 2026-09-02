@@ -7,7 +7,7 @@ import { isNativeCapacitor } from "../utils/nativeApp";
 import { getPrivateGuestPath } from "../utils/publicSitePaths";
 
 const Route = ({ component: Component, isPrivate = false, guestRedirect, ...rest }) => {
-	const { isAuth, loading } = useContext(AuthContext);
+	const { isAuth, loading, user } = useContext(AuthContext);
 
 	return (
 		<RouterRoute
@@ -30,9 +30,22 @@ const Route = ({ component: Component, isPrivate = false, guestRedirect, ...rest
 					);
 				}
 
+				if (isAuth && user?.billingOnly && props.location.pathname !== "/financeiro") {
+					return (
+						<Redirect
+							to={{ pathname: "/financeiro", state: { from: props.location } }}
+						/>
+					);
+				}
+
 				if (isAuth && !isPrivate) {
 					return (
-						<Redirect to={{ pathname: "/", state: { from: props.location } }} />
+						<Redirect
+							to={{
+								pathname: user?.billingOnly ? "/financeiro" : "/",
+								state: { from: props.location },
+							}}
+						/>
 					);
 				}
 

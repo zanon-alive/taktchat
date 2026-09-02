@@ -78,11 +78,12 @@ const messages = {
       auth: {
         toasts: {
           success: "Login efetuado com sucesso!",
+          billingOnly: "Sua assinatura venceu. Regularize o pagamento em Faturas para continuar.",
         },
         errors: {
           accessBlockedPlatform: "Acesso bloqueado pela plataforma. Entre em contato com o suporte.",
           accessBlockedPartner: "Acesso bloqueado pelo seu parceiro. Entre em contato com seu parceiro.",
-          licenseOverdue: "Licença vencida. Entre em contato com o suporte para renovar.",
+          licenseOverdue: "Licença vencida. Peça ao administrador da empresa para regularizar o pagamento.",
           accessBlocked: "Acesso bloqueado. Entre em contato com o suporte.",
         },
         dueDate: {

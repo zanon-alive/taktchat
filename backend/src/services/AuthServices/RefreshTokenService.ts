@@ -4,7 +4,9 @@ import { Response as Res } from "express";
 import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import ShowUserService from "../UserServices/ShowUserService";
-import CompanyAccessService from "../CompanyService/CompanyAccessService";
+import CompanyAccessService, {
+  canUseBillingOnly
+} from "../CompanyService/CompanyAccessService";
 import authConfig from "../../config/auth";
 import {
   createAccessToken,
@@ -21,6 +23,7 @@ interface Response {
   user: User;
   newToken: string;
   refreshToken: string;
+  billingOnly: boolean;
 }
 
 export const RefreshTokenService = async (
@@ -39,7 +42,8 @@ export const RefreshTokenService = async (
     }
 
     const access = await CompanyAccessService(user.companyId);
-    if (!access.allowed) {
+    const billingOnly = canUseBillingOnly(access, user.profile);
+    if (!access.allowed && !billingOnly) {
       res.clearCookie("jrt");
       throw new AppError(access.code ?? "ERR_ACCESS_BLOCKED", 403);
     }
@@ -47,8 +51,11 @@ export const RefreshTokenService = async (
     const newToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
 
-    return { user, newToken, refreshToken };
+    return { user, newToken, refreshToken, billingOnly };
   } catch (err) {
+    if (err instanceof AppError) {
+      throw err;
+    }
     res.clearCookie("jrt");
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }

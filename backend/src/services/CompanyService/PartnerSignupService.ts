@@ -6,6 +6,7 @@ import Plan from "../../models/Plan";
 import CompanyAccessService from "./CompanyAccessService";
 import CreateCompanyService from "./CreateCompanyService";
 import CreateLicenseService from "../LicenseService/CreateLicenseService";
+import EnsureOpenInvoiceForCompanyService from "../InvoicesService/EnsureOpenInvoiceForCompanyService";
 import { sendWelcomePartnerSignupMail } from "../MailServices/SendWelcomePartnerSignupMailService";
 
 const DEFAULT_TRIAL_DAYS = 7;
@@ -79,6 +80,12 @@ const PartnerSignupService = async (
     throw new AppError("E-mail já cadastrado.", 400);
   }
 
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const endDate = new Date(today);
+  endDate.setUTCDate(endDate.getUTCDate() + trialDays);
+  const dueDate = endDate.toISOString().slice(0, 10);
+
   const company = await CreateCompanyService({
     name: companyName,
     phone: phone || "",
@@ -87,18 +94,13 @@ const PartnerSignupService = async (
     companyUserName: adminName,
     status: true,
     planId,
-    dueDate: "",
-    recurrence: "",
+    dueDate,
+    recurrence: plan.recurrence || "MENSAL",
     type: "direct",
     parentCompanyId: partnerId,
     requestUserCompanyId: partnerId,
     requestUserSuper: false
   });
-
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const endDate = new Date(today);
-  endDate.setUTCDate(endDate.getUTCDate() + trialDays);
 
   await CreateLicenseService({
     companyId: company.id,
@@ -109,6 +111,8 @@ const PartnerSignupService = async (
     requestUserCompanyId: partnerId,
     requestUserSuper: false
   });
+
+  await EnsureOpenInvoiceForCompanyService(company.id, endDate);
 
   // E-mail de boas-vindas (não bloqueia o cadastro se falhar)
   sendWelcomePartnerSignupMail({

@@ -308,7 +308,7 @@ const MainListItems = ({ collapsed, onItemClick }) => {
   }, [searchParam]);
 
   useEffect(() => {
-    if (!isAuth || !user?.companyId) {
+    if (!isAuth || !user?.companyId || user?.billingOnly) {
       setShowCampaigns(false);
       setShowKanban(false);
       setShowOpenAi(false);
@@ -345,11 +345,11 @@ const MainListItems = ({ collapsed, onItemClick }) => {
     }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuth, user?.companyId]);
+  }, [isAuth, user?.companyId, user?.billingOnly]);
 
   useEffect(() => {
     // Aguardar autenticação completa antes de fazer requisições
-    if (!isAuth || !user?.id) {
+    if (!isAuth || !user?.id || user?.billingOnly) {
       return;
     }
     
@@ -358,7 +358,7 @@ const MainListItems = ({ collapsed, onItemClick }) => {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParam, pageNumber, isAuth, user?.id]);
+  }, [searchParam, pageNumber, isAuth, user?.id, user?.billingOnly]);
 
   useEffect(() => {
     if (user.id && socket && typeof socket.on === 'function') {
@@ -436,6 +436,16 @@ const MainListItems = ({ collapsed, onItemClick }) => {
 
   return (
     <div>
+      {user?.billingOnly ? (
+        <ListItemLink
+          to="/financeiro"
+          primary={i18n.t("mainDrawer.listItems.financeiro")}
+          icon={<LocalAtmIcon />}
+          tooltip={collapsed}
+          onClick={onItemClick}
+        />
+      ) : (
+      <>
       {/* BLOCO LEGADO - Apenas itens diretos (Dashboard antigo e Tempo Real) */}
       {((user.profile === "admin" || user.profile === "super") ||
         (user.profile === "user" && user.showDashboard === "enabled")) && (

@@ -23,6 +23,7 @@ import {
   Avatar,
   Badge,
   Chip,
+  Alert,
 } from "@mui/material";
 import { withStyles } from "@mui/styles";
 
@@ -727,11 +728,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           </IconButton>
           )}
 
-          {user.id && <NotificationsPopOver volume={volume} />}
+          {user.id && !user?.billingOnly && (
+            <NotificationsPopOver volume={volume} />
+          )}
 
-          {!inboxChrome && <AnnouncementsPopover />}
+          {!inboxChrome && !user?.billingOnly && <AnnouncementsPopover />}
 
-          {!inboxChrome && <ChatPopover />}
+          {!inboxChrome && !user?.billingOnly && <ChatPopover />}
 
           <div>
             <IconButton
@@ -803,7 +806,12 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           : (drawerOpen ? classes.contentShift : classes.contentShiftClose)
       )}>
         <div className={classes.appBarSpacer} />
-        <LicenseExpiryWarning />
+        {!user?.billingOnly && <LicenseExpiryWarning />}
+        {user?.billingOnly && (
+          <Alert severity="warning" style={{ margin: 16 }}>
+            Sua assinatura venceu. O painel fica bloqueado até o pagamento. Meios extras (ex.: C6) entram na próxima demanda; se o Mercado Pago já estiver configurado, use Pagar agora.
+          </Alert>
+        )}
         {children ? children : null}
       </main>
     </div>

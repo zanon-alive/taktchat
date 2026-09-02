@@ -24,6 +24,15 @@ function redirectUnauthenticatedGuest(history) {
   }
 }
 
+function getApiErrorCode(err) {
+  return (
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    err?.response?.data?.code ||
+    ""
+  );
+}
+
 const useAuth = () => {
   const history = useHistory();
   const [isAuth, setIsAuth] = useState(false);
@@ -73,7 +82,15 @@ const useAuth = () => {
     async (error) => {
       const originalRequest = error.config;
       const status = error?.response?.status;
+      const errorCode = getApiErrorCode(error);
       const isAuthRefreshCall = originalRequest?.url?.includes("/auth/refresh_token");
+
+      if (status === 403 && errorCode === "ERR_BILLING_ONLY") {
+        if (history.location.pathname !== "/financeiro") {
+          history.push("/financeiro");
+        }
+        return Promise.reject(error);
+      }
       
       // Evitar loop infinito: se já está tentando refresh ou é uma chamada de refresh, não tentar novamente
       if ((status === 401 || status === 403) && !originalRequest._retry && !isAuthRefreshCall && !isRefreshingRef.current) {
@@ -92,7 +109,7 @@ const useAuth = () => {
           // Refresh falhou: limpar estado e ir para landing (web na raiz) ou login
           isRefreshingRef.current = false;
           const refreshStatus = e?.response?.status;
-          const refreshErrorCode = e?.response?.data?.message || e?.response?.data?.code || "";
+          const refreshErrorCode = getApiErrorCode(e);
           
           // Se for 403, exibir mensagem específica
           if (refreshStatus === 403) {
@@ -122,14 +139,14 @@ const useAuth = () => {
       }
       
       if (status === 403) {
-        const errorCode = error?.response?.data?.message || error?.response?.data?.code || "";
+        const blockedCode = getApiErrorCode(error);
         let message = i18n.t("auth.errors.accessBlocked");
         
-        if (errorCode === "ERR_ACCESS_BLOCKED_PLATFORM") {
+        if (blockedCode === "ERR_ACCESS_BLOCKED_PLATFORM") {
           message = i18n.t("auth.errors.accessBlockedPlatform");
-        } else if (errorCode === "ERR_ACCESS_BLOCKED_PARTNER") {
+        } else if (blockedCode === "ERR_ACCESS_BLOCKED_PARTNER") {
           message = i18n.t("auth.errors.accessBlockedPartner");
-        } else if (errorCode === "ERR_LICENSE_OVERDUE") {
+        } else if (blockedCode === "ERR_LICENSE_OVERDUE") {
           message = i18n.t("auth.errors.licenseOverdue");
         }
         
@@ -163,6 +180,9 @@ const useAuth = () => {
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
           safeSetState(setIsAuth, true);
           safeSetState(setUser, data.user);
+          if (data.user?.billingOnly) {
+            history.replace("/financeiro");
+          }
         }
       } catch (err) {
         // falha de refresh inicial: garantir estado limpo
@@ -256,58 +276,45 @@ const useAuth = () => {
       localStorage.setItem("profileImage", data.user.profileImage); //regra pra exibir imagem contato
 
       moment.locale('pt-br');
+      const billingOnly = data.user?.billingOnly === true;
       let dueDate;
       if (data.user.company.id === 1) {
         dueDate = '2999-12-31T00:00:00.000Z'
       } else {
         dueDate = data.user.company.dueDate;
       }
-      const hoje = moment(moment()).format("DD/MM/yyyy");
-      const vencimento = moment(dueDate).format("DD/MM/yyyy");
+      const vencimento = dueDate ? moment(dueDate).format("DD/MM/yyyy") : "";
+      const diff = dueDate ? moment(dueDate).diff(moment()) : 0;
+      const dias = moment.duration(diff).asDays();
 
-      var diff = moment(dueDate).diff(moment(moment()).format());
-
-      var before = moment(moment().format()).isBefore(dueDate);
-      var dias = moment.duration(diff).asDays();
-
-      // Verificar novamente antes de atualizar estado
       if (!isMountedRef.current) return;
 
-      if (before === true) {
-        localStorage.setItem("token", JSON.stringify(data.token));
-        // localStorage.setItem("public-token", JSON.stringify(data.user.token));
-        // localStorage.setItem("companyId", companyId);
-        // localStorage.setItem("userId", id);
+      localStorage.setItem("token", JSON.stringify(data.token));
+      if (vencimento) {
         localStorage.setItem("companyDueDate", vencimento);
-        api.defaults.headers.Authorization = `Bearer ${data.token}`;
-        safeSetState(setUser, data.user);
-        safeSetState(setIsAuth, true);
-        toast.success(i18n.t("auth.toasts.success"));
-        if (Math.round(dias) < 5) {
-          toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
-        }
-
-        // // Atraso para garantir que o cache foi limpo
-        // setTimeout(() => {
-        //   window.location.reload(true); // Recarregar a página
-        // }, 1000);
-
-        history.push("/tickets");
-        safeSetState(setLoading, false);
-      } else {
-        // localStorage.setItem("companyId", companyId);
-        api.defaults.headers.Authorization = `Bearer ${data.token}`;
-        safeSetState(setIsAuth, true);
-        toastError(`Opss! Sua assinatura venceu ${vencimento}.
-Entre em contato com o Suporte para mais informações! `);
-        history.push("/financeiro-aberto");
-        safeSetState(setLoading, false);
       }
+      api.defaults.headers.Authorization = `Bearer ${data.token}`;
+      safeSetState(setUser, data.user);
+      safeSetState(setIsAuth, true);
+
+      if (billingOnly) {
+        toast.warn(i18n.t("auth.toasts.billingOnly"));
+        history.push("/financeiro");
+        safeSetState(setLoading, false);
+        return;
+      }
+
+      toast.success(i18n.t("auth.toasts.success"));
+      if (dueDate && moment(dueDate).isValid() && Math.round(dias) < 5 && Math.round(dias) >= 0) {
+        toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+      }
+      history.push("/tickets");
+      safeSetState(setLoading, false);
 
     } catch (err) {
       if (isMountedRef.current) {
         const status = err?.response?.status;
-        const errorCode = err?.response?.data?.message || err?.response?.data?.code || "";
+        const errorCode = getApiErrorCode(err);
         
         // Se for 403, exibir mensagem específica de bloqueio
         if (status === 403) {

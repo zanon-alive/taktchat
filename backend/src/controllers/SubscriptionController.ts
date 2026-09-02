@@ -6,9 +6,11 @@ import mercadopago from 'mercadopago'; // Remover se não estiver sendo usado
 import AppError from "../errors/AppError";
 import Company from "../models/Company";
 import Invoices from "../models/Invoices";
+import License from "../models/License";
 import Setting from "../models/Setting";
 import { getIO } from "../libs/socket";
 import axios from 'axios';
+import RegisterPaymentService from "../services/LicenseService/RegisterPaymentService";
 
 dotenv.config();
 
@@ -105,12 +107,24 @@ export const webhook = async (
           const company = await Company.findByPk(companyId);
 
           if (company) {
-            const expiresAt = new Date(company.dueDate);
-            expiresAt.setDate(expiresAt.getDate() + 30);
-            const newDueDate = expiresAt.toISOString().split("T")[0];
-
-            await company.update({ dueDate: newDueDate });
             await invoice.update({ status: "paid" });
+
+            const license = await License.findOne({
+              where: { companyId },
+              order: [["endDate", "DESC"]]
+            });
+            if (license) {
+              await RegisterPaymentService({
+                licenseId: license.id,
+                requestUserSuper: true
+              });
+            } else {
+              const expiresAt = new Date(company.dueDate || Date.now());
+              expiresAt.setDate(expiresAt.getDate() + 30);
+              await company.update({
+                dueDate: expiresAt.toISOString().split("T")[0]
+              });
+            }
 
             const io = getIO();
             const companyUpdate = await Company.findOne({ where: { id: companyId } });

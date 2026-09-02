@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useReducer, useContext, useMemo } from "react";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material";
-import { Paper, Button, Chip, Typography, Grid, Box, Card, CardContent, CardHeader, Divider, Avatar, CircularProgress, Tooltip, useMediaQuery } from "@mui/material";
+import { Paper, Button, Chip, Typography, Grid, Box, Card, CardContent, CardHeader, Divider, Avatar, CircularProgress, Tooltip, useMediaQuery, Alert } from "@mui/material";
 
 // Ícones
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -543,6 +543,11 @@ const Invoices = () => {
               </Grid>
             </Grid>
       </MainHeader>
+      {user?.billingOnly && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Regularize a fatura em aberto para voltar a usar o sistema. O botão Pagar agora usa o Mercado Pago se estiver configurado. Outros meios (C6, PIX nativo) ficam para a próxima demanda.
+        </Alert>
+      )}
       
           {isMobile ? (
             /* Mobile View - Cards */

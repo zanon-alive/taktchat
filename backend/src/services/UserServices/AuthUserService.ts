@@ -9,7 +9,9 @@ import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
 import CompaniesSettings from "../../models/CompaniesSettings";
-import CompanyAccessService from "../CompanyService/CompanyAccessService";
+import CompanyAccessService, {
+  canUseBillingOnly
+} from "../CompanyService/CompanyAccessService";
 
 interface SerializedUser {
   id: number;
@@ -26,8 +28,8 @@ interface SerializedUser {
   allUserChat?: string;
   userClosePendingTicket?: string;
   showDashboard?: string;
-  token?: string;
-  allowedContactTags?: number[];
+  permissions?: string[];
+  billingOnly?: boolean;
 }
 
 interface Request {
@@ -100,7 +102,8 @@ const AuthUserService = async ({
   }
 
   const access = await CompanyAccessService(user.companyId);
-  if (!access.allowed) {
+  const billingOnly = canUseBillingOnly(access, user.profile);
+  if (!access.allowed && !billingOnly) {
     throw new AppError(access.code ?? "ERR_ACCESS_BLOCKED", 403);
   }
 
@@ -110,7 +113,7 @@ const AuthUserService = async ({
   const serializedUser = await SerializeUser(user);
 
   return {
-    serializedUser,
+    serializedUser: { ...serializedUser, billingOnly },
     token,
     refreshToken
   };
