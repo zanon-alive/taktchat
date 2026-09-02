@@ -1,26 +1,24 @@
 # Taktchat — continuidade de sessão
 
-**Branch git:** `feat/onboarding-cobranca-pos-trial`  
+**Branch git:** `fix/ci-build-pos-pr57`  
 **Data:** 2026-09-01
 
 ## Nesta sessão
 
-Cadeado pós-trial do cadastro na landing:
+Hotfix do CI da `main` após o merge do PR #57:
 
-- Trial 14 dias, sem cartão no cadastro.
-- `dueDate` alinhado à licença + fatura open no signup.
-- Admin com licença vencida faz login e cai em `/financeiro`.
-- Atendente: 403 (peça ao admin).
-- APIs operacionais bloqueadas (`ERR_BILLING_ONLY`).
-- Webhook Mercado Pago (se já existir token) renova License + dueDate.
-- C6 / PIX nativo: **próxima demanda**.
-- UX: toast do atendente lê `error` da API; AppBar não monta chat/avisos/notificações/aviso de licença no modo faturas (evita 403).
+- Backend: `SerializedUser` em `AuthUserService` voltou a ter `token?: string`.
+- Frontend: fragmento JSX do menu `billingOnly` fechado em `MainListItems.js`.
 
-## Testes
+## Recém mergeado
 
-Relato do usuário (2026-09-01): todos os testes das modificações passaram.
+PR #57 — cadeado pós-trial. Commit `8590484`. CI da `main` ficou vermelho até este hotfix.
+
+## Próxima demanda (combinado)
+
+C6 / PIX nativo / cartão nativo na tela de Faturas. **Não implementar sem pedido explícito.**
 
 ## Não fazer
 
 - Deploy pelo agente.
-- Implementar gateway C6 nesta branch.
+- Push direto na `main`.

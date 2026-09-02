@@ -908,6 +908,8 @@ const MainListItems = ({ collapsed, onItemClick }) => {
 
       </>
       )}
+      </>
+      )}
 
       {!collapsed && (
         <React.Fragment>
