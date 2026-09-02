@@ -661,6 +661,12 @@ const messages = {
 			passwordDefault: "Password",
 			numberAttendants: "Users",
 			numberConections: "Connections",
+			licenseSection: "License",
+			plan: "Plan",
+			planPlaceholder: "Select a plan",
+			licenseStartDate: "Start",
+			licenseEndDate: "End",
+			licenseCurrent: "Active license until {{date}}",
 		  },
 		  buttons: {
 			okAdd: "Add",

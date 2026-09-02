@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import Company from "../../models/Company";
 import License from "../../models/License";
 import { getPlatformCompanyId } from "../../config/platform";
@@ -17,11 +18,28 @@ export function canUseBillingOnly(
 }
 
 /** Data de hoje em UTC (meia-noite) para comparação date-only */
-function toDateOnly(d: Date): number {
+export function toDateOnly(d: Date): number {
   const x = new Date(d);
   x.setUTCHours(0, 0, 0, 0);
   x.setUTCMilliseconds(0);
   return x.getTime();
+}
+
+export async function findVigenteLicense(
+  companyId: number,
+  transaction?: Transaction
+): Promise<License | null> {
+  const today = toDateOnly(new Date());
+  const licenses = await License.findAll({
+    where: { companyId, status: "active" },
+    order: [["endDate", "DESC"]],
+    ...(transaction ? { transaction } : {})
+  });
+  return (
+    licenses.find(
+      l => l.endDate != null && toDateOnly(l.endDate) >= today
+    ) ?? null
+  );
 }
 
 /**
@@ -41,17 +59,8 @@ const CompanyAccessService = async (companyId: number): Promise<CompanyAccessRes
     return { allowed: false, reason: "Empresa não encontrada.", code: "ERR_COMPANY_NOT_FOUND" };
   }
 
-  const today = toDateOnly(new Date());
-
   if (company.type === "whitelabel") {
-    // Múltiplas licenças: considerar a vigente com maior endDate
-    const licenses = await License.findAll({
-      where: { companyId, status: "active" },
-      order: [["endDate", "DESC"]]
-    });
-    const vigente = licenses.find(
-      (l) => l.endDate != null && toDateOnly(l.endDate) >= today
-    );
+    const vigente = await findVigenteLicense(companyId);
     if (!vigente) {
       return {
         allowed: false,
@@ -81,14 +90,7 @@ const CompanyAccessService = async (companyId: number): Promise<CompanyAccessRes
         };
       }
     }
-    // Múltiplas licenças: considerar a vigente com maior endDate
-    const licenses = await License.findAll({
-      where: { companyId, status: "active" },
-      order: [["endDate", "DESC"]]
-    });
-    const vigente = licenses.find(
-      (l) => l.endDate != null && toDateOnly(l.endDate) >= today
-    );
+    const vigente = await findVigenteLicense(companyId);
     if (!vigente) {
       return {
         allowed: false,

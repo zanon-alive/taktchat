@@ -75,9 +75,12 @@ describe("DirectSignupService", () => {
     expect(CreateCompanyService).toHaveBeenCalledWith(
       expect.objectContaining({
         dueDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
-        recurrence: "MENSAL"
+        recurrence: "MENSAL",
+        licenseStartDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+        licenseEndDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
       })
     );
+    expect(CreateLicenseService).not.toHaveBeenCalled();
     expect(EnsureOpenInvoiceForCompanyService).toHaveBeenCalledWith(
       10,
       expect.any(Date)

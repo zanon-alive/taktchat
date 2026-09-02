@@ -7,6 +7,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- Cadastro de empresa no painel exige plano, data de início e término da licença; empresa e licença gravam na mesma transação (direct e whitelabel). Edição sem licença vigente cria a licença neste modal.
 - Após o trial da landing, o admin entra só em Faturas até pagar. Atendente vê 403. Gateway C6/PIX nativo fica para a próxima demanda; o webhook do Mercado Pago (se já configurado) renova a licença.
 - Auditoria da ocultação de tickets: métricas SQL sem contar oculto, lista usável (filtro, debounce, CSV, Table MUI), mídia/paginação no detalhe, LogTicket/AuditLog, permissão `tickets.viewDeleted`, KPI no dashboard, redação LGPD, alerta de volume, retenção configurável (job) e rate limit no DELETE.
 - Ocultação de tickets (soft delete): motivo obrigatório, lista admin em `/tickets-excluidos`, conversa somente leitura. Ticket oculto não reabre e some das métricas.

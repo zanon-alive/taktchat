@@ -640,7 +640,13 @@ const messages = {
           email: "Correo electrónico",
           passwordDefault: "Contraseña",
           numberAttendants: "Usuarios",
-          numberConections: "Conexiones"
+          numberConections: "Conexiones",
+          licenseSection: "Licencia",
+          plan: "Plan",
+          planPlaceholder: "Seleccione un plan",
+          licenseStartDate: "Inicio",
+          licenseEndDate: "Término",
+          licenseCurrent: "Licencia vigente hasta {{date}}"
         },
         buttons: {
           okAdd: "Agregar",

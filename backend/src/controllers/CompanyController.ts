@@ -48,6 +48,8 @@ type CompanyData = {
   paymentMethod?: string;
   type?: "platform" | "direct" | "whitelabel";
   parentCompanyId?: number | null;
+  licenseStartDate?: string;
+  licenseEndDate?: string;
 };
 
 type SchedulesData = {
@@ -80,7 +82,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const schema = Yup.object().shape({
     name: Yup.string().required(),
-    password: Yup.string().required().min(5)
+    password: Yup.string().required().min(5),
+    planId: Yup.number()
+      .typeError("Plano é obrigatório.")
+      .required("Plano é obrigatório."),
+    licenseStartDate: Yup.string()
+      .matches(/^\d{4}-\d{2}-\d{2}$/, "Data de início inválida.")
+      .required("Data de início é obrigatória."),
+    licenseEndDate: Yup.string()
+      .matches(/^\d{4}-\d{2}-\d{2}$/, "Data de término inválida.")
+      .required("Data de término é obrigatória.")
   });
 
   try {

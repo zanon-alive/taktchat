@@ -255,27 +255,26 @@ A tela exibe uma tabela com todas as empresas cadastradas:
 1. Clicar no botão "+" no cabeçalho
 2. Preencher o formulário:
    - **Nome** (obrigatório)
-   - **Email** (obrigatório, único)
-   - **Documento** (CPF/CNPJ)
-   - **Plano** (selecionar do dropdown)
-   - **Senha Padrão** (obrigatória)
-   - **Número de Atendentes** (limite)
-   - **Número de Conexões** (limite)
    - **Status** (Ativo/Inativo)
-3. Clicar em "Salvar"
+   - **Email** (obrigatório, único)
+   - **Senha** (obrigatória)
+   - **Licença** — **Plano**, **Início** (hoje) e **Término** (hoje + 30 dias, editável); todos obrigatórios; término ≥ início
+3. Clicar em "Adicionar"
 
 **O que acontece:**
-- ✅ Empresa é criada no banco de dados
+- ✅ Empresa e licença `active` são gravadas na mesma transação
+- ✅ `dueDate` da empresa = data de término da licença
 - ✅ Primeiro usuário admin é criado automaticamente
 - ✅ Email do usuário = Email da empresa
-- ✅ Senha = Senha padrão informada
-- ✅ Empresa aparece na lista
+- ✅ Senha = senha informada
+- ✅ Empresa aparece na lista (sem F5)
 
 **Validações:**
 - Nome: mínimo 2 caracteres
 - Email: formato válido, único no sistema
 - Senha: obrigatória
-- Plano: deve existir
+- Plano, início e término: obrigatórios; término não pode ser anterior ao início
+- Falha ao criar a licença: rollback (empresa não persiste)
 
 #### 3. Editar Empresa
 
@@ -283,8 +282,9 @@ A tela exibe uma tabela com todas as empresas cadastradas:
 
 1. Clicar no ícone de lápis na linha da empresa
 2. Modal abre com dados preenchidos
-3. Alterar os campos desejados
-4. Clicar em "Salvar"
+3. Se **não** houver licença vigente, o bloco de licença aparece e o save cria a licença
+4. Se **já** houver licença vigente, o modal só informa “Licença vigente até…” (alterar período em `/licenses`)
+5. Clicar em "Salvar"
 
 **Campos Editáveis:**
 - Nome

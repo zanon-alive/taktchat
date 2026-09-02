@@ -82,10 +82,12 @@ describe("PartnerSignupService", () => {
     expect(result.message).toContain("7 dias");
       expect(CreateCompanyService).toHaveBeenCalledWith(
         expect.objectContaining({
-          dueDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
+          dueDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+          licenseStartDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+          licenseEndDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
         })
       );
-      expect(CreateLicenseService).toHaveBeenCalled();
+      expect(CreateLicenseService).not.toHaveBeenCalled();
   });
 
   it("deve rejeitar quando parceiro não é whitelabel", async () => {

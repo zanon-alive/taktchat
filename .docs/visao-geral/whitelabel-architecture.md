@@ -133,10 +133,12 @@ O Dono da Plataforma cobra whitelabels baseado na **quantidade de planos ativos*
 
 ### Cadastro de empresa no painel (`/companies`)
 
-1. Super ou admin autorizado preenche o modal e envia `POST /companies` (`CreateCompanyService`).
-2. Nome da empresa e e-mail do admin são únicos; conflito retorna **400** (não 500). Unique de `id` (sequence SERIAL atrasada após seed/dump) também vira 400; o serviço alinha as sequences e pede nova tentativa.
-3. Com sucesso, a página recarrega `GET /companiesPlan/` — a linha nova aparece sem F5.
-4. Migration `20260831000001-sync-serial-sequences` alinha `Companies`, `Users`, `CompaniesSettings`, `Plans`, `Queues` e `Licenses` ao `MAX(id)`. Em produção, rodar `taktchat_taktchat-migrate` após o deploy que a inclui.
+1. Super ou admin autorizado preenche o modal (nome, ativo, e-mail, senha, **plano**, **início** e **término** da licença) e envia `POST /companies` (`CreateCompanyService`).
+2. Plano e período são obrigatórios. A `License` (`active`) é criada na mesma transação; se a licença falhar, a empresa não persiste. `dueDate` da company = término da licença.
+3. Nome da empresa e e-mail do admin são únicos; conflito retorna **400** (não 500). Unique de `id` (sequence SERIAL atrasada após seed/dump) também vira 400; o serviço alinha as sequences e pede nova tentativa.
+4. Com sucesso, a página recarrega `GET /companiesPlan/` — a linha nova aparece sem F5.
+5. Na edição: se não houver licença vigente, o mesmo bloco aparece e o `PUT` cria a licença. Se já houver vigente, o modal só informa a data (alteração de licença continua em `/licenses`).
+6. Migration `20260831000001-sync-serial-sequences` alinha `Companies`, `Users`, `CompaniesSettings`, `Plans`, `Queues` e `Licenses` ao `MAX(id)`. Em produção, rodar `taktchat_taktchat-migrate` após o deploy que a inclui.
 
 ## Validações e Regras de Negócio
 
