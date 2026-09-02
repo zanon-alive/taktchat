@@ -41,6 +41,8 @@ type CompanyData = {
   recurrence?: string;
   document?: string;
   paymentMethod?: string;
+  licenseStartDate?: string;
+  licenseEndDate?: string;
 };
 
 type SchedulesData = {
@@ -101,7 +103,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     phone: Yup.string(),
     email: Yup.string(),
     planId: Yup.number().required(),
-    password: Yup.string().required().min(5)
+    password: Yup.string().required().min(5),
+    licenseStartDate: Yup.string()
+      .matches(/^\d{4}-\d{2}-\d{2}$/, "Data de início inválida.")
+      .required("Data de início é obrigatória."),
+    licenseEndDate: Yup.string()
+      .matches(/^\d{4}-\d{2}-\d{2}$/, "Data de término inválida.")
+      .required("Data de término é obrigatória.")
   });
 
   try {

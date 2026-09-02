@@ -5,7 +5,6 @@ import User from "../../models/User";
 import Plan from "../../models/Plan";
 import CompanyAccessService from "./CompanyAccessService";
 import CreateCompanyService from "./CreateCompanyService";
-import CreateLicenseService from "../LicenseService/CreateLicenseService";
 import EnsureOpenInvoiceForCompanyService from "../InvoicesService/EnsureOpenInvoiceForCompanyService";
 import { sendWelcomePartnerSignupMail } from "../MailServices/SendWelcomePartnerSignupMailService";
 
@@ -99,17 +98,9 @@ const PartnerSignupService = async (
     type: "direct",
     parentCompanyId: partnerId,
     requestUserCompanyId: partnerId,
-    requestUserSuper: false
-  });
-
-  await CreateLicenseService({
-    companyId: company.id,
-    planId,
-    status: "active",
-    startDate: today,
-    endDate,
-    requestUserCompanyId: partnerId,
-    requestUserSuper: false
+    requestUserSuper: false,
+    licenseStartDate: today.toISOString().slice(0, 10),
+    licenseEndDate: dueDate
   });
 
   await EnsureOpenInvoiceForCompanyService(company.id, endDate);

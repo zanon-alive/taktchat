@@ -661,6 +661,12 @@ const messages = {
           passwordDefault: "Şifre",
           numberAttendants: "Kullanıcılar",
           numberConections: "Bağlantılar",
+          licenseSection: "Lisans",
+          plan: "Plan",
+          planPlaceholder: "Plan seçin",
+          licenseStartDate: "Başlangıç",
+          licenseEndDate: "Bitiş",
+          licenseCurrent: "Geçerli lisans {{date}} tarihine kadar",
         },
         buttons: {
           okAdd: "Ekle",

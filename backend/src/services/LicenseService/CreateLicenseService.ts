@@ -1,4 +1,5 @@
 import * as Yup from "yup";
+import { Transaction } from "sequelize";
 import AppError from "../../errors/AppError";
 import License from "../../models/License";
 import Company from "../../models/Company";
@@ -14,6 +15,7 @@ interface LicenseData {
   recurrence?: string | null;
   requestUserCompanyId?: number;
   requestUserSuper?: boolean;
+  transaction?: Transaction;
 }
 
 const CreateLicenseService = async (
@@ -28,8 +30,10 @@ const CreateLicenseService = async (
     amount,
     recurrence,
     requestUserCompanyId,
-    requestUserSuper = false
+    requestUserSuper = false,
+    transaction
   } = licenseData;
+  const queryOpts = transaction ? { transaction } : undefined;
 
   const schema = Yup.object().shape({
     companyId: Yup.number().required("Empresa é obrigatória."),
@@ -43,18 +47,21 @@ const CreateLicenseService = async (
     throw new AppError(err.message);
   }
 
-  const company = await Company.findByPk(companyId);
+  const company = await Company.findByPk(companyId, queryOpts);
   if (!company) {
     throw new AppError("Empresa não encontrada.");
   }
 
-  const plan = await Plan.findByPk(planId);
+  const plan = await Plan.findByPk(planId, queryOpts);
   if (!plan) {
     throw new AppError("Plano não encontrado.");
   }
 
   if (!requestUserSuper && requestUserCompanyId != null) {
-    const requestCompany = await Company.findByPk(requestUserCompanyId);
+    const requestCompany = await Company.findByPk(
+      requestUserCompanyId,
+      queryOpts
+    );
     if (requestCompany?.type === "whitelabel") {
       if (company.parentCompanyId !== requestUserCompanyId) {
         throw new AppError(
@@ -69,17 +76,20 @@ const CreateLicenseService = async (
   }
 
   const start = new Date(startDate);
-  const license = await License.create({
-    companyId,
-    planId,
-    status,
-    startDate: start,
-    endDate: endDate ? new Date(endDate) : null,
-    amount: amount ?? plan.amount ?? null,
-    recurrence: recurrence ?? plan.recurrence ?? null,
-    activatedAt: start,
-    paidMonths: 0
-  });
+  const license = await License.create(
+    {
+      companyId,
+      planId,
+      status,
+      startDate: start,
+      endDate: endDate ? new Date(endDate) : null,
+      amount: amount ?? plan.amount ?? null,
+      recurrence: recurrence ?? plan.recurrence ?? null,
+      activatedAt: start,
+      paidMonths: 0
+    },
+    queryOpts
+  );
 
   return license;
 };

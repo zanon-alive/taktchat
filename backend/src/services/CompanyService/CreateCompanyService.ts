@@ -10,6 +10,7 @@ import UserQueue from "../../models/UserQueue";
 import Plan from "../../models/Plan";
 import { getPlatformCompanyId, isPlatformCompany } from "../../config/platform";
 import CreateLicenseService from "../LicenseService/CreateLicenseService";
+import { parseLicensePeriod } from "./parseLicensePeriod";
 import { generateSignupToken } from "../../helpers/PartnerSignupToken";
 import { mapCompanyCreateError, isIdUniqueConstraintError } from "../../helpers/mapCompanyCreateError";
 import { syncCompanyCreateSequences } from "../../helpers/syncSerialSequence";
@@ -33,6 +34,8 @@ interface CompanyData {
   requestUserCompanyId?: number;
   /** Se o usuário que está criando é super */
   requestUserSuper?: boolean;
+  licenseStartDate?: string;
+  licenseEndDate?: string;
 }
 
 const CreateCompanyService = async (
@@ -45,7 +48,6 @@ const CreateCompanyService = async (
     email,
     status,
     planId,
-    dueDate,
     recurrence,
     document,
     paymentMethod,
@@ -53,7 +55,9 @@ const CreateCompanyService = async (
     type: requestedType,
     parentCompanyId: requestedParentId,
     requestUserCompanyId,
-    requestUserSuper
+    requestUserSuper,
+    licenseStartDate,
+    licenseEndDate
   } = companyData;
 
   const companySchema = Yup.object().shape({
@@ -121,6 +125,12 @@ const CreateCompanyService = async (
     }
   }
 
+  const licensePeriod = parseLicensePeriod(
+    planId,
+    licenseStartDate,
+    licenseEndDate
+  );
+
   const t = await sequelize.transaction();
 
   try {
@@ -129,8 +139,8 @@ const CreateCompanyService = async (
       phone,
       email,
       status,
-      planId,
-      dueDate,
+      planId: licensePeriod.planId,
+      dueDate: licensePeriod.dueDate,
       recurrence,
       document,
       paymentMethod,
@@ -156,7 +166,7 @@ const CreateCompanyService = async (
       { transaction: t }
     );
 
-    const plan = planId ? await Plan.findByPk(planId) : null;
+    const plan = await Plan.findByPk(licensePeriod.planId);
     const canCreateQueue = plan && Number(plan.queues) >= 1;
     if (canCreateQueue) {
       const queue = await Queue.create({
@@ -174,29 +184,16 @@ const CreateCompanyService = async (
       }, { transaction: t });
     }
 
-    // Garantir licença para empresas whitelabel
-    if (type === "whitelabel" && planId) {
-      try {
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-        // Criar licença inicial com 30 dias de validade (pode ser ajustado)
-        const endDate = new Date(today);
-        endDate.setUTCDate(endDate.getUTCDate() + 30);
-        
-        await CreateLicenseService({
-          companyId: company.id,
-          planId: planId,
-          status: "active",
-          startDate: today,
-          endDate: endDate,
-          requestUserCompanyId: requestUserCompanyId || platformCompanyId,
-          requestUserSuper: requestUserSuper || false
-        });
-      } catch (licenseError: any) {
-        // Log do erro mas não falha a criação da empresa
-        console.warn(`[CreateCompanyService] Erro ao criar licença para whitelabel ${company.id}:`, licenseError?.message || licenseError);
-      }
-    }
+    await CreateLicenseService({
+      companyId: company.id,
+      planId: licensePeriod.planId,
+      status: "active",
+      startDate: licensePeriod.startDate,
+      endDate: licensePeriod.endDate,
+      requestUserCompanyId: requestUserCompanyId || platformCompanyId,
+      requestUserSuper: requestUserSuper || false,
+      transaction: t
+    });
 
     await t.commit();
 

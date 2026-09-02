@@ -115,8 +115,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
     const trialDays = parseInt(process.env.APP_TRIALEXPIRATION || "3", 10);
 
-    const dataNowMoreTrialDays = new Date();
-    dataNowMoreTrialDays.setDate(dataNowMoreTrialDays.getDate() + trialDays);
+    const todayUtc = new Date();
+    todayUtc.setUTCHours(0, 0, 0, 0);
+    const dataNowMoreTrialDays = new Date(todayUtc);
+    dataNowMoreTrialDays.setUTCDate(dataNowMoreTrialDays.getUTCDate() + trialDays);
 
     const date = dataNowMoreTrialDays.toISOString().split("T")[0];
 
@@ -142,7 +144,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       showDashboard: 'disabled',
       defaultTicketsManagerWidth: 550,
       allowRealTime: 'disabled',
-      allowConnections: 'disabled'
+      allowConnections: 'disabled',
+      licenseStartDate: todayUtc.toISOString().split("T")[0],
+      licenseEndDate: date
     };
 
     const user = await CreateCompanyService(companyData);

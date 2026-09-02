@@ -709,6 +709,12 @@ const messages = {
           passwordDefault: "Senha",
           numberAttendants: "Usuários",
           numberConections: "Conexões",
+          licenseSection: "Licença",
+          plan: "Plano",
+          planPlaceholder: "Selecione um plano",
+          licenseStartDate: "Início",
+          licenseEndDate: "Término",
+          licenseCurrent: "Licença vigente até {{date}}",
         },
         buttons: {
           okAdd: "Adicionar",

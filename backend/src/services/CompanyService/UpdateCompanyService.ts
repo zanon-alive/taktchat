@@ -3,8 +3,12 @@ import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
 import User from "../../models/User";
+import sequelize from "../../database";
 import { isPlatformCompany } from "../../config/platform";
 import { generateSignupToken } from "../../helpers/PartnerSignupToken";
+import CreateLicenseService from "../LicenseService/CreateLicenseService";
+import { findVigenteLicense } from "./CompanyAccessService";
+import { parseLicensePeriod } from "./parseLicensePeriod";
 
 interface CompanyData {
   name: string;
@@ -24,6 +28,8 @@ interface CompanyData {
   trialDaysForChildCompanies?: number | null;
   requestUserCompanyId?: number;
   requestUserSuper?: boolean;
+  licenseStartDate?: string;
+  licenseEndDate?: string;
 }
 
 const UpdateCompanyService = async (
@@ -47,7 +53,9 @@ const UpdateCompanyService = async (
     parentCompanyId: requestedParentId,
     trialDaysForChildCompanies,
     requestUserCompanyId,
-    requestUserSuper
+    requestUserSuper,
+    licenseStartDate,
+    licenseEndDate
   } = companyData;
 
   if (!company) {
@@ -101,6 +109,16 @@ const UpdateCompanyService = async (
         }
       }
     }
+  }
+
+  const vigente = await findVigenteLicense(company.id);
+  let licensePeriod: ReturnType<typeof parseLicensePeriod> | null = null;
+  if (!vigente) {
+    licensePeriod = parseLicensePeriod(
+      planId,
+      licenseStartDate,
+      licenseEndDate
+    );
   }
 
   // Verifica se existe outro usuário com o mesmo email em outra empresa
@@ -187,7 +205,30 @@ const UpdateCompanyService = async (
     companyUpdateData.email = company.email;
   }
 
-  await company.update(companyUpdateData);
+  if (licensePeriod) {
+    companyUpdateData.planId = licensePeriod.planId;
+    companyUpdateData.dueDate = licensePeriod.dueDate;
+    const t = await sequelize.transaction();
+    try {
+      await company.update(companyUpdateData, { transaction: t });
+      await CreateLicenseService({
+        companyId: company.id,
+        planId: licensePeriod.planId,
+        status: "active",
+        startDate: licensePeriod.startDate,
+        endDate: licensePeriod.endDate,
+        requestUserCompanyId,
+        requestUserSuper: isSuper,
+        transaction: t
+      });
+      await t.commit();
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
+  } else {
+    await company.update(companyUpdateData);
+  }
 
   if (companyData.campaignsEnabled !== undefined) {
     const [setting, created] = await Setting.findOrCreate({
