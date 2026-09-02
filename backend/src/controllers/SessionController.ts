@@ -101,14 +101,22 @@ export const update = async (
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }
 
-  const { user, newToken, refreshToken } = await RefreshTokenService(
+  const { user, newToken, refreshToken, billingOnly } = await RefreshTokenService(
     res,
     token
   );
 
   SendRefreshToken(res, refreshToken);
 
-  return res.json({ token: newToken, user });
+  const payload =
+    user && typeof (user as User & { toJSON?: () => object }).toJSON === "function"
+      ? (user as User & { toJSON: () => object }).toJSON()
+      : user;
+
+  return res.json({
+    token: newToken,
+    user: { ...payload, billingOnly }
+  });
 };
 
 export const me = async (req: Request, res: Response): Promise<Response> => {

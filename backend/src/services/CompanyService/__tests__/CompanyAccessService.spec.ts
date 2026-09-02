@@ -158,5 +158,33 @@ describe("CompanyAccessService", () => {
       expect(result.allowed).toBe(false);
       expect(result.code).toBe("ERR_ACCESS_BLOCKED_PLATFORM");
     });
+
+    it("deve permitir modo faturas quando a licença da empresa direta venceu", async () => {
+      const today = new Date();
+      const endDate = new Date(today);
+      endDate.setUTCDate(endDate.getUTCDate() - 1);
+
+      (Company.findByPk as jest.Mock).mockResolvedValue({
+        id: 3,
+        type: "direct",
+        parentCompanyId: null,
+        accessBlockedByParent: false
+      });
+
+      (License.findAll as jest.Mock).mockReset();
+      (License.findAll as jest.Mock).mockResolvedValue([
+        {
+          id: 1,
+          companyId: 3,
+          status: "active",
+          endDate
+        }
+      ]);
+
+      const result = await CompanyAccessService(3);
+      expect(result.allowed).toBe(false);
+      expect(result.billingOnly).toBe(true);
+      expect(result.code).toBe("ERR_LICENSE_OVERDUE");
+    });
   });
 });

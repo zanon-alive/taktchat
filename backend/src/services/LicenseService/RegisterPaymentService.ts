@@ -7,6 +7,7 @@ import {
 } from "./getLicenseCompanyFilter";
 import { logAudit } from "../AuditService";
 import User from "../../models/User";
+import Company from "../../models/Company";
 
 interface Request {
   licenseId: number | string;
@@ -44,19 +45,26 @@ const RegisterPaymentService = async ({
   const recurrence = license.recurrence ?? plan?.recurrence ?? "MENSAL";
   const monthsToAdd = monthsPerRecurrence(recurrence);
 
-  const activatedAt = license.activatedAt
-    ? new Date(license.activatedAt)
-    : new Date();
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
   if (!license.activatedAt) {
-    license.activatedAt = activatedAt;
+    license.activatedAt = today;
   }
   license.paidMonths = (license.paidMonths || 0) + monthsToAdd;
 
-  const endDate = new Date(activatedAt);
-  endDate.setUTCMonth(endDate.getUTCMonth() + license.paidMonths);
+  const currentEnd = license.endDate ? new Date(license.endDate) : today;
+  currentEnd.setUTCHours(0, 0, 0, 0);
+  const base = currentEnd.getTime() >= today.getTime() ? currentEnd : today;
+  const endDate = new Date(base);
+  endDate.setUTCMonth(endDate.getUTCMonth() + monthsToAdd);
   license.endDate = endDate;
   license.status = "active";
   await license.save();
+
+  const company = await Company.findByPk(license.companyId);
+  if (company) {
+    await company.update({ dueDate: endDate.toISOString().slice(0, 10) });
+  }
 
   // Auditoria
   const user = requestUserId ? await User.findByPk(requestUserId) : null;

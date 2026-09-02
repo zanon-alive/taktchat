@@ -22,8 +22,9 @@ jest.mock("../../LicenseService/CreateLicenseService", () => ({
   __esModule: true,
   default: jest.fn()
 }));
-jest.mock("../../MailServices/SendWelcomePartnerSignupMailService", () => ({
-  sendWelcomePartnerSignupMail: jest.fn(() => Promise.resolve())
+jest.mock("../../InvoicesService/EnsureOpenInvoiceForCompanyService", () => ({
+  __esModule: true,
+  default: jest.fn(() => Promise.resolve({ id: 1 }))
 }));
 
 import PartnerSignupService from "../PartnerSignupService";
@@ -79,8 +80,12 @@ describe("PartnerSignupService", () => {
 
     expect(result.company).toBeDefined();
     expect(result.message).toContain("7 dias");
-    expect(CreateCompanyService).toHaveBeenCalled();
-    expect(CreateLicenseService).toHaveBeenCalled();
+      expect(CreateCompanyService).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dueDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
+        })
+      );
+      expect(CreateLicenseService).toHaveBeenCalled();
   });
 
   it("deve rejeitar quando parceiro não é whitelabel", async () => {

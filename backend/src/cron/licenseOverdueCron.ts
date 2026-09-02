@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import License from '../models/License';
 import logger from '../utils/logger';
+import EnsureOpenInvoiceForCompanyService from '../services/InvoicesService/EnsureOpenInvoiceForCompanyService';
 
 /**
  * Job que marca licenças como overdue quando a data de vencimento passou.
@@ -39,6 +40,9 @@ const licenseOverdueCron = () => {
       for (const license of overdueLicenses) {
         try {
           await license.update({ status: 'overdue' });
+          if (license.endDate) {
+            await EnsureOpenInvoiceForCompanyService(license.companyId, license.endDate);
+          }
           updatedCount++;
           logger.info(
             `[LicenseOverdue Cron] Licença ${license.id} (Empresa: ${license.companyId}) ` +

@@ -4,8 +4,16 @@ import { getPlatformCompanyId } from "../../config/platform";
 
 export interface CompanyAccessResult {
   allowed: boolean;
+  billingOnly?: boolean;
   reason?: string;
   code?: string;
+}
+
+export function canUseBillingOnly(
+  access: CompanyAccessResult,
+  profile?: string
+): boolean {
+  return Boolean(access.billingOnly && profile === "admin");
 }
 
 /** Data de hoje em UTC (meia-noite) para comparação date-only */
@@ -84,6 +92,7 @@ const CompanyAccessService = async (companyId: number): Promise<CompanyAccessRes
     if (!vigente) {
       return {
         allowed: false,
+        billingOnly: true,
         reason: "Licença vencida.",
         code: "ERR_LICENSE_OVERDUE"
       };

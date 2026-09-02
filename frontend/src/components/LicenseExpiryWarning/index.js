@@ -17,12 +17,12 @@ const LicenseExpiryWarning = () => {
 
   useEffect(() => {
     if (!user?.companyId) return;
-    // Para super, não mostrar aviso (eles gerenciam licenças)
     if (user?.super) return;
+    if (user?.billingOnly) return;
 
     loadLicense();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.companyId, user?.super]);
+  }, [user?.companyId, user?.super, user?.billingOnly]);
 
   const loadLicense = async () => {
     try {

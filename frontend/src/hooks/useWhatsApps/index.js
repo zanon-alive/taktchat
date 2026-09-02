@@ -64,7 +64,7 @@ const useWhatsApps = () => {
 
 
   useEffect(() => {
-    if (!isAuth) {
+    if (!isAuth || user?.billingOnly) {
       dispatch({ type: "RESET" });
       setLoading(false);
       return;
@@ -82,7 +82,7 @@ const useWhatsApps = () => {
       }
     };
     fetchSession();
-  }, [isAuth]);
+  }, [isAuth, user?.billingOnly]);
 
   useEffect(() => {
     if (!isAuth || !user?.companyId || !socket || typeof socket.on !== 'function') {

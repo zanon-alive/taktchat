@@ -7,6 +7,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 ## [Unreleased]
 
 ### Adicionado (feat)
+- Após o trial da landing, o admin entra só em Faturas até pagar. Atendente vê 403. Gateway C6/PIX nativo fica para a próxima demanda; o webhook do Mercado Pago (se já configurado) renova a licença.
 - Auditoria da ocultação de tickets: métricas SQL sem contar oculto, lista usável (filtro, debounce, CSV, Table MUI), mídia/paginação no detalhe, LogTicket/AuditLog, permissão `tickets.viewDeleted`, KPI no dashboard, redação LGPD, alerta de volume, retenção configurável (job) e rate limit no DELETE.
 - Ocultação de tickets (soft delete): motivo obrigatório, lista admin em `/tickets-excluidos`, conversa somente leitura. Ticket oculto não reabre e some das métricas.
 - SHA curto do GitHub e número do PR (ex.: `#47 · ecaed27`) no canto do login e no rodapé da sidebar, para identificar a versão em produção. Clique copia.
@@ -25,6 +26,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
 - CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário (#40).
 ### Corrigido (fix)
+- Cadastro direto na landing e por parceiro passam a gravar `dueDate` da empresa igual ao fim do trial e já abrem a fatura. O login vencido vai para `/financeiro`, não para a rota inexistente `/financeiro-aberto`.
 - Cadastro de empresa retornava 500: sequence de IDs tentava reusar `id = 1` e o `AppError` recebia o erro Sequelize no lugar do status HTTP.
 - Lista de Empresas não atualizava após cadastrar/editar: o modal fechava sem recarregar `/companiesPlan`; agora recarrega após sucesso (sem precisar de F5).
 - HTML da SPA (`index.html`, `/landing`, `/tour`) passa a ir com `Cache-Control: no-cache`, para o browser não prender uma página antiga (ex.: "Welcome to nginx!") após o deploy.
