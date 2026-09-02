@@ -26,6 +26,7 @@ Notas de versão detalhadas também em `.docs/anexos/notas-de-versao.md`.
 - Login no header da landing; nos planos, CTA **Falar com especialista** quando o cadastro direto está desligado.
 - CTA **Falar no WhatsApp** na landing e no tour (hero, FAB, último slide e planos sem cadastro direto), sem preencher o formulário (#40).
 ### Corrigido (fix)
+- Build GHCR da `main` após o PR #57: `tsc` voltou a aceitar `serializedUser.token` no login; o menu fecha o fragmento JSX do modo Faturas.
 - Cadastro direto na landing e por parceiro passam a gravar `dueDate` da empresa igual ao fim do trial e já abrem a fatura. O login vencido vai para `/financeiro`, não para a rota inexistente `/financeiro-aberto`.
 - Cadastro de empresa retornava 500: sequence de IDs tentava reusar `id = 1` e o `AppError` recebia o erro Sequelize no lugar do status HTTP.
 - Lista de Empresas não atualizava após cadastrar/editar: o modal fechava sem recarregar `/companiesPlan`; agora recarrega após sucesso (sem precisar de F5).

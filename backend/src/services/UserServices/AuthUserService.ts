@@ -29,6 +29,7 @@ interface SerializedUser {
   userClosePendingTicket?: string;
   showDashboard?: string;
   permissions?: string[];
+  token?: string;
   billingOnly?: boolean;
 }
 
